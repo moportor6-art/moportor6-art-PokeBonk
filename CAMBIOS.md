@@ -9,6 +9,9 @@
 
 Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros).
 
+## Reliquias con imagen (Subversión 0.7)
+- El APK solo traía `ui/relics/r-comet.png`. Las otras 31 imágenes (`site/assets/ui/relics/*.png`) se crearon a partir de iconos de objetos del juego (`assets/items/`), centrados en 32x32. Sin cambios de código.
+
 ## Guía de objetivos (Subversión 0.6)
 - Flecha alrededor del jugador hacia el siguiente objetivo, por pasos: Poké Balls gratis, NPC de mejoras, desafíos/altares, guardián, portal. Dentro de cada paso, el más cercano.
 - Tocar la etiqueta salta el objetivo; botón «Guía: Sí/No» en la pausa (`localStorage` `pb-guia`).
@@ -41,7 +44,7 @@ Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros
 
 ## Versión oficial y subversión propia
 La versión oficial del juego **no se toca**: `site/version.json` y la lista oficial de «Novedades» siguen diciendo 0.9.9.
-Nuestros cambios van como **subversión** encima de la oficial (ahora: **0.9.9 oficial - Subversión 0.6**) y se ven en dos sitios:
+Nuestros cambios van como **subversión** encima de la oficial (ahora: **0.9.9 oficial - Subversión 0.7**) y se ven en dos sitios:
 - **Noticias** (icono del periódico): una noticia «Versión 0.9.9 oficial - Subversión 0.x» con el detalle, firmada como «Actualización hecha por moportor6 (no oficial)».
 - **Novedades** (botón de la versión junto al logo): un bloque propio arriba con la etiqueta «No oficial»; las notas oficiales siguen debajo, sin cambios.
 

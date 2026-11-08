@@ -4,11 +4,30 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.6';
+  const SUB = '0.7';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.7',
+      date: Date.UTC(2026, 10, 9, 0),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.7`,
+      summary: 'Las Reliquias de la grieta ya tienen imagen.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Arreglos`,
+        `- **Reliquias de la grieta sin imagen:** el port de Android solo traía la imagen de Polvo de Cometa; las otras 31 salían rotas.`,
+        `- Ahora cada reliquia usa el icono de un objeto del juego que se le parece (por ejemplo, Colmillo Mellado usa el Colmillo Agudo y Escama del Dragón Antiguo el Colmillo Dragón). Lo que hace cada reliquia no cambia.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.6',
       date: Date.UTC(2026, 10, 8, 23),
@@ -184,6 +203,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.7',
+      date: '2026-11-09',
+      title: 'Reliquias con imagen.',
+      notes: [
+        ['fix', '**Reliquias de la grieta**: ya no salen sin imagen. Cada una usa el icono de un objeto parecido del juego.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.6',
