@@ -431,7 +431,12 @@ public class MainActivity extends Activity {
     private WebResourceResponse serve(WebResourceRequest req) {
         Uri u = req.getUrl();
         if (!HOST.equals(u.getHost())) {
-            return notFound();   // juego 100 % local: ninguna petición sale a internet
+            // Subversión propia: PokéIsaac carga sus sprites, objetos y modo online desde sus servidores
+            // (igual que su APK original). Solo esos servidores salen a internet; sin conexión se juega igual.
+            if (isaacNet(u.getHost())) {
+                return null;
+            }
+            return notFound();   // juego 100 % local: ninguna otra petición sale a internet
         }
         String path = u.getPath();
         if (path == null || path.isEmpty()) {
@@ -455,6 +460,10 @@ public class MainActivity extends Activity {
             }
         }
         return respond(path, data, range);
+    }
+
+    static boolean isaacNet(String h) {
+        return h != null && (h.equals("bfwnvevcyrwwukokooty.supabase.co") || h.endsWith(".up.railway.app"));
     }
 
     private byte[] load(String path) {

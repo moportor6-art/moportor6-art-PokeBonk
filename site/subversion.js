@@ -4,11 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.7';
+  const SUB = '0.8';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.8',
+      date: Date.UTC(2026, 10, 9, 1),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.8`,
+      summary: 'PokéIsaac incluido como minijuego, con su botón en el menú.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# PokéIsaac`,
+        `- **PokéIsaac 1.0.11** (de @SrBatai) viene dentro de la app: botón **PokéIsaac** en la barra del menú principal, debajo de Donaciones.`,
+        `- Para volver, toca **Volver a PokéBonk** (abajo a la izquierda) dos veces.`,
+        `- Cada juego guarda sus propias partidas; no se mezclan.`,
+        `- **Sin conexión:** usa **Jugar sin conexión**. Igual que en su APK original, los sprites de los Pokémon y algunos objetos se descargan de sus servidores, así que sin internet salen como una roca gris.`,
+        `- **Con conexión:** carga los sprites y funcionan la cuenta, el ranking y el cooperativo, como en su APK.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.7',
       date: Date.UTC(2026, 10, 9, 0),
@@ -203,6 +225,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.8',
+      date: '2026-11-09',
+      title: 'PokéIsaac como minijuego.',
+      notes: [
+        ['new', '**PokéIsaac** (de @SrBatai) dentro de la app: botón en el menú principal y botón Volver a PokéBonk.'],
+        ['better', 'Sin internet se juega con Jugar sin conexión, pero los sprites de PokéIsaac se descargan de sus servidores, como en su APK original.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.7',
