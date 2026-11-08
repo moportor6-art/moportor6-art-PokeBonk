@@ -10,9 +10,10 @@
   const DMAX_KILLS = 100;
   const DMAX_SECS = 20;
 
-  // especie base -> mega (sid = id del sprite; shiny = tiene hoja variocolor propia)
+  // especie base -> mega (sid = id del sprite; shiny = tiene hoja variocolor propia;
+  // types = tipos de la mega si cambian. Las demás conservan los tipos del Pokémon base, como en los juegos)
   const MEGAS = {
-    6: { sid: 15006, name: 'Mega Charizard X', shiny: true },
+    6: { sid: 15006, name: 'Mega Charizard X', shiny: true, types: ['fire', 'dragon'] },
     65: { sid: 15065, name: 'Mega Alakazam', shiny: true },
     94: { sid: 15094, name: 'Mega Gengar', shiny: true },
     115: { sid: 15115, name: 'Mega Kangaskhan', shiny: true },
@@ -87,6 +88,8 @@
       M.keepHp(p, () => {
         p.__msid = sh && m.shiny ? m.sid + 2e4 : m.sid;
         p.__mshp = sh && !m.shiny;
+        // Tipos de la mega (solo cambian si la mega cambia de tipo en los juegos).
+        if (m.types) p.types = m.types.slice();
       });
       M.st.mega = true; M.st.megaFor = p.speciesId;
       try { r.sprites.get(p.__msid); } catch {}

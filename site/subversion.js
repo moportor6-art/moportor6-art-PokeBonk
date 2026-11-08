@@ -26,6 +26,7 @@
         `- **Cómo se desbloquea:** completa al 100% la investigación de la familia de ese Pokémon.`,
         `- **En la partida:** jugando con ese Pokémon (ya evolucionado), al llegar a **150 bajas** se ilumina el botón **MEGA** a la derecha. Al tocarlo te megaevolucionas hasta el final de la partida.`,
         `- **Qué da:** +25% daño, +15% PS, +10% velocidad de ataque y +10 armadura, con su sprite de mega (también en variocolor, salvo Skarmory y Tyranitar).`,
+        `- **Tipos:** cada mega usa sus tipos de los juegos. Solo cambia Mega Charizard X, que pasa a **Fuego/Dragón** (sus ataques de tipo Dragón ganan la bonificación de mismo tipo); las demás conservan los tipos de su Pokémon.`,
         ``,
         `# Dynamax`,
         `- **Cualquier Pokémon, una vez por partida:** al llegar a **100 bajas** se ilumina el botón **DMAX**.`,
@@ -141,6 +142,7 @@
         ['new', '**10 megas**: Charizard X, Alakazam, Gengar, Kangaskhan, Aerodactyl, Mewtwo Y, Steelix, Skarmory, Houndoom y Tyranitar. Se desbloquean con la investigación de su familia al 100%.'],
         ['new', '**Botón MEGA** a las 150 bajas: te megaevolucionas hasta el final de la partida (+25% daño, +15% PS, +10% vel. de ataque, +10 armadura).'],
         ['new', '**Botón DMAX** a las 100 bajas, una vez por partida: 20 s gigante con +50% daño, +50% PS y +30% área.'],
+        ['balance', 'Mega Charizard X pasa a Fuego/Dragón; las demás megas conservan sus tipos, como en los juegos.'],
         ['balance', 'Mega y Dynamax no se usan en Duelos.']
       ]
     },
