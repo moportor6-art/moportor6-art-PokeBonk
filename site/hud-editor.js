@@ -26,6 +26,19 @@
 
   const style = document.createElement('style');
   style.id = 'pb-hud-layout';
+  // Arreglo de la pausa en pantallas bajas (móvil en horizontal): las estadísticas en una sola fila
+  // y botones algo más bajos, para que no se monten unos sobre otros.
+  const pauseFix = document.createElement('style');
+  pauseFix.textContent = `@media (max-height:560px){
+html body #ui .pz > .pz-hero .pz-kpis{grid-template-columns:repeat(6,minmax(0,1fr))!important;gap:3px!important}
+html body #ui .pz > .pz-hero .sm-kpi{grid-column:auto!important;padding:2px 2px!important}
+html body #ui .pz > .pz-hero .sm-kpi b{font-size:12px!important}
+html body #ui .pz > .pz-hero .sm-kpi span{font-size:7px!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis}
+html body #ui .pz > .sm-foot .actions > .btn:not(.big){min-height:34px!important;padding-top:4px!important;padding-bottom:4px!important}
+html body #ui .pz > .sm-foot .actions > .btn:nth-child(-n+2):not(.big){min-height:38px!important}
+}`;
+  document.head.append(pauseFix);
+
   const editCss = document.createElement('style');
   editCss.textContent = `
 body.pb-hud-editing .modal.sm-modal{visibility:hidden!important}
@@ -182,14 +195,39 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
       p.append(row);
     },
 
-    // Botón «Editar HUD» en la pausa.
+    // Un solo botón «HUD y guía» en la pausa (ocupa el hueco libre junto a Reiniciar, sin añadir filas).
+    // Va como etiqueta pequeña junto a «Pausa», en la tarjeta del Pokémon, para no añadir filas de botones.
     inject() {
-      const acts = document.querySelector('.modal.sm-modal .panel.sm .sm-foot .actions');
-      if (!acts || acts.querySelector('.pb-he-btn')) return;
+      const hero = document.querySelector('.modal.sm-modal .panel.sm.pz > .pz-hero');
+      if (!hero || hero.querySelector('.pb-he-btn')) return;
+      if (getComputedStyle(hero).position === 'static') hero.style.position = 'relative';
       const b = document.createElement('button');
-      b.type = 'button'; b.className = 'btn ghost pb-he-btn'; b.textContent = 'Editar HUD';
-      b.addEventListener('click', e => { e.stopPropagation(); H.open(); });
-      acts.append(b);
+      b.type = 'button'; b.className = 'pb-he-btn'; b.textContent = 'HUD y guía';
+      b.style.cssText = 'position:absolute;right:8px;top:5px;z-index:2;padding:1px 8px;border-radius:99px;border:2px solid #fff;background:#7a3fd0;color:#fff;font:800 9px system-ui,sans-serif;letter-spacing:.3px;cursor:pointer';
+      b.addEventListener('click', e => { e.stopPropagation(); H.menu(); });
+      hero.append(b);
+    },
+
+    menu() {
+      if (document.querySelector('.pb-he-menu')) return;
+      const m = document.createElement('div'); m.className = 'pb-he pb-he-menu';
+      m.style.background = 'rgba(0,0,0,.45)';
+      const p = document.createElement('div'); p.className = 'pb-he-p';
+      const h = document.createElement('h3'); h.textContent = 'HUD y guía';
+      const row = document.createElement('div'); row.className = 'row';
+      const ed = document.createElement('button'); ed.className = 'go'; ed.textContent = 'Editar HUD';
+      const gu = document.createElement('button');
+      const gtxt = () => { gu.textContent = `Guía: ${window.PB_GUIA?.on ? 'Sí' : 'No'}`; };
+      gtxt();
+      const cl = document.createElement('button'); cl.textContent = 'Cerrar';
+      const close = () => m.remove();
+      ed.addEventListener('click', e => { e.stopPropagation(); close(); H.open(); });
+      gu.addEventListener('click', e => { e.stopPropagation(); window.PB_GUIA?.set(!PB_GUIA.on); gtxt(); });
+      cl.addEventListener('click', e => { e.stopPropagation(); close(); });
+      m.addEventListener('click', e => { if (e.target === m) close(); });
+      row.append(ed, gu);
+      const row2 = document.createElement('div'); row2.className = 'row'; row2.append(cl);
+      p.append(h, row, row2); m.append(p); document.body.append(m);
     }
   };
 

@@ -116,6 +116,6 @@
 
   const loop = () => { try { G.draw(); } catch {} requestAnimationFrame(loop); };
   requestAnimationFrame(loop);
-  setInterval(() => { try { G.inject(); } catch {} }, 400);
+  // El botón de la guía está dentro de «HUD y guía» (hud-editor.js) para no añadir filas a la pausa.
   window.PB_GUIA = G;
 })();

@@ -183,7 +183,7 @@
 .pb-mx button{pointer-events:auto;width:64px;height:64px;border-radius:50%;border:3px solid #fff;font:900 12px/1 system-ui,sans-serif;color:#fff;letter-spacing:.5px;box-shadow:0 4px 0 rgba(0,0,0,.25);touch-action:manipulation}
 .pb-mx .mg{background:radial-gradient(circle at 35% 30%,#d9a8ff,#7a3fd0)}
 .pb-mx .dx{background:radial-gradient(circle at 35% 30%,#ff9a9a,#d02a3a)}
-.pb-mx button[hidden]{display:none}
+.pb-mx[hidden],.pb-mx button[hidden]{display:none!important}
 .pb-mx button.ready{animation:pbmx 1s ease-in-out infinite}
 .pb-mx button:disabled{filter:grayscale(.7) brightness(.8)}
 @keyframes pbmx{50%{transform:scale(1.1)}}`;

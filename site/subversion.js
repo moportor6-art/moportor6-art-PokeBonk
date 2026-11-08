@@ -30,6 +30,11 @@
         `# Laboratorio`,
         `- **Huecos de vitamina** pasa de 2 a **4 niveles**: de 3 huecos hasta **7** (los niveles nuevos cuestan más).`,
         ``,
+        `# Arreglos`,
+        `- Los botones **MEGA y DMAX** ya no se ven encima del menú de pausa.`,
+        `- En la pausa, las estadísticas (tiempo, bajas, daño, dinero...) ya no quedan tapadas por los botones en pantallas bajas: ahora van en una sola fila.`,
+        `- **Editar HUD** y **Guía** se juntan en una etiqueta **HUD y guía**, arriba a la derecha de la tarjeta de tu Pokémon en la pausa.`,
+        ``,
         PIE
       ].join('\n')
     },
@@ -256,7 +261,8 @@
       title: 'Mega temporal y más huecos de vitamina.',
       notes: [
         ['balance', '**Mega temporal**: dura 40 s y se recarga con bajas (150 en los primeros 5 minutos, 300 después).'],
-        ['new', '**Huecos de vitamina** en el Laboratorio: ahora 4 niveles, hasta 7 huecos.']
+        ['new', '**Huecos de vitamina** en el Laboratorio: ahora 4 niveles, hasta 7 huecos.'],
+        ['fix', 'MEGA y DMAX ya no se ven encima de la pausa, y las estadísticas de la pausa ya no quedan tapadas.']
       ]
     },
     {
