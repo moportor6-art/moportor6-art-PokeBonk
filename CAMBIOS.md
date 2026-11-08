@@ -8,3 +8,14 @@
 - **Mismo poder que en el original:** el daño base de los compañeros es el de siempre (se quitó el tope de la versión anterior).
 
 Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros).
+
+## Versión oficial y subversión propia
+La versión oficial del juego **no se toca**: `site/version.json` y la lista oficial de «Novedades» siguen diciendo 0.9.9.
+Nuestros cambios van como **subversión** encima de la oficial (ahora: **0.9.9 oficial · Subversión 0.1**) y se ven en dos sitios:
+- **Noticias** (icono del periódico): una noticia «Versión 0.9.9 oficial · Subversión 0.1» con el detalle, firmada como «Subversión de moportor6 (no oficial)».
+- **Novedades** (botón de la versión junto al logo): un bloque propio arriba con la etiqueta «No oficial»; las notas oficiales siguen debajo, sin cambios.
+
+Todo el texto está en `site/subversion.js`. Para una nueva subversión (p. ej. 0.2) añade una entrada al principio de `items` y de `changelog` y cambia `SUB`.
+Si llega una versión oficial nueva, cambia `OFICIAL` y vuelve a empezar en Subversión 0.1.
+
+Archivos tocados para esto: `site/index.html` (carga `subversion.js`), `site/assets/main-Cx4tF-jA-mw3e1u3x.js` (las noticias del modo sin conexión incluyen las propias) y `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (bloque en «Novedades» y firma de la noticia).
