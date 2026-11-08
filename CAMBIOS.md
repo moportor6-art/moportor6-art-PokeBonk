@@ -9,6 +9,14 @@
 
 Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros).
 
+## Laboratorio individual (Subversión 0.3)
+- Cada mejora del Laboratorio se compra para un Pokémon concreto y solo le afecta a él (en sus partidas). Se guarda en `profile.lab.by[especie]`.
+- Excepción: el **Archivo** sigue siendo de toda la cuenta.
+- Selector «Mejoras de:» y botón «Devolver mejoras» en el Laboratorio: devuelve todo el Polvo gastado en ese Pokémon.
+- Lo comprado antes (global) se devolvió una vez como Polvo Estelar.
+- Mejoras nuevas: Contundencia (+5% daño crítico, 5 niv.), Alteración (+6% estados, 5 niv.), Persistencia (+4% duración, 5 niv.), Absorción (+0,5% robo de vida, 4 niv.).
+- Código: `site/lab-individual.js` y parches en `defineProperty-…js` (lista de mejoras y lectura del lab), `menus-…js` (compra, `lab()`, `labStats()`, pantalla del Laboratorio) y `main-Cx4tF-…js` (especie de la partida).
+
 ## Pokédólares guardados (Subversión 0.2)
 - Lo que sobra de oro al terminar una partida se guarda y se suma al empezar la siguiente (sale un aviso con la cantidad).
 - Si la app se cierra a mitad de partida, el oro guardado que llevabas vuelve a la reserva.
@@ -17,7 +25,7 @@ Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros
 
 ## Versión oficial y subversión propia
 La versión oficial del juego **no se toca**: `site/version.json` y la lista oficial de «Novedades» siguen diciendo 0.9.9.
-Nuestros cambios van como **subversión** encima de la oficial (ahora: **0.9.9 oficial - Subversión 0.2**) y se ven en dos sitios:
+Nuestros cambios van como **subversión** encima de la oficial (ahora: **0.9.9 oficial - Subversión 0.3**) y se ven en dos sitios:
 - **Noticias** (icono del periódico): una noticia «Versión 0.9.9 oficial - Subversión 0.x» con el detalle, firmada como «Actualización hecha por moportor6 (no oficial)».
 - **Novedades** (botón de la versión junto al logo): un bloque propio arriba con la etiqueta «No oficial»; las notas oficiales siguen debajo, sin cambios.
 
