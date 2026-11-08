@@ -4,11 +4,32 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.10';
+  const SUB = '0.11';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.11',
+      date: Date.UTC(2026, 10, 9, 4),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.11`,
+      summary: 'Guardado automático: si sales de la app en mitad de una partida, puedes continuarla.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Reanudar donde te quedaste`,
+        `- Si sales de la app en mitad de una partida (botón de inicio, cambiar de app, apagar la pantalla o cerrarla), la partida se **guarda sola**, igual que con «Guardar y salir».`,
+        `- **Si vuelves y la app seguía abierta**, la partida se reanuda sola en pausa: pulsa Continuar y sigues.`,
+        `- **Si la app se había cerrado**, al abrirla sale el aviso **Tienes una partida guardada** con **Continuar**, **Finalizar** (te quedas con lo conseguido) o **Más tarde**.`,
+        `- No se guarda en Duelos ni en Cooperativo, ni en los momentos en que el juego no deja guardar (por ejemplo, en algunas peleas). En esos casos pasa lo de siempre.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.10',
       date: Date.UTC(2026, 10, 9, 3),
@@ -282,6 +303,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.11',
+      date: '2026-11-09',
+      title: 'Guardado automático al salir de la app.',
+      notes: [
+        ['new', '**Guardado automático**: si sales de la app en mitad de una partida, se guarda sola y al volver puedes continuarla o finalizarla.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.10',

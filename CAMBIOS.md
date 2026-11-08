@@ -9,6 +9,9 @@
 
 Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros).
 
+## Guardado automático (Subversión 0.11)
+- `site/autoguardado.js`: al ocultarse la app (`visibilitychange`/`pagehide`) en mitad de una partida, hace lo mismo que «Guardar y salir» (`run.$9sojcp()` y `run.ui.onSuspend()`). Si la app sigue abierta al volver, pulsa «Continuar» en el aviso de partida guardada. No actúa en Duelos, Cooperativo ni cuando el juego no deja guardar.
+
 ## Modo vertical (Subversión 0.10)
 - `site/vertical.js`: fila «Orientación» en Ajustes > Gráficos (`localStorage` `pb-orient`), clase `pb-portrait` en `<html>` cuando la pantalla es más alta que ancha, estilos del menú principal (unidades de 412 x 880), HUD y pausa en vertical, y salto automático del aviso de girar.
 - `MainActivity.java`: `AndroidMenu.setOrientation("landscape"|"portrait"|"auto")`, guardado en SharedPreferences y aplicado en `onCreate`.
@@ -59,7 +62,7 @@ Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros
 
 ## Versión oficial y subversión propia
 La versión oficial del juego **no se toca**: `site/version.json` y la lista oficial de «Novedades» siguen diciendo 0.9.9.
-Nuestros cambios van como **subversión** encima de la oficial (ahora: **0.9.9 oficial - Subversión 0.10**) y se ven en dos sitios:
+Nuestros cambios van como **subversión** encima de la oficial (ahora: **0.9.9 oficial - Subversión 0.11**) y se ven en dos sitios:
 - **Noticias** (icono del periódico): una noticia «Versión 0.9.9 oficial - Subversión 0.x» con el detalle, firmada como «Actualización hecha por moportor6 (no oficial)».
 - **Novedades** (botón de la versión junto al logo): un bloque propio arriba con la etiqueta «No oficial»; las notas oficiales siguen debajo, sin cambios.
 
