@@ -4,11 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.5';
+  const SUB = '0.6';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.6',
+      date: Date.UTC(2026, 10, 8, 23),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.6`,
+      summary: 'Guía de objetivos: una flecha te indica a dónde ir, en orden.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Guía de objetivos`,
+        `- Una **flecha amarilla** alrededor de tu Pokémon apunta al siguiente objetivo, con su nombre y la distancia debajo.`,
+        `- Si el objetivo se ve en pantalla, además sale un marcador que rebota encima de él.`,
+        `- **Orden:** primero las **Poké Balls gratis**, luego los **NPC de mejoras** (tienda de Meowth, Ditto, Hypno, Ruinas del Fósil, Pokémon enjaulados, Snorlax, Magnemite, Porygon y el PC de Bill), después los **desafíos y altares**, luego el **guardián o legendario** y, al vencerlo, el **portal** al siguiente mapa.`,
+        `- Dentro de cada paso te lleva al más cercano.`,
+        `- Los NPC que se usan varias veces (como la tienda) cuentan como vistos al acercarte.`,
+        `- **Toca la etiqueta** para saltarte ese objetivo.`,
+        `- Se apaga y se enciende desde la **pausa**, con el botón **Guía: Sí/No**.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.5',
       date: Date.UTC(2026, 10, 8, 22),
@@ -160,6 +184,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.6',
+      date: '2026-11-08',
+      title: 'Guía de objetivos con flechas.',
+      notes: [
+        ['new', '**Guía de objetivos**: una flecha te lleva en orden a las Poké Balls gratis, los NPC de mejoras, los desafíos, el guardián y el portal.'],
+        ['better', 'Toca la etiqueta de la guía para saltarte un objetivo. Se apaga desde la pausa (Guía: Sí/No).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.5',
