@@ -1,0 +1,5 @@
+work-build/
+dist/
+android/*.keystore
+android/keystore.properties
+*.tmp

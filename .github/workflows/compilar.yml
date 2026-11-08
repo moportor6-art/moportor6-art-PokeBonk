@@ -1,0 +1,66 @@
+# Compila el APK y lo publica como release cuando subes una etiqueta vN (v1, v2, v3...).
+# El número de la etiqueta es el versionCode: la app avisa de la actualización
+# si es mayor que el de la versión instalada.
+name: Compilar y publicar APK
+
+on:
+  push:
+    tags: ['v*']
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  apk:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Instalar build-tools y plataforma Android 35
+        run: sdkmanager "build-tools;35.0.0" "platforms;android-35"
+
+      - name: Número de versión
+        id: ver
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          NUM=$(echo "$TAG" | grep -oE '[0-9]+' | tail -n1)
+          if [ -z "$NUM" ]; then NUM=$(jq .versionCode config.json); fi
+          echo "code=$NUM" >> "$GITHUB_OUTPUT"
+
+      - name: Clave de firma (secreto KEYSTORE_BASE64)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then echo "Falta el secreto KEYSTORE_BASE64"; exit 1; fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/clave.keystore"
+
+      - name: Compilar
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/clave.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: python3 build.py --version-code ${{ steps.ver.outputs.code }}
+
+      - name: Publicar release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/PokeBonk.apk
+          name: PokeBonk ${{ github.ref_name }}
+          generate_release_notes: true
+
+      - name: Guardar el APK (ejecución manual)
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: PokeBonk-apk
+          path: dist/PokeBonk.apk
