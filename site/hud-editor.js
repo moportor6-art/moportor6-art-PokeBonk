@@ -1,0 +1,199 @@
+/* Subversión propia: editor del HUD.
+   Desde la pausa de una partida, «Editar HUD» permite arrastrar cualquier elemento del HUD
+   (retrato, tiempo, minimapa, ataques, joystick, botones, MEGA/DMAX) y cambiar su tamaño.
+   Se guarda en este móvil (localStorage) y se aplica en todas las partidas.
+   Las posiciones se guardan en % de pantalla para que aguanten cambios de tamaño. */
+(() => {
+  const KEY = 'pb-hud-layout';
+  const ITEMS = [
+    { sel: '.hud-tl', css: '#hud .hud-tl', name: 'Retrato y nivel' },
+    { sel: '.hud-top', css: '#hud .hud-top', name: 'Tiempo y barra' },
+    { sel: '.hud-tr', css: '#hud .hud-tr', name: 'Minimapa' },
+    { sel: '.hud-bl', css: '#hud .hud-bl', name: 'Ataques y objetos' },
+    { sel: '.tc-stick', css: '.tc .tc-stick:not(.on), .tc .tc-stick.fixed', name: 'Joystick' },
+    { sel: '.tc-jump', css: '.tc .tc-jump', name: 'Saltar' },
+    { sel: '.tc-dash', css: '.tc .tc-dash', name: 'Deslizar' },
+    { sel: '.tc-lock', css: '.tc .tc-lock', name: 'Fijar objetivo' },
+    { sel: '.tc-ultb', css: '.tc .tc-ultb', name: 'Ultimate' },
+    { sel: '.tc-inc', css: '.tc .tc-inc', name: 'Incienso' },
+    { sel: '.tc-pause', css: '.tc .tc-pause', name: 'Pausa' },
+    { sel: '.tc-aim', css: '.tc .tc-aim', name: 'Apuntado' },
+    { sel: '.pb-mx .mg', css: '.pb-mx .mg', name: 'MEGA' },
+    { sel: '.pb-mx .dx', css: '.pb-mx .dx', name: 'DMAX' }
+  ];
+  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
+  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(H.layout)); } catch {} };
+
+  const style = document.createElement('style');
+  style.id = 'pb-hud-layout';
+  const editCss = document.createElement('style');
+  editCss.textContent = `
+body.pb-hud-editing .modal.sm-modal{visibility:hidden!important}
+body.pb-hud-editing #hud, body.pb-hud-editing .tc{visibility:visible!important;opacity:1!important}
+body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none!important}
+.pb-he{position:fixed;inset:0;z-index:9999;touch-action:none;user-select:none;-webkit-user-select:none}
+.pb-he-f{position:fixed;border:2px dashed rgba(255,255,255,.9);border-radius:10px;background:rgba(138,90,216,.18);box-sizing:border-box;touch-action:none}
+.pb-he-f.on{border:3px solid #ffd23a;background:rgba(255,210,58,.22)}
+.pb-he-f b{position:absolute;left:4px;top:-18px;font:800 11px system-ui,sans-serif;color:#fff;text-shadow:0 1px 2px #000;white-space:nowrap;pointer-events:none}
+.pb-he-p{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,86vw);padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.96);color:#2a2340;font:700 14px system-ui,sans-serif;box-shadow:0 6px 0 rgba(0,0,0,.2);touch-action:auto}
+.pb-he-p h3{margin:0 0 4px;font-size:16px}
+.pb-he-p small{display:block;opacity:.7;margin-bottom:8px;font-weight:600}
+.pb-he-p input[type=range]{width:100%}
+.pb-he-p .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+.pb-he-p button{flex:1;min-width:90px;padding:9px 8px;border-radius:12px;border:0;font:800 13px system-ui,sans-serif;background:#ece8f6;color:#2a2340}
+.pb-he-p button.go{background:#3ec26a;color:#fff}
+.pb-he-p button.warn{background:#f2d4d4;color:#8a1f2a}`;
+  document.head.append(style, editCss);
+
+  const H = {
+    layout: load(),
+    editing: false,
+
+    apply() {
+      let css = '';
+      for (const it of ITEMS) {
+        const v = H.layout[it.sel];
+        if (!v) continue;
+        const x = +v.x || 0, y = +v.y || 0, s = +v.s || 1;
+        css += `${it.css}{translate:${x.toFixed(2)}vw ${y.toFixed(2)}vh!important;scale:${s.toFixed(2)}!important}\n`;
+      }
+      style.textContent = css;
+    },
+
+    // Zona del joystick: si lo moviste, la zona sigue al joystick.
+    stickZone(x, stick) {
+      const v = H.layout['.tc-stick'];
+      if (!v || (!v.x && !v.y)) return x < innerWidth * .42;
+      const r = stick.getBoundingClientRect(), cx = r.left + r.width / 2;
+      return Math.abs(x - cx) < innerWidth * .25;
+    },
+
+    // ---- editor ----
+    open() {
+      if (H.editing) return;
+      H.editing = true;
+      document.body.classList.add('pb-hud-editing');
+      if (window.PB_MEGA) PB_MEGA.forceShow = true;
+      try { PB_MEGA?.paint(); } catch {}
+      const root = document.createElement('div'); root.className = 'pb-he';
+      const panel = document.createElement('div'); panel.className = 'pb-he-p';
+      root.append(panel);
+      document.body.append(root);
+      H.root = root; H.panel = panel; H.sel = null; H.frames = [];
+      requestAnimationFrame(() => { H.build(); H.renderPanel(); H.loop(); });
+    },
+
+    close() {
+      H.editing = false;
+      document.body.classList.remove('pb-hud-editing');
+      if (window.PB_MEGA) PB_MEGA.forceShow = false;
+      try { PB_MEGA?.paint(); } catch {}
+      H.root?.remove(); H.root = null;
+      save();
+    },
+
+    present() {
+      const out = [];
+      for (const it of ITEMS) {
+        const el = document.querySelector(it.sel);
+        if (!el) continue;
+        const r = el.getBoundingClientRect(), cs = getComputedStyle(el);
+        if (r.width < 4 || r.height < 4 || cs.display === 'none') continue;
+        out.push({ it, el });
+      }
+      return out;
+    },
+
+    build() {
+      for (const f of H.frames) f.box.remove();
+      H.frames = [];
+      for (const { it, el } of H.present()) {
+        const box = document.createElement('div'); box.className = 'pb-he-f';
+        const lb = document.createElement('b'); lb.textContent = it.name; box.append(lb);
+        H.root.insertBefore(box, H.panel);
+        const f = { it, el, box };
+        H.frames.push(f);
+        box.addEventListener('pointerdown', e => {
+          e.preventDefault(); e.stopPropagation();
+          box.setPointerCapture?.(e.pointerId);
+          H.sel = it.sel; H.renderPanel();
+          const v = H.layout[it.sel] ??= { x: 0, y: 0, s: 1 };
+          const sx = e.clientX, sy = e.clientY, ox = v.x, oy = v.y;
+          const mv = ev => {
+            v.x = ox + (ev.clientX - sx) / innerWidth * 100;
+            v.y = oy + (ev.clientY - sy) / innerHeight * 100;
+            H.apply();
+            H.clamp(f.el, v);
+          };
+          const up = () => { box.removeEventListener('pointermove', mv); box.removeEventListener('pointerup', up); box.removeEventListener('pointercancel', up); save(); };
+          box.addEventListener('pointermove', mv); box.addEventListener('pointerup', up); box.addEventListener('pointercancel', up);
+        });
+      }
+    },
+
+    // Que nada se salga de la pantalla.
+    clamp(el, v) {
+      const r = el.getBoundingClientRect();
+      let dx = 0, dy = 0;
+      if (r.left < 0) dx = -r.left; else if (r.right > innerWidth) dx = innerWidth - r.right;
+      if (r.top < 0) dy = -r.top; else if (r.bottom > innerHeight) dy = innerHeight - r.bottom;
+      if (dx || dy) { v.x += dx / innerWidth * 100; v.y += dy / innerHeight * 100; H.apply(); }
+    },
+
+    loop() {
+      if (!H.editing) return;
+      for (const f of H.frames) {
+        const r = f.el.getBoundingClientRect();
+        Object.assign(f.box.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+        f.box.classList.toggle('on', f.it.sel === H.sel);
+      }
+      requestAnimationFrame(H.loop);
+    },
+
+    renderPanel() {
+      const p = H.panel; p.textContent = '';
+      const it = ITEMS.find(i => i.sel === H.sel);
+      const h = document.createElement('h3'); h.textContent = it ? it.name : 'Editar HUD';
+      const sm = document.createElement('small');
+      sm.textContent = it ? 'Arrástralo para moverlo y usa la barra para cambiar su tamaño.' : 'Toca y arrastra cualquier elemento para moverlo. Toca uno para cambiar su tamaño.';
+      p.append(h, sm);
+      if (it) {
+        const v = H.layout[it.sel] ??= { x: 0, y: 0, s: 1 };
+        const lab = document.createElement('div'); lab.textContent = `Tamaño: ${Math.round(v.s * 100)}%`;
+        const rg = document.createElement('input'); rg.type = 'range'; rg.min = '50'; rg.max = '200'; rg.step = '5'; rg.value = String(Math.round(v.s * 100));
+        rg.addEventListener('input', () => { v.s = +rg.value / 100; lab.textContent = `Tamaño: ${rg.value}%`; H.apply(); const el = document.querySelector(it.sel); if (el) H.clamp(el, v); });
+        rg.addEventListener('change', save);
+        const row = document.createElement('div'); row.className = 'row';
+        const rs = document.createElement('button'); rs.textContent = 'Restablecer este';
+        rs.addEventListener('click', () => { delete H.layout[it.sel]; H.apply(); save(); H.renderPanel(); });
+        row.append(rs);
+        p.append(lab, rg, row);
+      }
+      const row = document.createElement('div'); row.className = 'row';
+      const all = document.createElement('button'); all.className = 'warn'; all.textContent = 'Restablecer todo';
+      let armed = false;
+      all.addEventListener('click', () => {
+        if (!armed) { armed = true; all.textContent = '¿Seguro? Toca otra vez'; return; }
+        H.layout = {}; H.apply(); save(); H.sel = null; H.renderPanel();
+      });
+      const ok = document.createElement('button'); ok.className = 'go'; ok.textContent = 'Listo';
+      ok.addEventListener('click', () => H.close());
+      row.append(all, ok);
+      p.append(row);
+    },
+
+    // Botón «Editar HUD» en la pausa.
+    inject() {
+      const acts = document.querySelector('.modal.sm-modal .panel.sm .sm-foot .actions');
+      if (!acts || acts.querySelector('.pb-he-btn')) return;
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'btn ghost pb-he-btn'; b.textContent = 'Editar HUD';
+      b.addEventListener('click', e => { e.stopPropagation(); H.open(); });
+      acts.append(b);
+    }
+  };
+
+  H.apply();
+  setInterval(() => { try { if (document.querySelector('.tc.on')) document.body.classList.add('pb-hud-touch'); H.inject(); } catch {} }, 400);
+  window.PB_HUD = H;
+})();

@@ -150,7 +150,7 @@
     ui() {
       if (!M.el) {
         const st = document.createElement('style');
-        st.textContent = `.pb-mx{position:fixed;right:max(12px,env(safe-area-inset-right));top:42%;z-index:30;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+        st.textContent = `.pb-mx{position:fixed;left:max(14px,env(safe-area-inset-left));top:26%;z-index:30;display:flex;flex-direction:column;gap:10px;pointer-events:none}
 .pb-mx button{pointer-events:auto;width:64px;height:64px;border-radius:50%;border:3px solid #fff;font:900 12px/1 system-ui,sans-serif;color:#fff;letter-spacing:.5px;box-shadow:0 4px 0 rgba(0,0,0,.25);touch-action:manipulation}
 .pb-mx .mg{background:radial-gradient(circle at 35% 30%,#d9a8ff,#7a3fd0)}
 .pb-mx .dx{background:radial-gradient(circle at 35% 30%,#ff9a9a,#d02a3a)}
@@ -175,8 +175,15 @@
     paint() {
       if (!M.el) return;
       const r = M.run, s = M.st;
-      if (!r || !s || s.off || r.state === 'over') { M.el.hidden = true; return; }
-      M.el.hidden = !(r.state === 'play' || r.state === 'paused' || r.state === 'evolving');
+      if (!r || !s || r.state === 'over' || (s.off && !M.forceShow)) { M.el.hidden = true; return; }
+      if (M.forceShow) {
+        // Editor del HUD: se ven los dos botones para poder moverlos.
+        M.el.hidden = false; M.bMega.hidden = false; M.bDmax.hidden = false;
+        M.bMega.disabled = M.bDmax.disabled = false;
+        if (!M.bMega.textContent) M.bMega.textContent = 'MEGA';
+        return;
+      }
+      M.el.hidden = !(r.state === 'play' || r.state === 'evolving');
       const kills = r.stats?.kills ?? 0, p = r.player;
       // MEGA: solo si esta especie tiene mega desbloqueada y aún no la usó
       const hasMega = p && M.unlocked(r.meta, p.speciesId) && !s.mega;

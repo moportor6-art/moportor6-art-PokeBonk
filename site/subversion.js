@@ -4,11 +4,37 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.4';
+  const SUB = '0.5';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.5',
+      date: Date.UTC(2026, 10, 8, 22),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.5`,
+      summary: 'Editor del HUD: mueve y cambia el tamaño de cualquier elemento de la partida.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Editor del HUD`,
+        `- En una partida, abre la **pausa** y toca **Editar HUD**.`,
+        `- **Arrastra** cualquier elemento para moverlo: retrato, tiempo, minimapa, ataques y objetos, joystick, saltar, deslizar, fijar objetivo, Ultimate, incienso, pausa, apuntado, MEGA y DMAX.`,
+        `- **Toca** uno para cambiar su **tamaño** (del 50% al 200%) o restablecerlo.`,
+        `- **Restablecer todo** lo deja como al principio. Nada se puede sacar de la pantalla.`,
+        `- Se guarda en tu móvil y vale para todas las partidas.`,
+        `- Si mueves el joystick fijo, la zona donde se toca para usarlo se mueve con él.`,
+        ``,
+        `# Otros`,
+        `- Los botones MEGA y DMAX ahora salen a la izquierda, debajo del retrato, y se ocultan en la pausa.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.4',
       date: Date.UTC(2026, 10, 8, 20),
@@ -134,6 +160,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.5',
+      date: '2026-11-08',
+      title: 'Editor del HUD.',
+      notes: [
+        ['new', '**Editar HUD** (en la pausa): arrastra cualquier elemento de la partida y cambia su tamaño del 50% al 200%.'],
+        ['better', 'Los botones MEGA y DMAX salen a la izquierda, debajo del retrato, y se ocultan en la pausa.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.4',

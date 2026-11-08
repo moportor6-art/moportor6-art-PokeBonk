@@ -9,6 +9,11 @@
 
 Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros).
 
+## Editor del HUD (Subversión 0.5)
+- Botón «Editar HUD» en la pausa: arrastrar y cambiar tamaño (50-200%) de los elementos del HUD y los controles táctiles. Se guarda en `localStorage` (`pb-hud-layout`) en % de pantalla y se aplica con las propiedades CSS `translate` y `scale`.
+- La zona táctil del joystick fijo sigue al joystick si se mueve (parche en `main-Cx4tF-…js`).
+- Código: `site/hud-editor.js`.
+
 ## Megas y Dynamax (Subversión 0.4)
 - 10 megas con sprites del PMD Sprite Repository convertidos al formato del juego (`site/assets/pmd/150NN.png`, `pmd-shiny/150NN.png`, entradas `150NN` en `site/data/sprites.json`; NN = número de la Pokédex). Créditos en `CREDITOS-SPRITES.md`.
 - Se desbloquean con la investigación de la familia al 100%. En partida: botón MEGA a las 150 bajas (permanente en esa partida). Tipos como en los juegos: solo Mega Charizard X cambia (Fuego/Dragón).
@@ -31,7 +36,7 @@ Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros
 
 ## Versión oficial y subversión propia
 La versión oficial del juego **no se toca**: `site/version.json` y la lista oficial de «Novedades» siguen diciendo 0.9.9.
-Nuestros cambios van como **subversión** encima de la oficial (ahora: **0.9.9 oficial - Subversión 0.4**) y se ven en dos sitios:
+Nuestros cambios van como **subversión** encima de la oficial (ahora: **0.9.9 oficial - Subversión 0.5**) y se ven en dos sitios:
 - **Noticias** (icono del periódico): una noticia «Versión 0.9.9 oficial - Subversión 0.x» con el detalle, firmada como «Actualización hecha por moportor6 (no oficial)».
 - **Novedades** (botón de la versión junto al logo): un bloque propio arriba con la etiqueta «No oficial»; las notas oficiales siguen debajo, sin cambios.
 
