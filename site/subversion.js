@@ -30,6 +30,10 @@
         `- El **Editor del HUD** guarda una disposición para horizontal y otra para vertical, así puedes acomodar cada una por separado.`,
         `- Las demás pantallas (Pokédex, Laboratorio, Ajustes, Builds, subidas de nivel, reliquias, resultados) ya se adaptan solas a la pantalla estrecha.`,
         ``,
+        `# Arreglos`,
+        `- **MEGA y DMAX en jefes:** ya se pueden usar durante la aparición de jefes, Alfas y otras escenas cortas. Antes el botón estaba lleno pero no respondía.`,
+        `- Los botones MEGA y DMAX responden al apoyar el dedo, sin esperar a soltarlo.`,
+        ``,
         PIE
       ].join('\n')
     },
@@ -286,7 +290,8 @@
       notes: [
         ['new', '**Orientación** en Ajustes > Gráficos: Horizontal, Vertical o Automática.'],
         ['new', 'Menú principal, HUD de la partida y pausa ordenados para vertical.'],
-        ['better', 'El Editor del HUD guarda una disposición distinta para cada orientación.']
+        ['better', 'El Editor del HUD guarda una disposición distinta para cada orientación.'],
+        ['fix', 'MEGA y DMAX ya funcionan durante la aparición de jefes y Alfas.']
       ]
     },
     {

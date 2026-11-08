@@ -70,15 +70,21 @@
       return out;
     },
 
+    // Se puede usar mientras se juega, también en jefes, Alfas, grietas y cinemáticas cortas;
+    // no en pausa, menús, transiciones de mapa ni al terminar.
+    active(r) {
+      return !['paused', 'modal', 'over', 'transition', 'done', 'loading'].includes(r.state);
+    },
+
     canMega() {
       const r = M.run, s = M.st;
-      if (!r || !s || s.off || r.state !== 'play' || !r.player || r.player.dead || r.player.__msid) return false;
+      if (!r || !s || s.off || !M.active(r) || !r.player || r.player.dead || r.player.__msid) return false;
       const sp = r.player.speciesId;
       return M.unlocked(r.meta, sp) && M.megaProgress() >= s.megaNeed;
     },
     canDmax() {
       const r = M.run, s = M.st;
-      if (!r || !s || s.off || r.state !== 'play' || !r.player || r.player.dead || r.player.__dmax) return false;
+      if (!r || !s || s.off || !M.active(r) || !r.player || r.player.dead || r.player.__dmax) return false;
       return M.dmaxProgress() >= s.dmaxNeed;
     },
 
@@ -191,10 +197,16 @@
         M.el = document.createElement('div'); M.el.className = 'pb-mx';
         M.bMega = document.createElement('button'); M.bMega.type = 'button'; M.bMega.className = 'mg'; M.bMega.textContent = 'MEGA';
         M.bDmax = document.createElement('button'); M.bDmax.type = 'button'; M.bDmax.className = 'dx'; M.bDmax.textContent = 'DMAX';
-        const stop = e => { e.stopPropagation(); };
-        for (const b of [M.bMega, M.bDmax]) { b.addEventListener('pointerdown', stop); b.addEventListener('touchstart', stop, { passive: true }); }
-        M.bMega.addEventListener('click', e => { e.stopPropagation(); M.megaevolve(); M.paint(); });
-        M.bDmax.addEventListener('click', e => { e.stopPropagation(); M.dynamax(); M.paint(); });
+        // Se activa al apoyar el dedo (pointerdown): en algunas peleas el juego bloquea el «click» de la pantalla táctil.
+        const bind = (btn, fn) => {
+          let last = 0;
+          const go = e => { e.stopPropagation(); e.preventDefault?.(); const t = performance.now(); if (t - last < 400) return; last = t; fn(); M.paint(); };
+          btn.addEventListener('pointerdown', go);
+          btn.addEventListener('click', go);
+          btn.addEventListener('touchstart', e => e.stopPropagation(), { passive: true });
+        };
+        bind(M.bMega, () => M.megaevolve());
+        bind(M.bDmax, () => M.dynamax());
         M.el.append(M.bMega, M.bDmax);
         document.body.append(M.el);
       }
@@ -212,7 +224,7 @@
         if (!M.bMega.textContent) M.bMega.textContent = 'MEGA';
         return;
       }
-      M.el.hidden = !(r.state === 'play' || r.state === 'evolving');
+      M.el.hidden = !M.active(r);
       const kills = r.stats?.kills ?? 0, p = r.player;
       // MEGA: solo si esta especie tiene mega desbloqueada
       const hasMega = p && (p.__msid || M.unlocked(r.meta, p.speciesId));
