@@ -2,12 +2,15 @@
    - Mega: solo para los Pokémon que tienen sprite de mega. Se desbloquea con la investigación de su
      familia al 100%. En la partida, al llegar a MEGA_KILLS bajas sale el botón MEGA; al tocarlo te
      megaevolucionas hasta el final de la partida.
-   - Dynamax: cualquier Pokémon, una vez por partida. Al llegar a DMAX_KILLS bajas sale el botón;
-     dura DMAX_SECS segundos de juego: gigante, aura roja, más daño y más PS.
+   - Dynamax: cualquier Pokémon, varias veces por partida. Se recarga con bajas: DMAX_KILLS_EARLY
+     bajas si la recarga empieza en los primeros DMAX_EARLY_SECS segundos, DMAX_KILLS_LATE después.
+     Las bajas cuentan desde que acaba el Dynamax anterior. Dura DMAX_SECS segundos de juego.
    No se usa en Duelos. Sprites de megas: PMD Sprite Repository (PMDCollab), uso no comercial con crédito. */
 (() => {
   const MEGA_KILLS = 150;
-  const DMAX_KILLS = 100;
+  const DMAX_KILLS_EARLY = 100;
+  const DMAX_KILLS_LATE = 300;
+  const DMAX_EARLY_SECS = 300;
   const DMAX_SECS = 20;
 
   // especie base -> mega (sid = id del sprite; shiny = tiene hoja variocolor propia;
@@ -49,7 +52,7 @@
     // Llamado por el juego al empezar cada partida.
     start(run) {
       M.run = run;
-      M.st = { mega: false, megaFor: null, dmaxUsed: false, dmaxEnd: 0, off: run.mode === 'duel' };
+      M.st = { mega: false, megaFor: null, dmaxEnd: 0, dmaxBase: 0, dmaxNeed: DMAX_KILLS_EARLY, off: run.mode === 'duel' };
       const p = run.player;
       if (p) { p.__msid = null; p.__mshp = false; p.__dmax = false; }
       try { for (const k in MEGAS) if (M.unlocked(run.meta, +k)) run.sprites.get(MEGAS[k].sid); } catch {}
@@ -72,8 +75,20 @@
     },
     canDmax() {
       const r = M.run, s = M.st;
-      if (!r || !s || s.off || s.dmaxUsed || r.state !== 'play' || !r.player || r.player.dead) return false;
-      return (r.stats?.kills ?? 0) >= DMAX_KILLS;
+      if (!r || !s || s.off || r.state !== 'play' || !r.player || r.player.dead || r.player.__dmax) return false;
+      return M.dmaxProgress() >= s.dmaxNeed;
+    },
+
+    dmaxProgress() {
+      const r = M.run, s = M.st;
+      return Math.max(0, (r?.stats?.kills ?? 0) - (s?.dmaxBase ?? 0));
+    },
+
+    // Empieza una recarga nueva: 100 bajas en los primeros 5 minutos, 300 después.
+    dmaxReset() {
+      const r = M.run, s = M.st;
+      s.dmaxBase = r.stats?.kills ?? 0;
+      s.dmaxNeed = (r.time ?? 0) < DMAX_EARLY_SECS ? DMAX_KILLS_EARLY : DMAX_KILLS_LATE;
     },
 
     keepHp(p, fn) {
@@ -103,7 +118,7 @@
       if (!M.canDmax()) return;
       const r = M.run, p = r.player;
       M.keepHp(p, () => { p.__dmax = true; });
-      M.st.dmaxUsed = true; M.st.dmaxEnd = r.time + DMAX_SECS;
+      M.st.dmaxEnd = r.time + DMAX_SECS;
       try { r.audio.power(); } catch {}
       try { r.shake?.(.6); } catch {}
       try { r.ui.toast(`¡Dynamax! ${DMAX_SECS} s gigante: más daño, PS y área.`, null); } catch {}
@@ -116,7 +131,8 @@
       if (r.state === 'over') { M.hide(); M.run = null; return; }
       if (p && p.__dmax && r.time >= s.dmaxEnd) {
         M.keepHp(p, () => { p.__dmax = false; });
-        try { r.ui.toast('El Dynamax se ha acabado.', null); } catch {}
+        M.dmaxReset();
+        try { r.ui.toast(`El Dynamax se ha acabado. Recarga: ${s.dmaxNeed} bajas.`, null); } catch {}
       }
       // Si evoluciona o cambia de especie, la mega solo vale para la especie que la tenía.
       if (p && p.__msid && s.megaFor !== p.speciesId) { M.keepHp(p, () => { p.__msid = null; p.__mshp = false; }); s.mega = false; }
@@ -170,15 +186,16 @@
         M.bMega.disabled = !ok; M.bMega.classList.toggle('ready', ok);
         M.bMega.textContent = ok ? 'MEGA' : `${Math.min(kills, MEGA_KILLS)}/${MEGA_KILLS}`;
       }
-      const hasD = !s.dmaxUsed;
-      M.bDmax.hidden = !hasD && !(p && p.__dmax);
+      M.bDmax.hidden = false;
       if (p && p.__dmax) {
-        M.bDmax.hidden = false; M.bDmax.disabled = true; M.bDmax.classList.remove('ready');
+        M.bDmax.disabled = true; M.bDmax.classList.remove('ready');
         M.bDmax.textContent = `${Math.max(0, Math.ceil(s.dmaxEnd - r.time))} s`;
-      } else if (hasD) {
-        const ok = kills >= DMAX_KILLS;
+      } else {
+        const got = M.dmaxProgress(), ok = got >= s.dmaxNeed;
         M.bDmax.disabled = !ok; M.bDmax.classList.toggle('ready', ok);
-        M.bDmax.textContent = ok ? 'DMAX' : `${Math.min(kills, DMAX_KILLS)}/${DMAX_KILLS}`;
+        M.bDmax.textContent = ok ? 'DMAX' : `${Math.min(got, s.dmaxNeed)}/${s.dmaxNeed}`;
+        // anillo de recarga
+        M.bDmax.style.boxShadow = ok ? '' : `0 4px 0 rgba(0,0,0,.25), inset 0 ${-60 * Math.min(1, got / s.dmaxNeed)}px 0 rgba(255,255,255,.25)`;
       }
     }
   };

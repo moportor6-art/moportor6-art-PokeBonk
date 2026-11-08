@@ -12,7 +12,7 @@ Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros
 ## Megas y Dynamax (Subversión 0.4)
 - 10 megas con sprites del PMD Sprite Repository convertidos al formato del juego (`site/assets/pmd/150NN.png`, `pmd-shiny/150NN.png`, entradas `150NN` en `site/data/sprites.json`; NN = número de la Pokédex). Créditos en `CREDITOS-SPRITES.md`.
 - Se desbloquean con la investigación de la familia al 100%. En partida: botón MEGA a las 150 bajas (permanente en esa partida). Tipos como en los juegos: solo Mega Charizard X cambia (Fuego/Dragón).
-- Dynamax: botón DMAX a las 100 bajas, una vez por partida, 20 s (escala x1,9, tinte rojo, +50% daño/PS, +30% área).
+- Dynamax: botón DMAX recargable con bajas (100 si la recarga empieza en los primeros 5 min, 300 después; cuentan desde que acaba el anterior), 20 s (escala x1,9, tinte rojo, +50% daño/PS, +30% área).
 - Código: `site/mega-dynamax.js`; parches en `main-Cx4tF-…js` (arranque de partida, `recompute()` y `render()` del jugador).
 
 ## Laboratorio individual (Subversión 0.3)

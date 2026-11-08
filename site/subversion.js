@@ -29,7 +29,8 @@
         `- **Tipos:** cada mega usa sus tipos de los juegos. Solo cambia Mega Charizard X, que pasa a **Fuego/Dragón** (sus ataques de tipo Dragón ganan la bonificación de mismo tipo); las demás conservan los tipos de su Pokémon.`,
         ``,
         `# Dynamax`,
-        `- **Cualquier Pokémon, una vez por partida:** al llegar a **100 bajas** se ilumina el botón **DMAX**.`,
+        `- **Cualquier Pokémon, las veces que quieras:** el botón **DMAX** se recarga con bajas y muestra cuántas llevas.`,
+        `- **Recarga:** si empieza en los **primeros 5 minutos**, necesitas **100 bajas**; después de los 5 minutos, **300 bajas**. Las bajas cuentan desde que se acaba el Dynamax anterior.`,
         `- **Dura 20 segundos:** te haces gigante con aura roja, +50% daño, +50% PS y +30% área.`,
         `- Se puede combinar con la mega.`,
         `- No hay Gigantamax: todavía no existen sprites de esas formas.`,
@@ -141,7 +142,7 @@
       notes: [
         ['new', '**10 megas**: Charizard X, Alakazam, Gengar, Kangaskhan, Aerodactyl, Mewtwo Y, Steelix, Skarmory, Houndoom y Tyranitar. Se desbloquean con la investigación de su familia al 100%.'],
         ['new', '**Botón MEGA** a las 150 bajas: te megaevolucionas hasta el final de la partida (+25% daño, +15% PS, +10% vel. de ataque, +10 armadura).'],
-        ['new', '**Botón DMAX** a las 100 bajas, una vez por partida: 20 s gigante con +50% daño, +50% PS y +30% área.'],
+        ['new', '**Botón DMAX** que se recarga con bajas (100 en los primeros 5 minutos, 300 después): 20 s gigante con +50% daño, +50% PS y +30% área.'],
         ['balance', 'Mega Charizard X pasa a Fuego/Dragón; las demás megas conservan sus tipos, como en los juegos.'],
         ['balance', 'Mega y Dynamax no se usan en Duelos.']
       ]
