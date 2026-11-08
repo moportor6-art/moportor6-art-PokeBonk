@@ -4,11 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.8';
+  const SUB = '0.9';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.9',
+      date: Date.UTC(2026, 10, 9, 2),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.9`,
+      summary: 'La mega ahora es temporal y recargable, y hay más huecos de vitamina.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Megaevolución temporal`,
+        `- La mega dura **40 segundos** (el doble que el Dynamax) y luego vuelves a tu forma normal, con tus tipos de siempre.`,
+        `- Se **recarga con bajas**: **150** si la recarga empieza en los primeros 5 minutos, **300** después. Las bajas cuentan desde que se acaba la mega anterior.`,
+        `- El botón MEGA muestra la recarga y, mientras dura, los segundos que quedan.`,
+        `- Sigue haciendo falta la investigación de la familia al 100%, y se puede combinar con el Dynamax.`,
+        ``,
+        `# Laboratorio`,
+        `- **Huecos de vitamina** pasa de 2 a **4 niveles**: de 3 huecos hasta **7** (los niveles nuevos cuestan más).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.8',
       date: Date.UTC(2026, 10, 9, 1),
@@ -225,6 +249,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.9',
+      date: '2026-11-09',
+      title: 'Mega temporal y más huecos de vitamina.',
+      notes: [
+        ['balance', '**Mega temporal**: dura 40 s y se recarga con bajas (150 en los primeros 5 minutos, 300 después).'],
+        ['new', '**Huecos de vitamina** en el Laboratorio: ahora 4 niveles, hasta 7 huecos.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.8',
