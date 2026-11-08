@@ -4,11 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.9';
+  const SUB = '0.10';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.10',
+      date: Date.UTC(2026, 10, 9, 3),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.10`,
+      summary: 'Modo vertical: elige Horizontal, Vertical o Automática en Ajustes.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Modo vertical`,
+        `- En **Ajustes > Gráficos**, la primera opción es **Orientación**: **Horizontal** (como siempre), **Vertical** o **Automática** (gira con el móvil). Se aplica al momento y se recuerda al abrir la app.`,
+        `- **Menú principal en vertical:** logo arriba, Jugar y los modos, tu compañero en el centro y los accesos (Pokédex, Laboratorio, Logros, Builds, Ajustes, Donaciones, PokéIsaac, Guía) abajo en dos filas.`,
+        `- **Partida en vertical:** el tiempo y el dinero bajan debajo del minimapa, y los ataques y vitaminas suben por encima de los botones táctiles.`,
+        `- **Pausa en vertical:** en una sola columna (tu Pokémon, pestañas y botones).`,
+        `- Ya no sale el aviso de girar el móvil si elegiste Vertical o Automática.`,
+        `- El **Editor del HUD** guarda una disposición para horizontal y otra para vertical, así puedes acomodar cada una por separado.`,
+        `- Las demás pantallas (Pokédex, Laboratorio, Ajustes, Builds, subidas de nivel, reliquias, resultados) ya se adaptan solas a la pantalla estrecha.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.9',
       date: Date.UTC(2026, 10, 9, 2),
@@ -254,6 +278,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.10',
+      date: '2026-11-09',
+      title: 'Modo vertical.',
+      notes: [
+        ['new', '**Orientación** en Ajustes > Gráficos: Horizontal, Vertical o Automática.'],
+        ['new', 'Menú principal, HUD de la partida y pausa ordenados para vertical.'],
+        ['better', 'El Editor del HUD guarda una disposición distinta para cada orientación.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.9',

@@ -146,6 +146,12 @@ public class MainActivity extends Activity {
     }
 
     public final class MenuBridge {
+        // Subversión propia: orientación elegida en Ajustes (landscape, portrait o auto). Se guarda para el próximo arranque.
+        @JavascriptInterface public void setOrientation(String mode) {
+            final String m = mode == null ? "landscape" : mode;
+            getSharedPreferences("pb", MODE_PRIVATE).edit().putString("orientation", m).apply();
+            menuHandler.post(() -> applyOrientation(m));
+        }
         // El aviso del juego pide la información si llegó antes de que el menú estuviera listo.
         @JavascriptInterface public String updateInfo() {
             return pendingUpdate;
@@ -368,6 +374,7 @@ public class MainActivity extends Activity {
             getWindow().setAttributes(lp);
         }
         limitTo60Hz();
+        applyOrientation(getSharedPreferences("pb", MODE_PRIVATE).getString("orientation", "landscape"));
         // Inspección por adb (chrome devtools protocol) para depurar en la consola.
         WebView.setWebContentsDebuggingEnabled(true);
         web = new WebView(this);
@@ -460,6 +467,14 @@ public class MainActivity extends Activity {
             }
         }
         return respond(path, data, range);
+    }
+
+    void applyOrientation(String m) {
+        int o;
+        if ("portrait".equals(m)) o = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_PORTRAIT;
+        else if ("auto".equals(m)) o = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_USER;
+        else o = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE;
+        if (getRequestedOrientation() != o) setRequestedOrientation(o);
     }
 
     static boolean isaacNet(String h) {

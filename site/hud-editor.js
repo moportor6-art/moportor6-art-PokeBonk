@@ -4,7 +4,8 @@
    Se guarda en este móvil (localStorage) y se aplica en todas las partidas.
    Las posiciones se guardan en % de pantalla para que aguanten cambios de tamaño. */
 (() => {
-  const KEY = 'pb-hud-layout';
+  // Una disposición para horizontal y otra para vertical.
+  const key = () => document.documentElement.classList.contains('pb-portrait') ? 'pb-hud-layout-v' : 'pb-hud-layout';
   const ITEMS = [
     { sel: '.hud-tl', css: '#hud .hud-tl', name: 'Retrato y nivel' },
     { sel: '.hud-top', css: '#hud .hud-top', name: 'Tiempo y barra' },
@@ -21,8 +22,8 @@
     { sel: '.pb-mx .mg', css: '.pb-mx .mg', name: 'MEGA' },
     { sel: '.pb-mx .dx', css: '.pb-mx .dx', name: 'DMAX' }
   ];
-  const load = () => { try { return JSON.parse(localStorage.getItem(KEY)) || {}; } catch { return {}; } };
-  const save = () => { try { localStorage.setItem(KEY, JSON.stringify(H.layout)); } catch {} };
+  const load = () => { try { return JSON.parse(localStorage.getItem(key())) || {}; } catch { return {}; } };
+  const save = () => { try { localStorage.setItem(key(), JSON.stringify(H.layout)); } catch {} };
 
   const style = document.createElement('style');
   style.id = 'pb-hud-layout';
@@ -232,6 +233,7 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
   };
 
   H.apply();
+  addEventListener('pb-orientation', () => { if (!H.editing) { H.layout = load(); H.apply(); } });
   setInterval(() => { try { if (document.querySelector('.tc.on')) document.body.classList.add('pb-hud-touch'); H.inject(); } catch {} }, 400);
   window.PB_HUD = H;
 })();

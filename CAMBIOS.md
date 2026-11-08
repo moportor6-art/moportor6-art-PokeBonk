@@ -9,6 +9,11 @@
 
 Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros).
 
+## Modo vertical (Subversión 0.10)
+- `site/vertical.js`: fila «Orientación» en Ajustes > Gráficos (`localStorage` `pb-orient`), clase `pb-portrait` en `<html>` cuando la pantalla es más alta que ancha, estilos del menú principal (unidades de 412 x 880), HUD y pausa en vertical, y salto automático del aviso de girar.
+- `MainActivity.java`: `AndroidMenu.setOrientation("landscape"|"portrait"|"auto")`, guardado en SharedPreferences y aplicado en `onCreate`.
+- `site/hud-editor.js`: disposición separada para vertical (`pb-hud-layout-v`).
+
 ## Mega temporal y vitaminas (Subversión 0.9)
 - Mega: dura 40 s (`MEGA_SECS`) y se recarga con bajas como el Dynamax (150 si la recarga empieza antes de los 5 min, 300 después). Al acabar vuelven el sprite, los tipos y las estadísticas. En `site/mega-dynamax.js`.
 - Laboratorio: «Huecos de vitamina» con 4 niveles (de 3 a 7 huecos; costes 1200, 3000, 6000, 10000 antes del descuento del juego). En `defineProperty-…js`.
@@ -54,7 +59,7 @@ Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros
 
 ## Versión oficial y subversión propia
 La versión oficial del juego **no se toca**: `site/version.json` y la lista oficial de «Novedades» siguen diciendo 0.9.9.
-Nuestros cambios van como **subversión** encima de la oficial (ahora: **0.9.9 oficial - Subversión 0.9**) y se ven en dos sitios:
+Nuestros cambios van como **subversión** encima de la oficial (ahora: **0.9.9 oficial - Subversión 0.10**) y se ven en dos sitios:
 - **Noticias** (icono del periódico): una noticia «Versión 0.9.9 oficial - Subversión 0.x» con el detalle, firmada como «Actualización hecha por moportor6 (no oficial)».
 - **Novedades** (botón de la versión junto al logo): un bloque propio arriba con la etiqueta «No oficial»; las notas oficiales siguen debajo, sin cambios.
 

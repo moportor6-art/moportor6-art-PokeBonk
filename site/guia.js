@@ -91,7 +91,7 @@
       G.lb.innerHTML = '';
       G.lb.append(t.label);
       const sm = document.createElement('small'); sm.textContent = `${Math.round(t.d)} m`; G.lb.append(sm);
-      G.lb.style.left = a.x + 'px'; G.lb.style.top = (a.y + 92) + 'px';
+      G.lb.style.left = a.x + 'px'; G.lb.style.top = (document.documentElement.classList.contains('pb-portrait') ? a.y - 120 : a.y + 92) + 'px';
       // marcador encima del objetivo si se ve en pantalla
       const c = ui.project(r, t.e.x, (t.e.y ?? p.y) + 3, t.e.z);
       const onScreen = c.vis && c.x > 0 && c.y > 0 && c.x < innerWidth && c.y < innerHeight && t.d > 3;
