@@ -4,11 +4,42 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.3';
+  const SUB = '0.4';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.4',
+      date: Date.UTC(2026, 10, 8, 20),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.4`,
+      summary: 'Megaevoluciones y Dynamax dentro de la partida.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Megaevolución`,
+        `- **10 megas:** Mega Charizard X, Mega Alakazam, Mega Gengar, Mega Kangaskhan, Mega Aerodactyl, Mega Mewtwo Y, Mega Steelix, Mega Skarmory, Mega Houndoom y Mega Tyranitar.`,
+        `- **Cómo se desbloquea:** completa al 100% la investigación de la familia de ese Pokémon.`,
+        `- **En la partida:** jugando con ese Pokémon (ya evolucionado), al llegar a **150 bajas** se ilumina el botón **MEGA** a la derecha. Al tocarlo te megaevolucionas hasta el final de la partida.`,
+        `- **Qué da:** +25% daño, +15% PS, +10% velocidad de ataque y +10 armadura, con su sprite de mega (también en variocolor, salvo Skarmory y Tyranitar).`,
+        ``,
+        `# Dynamax`,
+        `- **Cualquier Pokémon, una vez por partida:** al llegar a **100 bajas** se ilumina el botón **DMAX**.`,
+        `- **Dura 20 segundos:** te haces gigante con aura roja, +50% daño, +50% PS y +30% área.`,
+        `- Se puede combinar con la mega.`,
+        `- No hay Gigantamax: todavía no existen sprites de esas formas.`,
+        ``,
+        `# Notas`,
+        `- Mega y Dynamax no se usan en Duelos.`,
+        `- Sprites de megas: PMD Sprite Repository (PMDCollab), uso no comercial con crédito. Autores en CREDITOS-SPRITES.md del repositorio.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.3',
       date: Date.UTC(2026, 10, 8, 18),
@@ -101,6 +132,18 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.4',
+      date: '2026-11-08',
+      title: 'Megaevoluciones y Dynamax dentro de la partida.',
+      notes: [
+        ['new', '**10 megas**: Charizard X, Alakazam, Gengar, Kangaskhan, Aerodactyl, Mewtwo Y, Steelix, Skarmory, Houndoom y Tyranitar. Se desbloquean con la investigación de su familia al 100%.'],
+        ['new', '**Botón MEGA** a las 150 bajas: te megaevolucionas hasta el final de la partida (+25% daño, +15% PS, +10% vel. de ataque, +10 armadura).'],
+        ['new', '**Botón DMAX** a las 100 bajas, una vez por partida: 20 s gigante con +50% daño, +50% PS y +30% área.'],
+        ['balance', 'Mega y Dynamax no se usan en Duelos.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.3',
