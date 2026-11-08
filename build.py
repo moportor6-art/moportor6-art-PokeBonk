@@ -106,7 +106,7 @@ else:
     else:
         password = next(l.split('=', 1)[1] for l in props.read_text(encoding='utf-8').splitlines() if l.startswith('storePassword='))
 pwf = build / 'pw.tmp'
-pwf.write_text(password + '\n', encoding='utf-8')
+pwf.write_text(password + '\n' + password + '\n', encoding='utf-8')
 try:
     out = dist / 'PokeBonk.apk'
     run([java, '-jar', bt / 'lib/apksigner.jar', 'sign', '--ks', ks, '--ks-key-alias', 'pokebonk', '--ks-pass', 'file:' + str(pwf), '--key-pass', 'file:' + str(pwf), '--out', out, build / 'aligned.apk'])
