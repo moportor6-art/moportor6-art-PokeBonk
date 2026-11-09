@@ -1,4 +1,4 @@
-# Compila el APK y lo publica como release cuando subes una etiqueta vN (v1, v2, v3...).
+# Compila el APK (y la versión de Windows) y los publica como release cuando subes una etiqueta vN (v1, v2, v3...).
 # El número de la etiqueta es el versionCode: la app avisa de la actualización
 # si es mayor que el de la versión instalada.
 name: Compilar y publicar APK
@@ -76,3 +76,50 @@ jobs:
         with:
           name: PokeBonk-apk
           path: dist/PokeBonk.apk
+
+  # Versión de Windows: el mismo juego dentro de Electron. Solo al publicar una etiqueta o a mano.
+  windows:
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[windows]')
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Número de versión
+        id: ver
+        shell: bash
+        run: |
+          NUM=$(echo "${GITHUB_REF_NAME}" | grep -oE '[0-9]+' | tail -n1)
+          if [ -z "$NUM" ]; then NUM=0; fi
+          echo "num=$NUM" >> "$GITHUB_OUTPUT"
+
+      - name: Preparar y compilar
+        shell: bash
+        working-directory: desktop
+        run: |
+          rm -rf site && cp -r ../site site
+          npm install --no-audit --no-fund
+          npx electron-builder --win --publish never -c.extraMetadata.version=0.9.${{ steps.ver.outputs.num }}
+          ls dist
+
+      - name: Publicar en la release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            desktop/dist/PokeBonk-Windows-Instalador.exe
+            desktop/dist/PokeBonk-Windows-*.zip
+
+      - name: Guardar (ejecución manual)
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: PokeBonk-Windows
+          path: |
+            desktop/dist/PokeBonk-Windows-Instalador.exe
+            desktop/dist/PokeBonk-Windows-*.zip
