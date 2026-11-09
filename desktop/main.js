@@ -59,12 +59,33 @@ function createWindow() {
   win.on('closed', () => { win = null; });
 }
 
+// Subversión propia: si a Pokelike 2.0 le falta algún archivo, se pide a pokelike.xyz y se guarda para la próxima vez.
+async function pokelikeOnline(rel) {
+  const fs = require('fs');
+  const cache = path.join(app.getPath('userData'), 'pokelike-cache');
+  const file = path.normalize(path.join(cache, rel));
+  if (!file.startsWith(cache)) return new Response('', { status: 404 });
+  if (fs.existsSync(file)) return net.fetch(pathToFileURL(file).toString());
+  try {
+    const r = await net.fetch('https://pokelike.xyz/' + rel.split('/').map(encodeURIComponent).join('/'));
+    const type = r.headers.get('content-type') || '';
+    if (!r.ok || (!rel.endsWith('.html') && type.startsWith('text/html'))) return new Response('', { status: 404 });
+    const buf = Buffer.from(await r.arrayBuffer());
+    fs.mkdirSync(path.dirname(file), { recursive: true });
+    fs.writeFileSync(file, buf);
+    return new Response(buf, { headers: { 'content-type': type || 'application/octet-stream' } });
+  } catch (e) {
+    return new Response('', { status: 404 });
+  }
+}
+
 app.whenReady().then(() => {
   protocol.handle('app', req => {
     let p = decodeURIComponent(new URL(req.url).pathname);
     if (p.endsWith('/')) p += 'index.html';
     const file = path.normalize(path.join(ROOT, p));
     if (!file.startsWith(ROOT)) return new Response('', { status: 404 });
+    if (p.startsWith('/pokelike/') && !require('fs').existsSync(file)) return pokelikeOnline(p.slice('/pokelike/'.length));
     return net.fetch(pathToFileURL(file).toString());
   });
   createWindow();

@@ -89,20 +89,51 @@ jobs:
           path: site/pokeisaac
           retention-days: 3
 
-      # Copia tal cual de pokelike.xyz en la rama respaldo-pokelike-web (respaldo y para revisar sus cambios).
-      # La app usa la copia del repo (Pokelike 1.6): la 2.0 de la web viene ofuscada y no se puede preparar sola.
-      - name: Pokelike tal cual de la web
+      # Pokelike 2.0 completo de pokelike.xyz (código, música e imágenes). Solo se vuelve a bajar cuando la web
+      # cambia (se guarda en la caché de GitHub según el nombre de su código). Si falla, se usa la copia del repo (1.6).
+      - name: Pokelike versión de la web
+        id: plv
+        continue-on-error: true
+        run: echo "b=$(curl -fsSL -A "Mozilla/5.0 (Linux; Android 14) Chrome/130.0 Mobile" https://pokelike.xyz/ | grep -oE 'js/bundle[^\"]*\.js' | head -n1 | tr -c 'a-zA-Z0-9.' '_')" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        if: steps.plv.outputs.b != ''
+        with:
+          path: pokelike-web
+          key: pokelike-v1-${{ steps.plv.outputs.b }}
+
+      - name: Pokelike actualizado
+        if: steps.plv.outputs.b != ''
+        continue-on-error: true
+        run: |
+          if [ -f pokelike-web/index.html ]; then
+            echo "Pokelike ya bajado antes (caché)"
+          else
+            python3 tools/actualizar_pokelike.py web pokelike-web
+          fi
+          test -f pokelike-web/index.html
+          rm -rf site/pokelike
+          cp -r pokelike-web site/pokelike
+          echo "Pokelike en la app: $(cat site/pokelike/version.txt)"
+
+      - name: Respaldo de Pokelike
         continue-on-error: true
         env:
           TOKEN: ${{ github.token }}
         run: |
-          D=$(mktemp -d)
-          python3 tools/actualizar_pokelike.py crudo "$D"
+          V=$(tr -d '\r\n' < site/pokelike/version.txt)
+          H=$(cat site/pokelike/js/*.js site/pokelike/index.html | sha1sum | cut -c1-8)
+          URL="https://x-access-token:${TOKEN}@github.com/${{ github.repository }}"
+          if git ls-remote --exit-code "$URL" "refs/tags/pokelike-$V-$H" > /dev/null; then echo "Ya respaldada: $V-$H"; exit 0; fi
+          D=$(mktemp -d); cp -r site/pokelike/. "$D"/
           cd "$D"
-          git init -q -b respaldo-pokelike-web
+          printf 'Respaldo de Pokelike %s (pokelike.xyz). Bajado al compilar PokeBonk.\n' "$V-$H" > LEEME.txt
+          git init -q -b respaldo-pokelike
           git add -A
-          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com commit -qm "Pokelike tal cual de pokelike.xyz"
-          git push -q -f "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}" respaldo-pokelike-web
+          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com commit -qm "Pokelike $V-$H"
+          git tag "pokelike-$V-$H"
+          git push -q -f "$URL" respaldo-pokelike "pokelike-$V-$H"
+          echo "Respaldada: $V-$H"
 
       - uses: actions/upload-artifact@v4
         with:

@@ -469,10 +469,58 @@ public class MainActivity extends Activity {
             return big;
         }
         byte[] data = load(path);
+        if (data == null && path.startsWith("pokelike/")) {
+            data = fetchPokelike(path);
+        }
         if (data == null) {
             return notFound();
         }
         return respond(path, data, range);
+    }
+
+    // Subversión propia: Pokelike 2.0 va entero en el APK, pero si falta algún archivo (una imagen que el juego
+    // arma por nombre) se pide a pokelike.xyz y se guarda en el móvil para la próxima vez (sin internet ya no hace falta).
+    private byte[] fetchPokelike(String path) {
+        String rel = path.substring("pokelike/".length());
+        if (rel.isEmpty() || rel.contains("..")) {
+            return null;
+        }
+        java.net.HttpURLConnection c = null;
+        try {
+            c = (java.net.HttpURLConnection) new java.net.URL("https://pokelike.xyz/" + rel.replace(" ", "%20")).openConnection();
+            c.setConnectTimeout(8000);
+            c.setReadTimeout(15000);
+            if (c.getResponseCode() != 200) {
+                return null;
+            }
+            String type = c.getContentType();
+            byte[] b;
+            try (InputStream in = c.getInputStream()) {
+                b = readAll(in);
+            }
+            // La web devuelve su página principal para lo que no existe: eso no se guarda.
+            if (!rel.endsWith(".html") && type != null && type.startsWith("text/html")) {
+                return null;
+            }
+            File f = new File(getFilesDir(), "site/" + path);
+            File dir = f.getParentFile();
+            if (dir != null && (dir.isDirectory() || dir.mkdirs())) {
+                File tmp = new File(f.getPath() + ".part");
+                try (java.io.FileOutputStream out = new java.io.FileOutputStream(tmp)) {
+                    out.write(b);
+                }
+                if (!tmp.renameTo(f)) {
+                    tmp.delete();
+                }
+            }
+            return b;
+        } catch (Exception e) {
+            return null;
+        } finally {
+            if (c != null) {
+                c.disconnect();
+            }
+        }
     }
 
     void applyOrientation(String m) {
@@ -561,7 +609,9 @@ public class MainActivity extends Activity {
         if (h == null) {
             return false;
         }
-        if (h.equals("bfwnvevcyrwwukokooty.supabase.co") || h.endsWith(".up.railway.app") || h.endsWith(".pages.dev")) {
+        if (h.equals("bfwnvevcyrwwukokooty.supabase.co") || h.endsWith(".up.railway.app") || h.endsWith(".pages.dev")
+                || h.endsWith("pokelike.xyz") || h.equals("pokeapi.co") || h.equals("raw.githubusercontent.com")
+                || h.equals("play.pokemonshowdown.com") || h.equals("pokemon.alexonsager.net")) {
             return true;
         }
         if (isaacHosts == null) {

@@ -13,6 +13,7 @@ y sprites de los Pokémon dentro de la app en vez de pedirlos a internet.
 """
 import json, os, re, shutil, sys, tempfile, time
 from pathlib import Path
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 ORIGIN = os.environ.get('PL_ORIGIN', 'https://pokelike.xyz/')
@@ -30,6 +31,8 @@ def fetch(url):
                 return r.read()
         except Exception as e:  # noqa
             last = e
+            if getattr(e, 'code', 500) < 500:
+                break
             time.sleep(1)
     raise last
 
@@ -110,52 +113,98 @@ def preparar(src, dest, sprites_dir=None, sprite_fetch=None):
 
 
 def web(dest):
+    """Pokelike 2.0 de pokelike.xyz completo: código, estilos, música y todas las imágenes que el código nombra."""
+    from concurrent.futures import ThreadPoolExecutor
     dest = Path(dest)
     tmp = Path(tempfile.mkdtemp())
     html = fetch(ORIGIN).decode('utf-8')
-    files = {'index.html'}
-    for m in re.finditer(r'(?:src|href)="((?:js|css)/[\w./-]+?\.(?:js|css))', html):
-        files.add(m.group(1))
-    for arr in re.findall(r"\[((?:\s*'[\w-]+'\s*,?)+)\]\s*\.forEach\(\s*function\s*\(\s*\w+\s*\)\s*\{[^}]*js/", html):
-        for n in re.findall(r"'([\w-]+)'", arr):
-            files.add('js/%s.js' % n)
-    files |= {'css/style.css', 'data/pokedex.json', 'data/pokedex-mods.json', 'favicon.svg'}
-    files |= {'js/%s.js' % n for n in ('data', 'map', 'battle', 'endless', 'ui', 'game', 'rules', 'cloud-save')}
-    print('Página recibida: %d bytes, título: %s' % (len(html), (re.search(r'<title>([^<]*)', html) or [None, '?'])[1]))
-    print('Scripts en la página:', ', '.join(re.findall(r'<script[^>]*src="([^"]+)"', html))[:600])
-    (tmp / 'index.html').write_text(html, encoding='utf-8')
-    for rel in sorted(files - {'index.html'}):
+    rels = set(m.lstrip('./') for m in re.findall(r'(?:src|href)="(?!https?:|//|#|data:|mailto:)([^"?#]+)', html))
+    rels.discard('')
+
+    def bajar(rel):
+        t = tmp / rel
+        if t.exists():
+            return True
         try:
-            data = fetch(ORIGIN + rel)
-        except Exception as e:  # noqa
-            print('  no se pudo bajar', rel, str(e)[:80]); continue
-        (tmp / rel).parent.mkdir(parents=True, exist_ok=True)
-        (tmp / rel).write_bytes(data)
-    for rel in ESENCIALES:
+            data = fetch(ORIGIN + '/'.join(quote(x) for x in rel.split('/')))
+        except Exception:  # noqa
+            return False
+        # La web devuelve su página principal para lo que no existe.
+        if not rel.endswith('.html') and data[:200].lstrip().lower().startswith((b'<!doctype', b'<html')):
+            return False
+        t.parent.mkdir(parents=True, exist_ok=True)
+        t.write_bytes(data)
+        return True
+
+    with ThreadPoolExecutor(8) as pool:
+        list(pool.map(bajar, sorted(rels)))
+    bundle = sorted(tmp.glob('js/bundle*.js'))
+    for rel in ['style/main.css']:
         if not (tmp / rel).is_file():
             sys.exit('Falta un archivo esencial (%s); se queda la copia del repo.' % rel)
-    # Imágenes con ruta fija que aparecen en el código y no están en la copia anterior.
-    texto = ''.join((tmp / f).read_text(encoding='utf-8', errors='ignore') for f in files if (tmp / f).is_file())
-    nuevas = 0
-    for rel in sorted(set(re.findall(r"""['"`(]((?:sprites|ui)/[^'"`)?$\s]+\.(?:png|gif|jpg|webp|svg))""", texto))):
-        if '%' not in rel and not (dest / rel).exists() and not (tmp / rel).exists():
-            try:
-                (tmp / rel).parent.mkdir(parents=True, exist_ok=True)
-                (tmp / rel).write_bytes(fetch(ORIGIN + rel.replace(' ', '%20'))); nuevas += 1
-            except Exception:  # noqa
-                pass
-    # Lo que no se bajó se conserva de la copia anterior.
-    for f in dest.rglob('*') if dest.is_dir() else []:
-        t = tmp / f.relative_to(dest)
-        if f.is_file() and not t.exists():
-            t.parent.mkdir(parents=True, exist_ok=True)
-            shutil.copy2(f, t)
-    ver = re.search(r'\bv(\d+\.\d+(?:\.\d+)?)\b', html)
-    (tmp / 'version.txt').write_text((ver.group(1) if ver else '?') + '\n')
-    preparar(tmp, tmp, sprite_fetch=fetch)
+    if not bundle:
+        sys.exit('Falta el código del juego (js/bundle); se queda la copia del repo.')
+
+    # Todo lo que el código y los estilos nombran.
+    texto = ''
+    for f in list(tmp.rglob('*.js')) + list(tmp.rglob('*.css')):
+        texto += f.read_text(encoding='utf-8', errors='ignore').replace('\\x20', ' ') + '\n'
+    ext = r'(?:png|jpg|jpeg|gif|webp|svg|mp3|ogg|wav|json|woff2?|ttf)'
+    nombres = set(re.findall(r"""['"`(]([^'"`()\s<>{}$]{1,140}\.""" + ext + r""")['"`)]""", texto))
+    carpetas = sorted(set(re.findall(r"""['"`]((?:img|audio|data|style|fonts)/[^'"`\s$]*/)['"`]""", texto)))
+    pedir = set()
+    for n in nombres:
+        if n.startswith(('http:', 'https:', 'data:')):
+            continue
+        n = n.replace('../', '').lstrip('./')
+        if '/' in n:
+            pedir.add(n)
+        else:
+            pedir.update(c + n for c in carpetas)
+    print('Pokelike: %d nombres de archivo, %d carpetas, %d peticiones' % (len(nombres), len(carpetas), len(pedir)), flush=True)
+    with ThreadPoolExecutor(12) as pool:
+        ok = sum(pool.map(bajar, sorted(pedir)))
+    print('Pokelike: %d archivos bajados' % ok, flush=True)
+
+    # Fuentes de Google en local.
+    css_url = 'https://fonts.googleapis.com/css2?family=Press+Start+2P&family=DotGothic16&display=swap'
+    try:
+        req = Request(css_url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36'})
+        with urlopen(req, timeout=30) as r:
+            gcss = r.read().decode('utf-8')
+        (tmp / 'fonts').mkdir(exist_ok=True)
+        for i, u in enumerate(dict.fromkeys(re.findall(r'url\((https://[^)]+)\)', gcss))):
+            name = 'f%03d.%s' % (i, u.rsplit('.', 1)[-1])
+            (tmp / 'fonts' / name).write_bytes(fetch(u))
+            gcss = gcss.replace(u, name)
+        (tmp / 'fonts/google.css').write_text(gcss, encoding='utf-8')
+        fuente = 'fonts/google.css'
+    except Exception as e:  # noqa
+        print('  fuentes de Google no disponibles:', str(e)[:80])
+        fuente = None
+
+    # Página: sin publicidad ni estadísticas, fuentes locales y botón para volver.
+    malos = ('fuseplatform', 'googletag', 'gtag(', 'cloudflareinsights', 'adsbygoogle', 'inmobi')
+    html = re.sub(r'<script\b[^>]*>[\s\S]*?</script>', lambda m: '' if any(x in m.group(0) for x in malos) else m.group(0), html)
+    html = re.sub(r'\s*<link[^>]+(?:fuseplatform|googletagmanager|fonts\.gstatic)[^>]*>', '', html)
+    html = re.sub(r'<noscript>\s*<link[^>]+fonts\.googleapis[^>]*>\s*</noscript>', '', html)
+    html = re.sub(r'\s*<link rel="preconnect"[^>]+fonts\.googleapis\.com[^>]*>', '', html)
+    if fuente:
+        html = re.sub(r'https://fonts\.googleapis\.com/css2\?[^"\']+', fuente, html)
+        for f in tmp.rglob('*.css'):
+            if f.parent.name != 'fonts':
+                t = f.read_text(encoding='utf-8', errors='ignore')
+                f.write_text(re.sub(r"@import url\(['\"]?https://fonts\.googleapis\.com[^)]*\);?", '', t), encoding='utf-8')
+    html = html.replace('</head>', '  <script>window.PB_VOLVER_BL = 1;</script>\n  <script src="volver-pokebonk.js"></script>\n</head>', 1)
+    (tmp / 'index.html').write_text(html, encoding='utf-8')
+    shutil.copy2(REPO / 'site/pokeisaac/volver-pokebonk.js', tmp / 'volver-pokebonk.js')
+    vers = re.findall(r"'(\d+)\.(\d+)\.(\d+)'", bundle[0].read_text(encoding='utf-8', errors='ignore'))
+    ver = '.'.join(max(vers, key=lambda v: tuple(map(int, v)))) if vers else '2'
+    (tmp / 'version.txt').write_text(ver + '\n')
     shutil.rmtree(dest, ignore_errors=True)
     shutil.copytree(tmp, dest)
-    print('Listo: Pokelike %s de la web (%d archivos de código, %d imágenes nuevas)' % (ver.group(1) if ver else '?', len(files), nuevas))
+    tam = sum(f.stat().st_size for f in dest.rglob('*') if f.is_file())
+    print('Listo: Pokelike %s de la web (%d archivos, %.0f MB)' % (ver, sum(1 for f in dest.rglob('*') if f.is_file()), tam / 1048576))
 
 
 def crudo(out):

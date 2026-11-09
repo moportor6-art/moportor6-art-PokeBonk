@@ -10,7 +10,7 @@
     { id: 'pokesurvivor', name: 'PokéSurvivor', icon: 'pokesurvivor-icono.png', url: 'pokesurvivor/index.html',
       desc: 'Sobrevive a oleadas de enemigos. De JPTER78 y JayElDragon.' },
     { id: 'pokelike', name: 'Pokelike', icon: 'pokelike/favicon.svg', url: 'pokelike/index.html',
-      desc: 'Roguelike por turnos: gimnasios, Alto Mando y Torre Batalla. De pokelike.xyz.' }
+      desc: 'Roguelike por turnos: Historia, Torre Batalla y Desafíos. De pokelike.xyz.' }
   ];
 
   const css = `

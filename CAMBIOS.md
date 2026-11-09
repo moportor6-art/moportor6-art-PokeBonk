@@ -1,8 +1,10 @@
 # Cambios respecto al port original
 
 ## Pokelike y Más juegos (Subversión 0.12)
-- `site/pokelike/`: Pokelike 1.6 (de la copia pcasaspere/pokelike_v2 de pokelike.xyz), preparado con `tools/actualizar_pokelike.py preparar`: sin anuncios ni Google Analytics, fuente local, botón Volver arriba a la izquierda (`window.PB_VOLVER_TOP`) y los sprites de PokeAPI (649 Pokémon, normales y shiny) dentro de la app (`data/pokedex.json` apunta a `sprites/pokemon/`).
-- pokelike.xyz ya va por la 2.0: un solo `js/bundle.<hash>.js` ofuscado, con sprites en `img/sprites/`. No se puede preparar automáticamente, así que la app usa la 1.6 del repo. En cada compilación, `actualizar_pokelike.py crudo` guarda una copia tal cual de la web en la rama `respaldo-pokelike-web` (sin todos los sprites, que el código ofuscado pide por nombre). La rama `respaldo-pokelike` tiene la 1.6 preparada.
+- La app trae **Pokelike 2.0** de pokelike.xyz (versión del juego 3.6.3). Su código viene ofuscado, pero la lista de textos está en claro: `tools/actualizar_pokelike.py web` baja la página, el `js/bundle.<hash>.js`, los estilos, la música y todos los archivos que el código nombra (unos 1,800, más los nombres sueltos probados en cada carpeta conocida). Quita la publicidad (Publift/Fuse, Google) y las estadísticas, pone las fuentes de Google en local y el botón Volver (abajo a la izquierda, `window.PB_VOLVER_BL`).
+- En GitHub Actions se baja solo cuando cambia el nombre del bundle (caché `pokelike-v1-<bundle>`) y cada versión se respalda en la rama `respaldo-pokelike` (etiqueta `pokelike-<versión>-<hash>`; la 1.6 queda en `pokelike-1.6-72ca3c0e`).
+- Lo que falte (imágenes que el juego arma por nombre): Android (`MainActivity.fetchPokelike`) y Windows (`pokelikeOnline` en `desktop/main.js`) lo piden a pokelike.xyz y lo guardan en el dispositivo.
+- `site/pokelike/` del repo es la 1.6 (copia de pcasaspere/pokelike_v2, preparada con `actualizar_pokelike.py preparar`): se usa si la descarga falla.
 - `site/pokeisaac-boton.js`: un solo botón "Más juegos" que abre una ventana con PokéIsaac, PokéSurvivor y Pokelike.
 
 ## PokéSurvivor (Subversión 0.12)
