@@ -24,7 +24,6 @@
         `# PokéPath TD`,
         `- Nuevo juego en **Más juegos**: **PokéPath TD 1.7**, un tower defense en el que construyes el camino por donde pasan los enemigos. 9 rutas, tu equipo de Pokémon, objetos, tienda y desafíos. Está en español.`,
         `- Funciona **sin internet** y sin cuenta: es el juego de su versión de escritorio. Tu partida se guarda en este dispositivo.`,
-        `- Cada versión de la app trae el PokéPath más nuevo que publique su autor.`,
         `- Para volver, toca **Volver a PokéBonk** dos veces.`,
         ``,
         `> PokéPath TD: juego de Khydra (khydra98.itch.io/pokepath).`,
@@ -418,7 +417,7 @@
       date: '2026-11-09',
       title: 'PokéPath TD en Más juegos.',
       notes: [
-        ['new', '**PokéPath TD** (de Khydra) en Más juegos: tower defense sin internet y sin cuenta, en español. Se actualiza solo en cada versión.']
+        ['new', '**PokéPath TD** (de Khydra) en Más juegos: tower defense sin internet y sin cuenta, en español.']
       ]
     },
     {
