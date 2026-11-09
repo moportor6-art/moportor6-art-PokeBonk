@@ -42,7 +42,7 @@ html body #ui .pz > .sm-foot .actions > .btn:nth-child(-n+2):not(.big){min-heigh
 
   const editCss = document.createElement('style');
   editCss.textContent = `
-body.pb-hud-editing .modal.sm-modal{visibility:hidden!important}
+body.pb-hud-editing .modal{visibility:hidden!important}
 body.pb-hud-editing #hud, body.pb-hud-editing .tc{visibility:visible!important;opacity:1!important}
 body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none!important}
 .pb-he{position:fixed;inset:0;z-index:9999;touch-action:none;user-select:none;-webkit-user-select:none}
@@ -234,6 +234,27 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
 
   H.apply();
   addEventListener('pb-orientation', () => { if (!H.editing) { H.layout = load(); H.apply(); } });
-  setInterval(() => { try { if (document.querySelector('.tc.on')) document.body.classList.add('pb-hud-touch'); H.inject(); } catch {} }, 400);
+  // Fila «Editor del HUD» en Ajustes > Gráficos (debajo de Orientación). Solo abre el editor durante una partida.
+  const settingsRow = () => {
+    const body = document.querySelector('.jay-enemy-row')?.parentElement;
+    if (!body || body.querySelector('.pb-he-row')) return;
+    const r = document.createElement('div');
+    r.className = 'st-row segrow wide pb-he-row';
+    const label = document.createElement('span');
+    label.append('Editor del HUD');
+    const small = document.createElement('small');
+    const run = window.__pbRun, inRun = run && run.state !== 'over' && run.player;
+    small.textContent = inRun ? 'Mueve y cambia el tamaño de cada botón y barra de la partida' : 'Ábrelo durante una partida: Pausa > Ajustes, o la etiqueta «HUD y guía» de la pausa';
+    label.append(small);
+    const seg = document.createElement('div'); seg.className = 'seg';
+    const b = document.createElement('button'); b.type = 'button'; b.className = 'pill on'; b.textContent = 'Editar HUD';
+    b.disabled = !inRun;
+    b.addEventListener('click', e => { e.stopPropagation(); if (window.__pbRun?.player) H.open(); });
+    seg.append(b);
+    r.append(label, seg, document.createElement('span'));
+    const orient = body.querySelector('.pb-orient-row');
+    if (orient) orient.after(r); else body.prepend(r);
+  };
+  setInterval(() => { try { if (document.querySelector('.tc.on')) document.body.classList.add('pb-hud-touch'); H.inject(); settingsRow(); } catch {} }, 400);
   window.PB_HUD = H;
 })();

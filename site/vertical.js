@@ -81,10 +81,14 @@ ${P} .jay-sidebar .mm-item .mm-tx small{display:none!important}
 ${P} .jay-sidebar .jay-home-button,${P} .jay-sidebar .jay-watermark{display:none!important}
 ${P} .jay-home .mm-foot{position:absolute!important;left:0!important;right:0!important;bottom:calc(4 * var(--u))!important;display:flex;justify-content:center}
 
-/* Partida: ataques y vitaminas por encima de los botones táctiles */
-${P} #hud .hud-bl{bottom:calc(200px + env(safe-area-inset-bottom))!important}
-${P} #hud .hud-tr{transform-origin:top right;scale:.85}
-${P} #hud .hud-top{top:calc(172px + env(safe-area-inset-top))!important;left:0!important;right:0!important;margin:0 auto!important;width:max-content!important;max-width:96vw!important;transform:none!important}
+/* Partida en vertical: minimapa más pequeño, tiempo debajo, ataques a la izquierda por encima del joystick
+   y MEGA/DMAX a la derecha. El Editor del HUD puede mover y escalar todo encima de esto. */
+${P} #hud .hud-tr{transform-origin:top right;scale:.72;right:calc(70px + env(safe-area-inset-right))!important}
+${P} #hud .hud-tl{transform-origin:top left;scale:.9}
+${P} #hud .hud-top{top:calc(148px + env(safe-area-inset-top))!important;left:0!important;right:0!important;margin:0 auto!important;width:max-content!important;max-width:96vw!important;transform:none!important}
+${P} #hud .hud-bl{left:calc(8px + env(safe-area-inset-left))!important;right:auto!important;bottom:calc(180px + env(safe-area-inset-bottom))!important;margin:0!important;transform:none!important;transform-origin:bottom left;scale:.85}
+${P} .pb-mx{left:auto!important;right:max(10px,env(safe-area-inset-right))!important;top:calc(192px + env(safe-area-inset-top))!important}
+${P} .pb-mx button{width:56px!important;height:56px!important}
 
 /* Pausa: una sola columna */
 html.pb-portrait body #ui .sm.pz{grid-template:"hero" auto "tabs" auto "body" minmax(0,1fr) "foot" auto / minmax(0,1fr)!important;gap:6px!important}

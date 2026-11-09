@@ -31,6 +31,10 @@
         `- Los textos que no cabían ahora se ajustan solos a su botón: **Continuar**, **Supervivencia**, los eventos con fechas largas, Encargos y la barra lateral.`,
         `- La barra lateral ya muestra todos los accesos (también **Guía**): se quitó «Inicio», que no hacía nada porque ya estás en el inicio, y los botones se reparten el alto.`,
         ``,
+        `# Vertical, menos apretado`,
+        `- Nueva disposición de la partida en vertical: minimapa más pequeño junto a Pausa, tiempo y dinero debajo, **ataques y vitaminas a la izquierda, encima del joystick** (ya no tapan el incienso ni la Ultimate) y **MEGA/DMAX a la derecha**.`,
+        `- **Editor del HUD** también en **Ajustes > Gráficos**, debajo de Orientación. Se usa durante una partida (Pausa > Ajustes), y sigue estando la etiqueta «HUD y guía» de la pausa.`,
+        ``,
         PIE
       ].join('\n')
     },
@@ -314,7 +318,8 @@
       title: 'Guardado automático al salir de la app.',
       notes: [
         ['new', '**Guardado automático**: si sales de la app en mitad de una partida, se guarda sola y al volver puedes continuarla o finalizarla.'],
-        ['fix', 'Menú principal: los textos largos (Continuar, Supervivencia, eventos) ya caben en sus botones y la barra lateral muestra todos los accesos.']
+        ['fix', 'Menú principal: los textos largos (Continuar, Supervivencia, eventos) ya caben en sus botones y la barra lateral muestra todos los accesos.'],
+        ['better', 'Partida en vertical menos apretada, y Editor del HUD también en Ajustes > Gráficos.']
       ]
     },
     {
