@@ -120,6 +120,9 @@ def web(dest):
         for n in re.findall(r"'([\w-]+)'", arr):
             files.add('js/%s.js' % n)
     files |= {'css/style.css', 'data/pokedex.json', 'data/pokedex-mods.json', 'favicon.svg'}
+    files |= {'js/%s.js' % n for n in ('data', 'map', 'battle', 'endless', 'ui', 'game', 'rules', 'cloud-save')}
+    print('Página recibida: %d bytes, título: %s' % (len(html), (re.search(r'<title>([^<]*)', html) or [None, '?'])[1]))
+    print('Scripts en la página:', ', '.join(re.findall(r'<script[^>]*src="([^"]+)"', html))[:600])
     (tmp / 'index.html').write_text(html, encoding='utf-8')
     for rel in sorted(files - {'index.html'}):
         try:
