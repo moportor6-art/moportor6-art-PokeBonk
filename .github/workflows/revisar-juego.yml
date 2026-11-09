@@ -12,7 +12,7 @@ on:
         default: respaldo-pokeplunder-web
   push:
     branches: [main]
-    paths: ['.github/workflows/revisar-juego.yml']
+    paths: ['.github/workflows/revisar-juego.yml', 'tools/actualizar_pokelike.py']
 
 permissions:
   contents: write
