@@ -89,6 +89,36 @@ jobs:
           path: site/pokeisaac
           retention-days: 3
 
+      # Pokelike: se baja la versión más nueva de pokelike.xyz (con sus sprites). Si falla, se usa la copia del repo.
+      - name: Pokelike actualizado
+        continue-on-error: true
+        run: python3 tools/actualizar_pokelike.py web site/pokelike
+
+      - name: Respaldo de Pokelike
+        continue-on-error: true
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          V=$(tr -d '\r\n' < site/pokelike/version.txt)
+          H=$(cat site/pokelike/js/*.js site/pokelike/index.html | sha1sum | cut -c1-8)
+          URL="https://x-access-token:${TOKEN}@github.com/${{ github.repository }}"
+          if git ls-remote --exit-code "$URL" "refs/tags/pokelike-$V-$H" > /dev/null; then echo "Ya respaldada: $V-$H"; exit 0; fi
+          D=$(mktemp -d); cp -r site/pokelike/. "$D"/
+          cd "$D"
+          printf 'Respaldo de Pokelike %s (pokelike.xyz). Bajado al compilar PokeBonk.\n' "$V-$H" > LEEME.txt
+          git init -q -b respaldo-pokelike
+          git add -A
+          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com commit -qm "Pokelike $V-$H"
+          git tag "pokelike-$V-$H"
+          git push -q -f "$URL" respaldo-pokelike "pokelike-$V-$H"
+          echo "Respaldada: $V-$H"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pokelike-web
+          path: site/pokelike
+          retention-days: 3
+
   apk:
     needs: survivor
     runs-on: ubuntu-latest
@@ -110,6 +140,15 @@ jobs:
         with:
           name: pokeisaac-web
           path: site/pokeisaac
+
+      - name: Quitar la copia vieja de Pokelike
+        shell: bash
+        run: rm -rf site/pokelike
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: pokelike-web
+          path: site/pokelike
 
       - uses: actions/setup-java@v4
         with:
@@ -191,6 +230,15 @@ jobs:
         with:
           name: pokeisaac-web
           path: site/pokeisaac
+
+      - name: Quitar la copia vieja de Pokelike
+        shell: bash
+        run: rm -rf site/pokelike
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: pokelike-web
+          path: site/pokelike
 
       - uses: actions/setup-node@v4
         with:

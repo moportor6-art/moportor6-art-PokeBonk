@@ -1,0 +1,4290 @@
+// game.js - Central game state and entry point
+
+// Seeded PRNG (mulberry32) — use rng() instead of Math.random() for all game logic
+let _rngSeed = 0;
+function rng() {
+  _rngSeed = (_rngSeed + 0x6D2B79F5) | 0;
+  let t = Math.imul(_rngSeed ^ (_rngSeed >>> 15), 1 | _rngSeed);
+  t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+  return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+}
+function seedRng(seed) { _rngSeed = seed >>> 0; }
+function getRngSeed() { return _rngSeed >>> 0; }
+
+// Bumped every time a run (re)starts. In-flight async work — battle animations,
+// post-battle callbacks — captures the value at its start and bails when it
+// changes, so pressing R (reset) from any screen can't corrupt the new run.
+let runGeneration = 0;
+
+let state = {
+  currentMap: 0,
+  currentNode: null,
+  team: [],
+  items: [],
+  badges: 0,
+  map: null,
+  eliteIndex: 0,
+  trainer: 'boy',
+  starterSpeciesId: null,
+  maxTeamSize: 1,
+  nuzlockeMode: false,
+  gen2Mode: false,
+  silverBeaten: 0,
+};
+
+// ---- Run persistence ----
+
+// Cross-tab safety: each run carries a runId and a monotonically increasing
+// saveSeq. A tab may only write the save if it is still the freshest writer —
+// a stale tab (the run advanced elsewhere, or a different run started) shows
+// a takeover notice instead of silently clobbering the active game.
+let _tabStale = false;
+// Set when THIS tab legitimately starts a new run — the first save claims
+// ownership (writes the new runId) without tripping the staleness guard.
+let _forceNextSave = false;
+
+function showTabTakeoverNotice() {
+  if (document.getElementById('tab-takeover-overlay')) return;
+  const ov = document.createElement('div');
+  ov.id = 'tab-takeover-overlay';
+  ov.style.cssText = 'position:fixed;inset:0;z-index:2000;background:rgba(8,8,14,0.88);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:16px;text-align:center;padding:24px;';
+  ov.innerHTML = `
+    <div style="font-family:'Press Start 2P',monospace;font-size:13px;color:var(--red,#ff5a50);line-height:1.6;">This tab is out of date</div>
+    <div style="font-size:12px;color:#ccc;max-width:420px;line-height:1.6;">The game has progressed in another tab. To avoid losing progress, this tab stopped saving.</div>
+    <button class="btn-primary" onclick="location.reload()" style="font-size:13px;padding:12px 20px;">Resume here</button>`;
+  document.body.appendChild(ov);
+}
+
+function saveRun() {
+  try {
+    if (_tabStale) return; // never let a stale tab overwrite fresher progress
+    if (_forceNextSave) {
+      _forceNextSave = false; // claiming a freshly started run — skip the guard once
+    } else {
+      const stored = (() => { try { return JSON.parse(localStorage.getItem('poke_current_run') || 'null'); } catch { return null; } })();
+      if (stored && state.runId && stored.runId && (stored.runId !== state.runId || (stored.saveSeq || 0) > (state.saveSeq || 0))) {
+        _tabStale = true;
+        showTabTakeoverNotice();
+        return;
+      }
+    }
+    state.saveSeq = (state.saveSeq || 0) + 1;
+    const saved = { ...state, currentNodeId: state.currentNode?.id || null, currentNode: null, rngSeed: getRngSeed() };
+    localStorage.setItem('poke_current_run', JSON.stringify(saved));
+  } catch {}
+}
+
+// Live cross-tab watch: when another tab writes a fresher save, mark this tab
+// stale immediately (mid-run only — the title screen re-reads on Continue).
+if (typeof window !== 'undefined') {
+  window.addEventListener('storage', e => {
+    if (e.key !== 'poke_current_run' || !e.newValue) return;
+    try {
+      const incoming = JSON.parse(e.newValue);
+      if (!state || !state.runId || !state.starterSpeciesId) return; // no live run here
+      if (incoming.runId !== state.runId || (incoming.saveSeq || 0) > (state.saveSeq || 0)) {
+        _tabStale = true;
+        showTabTakeoverNotice();
+      }
+    } catch {}
+  });
+}
+
+function loadRun() {
+  try {
+    const raw = localStorage.getItem('poke_current_run');
+    if (!raw) return false;
+    const saved = JSON.parse(raw);
+    if (saved.rngSeed) seedRng(saved.rngSeed);
+    state = saved;
+    if (!state.runId) state.runId = Date.now() + ':' + Math.floor(Math.random() * 1e9); // adopt legacy saves
+    _tabStale = false; // we just loaded the freshest save — this tab is current again
+    document.getElementById('tab-takeover-overlay')?.remove();
+    state.currentNode = saved.currentNodeId ? (state.map?.nodes?.[saved.currentNodeId] || null) : null;
+    delete state.currentNodeId;
+    delete state.rngSeed;
+    // Migrate slug-style dex names saved by older versions
+    // (Darmanitan-standard -> Darmanitan); nicknames are untouched.
+    if (typeof cleanDexName === 'function' && Array.isArray(state.team)) {
+      for (const p of state.team) if (p && p.name) p.name = cleanDexName(p.name);
+    }
+    return true;
+  } catch { return false; }
+}
+
+function clearSavedRun() {
+  localStorage.removeItem('poke_current_run');
+}
+
+// Which generation this run plays: '1' | '2' | '3' | 'all'. Falls back to the
+// legacy boolean pair for saves created before runGen existed.
+function getRunGen() {
+  return state.runGen || (state.bothGens ? 'all' : state.gen2Mode ? '2' : '1');
+}
+
+// Legacy reset-backup restore: older builds had a restart button that backed
+// the run up into "previous" slots before wiping it. The button is gone, but
+// the IIFE below still recovers any such backup on load, then cleans up.
+const PREVIOUS_RUN_KEY = 'poke_previous_run';
+const PREVIOUS_ENDLESS_KEY = 'poke_previous_endless_state';
+
+(function restoreRunBackupOnPageLoad() {
+  try {
+    // Restore ONLY when no current run exists. A leftover backup (reset →
+    // new run started without a reload) must never clobber live progress —
+    // with several tabs open, any tab loading the page used to overwrite the
+    // active run with this stale backup.
+    const prev = localStorage.getItem(PREVIOUS_RUN_KEY);
+    if (prev && !localStorage.getItem('poke_current_run')) {
+      localStorage.setItem('poke_current_run', prev);
+      const prevEndless = localStorage.getItem(PREVIOUS_ENDLESS_KEY);
+      if (prevEndless) localStorage.setItem('poke_endless_state', prevEndless);
+    }
+    localStorage.removeItem(PREVIOUS_RUN_KEY);
+    localStorage.removeItem(PREVIOUS_ENDLESS_KEY);
+  } catch {}
+})();
+
+// A generation counts as beaten when any Hall of Fame entry records a win in
+// it (legacy entries without a gen field are Gen 1 wins).
+function isGenBeaten(gen) {
+  return getHallOfFame().some(e => (e.gen || (e.gen2Mode ? '2' : '1')) === gen);
+}
+
+// ---- Initialization ----
+
+async function initGame() {
+  applyDarkMode();
+  showScreen('title-screen');
+  // Await the cloud load so we don't fire a stale syncToCloud() in parallel
+  // that overwrites another device's progress with the un-merged local save.
+  // initCloudSave handles the post-merge push itself.
+  if (typeof initCloudSave === 'function') await initCloudSave();
+  // Generation toggle — selection is read when Normal/Nuzlocke is clicked
+  // and persists across reloads via localStorage. The stored 'both' value
+  // means "Tot" (all generations combined) and maps to runGen 'all'.
+  const _savedGen = localStorage.getItem('poke_selected_gen');
+  let selectedGen = (['2', '3', '4', '5', 'both'].includes(_savedGen)) ? _savedGen : '1'; // '1'..'5' | 'both'
+  // Gens 4/5 unlock in sequence: win Hoenn to open Sinnoh, win Sinnoh to open
+  // Unova. Tot (all gens mixed) demands the full crown: every gen beaten.
+  const allGensBeaten = () => ['1', '2', '3', '4', '5'].every(isGenBeaten);
+  if ((selectedGen === '4' && !isGenBeaten('3')) || (selectedGen === '5' && !isGenBeaten('4'))
+      || (selectedGen === 'both' && !allGensBeaten())) selectedGen = '1';
+  const syncGenButtons = () => {
+    document.querySelectorAll('#gen-toggle .gen-btn').forEach(b => {
+      b.classList.toggle('gen-btn--active', String(b.dataset.gen) === selectedGen);
+      const g = String(b.dataset.gen);
+      const locked = (g === '4' && !isGenBeaten('3')) || (g === '5' && !isGenBeaten('4'))
+        || (g === 'both' && !allGensBeaten());
+      b.classList.toggle('gen-btn--locked', locked);
+      b.title = !locked ? ''
+        : g === '4' ? 'Win the Hoenn campaign to unlock Sinnoh'
+        : g === '5' ? 'Win the Sinnoh campaign to unlock Unova'
+        : 'Win ALL five campaigns to unlock Tot';
+    });
+  };
+  syncGenButtons();
+  document.querySelectorAll('#gen-toggle .gen-btn').forEach(btn => {
+    btn.onclick = () => {
+      const g = String(btn.dataset.gen || '1');
+      if ((g === '4' && !isGenBeaten('3')) || (g === '5' && !isGenBeaten('4'))
+          || (g === 'both' && !allGensBeaten())) {
+        showAchievementToast({ icon: '🔒',
+          name: g === '4' ? 'Sinnoh is locked' : g === '5' ? 'Unova is locked' : 'Tot is locked',
+          desc: g === '4' ? 'Win the Hoenn (Gen III) campaign first!'
+            : g === '5' ? 'Win the Sinnoh (Gen IV) campaign first!'
+            : 'Win all five campaigns to mix every generation!' });
+        return;
+      }
+      selectedGen = g;
+      localStorage.setItem('poke_selected_gen', selectedGen);
+      syncGenButtons();
+    };
+  });
+  const selectedRunGen = () => selectedGen === 'both' ? 'all' : selectedGen;
+  document.getElementById('btn-new-run').onclick = () => startAdventureFlow(selectedRunGen());
+
+  const endlessBtn = document.getElementById('btn-endless-run');
+  if (endlessBtn) {
+    if (getHallOfFame().length > 0) {
+      endlessBtn.onclick = () => showEndlessStageSelect();
+      endlessBtn.disabled = false;
+      endlessBtn.style.opacity = '';
+      endlessBtn.style.pointerEvents = '';
+      // Remove lock wrapper if it was injected in a previous initGame call
+      const parent = endlessBtn.parentNode;
+      if (parent && parent.classList.contains('endless-lock-wrap')) {
+        const grandparent = parent.parentNode;
+        if (grandparent) {
+          grandparent.insertBefore(endlessBtn, parent);
+          parent.remove();
+        }
+      }
+    } else if (!endlessBtn.disabled) {
+      endlessBtn.style.opacity = '0.45';
+      endlessBtn.disabled = true;
+      endlessBtn.style.pointerEvents = 'none';
+      const wrapper = document.createElement('div');
+      wrapper.className = 'endless-lock-wrap';
+      wrapper.style.cssText = 'position:relative;display:block;';
+      endlessBtn.parentNode.insertBefore(wrapper, endlessBtn);
+      wrapper.appendChild(endlessBtn);
+      const lockOverlay = document.createElement('div');
+      lockOverlay.style.cssText = 'position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:24px;cursor:not-allowed;';
+      lockOverlay.innerHTML = '<img src="sprites/lock.png" style="height:36px;width:auto;image-rendering:pixelated;">';
+      lockOverlay.addEventListener('mousemove', e => _itemTooltip.show('Beat the game first to unlock', e.clientX + 14, e.clientY - 8));
+      lockOverlay.addEventListener('mouseleave', () => _itemTooltip.hide());
+      wrapper.appendChild(lockOverlay);
+    }
+  }
+
+  const continueEndlessBtn = document.getElementById('btn-continue-endless');
+  if (continueEndlessBtn) {
+    if (localStorage.getItem('poke_endless_state') && localStorage.getItem('poke_current_run')) {
+      continueEndlessBtn.style.display = '';
+      continueEndlessBtn.onclick = () => continueEndlessRun();
+    } else {
+      continueEndlessBtn.style.display = 'none';
+    }
+  }
+
+  const continueBtn = document.getElementById('btn-continue-run');
+  if (localStorage.getItem('poke_current_run') && !localStorage.getItem('poke_endless_state')) {
+    continueBtn.style.display = '';
+    continueBtn.onclick = async () => {
+      if (!loadRun()) return;
+      if (state.pendingRetry) { showLevelRetryScreen(); return; }
+      if (Array.isArray(state.pendingPerkDraft) && state.pendingPerkDraft.length) await showPerkDraft();
+      if (state.currentNode && !state.currentNode.visited) {
+        await onNodeClick(state.currentNode);
+      } else {
+        showMapScreen();
+      }
+    };
+  } else {
+    continueBtn.style.display = 'none';
+  }
+
+  // Warm the image cache for what the player will see next (map backgrounds
+  // for the active run's gen + saved team sprites) once the browser is idle —
+  // kills the visual "pop" when entering the map without blocking boot.
+  const warmImages = () => {
+    try {
+      const urls = [];
+      const cfg = GEN_RUN_CONFIG[getRunGen()];
+      if (cfg?.mapBg) for (let i = 0; i < 9; i++) urls.push(cfg.mapBg(i));
+      if (Array.isArray(state.team)) for (const p of state.team) if (p?.speciesId) urls.push(`sprites/pokemon/${p.speciesId}.png`);
+      for (const u of urls) { const im = new Image(); im.decoding = 'async'; im.src = u; }
+    } catch {}
+  };
+  if ('requestIdleCallback' in window) requestIdleCallback(warmImages, { timeout: 3000 });
+  else setTimeout(warmImages, 1500);
+}
+
+// Professor-style intro: the journey's mode is chosen through classic GBA
+// dialogs instead of separate title buttons. Normal runs also pick what a
+// full-team wipe means: retry the area (the long-standing default) or a true
+// blackout that ends the run.
+const REGION_NAMES = { '1': 'KANTO', '2': 'JOHTO', '3': 'HOENN', '4': 'SINNOH', '5': 'UNOVA', 'all': 'KANTO, JOHTO and HOENN' };
+async function startAdventureFlow(gen) {
+  if ((gen === '4' && !isGenBeaten('3')) || (gen === '5' && !isGenBeaten('4'))
+      || (gen === 'all' && !['1', '2', '3', '4', '5'].every(isGenBeaten))) gen = '1';
+  const region = REGION_NAMES[gen] || 'KANTO';
+  const mode = await showGbaDialog({
+    lines: [
+      'Hello there! Glad to meet you!',
+      `Welcome to the world of POKÉMON! Your very own tale of grit and glory is about to unfold in ${region}!`,
+      'Tell me. How would you like to travel on your journey?',
+    ],
+    choices: [
+      { label: 'NORMAL', value: 'normal' },
+      { label: 'NUZLOCKE', value: 'nuzlocke' },
+    ],
+  });
+  let retryOnWipe = false;
+  if (mode === 'normal') {
+    const wipe = await showGbaDialog({
+      lines: [
+        'One more thing. If all your POKÉMON were to faint out there...',
+        'What should happen to you then?',
+      ],
+      choices: [
+        { label: 'RETRY THE AREA', value: 'retry' },
+        { label: 'BLACK OUT', value: 'blackout' },
+      ],
+    });
+    retryOnWipe = wipe === 'retry';
+  }
+  await startNewRun(mode === 'nuzlocke', gen, null, { retryOnWipe });
+}
+
+// gen: '1' | '2' | '3' | 'all'. The legacy gen2Mode/bothGens booleans are kept
+// in sync on state so the many existing reads (and old saves) keep working;
+// new code should read getRunGen() instead.
+// opts.retryOnWipe (Normal only): false = a wipe ends the run ("blacked out");
+// omitted/true = the area can be retried (legacy default, and what old saves get).
+async function startNewRun(nuzlockeMode = false, gen = '1', forcedStarterId = null, opts = {}) {
+  runGeneration++;
+  clearEndlessState();
+  const savedTrainer = localStorage.getItem('poke_trainer') || null;
+  const seed = (Date.now() ^ (Math.random() * 0x100000000 | 0)) >>> 0;
+  seedRng(seed);
+  const gen2Mode = gen === '2';
+  const bothGens = gen === 'all';
+  _tabStale = false; _forceNextSave = true;
+  document.getElementById('tab-takeover-overlay')?.remove();
+  state = { runId: Date.now() + ':' + Math.floor(Math.random() * 1e9), saveSeq: 0, currentMap: 0, currentNode: null, team: [], items: [], badges: 0, map: null, eliteIndex: 0, trainer: savedTrainer || 'boy', starterSpeciesId: null, maxTeamSize: 1, nuzlockeMode, runGen: gen, gen2Mode, bothGens, silverBeaten: 0, usedPokecenter: false, pickedUpItem: false, runSeed: seed, retryOnWipe: nuzlockeMode ? false : opts.retryOnWipe !== false };
+  if (gen === '3') {
+    // Which villain team ambushes this run (rival-slot encounters).
+    state.villainTeam = gen === '4' ? 'galactic'
+      : gen === '5' ? 'plasma'
+      : rng() < 0.5 ? 'aqua' : 'magma';
+  }
+  // Mega Evolution: every unlocked Mega Stone starts in the bag (key items —
+  // they re-materialize each run from the account collection).
+  if (hasMegaBracelet()) {
+    for (const id of getMegaStones()) {
+      const stone = megaStoneItem(id);
+      if (stone) state.items.push(stone);
+    }
+  }
+  if (bothGens) {
+    // Roll which generation's leader appears at each gym slot, and a random
+    // Elite Four lineup (4 members + champion), mixing all generations.
+    state.gymGens = Array.from({ length: 8 }, () => 1 + Math.floor(rng() * 5));
+    const elitePool = [];
+    for (let idx = 0; idx < 4; idx++) for (const g of [1, 2, 3, 4, 5]) elitePool.push({ gen: g, idx });
+    for (let i = elitePool.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [elitePool[i], elitePool[j]] = [elitePool[j], elitePool[i]]; }
+    const champ = { gen: 1 + Math.floor(rng() * 5), idx: 4 };
+    state.eliteLineup = [...elitePool.slice(0, 4), champ];
+  }
+  if (forcedStarterId && savedTrainer) {
+    await pickForcedStarter(forcedStarterId);
+    return;
+  }
+  if (savedTrainer) {
+    await showStarterSelect();
+  } else {
+    await showTrainerSelect();
+  }
+}
+
+// Skip the starter chooser by instancing the requested species directly. Used
+// by the reset-run button so the player gets the same starter back.
+// forcedShiny (optional): if a boolean is passed, use it instead of re-rolling
+// — prevents the Battle Tower exploit where resetting re-rolls shiny status.
+async function pickForcedStarter(speciesId, forcedShiny = null) {
+  const species = await fetchPokemonById(speciesId);
+  if (!species) {
+    await showStarterSelect();
+    return;
+  }
+  const isShiny = typeof forcedShiny === 'boolean'
+    ? forcedShiny
+    : rng() < shinyRollOdds();
+  const inst = createInstance(species, 5, isShiny, 0);
+  await selectStarter(inst);
+}
+
+async function showTrainerSelect() {
+  showScreen('trainer-screen');
+  const boyCard  = document.getElementById('trainer-boy');
+  const girlCard = document.getElementById('trainer-girl');
+  boyCard.querySelector('.trainer-icon-wrap').innerHTML  = TRAINER_SVG.boy;
+  girlCard.querySelector('.trainer-icon-wrap').innerHTML = TRAINER_SVG.girl;
+
+  await new Promise(resolve => {
+    function pick(gender) {
+      state.trainer = gender;
+      localStorage.setItem('poke_trainer', gender);
+      resolve();
+    }
+    boyCard.onclick   = () => pick('boy');
+    boyCard.onkeydown = e => { if (e.key==='Enter'||e.key===' ') pick('boy'); };
+    girlCard.onclick   = () => pick('girl');
+    girlCard.onkeydown = e => { if (e.key==='Enter'||e.key===' ') pick('girl'); };
+  });
+  await showStarterSelect();
+}
+
+function makeMaxedStarsEl(speciesId) {
+  const buffs = loadPersistentBuffs()[getEvoLineRoot(speciesId)] || {};
+  const total = getTotalBuffPoints(buffs);
+  const fullStars = Math.floor(total / 10);
+  const halfStar = (total % 10) >= 1;
+  if (!fullStars && !halfStar) return null;
+  const el = document.createElement('div');
+  el.style.cssText = 'position:absolute;top:3px;right:3px;display:flex;gap:1px;flex-wrap:wrap;justify-content:flex-end;max-width:40px;';
+  el.innerHTML =
+    Array.from({ length: fullStars }, () => `<span style="font-size:7px;color:gold;line-height:1;">★</span>`).join('') +
+    (halfStar ? `<span style="font-size:7px;color:gold;line-height:1;display:inline-block;width:0.5em;overflow:hidden;">★</span>` : '');
+  el.title = `${total} buff points`;
+  return el;
+}
+
+async function showStarterSelect() {
+  showScreen('starter-screen');
+  const container = document.getElementById('starter-choices');
+  container.innerHTML = '<div class="loading">Loading starters...</div>';
+
+  if (state.isEndlessMode) {
+    endlessState.currentRegion = rollRegion(endlessState.stageNumber, endlessState.regionNumber);
+    endlessState._preRolled = true;
+    const panel = document.getElementById('starter-region-panel');
+    if (panel) {
+      const region = endlessState.currentRegion;
+      const header = `<div class="hud-label">Upcoming Region</div><div class="hud-label" style="font-size:7px;opacity:0.7;">${getStageName(region.stageNum)} R${region.regionNum}</div>`;
+      const rows = region.trainers.map((trainer, i) => {
+        const type = trainer.archetype?.type || '???';
+        const name = trainer.archetype?.name || '???';
+        const isBigBoss = i === 2;
+        const typeClass = type.toLowerCase();
+        const rowClass = isBigBoss ? 'region-stage-row boss' : 'region-stage-row';
+        const speciesAttr = (trainer.speciesIds || []).join(',');
+        return `<div class="${rowClass}" data-species="${speciesAttr}" style="cursor:default;">
+          <span class="type-badge type-${typeClass}" style="font-size:6px;padding:1px 3px;">${type}</span>
+          <span class="region-stage-name">${isBigBoss ? '★ ' : ''}${name}</span>
+          <span class="region-stage-level">Lv${trainer.displayLevel ?? trainer.level}</span>
+        </div>`;
+      }).join('');
+      panel.innerHTML = header + `<div class="region-stage-list">${rows}</div>`;
+      if (typeof attachBossTeamTooltips === 'function') attachBossTeamTooltips(panel);
+      panel.style.display = '';
+    }
+  }
+
+  const startLevel = 5;
+  const activeStarterIds = GEN_RUN_CONFIG[getRunGen()].starters;
+  const starters = state.isEndlessMode ? [] : await Promise.all(activeStarterIds.map(id => fetchPokemonById(id)));
+
+  container.innerHTML = '';
+  container.style.cssText = '';
+  container.parentElement.querySelectorAll('.hof-starter-label').forEach(el => el.remove());
+
+  if (state.isEndlessMode) {
+    // --- Section 1: Region starters — only shown when no HoF runs exist yet ---
+    const allHofEntries = getHallOfFame();
+    if (allHofEntries.length === 0) {
+      const starterIds = REGION_STARTERS[endlessState.stageNumber] || REGION_STARTERS[1];
+      const starterSpecies = (await Promise.all(starterIds.map(id => fetchPokemonById(id)))).filter(Boolean);
+      const starterRow = document.createElement('div');
+      starterRow.className = 'starter-card-row';
+      for (const species of starterSpecies) {
+        const isShiny = rng() < shinyRollOdds();
+        const inst = createInstance(species, startLevel, isShiny, 0);
+        const starterCaught = _isDexCaught(getPokedex()[inst.speciesId]);
+        const wrapper = document.createElement('div');
+        wrapper.innerHTML = renderPokemonCard(inst, true, false, starterCaught);
+        const card = wrapper.querySelector('.poke-card');
+        card.setAttribute('role', 'button');
+        card.setAttribute('tabindex', '0');
+        card.addEventListener('click', () => selectStarter(inst));
+        card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') selectStarter(inst); });
+        starterRow.appendChild(card);
+      }
+      container.appendChild(starterRow);
+    }
+
+    // --- Section 2: HoF PC (past run Pokémon only) ---
+    const seen = new Set();
+    const hofIds = [];
+    for (const entry of allHofEntries) {
+      for (const p of entry.team) {
+        const id = getEvoLineRoot(p.speciesId);
+        if (!seen.has(id) && !LEGENDARY_ID_SET.has(id)) { seen.add(id); hofIds.push(id); }
+      }
+    }
+    hofIds.sort((a, b) => a - b);
+    const hofX = hofIds.length;
+    const hofY = new Set([...ALL_CATCHABLE_IDS].map(id => getEvoLineRoot(id))).size;
+    const hofSpecies = hofIds.length > 0
+      ? (await Promise.all(hofIds.map(id => fetchPokemonById(id)))).filter(Boolean)
+      : [];
+
+    const hofBox = document.createElement('div');
+    hofBox.className = 'pc-box';
+    const hasEntries = hofSpecies.length > 0;
+    const sortBtnsHtml = hasEntries
+      ? `<div class="hof-sort-btns"><button class="hof-sort-btn active" data-sort="stars">★ Stars</button><button class="hof-sort-btn" data-sort="lastused">Last Used</button><button class="hof-sort-btn" data-sort="id">#</button><span class="hof-sort-sep"></span><button class="hof-sort-btn hof-filter-shiny" data-filter="shiny">★ Shiny</button></div>`
+      : '';
+    const hofTitle = hasEntries ? `HALL OF FAME PC (${hofX}/${hofY})` : 'HALL OF FAME PC';
+    hofBox.innerHTML = `<div class="pc-box-titlebar${hasEntries ? ' with-sort' : ''}"><span>${hofTitle}</span>${sortBtnsHtml}</div><div class="pc-box-body"><div class="pc-box-grid" style="grid-template-columns:repeat(6,1fr);"></div></div>`;
+    const grid = hofBox.querySelector('.pc-box-grid');
+
+    if (!hasEntries) {
+      grid.innerHTML = `<div style="grid-column:1/-1;text-align:center;opacity:0.5;padding:12px;font-size:8px;">Complete a run to unlock Pokémon here</div>`;
+    }
+
+    const persistBuffs = loadPersistentBuffs();
+    const _hofStats = ['hp','atk','def','speed','special'];
+    function hofStarScore(speciesId) {
+      const b = persistBuffs[getEvoLineRoot(speciesId)] || {};
+      const maxed = _hofStats.filter(k => (b[k] ?? 0) >= 10).length;
+      const partial = _hofStats.filter(k => { const v = b[k] ?? 0; return v > 0 && v < 10; }).length;
+      return maxed + partial * 0.5;
+    }
+
+    const shinyRoots = new Set();
+    for (const entry of allHofEntries) {
+      for (const p of entry.team) {
+        if (p.isShiny) shinyRoots.add(getEvoLineRoot(p.speciesId));
+      }
+    }
+
+    const hofInstances = hofSpecies.map(species => {
+      const isShiny = shinyRoots.has(getEvoLineRoot(species.id ?? species.speciesId));
+      const inst = createInstance(species, startLevel, isShiny, 0);
+      loadBuffsIntoPokemon(inst);
+      return inst;
+    });
+
+    function buildHofGrid(instances) {
+      grid.innerHTML = '';
+      for (const inst of instances) {
+        const typeBadges = (inst.types || []).map(t =>
+          `<span class="type-badge type-${t.toLowerCase()}" style="font-size:5px;padding:1px 2px;">${t}</span>`).join('');
+        const slot = document.createElement('div');
+        slot.className = 'pc-slot';
+        slot.setAttribute('role', 'button');
+        slot.setAttribute('tabindex', '0');
+        slot.innerHTML = `
+          <img src="${inst.spriteUrl}" alt="${inst.name}">
+          <div class="pc-slot-name">${inst.name}</div>
+          <div class="pc-slot-lv">Lv.${startLevel}</div>
+          <div style="display:flex;gap:2px;flex-wrap:wrap;justify-content:center;">${typeBadges}</div>`;
+        const stars = makeMaxedStarsEl(inst.speciesId);
+        if (stars) slot.appendChild(stars);
+        if (inst.isShiny) {
+          const shinyStar = document.createElement('span');
+          shinyStar.textContent = '★';
+          shinyStar.style.cssText = 'position:absolute;top:3px;left:3px;font-size:7px;color:#4af;line-height:1;';
+          shinyStar.title = 'Shiny!';
+          slot.appendChild(shinyStar);
+        }
+        slot.addEventListener('click', () => selectStarter(inst));
+        slot.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') selectStarter(inst); });
+        slot.addEventListener('mouseenter', () => showTeamHoverCard(inst, slot));
+        slot.addEventListener('mouseleave', () => hideTeamHoverCard());
+        grid.appendChild(slot);
+      }
+    }
+
+    let showOnlyShiny = false;
+    let currentSort = 'stars';
+
+    const lastUsedTimes = getLastUsedTimes();
+    function sortHof(mode) {
+      const pool = showOnlyShiny ? hofInstances.filter(i => i.isShiny) : [...hofInstances];
+      if (mode === 'stars') pool.sort((a, b) => { const d = hofStarScore(b.speciesId) - hofStarScore(a.speciesId); return d !== 0 ? d : a.speciesId - b.speciesId; });
+      else if (mode === 'lastused') pool.sort((a, b) => {
+        const ra = getEvoLineRoot(a.speciesId), rb = getEvoLineRoot(b.speciesId);
+        const ta = lastUsedTimes[ra] ?? 0, tb = lastUsedTimes[rb] ?? 0;
+        return tb !== ta ? tb - ta : a.speciesId - b.speciesId;
+      });
+      else pool.sort((a, b) => a.speciesId - b.speciesId);
+      buildHofGrid(pool);
+    }
+
+    if (hasEntries) {
+      sortHof('stars');
+      hofBox.querySelectorAll('.hof-sort-btn:not(.hof-filter-shiny)').forEach(btn => {
+        btn.addEventListener('click', () => {
+          hofBox.querySelectorAll('.hof-sort-btn:not(.hof-filter-shiny)').forEach(b => b.classList.remove('active'));
+          btn.classList.add('active');
+          currentSort = btn.dataset.sort;
+          sortHof(currentSort);
+        });
+      });
+      const shinyFilterBtn = hofBox.querySelector('.hof-filter-shiny');
+      if (shinyFilterBtn) {
+        shinyFilterBtn.addEventListener('click', () => {
+          showOnlyShiny = !showOnlyShiny;
+          shinyFilterBtn.classList.toggle('active', showOnlyShiny);
+          sortHof(currentSort);
+        });
+      }
+    }
+
+    container.appendChild(hofBox);
+  } else {
+    container.style.display = 'flex';
+    container.style.justifyContent = 'center';
+    container.style.flexWrap = 'wrap';
+    container.style.gap = '16px';
+
+    for (const species of starters) {
+      if (!species) continue;
+      const isShiny = rng() < shinyRollOdds();
+      const inst = createInstance(species, startLevel, isShiny, 0);
+      const starterCaught = _isDexCaught(getPokedex()[inst.speciesId]);
+      const wrapper = document.createElement('div');
+      wrapper.innerHTML = renderPokemonCard(inst, true, false, starterCaught);
+      const card = wrapper.querySelector('.poke-card');
+      card.setAttribute('role', 'button');
+      card.setAttribute('tabindex', '0');
+      card.addEventListener('click', () => selectStarter(inst));
+      card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') selectStarter(inst); });
+      container.appendChild(card);
+    }
+  }
+}
+
+async function selectStarter(pokemon) {
+  const normalUrl = `sprites/pokemon/${pokemon.speciesId}.png`;
+  markPokedexCaught(pokemon.speciesId, pokemon.name, pokemon.types, normalUrl);
+  if (pokemon.isShiny) markShinyDexCaught(pokemon.speciesId, pokemon.name, pokemon.types, pokemon.spriteUrl);
+  loadBuffsIntoPokemon(pokemon);
+  state.team = [pokemon];
+  state.starterSpeciesId = pokemon.speciesId;
+  state.starterWasShiny = !!pokemon.isShiny;
+  recordUsedStarter(pokemon.speciesId);
+  setLastUsedTime(getEvoLineRoot(pokemon.speciesId));
+  state.maxTeamSize = 1;
+  if (state.isEndlessMode) {
+    startEndlessRegion();
+  } else {
+    startMap(0);
+  }
+}
+
+// ---- Map Management ----
+
+function startMap(mapIndex) {
+  state.currentMap = mapIndex;
+  state.map = generateMap(mapIndex, state.nuzlockeMode, state.gen2Mode);
+
+  // Full heal between arenas (skip the very first map)
+  if (mapIndex > 0) {
+    for (const p of state.team) {
+      p.currentHp = p.maxHp;
+    }
+    if (hasPerk('head_start')) {
+      applyLevelGain(state.team, [], new Set(state.team.map((_, i) => i)), 0, false, 1, getLevelCapForMap());
+    }
+  }
+
+  // Snapshot the player's state at the start of this level so a wipe can retry
+  // the level (Normal mode) instead of ending the run. Re-taken every time a
+  // level starts, so successive retries always restore this exact state.
+  state.mapStartSnapshot = JSON.parse(JSON.stringify({
+    team: state.team,
+    items: state.items,
+    maxTeamSize: state.maxTeamSize,
+  }));
+  state.pendingRetry = false;
+  // Fresh level = fresh attempt counter (retryCurrentMap restores it after).
+  state.mapRetries = 0;
+
+  const startNode = state.map.nodes['n0_0'];
+  state.currentNode = startNode;
+
+  showMapScreen();
+}
+
+function showMapScreen() {
+  // In endless mode, delegate to the endless map renderer (which uses the correct click handler)
+  if (state.isEndlessMode) { saveRun(); showEndlessMapScreen(); return; }
+
+  if (typeof hideEndlessTraitPanel === 'function') hideEndlessTraitPanel();
+  const regionPanel = document.getElementById('endless-region-panel');
+  if (regionPanel) regionPanel.style.display = 'none';
+  showScreen('map-screen');
+  const genCfg = GEN_RUN_CONFIG[getRunGen()];
+  const mapInfo = document.getElementById('map-info');
+  if (mapInfo) {
+    const isFinal = state.currentMap === 8;
+    const leader = isFinal ? null : genCfg.leaders()[state.currentMap];
+    mapInfo.innerHTML = isFinal
+      ? `<span>${genCfg.eliteTitle}</span>`
+      : `<span>Map ${state.currentMap+1}: vs <b>${leader.name}</b> (${leader.type})</span>`;
+  }
+  // Mode is communicated by the START node's colour (see getNodeColor in
+  // js/map.js) — blue for Normal, red for Nuzlocke. No HUD badge needed.
+  // Locally-hosted, cleaned badge sprites (see scripts/clean-badges.py).
+  // Removes the light-gray outer ring the PokeAPI versions carry, which reads
+  // as a white halo on dark surfaces.
+  const BASE = 'sprites/badges/';
+  // Earned badges in colour; the ones still MISSING show as grayed-out
+  // silhouettes of the real badge, plus an at-a-glance X/8 counter.
+  const badgeHtml = Array.from({ length: 8 }, (_, i) => {
+    const earned = i < state.badges;
+    const label = genCfg.leaders()[i].badge + (earned ? '' : ' — not earned yet');
+    return `<img src="${BASE}${i + 1 + genCfg.badgeOffset}.png" alt="${label}" title="${label}"
+      class="badge-icon-img${earned ? '' : ' badge-icon-missing'}">`;
+  }).join('') + `<span class="badge-count-num" title="Badges earned">${state.badges}/8</span>`;
+  const badgePanelEl = document.getElementById('badge-count-panel');
+  if (badgePanelEl) badgePanelEl.innerHTML = badgeHtml;
+
+  renderTeamBar(state.team);
+  renderItemBadges(state.items);
+
+  const mapContainer = document.getElementById('map-container');
+  mapContainer.style.backgroundImage = `url('${genCfg.mapBg(state.currentMap)}')`;
+  renderMap(state.map, mapContainer, onNodeClick);
+  saveRun();
+
+  if (!localStorage.getItem('poke_tutorial_seen')) {
+    showTutorialOverlay();
+  }
+}
+
+function showTutorialOverlay() {
+  const overlay = document.createElement('div');
+  overlay.id = 'tutorial-overlay';
+
+  // Find positions of the settings button and team bar
+  const settingsBtn = document.querySelector('#map-screen button[title="Settings"]');
+  const teamBar = document.getElementById('team-bar');
+
+  if (settingsBtn) {
+    const r = settingsBtn.getBoundingClientRect();
+    const callout = document.createElement('div');
+    callout.className = 'tutorial-callout arrow-right';
+    callout.textContent = 'Open settings and turn on Auto Skip!';
+    callout.style.top = (r.top + r.height / 2 - 30) + 'px';
+    callout.style.right = (window.innerWidth - r.left + 10) + 'px';
+    overlay.appendChild(callout);
+  }
+
+  if (teamBar) {
+    const r = teamBar.getBoundingClientRect();
+    const callout = document.createElement('div');
+    callout.className = 'tutorial-callout arrow-up';
+    callout.textContent = 'Click a Pokémon to swap positions in your team';
+    callout.style.top = (r.bottom + 14) + 'px';
+    callout.style.left = (r.left + r.width / 2 - 90) + 'px';
+    overlay.appendChild(callout);
+  }
+
+  const dismiss = document.createElement('div');
+  dismiss.className = 'tutorial-dismiss';
+  dismiss.textContent = 'Click anywhere to dismiss';
+  overlay.appendChild(dismiss);
+
+  overlay.addEventListener('click', () => {
+    localStorage.setItem('poke_tutorial_seen', '1');
+    overlay.remove();
+  });
+
+  document.body.appendChild(overlay);
+}
+
+function showItemFoundToast(icon, name) {
+  const toast = document.createElement('div');
+  toast.className = 'item-found-toast';
+  toast.innerHTML = `<span class="item-toast-icon">${icon}</span>
+    <div class="ach-toast-text">
+      <div class="item-toast-label">Item Found!</div>
+      <div class="item-toast-name">${name}</div>
+    </div>`;
+  document.body.appendChild(toast);
+  requestAnimationFrame(() => toast.classList.add('visible'));
+  setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => toast.remove(), 400);
+  }, 3000);
+}
+
+
+let _nodeClickBusy = false;
+async function onNodeClick(node) {
+  if (_nodeClickBusy) return;
+  if (!node.accessible) return;
+  _nodeClickBusy = true;
+  try {
+  state.currentNode = node;
+  // Lock sibling nodes before saving so F5 can't switch to a different path choice
+  for (const n of Object.values(state.map.nodes)) {
+    if (n.layer === node.layer && n.id !== node.id && n.accessible) {
+      n.accessible = false;
+    }
+  }
+  let resolvedType = node.type;
+
+  if (node.type === NODE_TYPES.QUESTION) {
+    if (state.savedQuestionResolve?.nodeId === node.id) {
+      resolvedType = state.savedQuestionResolve.resolvedType;
+    } else {
+      resolvedType = resolveQuestionMark();
+      const eventId = resolvedType === 'event' ? rollQuestionEvent() : null;
+      state.savedQuestionResolve = { nodeId: node.id, resolvedType, eventId };
+    }
+  }
+  saveRun();
+
+  switch (resolvedType) {
+    case NODE_TYPES.BATTLE:
+      await doBattleNode(node);
+      break;
+    case NODE_TYPES.CATCH:
+      await doCatchNode(node);
+      break;
+    case NODE_TYPES.ITEM:
+      doItemNode(node);
+      break;
+    case NODE_TYPES.BOSS:
+      await doBossNode(node);
+      break;
+    case NODE_TYPES.POKECENTER:
+      doPokeCenterNode(node);
+      break;
+    case NODE_TYPES.TRAINER:
+      await doTrainerNode(node);
+      break;
+    case NODE_TYPES.LEGENDARY:
+      await doLegendaryNode(node);
+      break;
+    case NODE_TYPES.MOVE_TUTOR:
+      await doMoveTutorNode(node);
+      break;
+    case NODE_TYPES.TRADE:
+      if (state.isEndlessMode) { advanceFromNode(state.map, node.id); showMapScreen(); }
+      else await doTradeNode(node);
+      break;
+    case NODE_TYPES.SILVER:
+      await doSilverNode(node);
+      break;
+    case 'shiny':
+      await doShinyNode(node);
+      break;
+    case 'event':
+      await doEventNode(node, state.savedQuestionResolve?.eventId || rollQuestionEvent());
+      break;
+    case 'mega':
+      doItemNode(node);
+      break;
+    default:
+      await doBattleNode(node);
+  }
+  } finally {
+    _nodeClickBusy = false;
+  }
+}
+
+function resolveQuestionMark() {
+  const r = rng();
+  if (r < 0.12) return NODE_TYPES.BATTLE;
+  if (r < 0.24) return NODE_TYPES.TRAINER;
+  if (r < 0.32) return state.nuzlockeMode ? NODE_TYPES.BATTLE : NODE_TYPES.CATCH;
+  if (r < 0.40) return NODE_TYPES.ITEM;
+  if (r < (hasShinyCharm() ? 0.52 : 0.47)) return 'shiny';
+  if (r < 0.57) return 'mega';
+  return 'event'; // ~43-48% — the random-event pool below
+}
+
+// Weighted random-event table for ❓ nodes. Rolled once per node (persisted in
+// savedQuestionResolve.eventId) so refreshes replay the same event.
+const QUESTION_EVENTS = [
+  { id: 'fountain',     w: 12 },
+  { id: 'berry_bush',   w: 15 },
+  { id: 'rare_candy',   w: 9 },
+  { id: 'escape_rope',  w: 7,  skip: () => state.nuzlockeMode },
+  { id: 'free_tutor',   w: 10 },
+  { id: 'wounded_mon',  w: 11, skip: () => state.team.length >= 6 || state.nuzlockeMode },
+  { id: 'egg',          w: 9,  skip: () => state.nuzlockeMode || state.pendingEgg },
+  { id: 'thief',        w: 12 },
+  { id: 'mini_boss',    w: 11 },
+  { id: 'wonder_trade', w: 5,  skip: () => state.team.length < 2 || state.nuzlockeMode },
+];
+function rollQuestionEvent() {
+  const pool = QUESTION_EVENTS.filter(e => !(e.skip && e.skip()));
+  const total = pool.reduce((a, e) => a + e.w, 0);
+  let r = rng() * total;
+  for (const e of pool) { r -= e.w; if (r <= 0) return e.id; }
+  return pool[0].id;
+}
+
+// ---- Node Handlers ----
+
+// Each Battle Tower stage anchors to one generation. Stage 1 = Kanto (Gen 1),
+// stage 2 = Johto (Gen 2), etc. Encounters are restricted to that gen's range.
+const STAGE_GEN_RANGES = {
+  1: { minGenId: 1,   maxGenId: 151 },
+  2: { minGenId: 152, maxGenId: 251 },
+  3: { minGenId: 252, maxGenId: 386 },
+  4: { minGenId: 387, maxGenId: 493 },
+  5: { minGenId: 494, maxGenId: 649 },
+};
+function getStageGenRange(stage) {
+  return STAGE_GEN_RANGES[stage] || { minGenId: 1, maxGenId: 649 };
+}
+function getCatchGenRange() {
+  if (state.isEndlessMode) return getStageGenRange(endlessState.stageNumber);
+  return GEN_RUN_CONFIG[getRunGen()].catch;
+}
+
+// Build the set of forms a base-species ID can become at or below maxLevel,
+// walking both linear and branching evolutions. Used by the reverse lookup so
+// e.g. Pidgey + level 36 reports Pidgey/Pidgeotto/Pidgeot, and Eevee reports
+// all of its eeveelutions.
+function _reachableEvoForms(baseId, maxLevel) {
+  const seen = new Set([baseId]);
+  const stack = [baseId];
+  while (stack.length) {
+    const id = stack.pop();
+    const linear = EVOLUTIONS[id];
+    if (linear && linear.level <= maxLevel && !seen.has(linear.into)) {
+      seen.add(linear.into);
+      stack.push(linear.into);
+    }
+    const branches = BRANCHING_EVOLUTIONS[id];
+    if (branches) {
+      for (const b of branches) {
+        if (b.level <= maxLevel && !seen.has(b.into)) {
+          seen.add(b.into);
+          stack.push(b.into);
+        }
+      }
+    }
+  }
+  return seen;
+}
+
+// Reverse lookup: every (stage, region, map) where this Pokemon — or any
+// member of its evolution line — can spawn in the Battle Tower. Some species
+// (e.g. Crobat) only appear by leveling up a base that spawns at low-tier
+// floors; the location of the base is what's reported in that case.
+function getBattleTowerLocations(pokemonId) {
+  // Build the full evolution line for this species. Walk down to the root and
+  // then forward through every reachable form (with no level cap) so the line
+  // covers babies, both branches of branching evos, and final forms.
+  const root = (typeof getEvoLineRoot === 'function') ? getEvoLineRoot(pokemonId) : pokemonId;
+  const lineForms = _reachableEvoForms(root, Infinity);
+  const out = [];
+  for (let stage = 1; stage <= 5; stage++) {
+    const stageRange = STAGE_GEN_RANGES[stage];
+    for (let region = 1; region <= 3; region++) {
+      for (let map = 0; map < 3; map++) {
+        const [minL, maxL] = getEndlessLevelRange(stage, region, map);
+        const mapIdx = levelToMapIndex(maxL);
+        const r = MAP_BST_RANGES[Math.min(mapIdx, MAP_BST_RANGES.length - 1)];
+        // Same widened bucket the Battle Tower encounter system actually rolls.
+        const bucket = getBstBucket(r.min, 'endless');
+        let matched = false;
+        for (const baseId of bucket) {
+          if (baseId < stageRange.minGenId || baseId > stageRange.maxGenId) continue;
+          if (lineForms.has(baseId)) { matched = true; break; }
+        }
+        if (matched) {
+          out.push({
+            stage, stageName: getStageName(stage),
+            region, map: map + 1,
+            minL, maxL,
+            label: `R${region}M${map + 1}`,
+          });
+        }
+      }
+    }
+  }
+  return out;
+}
+
+// Maps a max level to an appropriate map index for BST bucket selection.
+function levelToMapIndex(maxLevel) {
+  if (maxLevel <= 10) return 0;
+  if (maxLevel <= 20) return 1;
+  if (maxLevel <= 30) return 3;
+  if (maxLevel <= 42) return 4;
+  if (maxLevel <= 52) return 6;
+  return 7;
+}
+
+// In endless mode, use a BST bucket matching the current level range instead of fakeMapIndex.
+function getEncounterMapIndex() {
+  if (state.isEndlessMode && state.endlessLevelRange) {
+    return levelToMapIndex(state.endlessLevelRange[1]);
+  }
+  return state.currentMap;
+}
+
+// Returns a level scaled to the node's layer.
+function getLevelForNode(node) {
+  if (state.isEndlessMode) {
+    // Endless R1M1: level exactly equals layer number (1–7), no spread
+    if (endlessState.regionNumber === 1 && endlessState.mapIndexInRegion === 0) return node.layer;
+    const [minL, maxL] = state.endlessLevelRange;
+    const t = Math.min(1, Math.max(0, (node.layer - 1) / 6)); // 0.0 at layer 1, 1.0 at layer 7
+    const base = Math.round(minL + t * (maxL - minL));
+    const spread = Math.max(1, Math.round((maxL - minL) / 8));
+    return Math.min(maxL, Math.max(minL, base + Math.floor(rng() * spread)));
+  }
+  // Map 1 floor: the ladder's natural start (level 1-2, minus the early-map
+  // reduction) produced level-1 wilds against a level-5 starter. Early nodes
+  // never drop below 3 (catch nodes already floor at 4).
+  const _mapFloor = state.currentMap === 0 ? 3 : 1;
+  // The ladder's CEILING blends the nominal band with the map's level cap:
+  // max(bandMax−1, cap−4). Late maps keep routes near the cap (the leader's
+  // ace outruns the band there — a pure-band ladder made them a tension-free
+  // farming stroll), while early maps stay inside their band: the player
+  // enters at the PREVIOUS cap, and a cap−1 ceiling there (e.g. routes at 22
+  // on map 2 while the player arrives at 10) made mid-map attrition lethal.
+  const _bandMax = GEN_RUN_CONFIG[state.bothGens ? '1' : getRunGen()].levels()[state.currentMap][1];
+  const _ceil = Math.max(1, _bandMax - 1, getLevelCapForMap() - 4);
+  // Gen 2/3: deterministic per-layer curve — fixed offsets scaled onto the
+  // mapMin..cap−1 span. Boss layer 8 uses leader data, not this function.
+  const _runGen = getRunGen();
+  if (_runGen !== '1' && _runGen !== 'all') {
+    const [minL] = GEN_RUN_CONFIG[_runGen].levels()[state.currentMap];
+    const span = Math.max(0, _ceil - minL);
+    if (node.layer >= GEN2_LAYER_OFFSETS.length + 1) return _ceil;
+    const layerIdx = Math.min(GEN2_LAYER_OFFSETS.length, Math.max(1, node.layer)) - 1;
+    return Math.min(_ceil, Math.max(_mapFloor, minL + Math.round(GEN2_LAYER_OFFSETS[layerIdx] * span / 9)));
+  }
+  // Non-gen2/3: spread levels evenly across layers 1..7 (highest non-boss layer).
+  const [minL] = MAP_LEVEL_RANGES[state.currentMap];
+  const t = Math.min(1, Math.max(0, (node.layer - 1) / 6));
+  const base = Math.round(minL + t * (_ceil - minL));
+  const spread = Math.max(1, Math.round((_ceil - minL) / 8));
+  return Math.min(_ceil, Math.max(_mapFloor, Math.max(minL, base + Math.floor(rng() * spread))));
+}
+
+async function doBattleNode(node) {
+  // Difficulty linearization: wild Pokémon run BELOW the node level early —
+  // the player enters each map at the PREVIOUS map's cap while the route
+  // ladder jumps straight toward the new cap, so early maps need real
+  // breathing room (journey sims died mid-route, not at the gym).
+  const reduction = state.isEndlessMode ? 0
+    : state.currentMap <= 1 ? 2
+    : state.currentMap <= 3 ? 1
+    : 0;
+  const level = Math.max(1, getLevelForNode(node) - reduction);
+  let choices = await getCatchChoices(getEncounterMapIndex(), 3, getCatchGenRange().maxGenId, !state.isEndlessMode, getCatchGenRange().minGenId);
+  const lvlFiltered = choices.filter(sp => minLevelForSpecies(sp.id ?? sp.speciesId) <= level);
+  if (lvlFiltered.length > 0) choices = lvlFiltered;
+
+  // On the first layer of the first map, exclude enemies super effective against the starter
+  if (state.currentMap === 0 && node.layer === 1 && state.team.length > 0) {
+    const starterTypes = state.team[0].types || [];
+    const isSafe = sp => !(sp.types || []).some(et =>
+      starterTypes.some(st => (TYPE_CHART[et]?.[st] || 1) >= 2)
+    );
+    const safe = choices.filter(isSafe);
+    if (safe.length > 0) {
+      choices = safe;
+    } else {
+      // Fallback: Eevee (Normal type, never super effective)
+      const eevee = await fetchPokemonById(133);
+      if (eevee) choices = [eevee];
+    }
+  }
+
+  const rawSpecies = choices[Math.floor(rng() * choices.length)];
+  if (!rawSpecies) {
+    advanceFromNode(state.map, node.id);
+    showMapScreen();
+    return;
+  }
+  const rawId = rawSpecies.id ?? rawSpecies.speciesId;
+  const evoId = resolveEvoForLevel(rawId, level);
+  const enemySpecies = evoId !== rawId ? (await fetchPokemonById(evoId) || rawSpecies) : rawSpecies;
+  const enemy = createInstance(enemySpecies, level, false, getMoveТierForMap(state.currentMap));
+  const titleEl = document.getElementById('battle-title');
+  const subEl = document.getElementById('battle-subtitle');
+  if (titleEl) titleEl.textContent = `Wild ${enemy.name} appeared!`;
+  if (subEl) subEl.textContent = `Level ${enemy.level}`;
+  const won = await new Promise(resolve => {
+    runBattleScreen([enemy], false, () => resolve(true), () => resolve(false), null, [], 0);
+  });
+  if (!won) { showGameOver(); return; }
+  if (state.isEndlessMode) await applyEndlessBugTrait();
+  advanceFromNode(state.map, node.id);
+  showMapScreen();
+}
+
+// Runs a gym battle for the given leader (team padded to 6 of the leader's type).
+// Difficulty linearization: early gyms field smaller rosters (3/4/5, full 6
+// from map 4) so the player's young team isn't outnumbered 6-to-2, and later
+// gyms tighten their filler toward the ace so it stays a threat.
+function gymBuildOpts() {
+  // Rosters grow with the player's young team (3/4/5, full 6 from map 4) but
+  // every member fights AT the ace's level and holds an item (filler leans
+  // toward the leader's type-boost item). Elite fights are always 6.
+  const m = state.currentMap;
+  return {
+    teamSize: m <= 1 ? 3 : m === 2 ? 4 : m === 3 ? 5 : 6,
+    fillerSpread: 0,
+    equipFiller: true,
+  };
+}
+
+async function runGymBattle(node, leader, maxGenId, aceTarget) {
+  const built = await buildBossTeam(leader.team, leader.type, maxGenId, aceTarget, gymBuildOpts());
+  const enemyTeam = built.map(p => ({
+    ...createInstance(p, p.level, false, leader.moveTier ?? 1),
+    heldItem: p.heldItem || null,
+  }));
+  showScreen('battle-screen');
+  document.getElementById('battle-title').textContent = `Gym Battle vs ${leader.name}!`;
+  document.getElementById('battle-subtitle').textContent = `${leader.badge} is on the line!`;
+  await runBattleScreen(enemyTeam, true, () => {
+    state.badges++;
+    advanceFromNode(state.map, node.id);
+    showBadgeScreen(leader);
+    const ach = unlockAchievement(`gym_${state.currentMap}`);
+    if (ach) showAchievementToast(ach);
+  }, () => { showGameOver(); }, leader.name, [], 3);
+}
+
+// Highest species id a gym/elite's filler may use, per rolled gen.
+const GEN_MAX_SPECIES_ID = { 1: 151, 2: 251, 3: 386, 4: 493, 5: 649 };
+function LEADER_TABLE_BY_GEN(gen) {
+  return gen === 5 ? UNOVA_GYM_LEADERS
+    : gen === 4 ? SINNOH_GYM_LEADERS
+    : gen === 3 ? HOENN_GYM_LEADERS
+    : gen === 2 ? JOHTO_GYM_LEADERS
+    : GYM_LEADERS;
+}
+
+async function doBossNode(node) {
+  // Tot: gym is a random Gen 1/2/3 leader for this slot; levels normalised.
+  if (state.bothGens) {
+    if (state.currentMap === 8) { await doBothElite4(); return; }
+    const gen = (state.gymGens && state.gymGens[state.currentMap]) || 1;
+    const leader = LEADER_TABLE_BY_GEN(gen)[state.currentMap];
+    await runGymBattle(node, leader, GEN_MAX_SPECIES_ID[gen] || 151, bothGensMapAceLevel(state.currentMap));
+    return;
+  }
+  const runGen = getRunGen();
+  if (runGen === '4' || runGen === '5') {
+    const cfg = GEN_RUN_CONFIG[runGen];
+    const maxId = cfg.catch.maxGenId;
+    if (state.currentMap === 8) { await doEliteGauntlet(cfg.elite(), maxId, null); return; }
+    await runGymBattle(node, cfg.leaders()[state.currentMap], maxId, null);
+    return;
+  }
+  if (runGen === '3') {
+    if (state.currentMap === 8) { await doEliteGauntlet(GEN3_ELITE_4, 386, null); return; }
+    await runGymBattle(node, HOENN_GYM_LEADERS[state.currentMap], 386, null);
+    return;
+  }
+  if (state.gen2Mode) {
+    if (state.currentMap === 8) { await doEliteGauntlet(GEN2_ELITE_4, 251, 'gen2_win'); return; }
+    await runGymBattle(node, JOHTO_GYM_LEADERS[state.currentMap], 251, null);
+    return;
+  }
+  if (state.currentMap === 8) { await doEliteGauntlet(ELITE_4, 151, null); return; }
+  await runGymBattle(node, GYM_LEADERS[state.currentMap], 151, null);
+}
+
+// I+II league: the randomly-chosen lineup (4 Elite + champion, mixing gens),
+// each padded to 6 and normalised to the Gen 1 Elite Four difficulty curve.
+async function doBothElite4() {
+  const lineup = state.eliteLineup || [];
+  const memberAt = i => {
+    const slot = lineup[i];
+    return (slot.gen === 5 ? GEN5_ELITE_4
+      : slot.gen === 4 ? GEN4_ELITE_4
+      : slot.gen === 3 ? GEN3_ELITE_4
+      : slot.gen === 2 ? GEN2_ELITE_4
+      : ELITE_4)[slot.idx];
+  };
+  const resumeFrom = state.eliteIndex;
+  for (let i = state.eliteIndex; i < lineup.length; i++) {
+    state.eliteIndex = i;
+    saveRun();
+    const member = memberAt(i);
+    // Prep screen before each battle (reorder team / use items) — skipped on
+    // the resumed fight so a reload drops straight back into the battle.
+    const isResumedFight = i === resumeFrom && resumeFrom > 0;
+    if (!isResumedFight) {
+      const prevName = i === 0 ? null : memberAt(i - 1).name;
+      await showElitePrepScreen({
+        title: prevName ? `${prevName} defeated!` : 'The Elite Four await!',
+        subtitle: `Next: ${member.name} (${member.type}) — Battle ${i + 1}/${lineup.length}`,
+        nextBoss: member,
+      });
+    }
+    const target = Math.max(...ELITE_4[Math.min(i, ELITE_4.length - 1)].team.map(p => p.level));
+    const built = await buildBossTeam(member.team, member.type, 649, target, { fillerSpread: 0, equipFiller: true });
+    const enemyTeam = built.map(p => ({ ...createInstance(p, p.level, false, 2), heldItem: p.heldItem || null }));
+
+    showScreen('battle-screen');
+    document.getElementById('battle-title').textContent = `${member.title}: ${member.name}!`;
+    document.getElementById('battle-subtitle').textContent = i === lineup.length - 1 ? 'Final Battle!' : `Elite Four — Battle ${i + 1}/${lineup.length - 1}`;
+    const won = await new Promise(resolve => {
+      runBattleScreen(enemyTeam, true, () => resolve(true), () => resolve(false), member.name, [], 3);
+    });
+    if (!won) { showGameOver(); return; }
+  }
+  const eliteAch = unlockAchievement('elite_four');
+  if (eliteAch) showAchievementToast(eliteAch);
+  state.eliteIndex = 0;
+  showWinScreen();
+}
+
+// Rival-slot battles: Silver in Gen 2, Team Aqua/Magma in Gen 3. Both use the
+// SILVER node type, give Double XP, full-heal afterwards, and are exempt from
+// Nuzlocke perma-death (runBattleScreen checks isRivalEnemyToken).
+const VILLAIN_SPRITES = {
+  aqua:  { admin: 'sprites/gen3/aqua-admin.png',  leader: 'sprites/gen3/archie.png' },
+  magma: { admin: 'sprites/gen3/magma-admin.png', leader: 'sprites/gen3/maxie.png' },
+};
+// Per-encounter villain sprites for the single-faction gens (index = encounter).
+const VILLAIN_ENC_SPRITES = {
+  '4': ['sprites/gen4/galactic-grunt.png', 'sprites/gen4/mars.png', 'sprites/gen4/jupiter.png', 'sprites/gen4/cyrus.png'],
+  '5': ['sprites/gen5/plasma-grunt.png', 'sprites/gen5/n.png', 'sprites/gen5/n.png', 'sprites/gen5/ghetsis.png'],
+};
+function isRivalEnemyToken(name) {
+  return name === 'silver' ||
+    (typeof name === 'string' && /^sprites\/gen3\/(aqua-admin|magma-admin|archie|maxie)\.png$/.test(name)) ||
+    (typeof name === 'string' && /^sprites\/gen[45]\/(galactic-grunt|mars|jupiter|cyrus|plasma-grunt|n|ghetsis)\.png$/.test(name));
+}
+
+async function doSilverNode(node) {
+  // Encounter index is keyed off the current map so skipping earlier rival
+  // fights doesn't make a later one trivial.
+  const RIVAL_ENC_BY_MAP = { 1: 0, 3: 1, 5: 2, 7: 3 };
+  const runGenNow = getRunGen();
+  const isVillain = ['3', '4', '5'].includes(runGenNow);
+  const encounters = runGenNow === '3' ? AQUA_MAGMA_ENCOUNTERS[state.villainTeam || 'aqua']
+    : runGenNow === '4' ? GALACTIC_ENCOUNTERS
+    : runGenNow === '5' ? PLASMA_ENCOUNTERS
+    : SILVER_ENCOUNTERS;
+  const encounterIdx = Math.min(
+    RIVAL_ENC_BY_MAP[state.currentMap] ?? (state.silverBeaten || 0),
+    encounters.length - 1,
+  );
+  const encData = encounters[encounterIdx];
+  // Move tier scales with the current map so enc 0 isn't slammed with T2 moves.
+  const rivalTier = getMoveТierForMap(state.currentMap);
+  const enemyTeam = encData.team.map(p => ({
+    ...createInstance(p, p.level, false, rivalTier),
+    heldItem: p.heldItem || null,
+  }));
+  // Silver always carries the starter line that counters the player's (Gen 2
+  // only — the villain teams bring their own canonical rosters).
+  const starterLine = isVillain ? null : SILVER_STARTER_LINES[state.starterSpeciesId];
+  if (starterLine) {
+    // Use natural evolution thresholds against the encounter level.
+    const lastIdx = enemyTeam.length - 1;
+    const lvl = enemyTeam[lastIdx].level;
+    const evolvedId = resolveEvoForLevel(starterLine[0].speciesId, lvl);
+    const stageIdx = Math.max(0, starterLine.findIndex(s => s.speciesId === evolvedId));
+    const starterSpecies = starterLine[stageIdx];
+    enemyTeam[lastIdx] = { ...createInstance(starterSpecies, lvl, false, rivalTier), heldItem: starterSpecies.heldItem || null };
+  }
+  showScreen('battle-screen');
+  document.getElementById('battle-title').textContent = isVillain
+    ? `${encData.leader} wants to battle!`
+    : 'Silver wants to battle!';
+  const factionName = runGenNow === '4' ? 'Team Galactic'
+    : runGenNow === '5' ? 'Team Plasma'
+    : `Team ${state.villainTeam === 'magma' ? 'Magma' : 'Aqua'}`;
+  document.getElementById('battle-subtitle').textContent = isVillain
+    ? `${factionName} Ambush — Double XP`
+    : 'Rival Battle — Double XP';
+  const enemyToken = !isVillain ? 'silver'
+    : VILLAIN_ENC_SPRITES[runGenNow]
+      ? VILLAIN_ENC_SPRITES[runGenNow][encounterIdx]
+      : (encounterIdx === 3 ? VILLAIN_SPRITES[state.villainTeam || 'aqua'].leader
+                            : VILLAIN_SPRITES[state.villainTeam || 'aqua'].admin);
+  const won = await new Promise(resolve => {
+    // Rival battles give +3 base, to every team member regardless of whether
+    // they participated or fainted. Lucky egg etc. still apply.
+    runBattleScreen(enemyTeam, true, () => resolve(true), () => resolve(false), enemyToken, [], 3, null, null, true);
+  });
+  if (!won) { showGameOver(); return; }
+  // Full heal after the rival battle.
+  for (const p of state.team) p.currentHp = p.maxHp;
+  state.silverBeaten = (state.silverBeaten || 0) + 1;
+  advanceFromNode(state.map, node.id);
+  showMapScreen();
+}
+
+// Prep screen shown between Elite 4 / Champion battles. Shows the next
+// opponent's roster, lets the player drag-reorder their team and use items,
+// then proceeds on Continue.
+function showElitePrepScreen({ title, subtitle, nextBoss }) {
+  return new Promise(resolve => {
+    document.getElementById('elite-prep-title').textContent = title;
+    document.getElementById('elite-prep-sub').textContent = subtitle;
+
+    const enemyEl = document.getElementById('elite-prep-enemy-team');
+    enemyEl.innerHTML = nextBoss.team.map(p => {
+      const sprite = `sprites/pokemon/${p.speciesId}.png`;
+      const types  = (p.types || []).map(t => `<span class="type-badge type-${t.toLowerCase()}">${t}</span>`).join('');
+      const item   = p.heldItem ? `<div class="held">${itemIconHtml(p.heldItem, 18)}<span class="held-name">${p.heldItem.name}</span></div>` : '';
+      return `<div class="elite-prep-enemy-slot">
+        <img src="${sprite}" alt="${p.name}" onerror="this.style.display='none'">
+        <div class="name">${p.name}</div>
+        <div class="lv">Lv ${p.level}</div>
+        <div class="types">${types}</div>
+        ${item}
+      </div>`;
+    }).join('');
+
+    const teamEl  = document.getElementById('elite-prep-player-team');
+    const itemsEl = document.getElementById('elite-prep-items');
+    const refresh = () => {
+      renderTeamBar(state.team, teamEl, false, true, refresh);
+      renderItemBadges(state.items, itemsEl, refresh);
+    };
+    refresh();
+
+    showScreen('elite-prep-screen');
+
+    const btn = document.getElementById('btn-elite-prep-continue');
+    const onContinue = () => {
+      btn.removeEventListener('click', onContinue);
+      resolve();
+    };
+    btn.addEventListener('click', onContinue);
+  });
+}
+
+// Elite Four gauntlet with prep screens, shared by the Gen 2 and Gen 3
+// leagues (Gen 1 keeps its legacy transition-only flow in doElite4).
+async function doEliteGauntlet(bosses, maxGenId, winAchievementId = null) {
+  const resumeFrom = state.eliteIndex;
+  for (let i = state.eliteIndex; i < bosses.length; i++) {
+    state.eliteIndex = i;
+    saveRun();
+    const boss = bosses[i];
+    // Prep screen before each Elite battle — but skip it on the resumed
+    // fight so reloading drops the player straight back into the battle.
+    const isResumedFight = i === resumeFrom && resumeFrom > 0;
+    if (!isResumedFight) {
+      const prevName = i === 0 ? null : bosses[i - 1].name;
+      await showElitePrepScreen({
+        title: prevName ? `${prevName} defeated!` : 'The Elite Four await!',
+        subtitle: `Next: ${boss.name} (${boss.type}) — Battle ${i + 1}/${bosses.length}`,
+        nextBoss: boss,
+      });
+    }
+    const built = await buildBossTeam(boss.team, boss.type, maxGenId, null, { fillerSpread: 0, equipFiller: true });
+    const enemyTeam = built.map(p => ({ ...createInstance(p, p.level, false, 2), heldItem: p.heldItem || null }));
+    showScreen('battle-screen');
+    document.getElementById('battle-title').textContent = `${boss.title}: ${boss.name}!`;
+    document.getElementById('battle-subtitle').textContent =
+      i < bosses.length - 1 ? `Elite Four — Battle ${i + 1}/${bosses.length - 1}` : 'Final Battle!';
+    const won = await new Promise(resolve => {
+      runBattleScreen(enemyTeam, true, () => resolve(true), () => resolve(false), boss.name, [], 3);
+    });
+    if (!won) { showGameOver(); return; }
+  }
+  const eliteAch = unlockAchievement('elite_four');
+  if (eliteAch) showAchievementToast(eliteAch);
+  if (winAchievementId) {
+    const winAch = unlockAchievement(winAchievementId);
+    if (winAch) showAchievementToast(winAch);
+  }
+  state.eliteIndex = 0;
+  showWinScreen();
+}
+
+
+
+
+async function doCatchNode(node) {
+  showScreen('catch-screen');
+  renderTeamBar(state.team, document.getElementById('catch-team-bar'), true);
+  const choicesEl = document.getElementById('catch-choices');
+
+  let instances, rerollPool, level;
+
+  if (state.savedCatch?.nodeId === node.id && Array.isArray(state.savedCatch.instances)) {
+    // Restore persisted choices after a page refresh so the same Pokemon are always shown
+    ({ instances, rerollPool, level } = state.savedCatch);
+  } else {
+    choicesEl.innerHTML = '<div class="loading">Finding Pokemon...</div>';
+
+    let choices = await getCatchChoices(getEncounterMapIndex(), 18, getCatchGenRange().maxGenId, !state.isEndlessMode, getCatchGenRange().minGenId, state.isEndlessMode);
+    const isFirstMap = state.currentMap === 0 || (state.isEndlessMode && endlessState.regionNumber === 1 && endlessState.mapIndexInRegion === 0);
+    // Same early-map breathing room wild battles get — catch fights ran at
+    // full ladder level while the team was still at the previous map's cap.
+    const catchReduction = state.isEndlessMode ? 0
+      : state.currentMap <= 1 ? 2
+      : state.currentMap <= 3 ? 1
+      : 0;
+    level = isFirstMap ? Math.max(4, getLevelForNode(node)) : Math.max(4, getLevelForNode(node) - catchReduction);
+    const lvlFiltered = choices.filter(sp => minLevelForSpecies(sp.id ?? sp.speciesId) <= level);
+    if (lvlFiltered.length > 0) {
+      // Pad with ineligible choices if filtering drops below 3 so there are always 3 options
+      choices = lvlFiltered.length < 3
+        ? [...lvlFiltered, ...choices.filter(sp => !lvlFiltered.includes(sp))].slice(0, hasPerk('catch_expert') ? 4 : 3)
+        : lvlFiltered;
+    }
+
+    // Nuzlocke map 1: restrict to curated pool (Gen 1 only)
+    if (state.nuzlockeMode && state.currentMap === 0 && !state.gen2Mode && getRunGen() !== '3') {
+      const nuzlockeMap1Ids = new Set([10,11,27,54,56,60,69,72,74,79,81,86,96,98,100,102,111,116,118,120,129,133]);
+      const filtered = choices.filter(sp => nuzlockeMap1Ids.has(sp.id ?? sp.speciesId));
+      if (filtered.length > 0) choices = filtered;
+    }
+
+    // Map 1, layer 1: guarantee at least one Grass AND one Water Pokemon (non-nuzlocke only)
+    if (!state.nuzlockeMode && state.currentMap === 0 && node.layer === 1) {
+      const _cRunGen = getRunGen();
+      const GRASS_BY_GEN = { '3': [273, 285], '4': [406, 420], '5': [540, 546, 548] }; // Seedot/Shroomish | Budew/Cherubi | Sewaddle/Cottonee/Petilil
+      const WATER_BY_GEN = { '3': [270, 283, 341], '4': [418, 422, 456], '5': [535, 580, 592] }; // Lotad/Surskit/Corphish | Buizel/Shellos/Finneon | Tympole/Ducklett/Frillish
+      const grassIds = GRASS_BY_GEN[_cRunGen] || (state.gen2Mode ? [187, 191] : [43, 69, 102]);
+      const waterIds = WATER_BY_GEN[_cRunGen] || (state.gen2Mode ? [183, 194, 223] : [54, 60, 72, 79, 86, 98, 116, 118, 120, 129]);
+      if (!choices.some(p => p.types?.includes('Grass'))) {
+        const id = grassIds[Math.floor(rng() * grassIds.length)];
+        const r = await fetchPokemonById(id);
+        if (r) choices[0] = r;
+      }
+      if (!choices.some(p => p.types?.includes('Water'))) {
+        const id = waterIds[Math.floor(rng() * waterIds.length)];
+        const r = await fetchPokemonById(id);
+        if (r) {
+          const slot = choices.findIndex(p => !p.types?.includes('Grass'));
+          choices[slot === -1 ? 2 : slot] = r;
+        }
+      }
+    }
+
+    // Save all level-filtered candidates before team-dup filters (for reroll pool variety)
+    const allCandidates = [...choices];
+
+    const teamRoots = new Set(state.team.map(p => getEvoLineRoot(p.speciesId)));
+    if (state.nuzlockeMode) {
+      const filtered = choices.filter(sp => !teamRoots.has(getEvoLineRoot(sp.id)));
+      choices = (filtered.length > 0 ? filtered : choices).slice(0, 1);
+    }
+    if (state.isEndlessMode) {
+      const filtered = choices.filter(sp => !teamRoots.has(getEvoLineRoot(sp.id ?? sp.speciesId)));
+      if (filtered.length > 0) {
+        choices = filtered;
+        if (choices.length < 3) {
+          const lowerIdx = Math.max(0, getEncounterMapIndex() - 1);
+          if (lowerIdx < getEncounterMapIndex()) {
+            const maxGen = getEndlessMaxGenId(endlessState.stageNumber);
+            const lowerPool = await getCatchChoices(lowerIdx, 18, maxGen, false, 1, state.isEndlessMode);
+            const choiceRoots = new Set(choices.map(sp => getEvoLineRoot(sp.id ?? sp.speciesId)));
+            const extras = lowerPool.filter(sp =>
+              !teamRoots.has(getEvoLineRoot(sp.id ?? sp.speciesId)) &&
+              !choiceRoots.has(getEvoLineRoot(sp.id ?? sp.speciesId))
+            );
+            choices = [...choices, ...extras].slice(0, hasPerk('catch_expert') ? 4 : 3);
+          }
+        }
+      }
+    }
+    const displayedIds = new Set(choices.slice(0, hasPerk('catch_expert') ? 4 : 3).map(sp => sp.id ?? sp.speciesId));
+    rerollPool = allCandidates.filter(sp => !displayedIds.has(sp.id ?? sp.speciesId));
+    // Battle Tower: rerolls must also never surface an evolution line already
+    // on the team — otherwise dedup only holds for the initial 3 choices.
+    if (state.isEndlessMode) {
+      rerollPool = rerollPool.filter(sp => !teamRoots.has(getEvoLineRoot(sp.id ?? sp.speciesId)));
+    }
+    choices = choices.slice(0, hasPerk('catch_expert') ? 4 : 3);
+
+    instances = choices.map(sp => createInstance(sp, sp._legendary ? level + 5 : level, rng() < shinyRollOdds(), getMoveТierForMap(state.currentMap)));
+
+    state.savedCatch = { nodeId: node.id, instances, rerollPool, level };
+    saveRun();
+  }
+
+  const rerolled = new Set();
+
+  function renderCatchSlot(inst, slotIdx) {
+    loadBuffsIntoPokemon(inst);
+    const caught = inst.isShiny
+      ? !!(getShinyDex()[inst.speciesId])
+      : _isDexCaught(getPokedex()[inst.speciesId]);
+    const myRoot = getEvoLineRoot(inst.speciesId);
+    const hofStarterBadge = inst.isShiny
+      ? (!caught && getUsedStarters().some(id => getEvoLineRoot(id) === myRoot))
+      : hofHasEvoLine(inst.speciesId);
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = renderPokemonCard(inst, true, false, caught, hofStarterBadge);
+    const card = wrapper.querySelector('.poke-card');
+    card.style.cursor = 'pointer';
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    card.addEventListener('click', () => catchPokemon(inst, node));
+    card.addEventListener('keydown', e => { if (e.key === 'Enter' || e.key === ' ') catchPokemon(inst, node); });
+    const wrap = document.createElement('div');
+    wrap.className = 'poke-choice-wrap';
+    wrap.appendChild(card);
+    wrap.insertAdjacentHTML('beforeend', renderTraitPreview(inst, state.team));
+    if (state.isEndlessMode && !rerolled.has(slotIdx)) {
+      const btn = document.createElement('button');
+      btn.className = 'btn-secondary reroll-btn';
+      btn.textContent = 'Reroll';
+      btn.addEventListener('click', async () => {
+        rerolled.add(slotIdx);
+        btn.disabled = true;
+        // Exclude other displayed slots AND current team members (by evo-line root)
+        const otherRoots = new Set([
+          ...instances.filter((_, i) => i !== slotIdx).map(i => getEvoLineRoot(i.speciesId)),
+          ...state.team.map(p => getEvoLineRoot(p.speciesId)),
+        ]);
+        let src = rerollPool.filter(sp => !otherRoots.has(getEvoLineRoot(sp.id ?? sp.speciesId)));
+        if (src.length === 0) {
+          const fresh = await getCatchChoices(getEncounterMapIndex(), 6, getCatchGenRange().maxGenId, !state.isEndlessMode, getCatchGenRange().minGenId, state.isEndlessMode);
+          const otherRootsPost = new Set([
+            ...instances.filter((_, i) => i !== slotIdx).map(i => getEvoLineRoot(i.speciesId)),
+            ...state.team.map(p => getEvoLineRoot(p.speciesId)),
+          ]);
+          src = fresh.filter(sp => !otherRootsPost.has(getEvoLineRoot(sp.id ?? sp.speciesId)));
+          if (src.length === 0) src = fresh;
+        }
+        if (src.length === 0) return;
+        const pick = src[Math.floor(rng() * src.length)];
+        // Remove picked from pool so subsequent rerolls can't get the same pokemon
+        const pickIdx = rerollPool.indexOf(pick);
+        if (pickIdx !== -1) rerollPool.splice(pickIdx, 1);
+        const newInst = createInstance(pick, level, rng() < shinyRollOdds(), getMoveТierForMap(state.currentMap));
+        instances[slotIdx] = newInst;
+        choicesEl.replaceChild(renderCatchSlot(newInst, slotIdx), choicesEl.children[slotIdx]);
+      });
+      wrap.appendChild(btn);
+    }
+    return wrap;
+  }
+
+  choicesEl.innerHTML = '';
+  for (let i = 0; i < instances.length; i++) {
+    choicesEl.appendChild(renderCatchSlot(instances[i], i));
+  }
+
+  document.getElementById('btn-skip-catch').onclick = () => {
+    state.savedCatch = null;
+    state.savedQuestionResolve = null;
+    advanceFromNode(state.map, node.id);
+    showMapScreen();
+  };
+}
+
+function checkStarterCollectionAchievements() {
+  const stage = endlessState.stageNumber;
+  const starterIds = REGION_STARTERS[stage];
+  if (!starterIds) return;
+  // Index entries are "stage:starterId" strings — see recordHofIndexFromEntry.
+  const prefix = `${stage}:`;
+  const used = new Set(
+    getHofIndex().starterRuns
+      .filter(s => s.startsWith(prefix))
+      .map(s => Number(s.slice(prefix.length)))
+  );
+  if (starterIds.some(id => used.has(id))) {
+    const ach = unlockAchievement(`starters_stage_${stage}`);
+    if (ach) showAchievementToast(ach);
+  }
+}
+
+function checkDexAchievements() {
+  if (isPokedexComplete()) {
+    const ach = unlockAchievement('pokedex_complete');
+    if (ach) showAchievementToast(ach);
+  }
+  const shinyCount = [...ALL_CATCHABLE_IDS, ...LEGENDARY_IDS].filter(id => getShinyDex()[id]).length;
+  for (const threshold of [100, 200, 300, 400, 500, 600]) {
+    if (shinyCount >= threshold) {
+      const ach = unlockAchievement(`shinydex_${threshold}`);
+      if (ach) showAchievementToast(ach);
+    }
+  }
+  if (isShinyDexComplete()) {
+    const ach = unlockAchievement('shinydex_complete');
+    if (ach) showAchievementToast(ach);
+  }
+  if (isShinyGenDexComplete(1, 649)) {
+    const ach = unlockAchievement('shinydex_all');
+    if (ach) showAchievementToast(ach);
+  }
+  const genRanges = [
+    ['pokedex_gen2', 152, 251],
+    ['pokedex_gen3', 252, 386],
+    ['pokedex_gen4', 387, 493],
+    ['pokedex_gen5', 494, 649],
+  ];
+  for (const [id, min, max] of genRanges) {
+    if (isGenDexComplete(min, max)) {
+      const ach = unlockAchievement(id);
+      if (ach) showAchievementToast(ach);
+    }
+  }
+}
+
+function catchPokemon(pokemon, node) {
+  const normalUrl = `sprites/pokemon/${pokemon.speciesId}.png`;
+  markPokedexCaught(pokemon.speciesId, pokemon.name, pokemon.types, normalUrl);
+  if (pokemon.isShiny) markShinyDexCaught(pokemon.speciesId, pokemon.name, pokemon.types, pokemon.spriteUrl);
+  checkDexAchievements();
+  if (state.team.length < 6) {
+    loadBuffsIntoPokemon(pokemon);
+    state.team.push(pokemon);
+    if (state.team.length > state.maxTeamSize) state.maxTeamSize = state.team.length;
+    state.savedCatch = null;
+    state.savedQuestionResolve = null;
+    advanceFromNode(state.map, node.id);
+    showMapScreen();
+  } else {
+    showSwapScreen(pokemon, node);
+  }
+}
+
+function showSwapScreen(newPoke, node) {
+  showScreen('swap-screen');
+  const hasRoom = state.team.length < 6;
+  const h2 = document.querySelector('#swap-screen h2');
+  if (h2) h2.textContent = hasRoom ? 'New Pokémon!' : 'Team Full!';
+  const swapCaught = _isDexCaught(getPokedex()[newPoke.speciesId]);
+  document.getElementById('swap-incoming').innerHTML = `<div style="display:flex;justify-content:center;">${renderPokemonCard(newPoke, true, false, swapCaught)}</div>`;
+  const el = document.getElementById('swap-choices');
+  el.innerHTML = '';
+  document.getElementById('swap-prompt').textContent = hasRoom ? 'Add to team or keep team as-is:' : 'Choose a Pokémon to release:';
+
+  // Trait overlay (endless mode only)
+  let traitOverlay = document.getElementById('swap-trait-overlay');
+  if (traitOverlay) traitOverlay.remove();
+  if (state.isEndlessMode) {
+    traitOverlay = document.createElement('div');
+    traitOverlay.id = 'swap-trait-overlay';
+    traitOverlay.style.cssText = [
+      'position:fixed', 'right:16px', 'top:50%', 'transform:translateY(-50%)',
+      'background:var(--bg-card)', 'border:2px solid var(--border)', 'border-radius:8px',
+      'padding:10px 12px', 'min-width:150px', 'display:none', 'z-index:200',
+      'font-family:"Press Start 2P",monospace', 'box-shadow:2px 2px 0 #000',
+    ].join(';');
+    document.body.appendChild(traitOverlay);
+  }
+
+  const cleanup = () => { if (traitOverlay) traitOverlay.remove(); };
+
+  if (hasRoom) {
+    const addBtn = document.createElement('button');
+    addBtn.className = 'btn-primary';
+    addBtn.style.cssText = 'width:100%;margin-bottom:10px;';
+    addBtn.textContent = `Add ${newPoke.name} to team!`;
+    addBtn.addEventListener('click', () => {
+      cleanup();
+      loadBuffsIntoPokemon(newPoke);
+      state.team.push(newPoke);
+      if (state.team.length > state.maxTeamSize) state.maxTeamSize = state.team.length;
+      state.savedCatch = null;
+      state.savedQuestionResolve = null;
+      advanceFromNode(state.map, node.id);
+      state.currentNode = null;
+      showMapNotification(`${newPoke.name} joined your team!`);
+      showMapScreen();
+    });
+    el.appendChild(addBtn);
+  }
+
+  for (let i = 0; i < state.team.length; i++) {
+    if (hasRoom) break;
+    const p = state.team[i];
+    const wrapper = document.createElement('div');
+    wrapper.innerHTML = renderPokemonCard(p, true, false);
+    const card = wrapper.querySelector('.poke-card');
+    card.style.cursor = 'pointer';
+    card.setAttribute('role', 'button');
+    card.setAttribute('tabindex', '0');
+    const idx = i;
+    card.addEventListener('click', () => {
+      cleanup();
+      if (newPoke.isShiny) markShinyDexCaught(newPoke.speciesId, newPoke.name, newPoke.types, newPoke.spriteUrl);
+      const released = state.team[idx];
+      if (released.heldItem) state.items.push(released.heldItem);
+      loadBuffsIntoPokemon(newPoke);
+      state.team.splice(idx, 1, newPoke);
+      state.savedCatch = null;
+      state.savedQuestionResolve = null;
+      advanceFromNode(state.map, node.id);
+      state.currentNode = null;
+      showMapScreen();
+    });
+    if (traitOverlay) {
+      card.addEventListener('mouseenter', () => {
+        const hypothetical = state.team.map((m, j) => j === idx ? newPoke : m);
+        const cur  = getTraitDisplayData(state.team);
+        const next = getTraitDisplayData(hypothetical);
+        const curMap  = Object.fromEntries(cur.map(e  => [e.type, e]));
+        const nextMap = Object.fromEntries(next.map(e => [e.type, e]));
+        const allTypes = [...new Set([...cur.map(e => e.type), ...next.map(e => e.type)])];
+        const rows = allTypes.map(type => {
+          const c = curMap[type]  || { tier: 0, count: 0 };
+          const n = nextMap[type] || { tier: 0, count: 0 };
+          const diff = n.tier - c.tier;
+          const diffHtml = diff > 0
+            ? `<span style="color:#4f4;font-size:7px;">+${diff}</span>`
+            : diff < 0
+              ? `<span style="color:#f44;font-size:7px;">${diff}</span>`
+              : '';
+          const tierDots = (t) => '●'.repeat(t) + '○'.repeat(3 - t);
+          return `<div style="display:flex;align-items:center;gap:5px;margin-bottom:3px;">
+            <span class="type-badge type-${type.toLowerCase()}" style="font-size:5px;padding:1px 3px;min-width:36px;text-align:center;">${type}</span>
+            <span style="font-size:7px;color:var(--text-dim);">${tierDots(n.tier)}</span>
+            ${diffHtml}
+          </div>`;
+        }).join('');
+        traitOverlay.innerHTML = `
+          <div style="font-size:6px;color:var(--text-dim);margin-bottom:6px;letter-spacing:1px;">TRAITS AFTER</div>
+          ${rows || '<div style="font-size:6px;color:var(--text-dim);">No active traits</div>'}`;
+        traitOverlay.style.display = 'block';
+      });
+      card.addEventListener('mouseleave', () => { traitOverlay.style.display = 'none'; });
+    }
+    el.appendChild(card);
+  }
+
+  document.getElementById('btn-cancel-swap').onclick = () => {
+    cleanup();
+    state.savedCatch = null;
+    state.savedQuestionResolve = null;
+    advanceFromNode(state.map, node.id);
+    state.currentNode = null;
+    showMapScreen();
+  };
+}
+
+function doItemNode(node) {
+  showScreen('item-screen');
+  renderTeamBar(state.team, document.getElementById('item-team-bar'));
+
+  // Exclude held-type items already in bag or on a Pokemon (usable items can stack)
+  const usedIds = new Set([
+    ...state.items.filter(it => !it.usable).map(it => it.id),
+    ...state.team.filter(p => p.heldItem).map(p => p.heldItem.id),
+  ]);
+  const heldAvailable = ITEM_POOL.filter(it =>
+    !usedIds.has(it.id) &&
+    (it.minMap === undefined || state.currentMap >= it.minMap) &&
+    (!it.gen2Only || state.gen2Mode)
+  );
+
+  // Usable items: filter out ones that can't be applied to current team
+  const canUseMaxRevive   = state.team.some(p => p.currentHp <= 0);
+  const canUseFullRestore = state.team.some(p => p.currentHp > 0 && p.currentHp < p.maxHp);
+  const canUseEvoStone    = state.team.some(p => {
+    if (BRANCHING_EVOLUTIONS[p.speciesId]) return true;
+    const evo = EVOLUTIONS[p.speciesId];
+    return evo && evo.into !== p.speciesId;
+  });
+  const canUseTm          = state.team.some(p => hasUpgradableMove(p));
+  const usableAvailable = USABLE_ITEM_POOL.filter(it => {
+    // Escape Rope negates Nuzlocke permadeath — never offer it in Nuzlocke runs.
+    if (it.id === 'escape_rope')  return !state.nuzlockeMode;
+    if (it.id === 'max_revive')   return canUseMaxRevive;
+    if (it.id === 'full_restore') return canUseFullRestore;
+    if (it.id === 'moon_stone')   return canUseEvoStone;
+    if (it.id === 'tm_normal')    return canUseTm;
+    return true;
+  });
+
+  const available = [...heldAvailable, ...usableAvailable];
+  // Fisher-Yates shuffle — sort(() => rng() - 0.5) is famously biased.
+  const shuffled = [...available];
+  for (let i = shuffled.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+  }
+  const picks = shuffled.slice(0, hasPerk('lucky_finder') ? 4 : 3);
+
+  const el = document.getElementById('item-choices');
+  el.innerHTML = '';
+  for (const item of picks) {
+    const div = document.createElement('div');
+    div.className = 'item-card';
+    div.innerHTML = `<div class="item-icon">${itemIconHtml(item, 36)}</div>
+      <div class="item-name">${item.name}</div>
+      <div class="item-desc">${item.desc}</div>
+      ${item.usable ? '<div style="font-size:9px;color:#4af;margin-top:4px;">USABLE ITEM</div>' : ''}`;
+    div.style.cursor = 'pointer';
+    div.addEventListener('click', () => {
+      state.pickedUpItem = true;
+      if (item.usable) {
+        state.items.push({ ...item });
+        advanceFromNode(state.map, node.id);
+        showMapScreen();
+      } else {
+        openItemEquipModal(item, {
+          onComplete: () => { advanceFromNode(state.map, node.id); showMapScreen(); },
+        });
+      }
+    });
+    el.appendChild(div);
+  }
+
+  const itemSkipBtn = document.getElementById('btn-skip-item');
+  itemSkipBtn.style.display = '';
+  itemSkipBtn.onclick = () => {
+    advanceFromNode(state.map, node.id);
+    showMapScreen();
+  };
+}
+
+function openItemEquipModal(item, { fromBagIdx = -1, fromPokemonIdx = -1, onComplete = null } = {}) {
+  document.getElementById('item-equip-modal')?.remove();
+
+  const done = onComplete || (() => {
+    renderItemBadges(state.items);
+    renderTeamBar(state.team);
+  });
+
+  const modal = document.createElement('div');
+  modal.id = 'item-equip-modal';
+  modal.className = 'item-equip-overlay';
+
+  const rows = state.team.map((p, i) => {
+    const isSelf = fromPokemonIdx === i;
+    const hasHeld = !!p.heldItem;
+    const btnLabel = isSelf ? 'Holding' : hasHeld ? 'Swap' : 'Equip';
+    return `<div class="equip-pokemon-row">
+      <img src="${p.spriteUrl}" class="equip-poke-sprite" onerror="this.style.display='none'">
+      <div class="equip-poke-info">
+        <div class="equip-poke-name">${p.nickname || p.name}</div>
+        <div class="equip-poke-lv">Lv${p.level}</div>
+      </div>
+      <div class="equip-held-slot">
+        ${hasHeld
+          ? `<span class="equip-held-item" title="${p.heldItem.desc}">${itemIconHtml(p.heldItem, 18)} ${p.heldItem.name}</span>`
+          : '<span class="equip-empty-slot">— empty —</span>'}
+      </div>
+      <div class="equip-btn-group">
+        ${isSelf
+          ? `<button class="equip-btn equip-btn-unequip" data-unequip="${i}">Unequip</button>`
+          : `<button class="equip-btn${hasHeld ? ' equip-btn-swap' : ''}" data-idx="${i}">${btnLabel}</button>`}
+      </div>
+    </div>`;
+  }).join('');
+
+  modal.innerHTML = `
+    <div class="item-equip-box">
+      <div class="equip-item-header">
+        <span class="equip-item-icon">${itemIconHtml(item, 32)}</span>
+        <div>
+          <div class="equip-item-name">${item.name}</div>
+          <div class="equip-item-desc">${item.desc}</div>
+        </div>
+      </div>
+      <div class="equip-pokemon-list">${rows}</div>
+      <button id="btn-equip-to-bag" class="btn-secondary" style="width:100%;margin-top:8px;">
+        ${fromPokemonIdx >= 0 ? '⬇ Unequip (return to bag)' : 'Keep in Bag'}
+      </button>
+      <button id="btn-equip-cancel" class="btn-secondary" style="width:100%;margin-top:4px;">Cancel</button>
+    </div>`;
+
+  document.body.appendChild(modal);
+
+  // Unequip buttons — strip item off a Pokemon and bag it, without equipping current item
+  modal.querySelectorAll('[data-unequip]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.unequip);
+      const pokemon = state.team[idx];
+      if (pokemon.heldItem) {
+        state.items.push(pokemon.heldItem);
+        pokemon.heldItem = null;
+      }
+      syncTeamMegaStates();
+      modal.remove();
+      done();
+    });
+  });
+
+  modal.querySelectorAll('button[data-idx]').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const idx = parseInt(btn.dataset.idx);
+      const pokemon = state.team[idx];
+      const displaced = pokemon.heldItem;
+
+      // Remove item from its source
+      if (fromBagIdx >= 0) {
+        state.items.splice(fromBagIdx, 1);
+        if (displaced) state.items.push(displaced);
+      } else if (fromPokemonIdx >= 0) {
+        // True swap: give the displaced item back to the source Pokemon
+        state.team[fromPokemonIdx].heldItem = displaced || null;
+      } else {
+        // Brand new item from a node — displaced item goes to bag
+        if (displaced) state.items.push(displaced);
+      }
+
+      pokemon.heldItem = item;
+      syncTeamMegaStates();
+      modal.remove();
+      done();
+    });
+  });
+
+  modal.querySelector('#btn-equip-to-bag').addEventListener('click', () => {
+    if (fromPokemonIdx >= 0) {
+      state.team[fromPokemonIdx].heldItem = null;
+      syncTeamMegaStates();
+      state.items.push(item);
+    } else if (fromBagIdx < 0) {
+      // Brand new item — put in bag
+      state.items.push(item);
+    }
+    // fromBagIdx >= 0 means it's already in bag — do nothing
+    modal.remove();
+    done();
+  });
+
+  modal.querySelector('#btn-equip-cancel').addEventListener('click', () => {
+    modal.remove();
+  });
+
+}
+
+function openUsableItemModal(item, bagIdx, afterUse = null) {
+  // Escape Rope auto-triggers from runBattleScreen on a non-boss loss; clicking
+  // it manually just informs the player so they don't accidentally consume it.
+  if (item.id === 'escape_rope') {
+    showMapNotification('🪢 Escape Rope auto-uses on a non-boss loss to save your run.');
+    return;
+  }
+  document.getElementById('usable-item-modal')?.remove();
+
+  const canTarget = p => {
+    if (item.id === 'max_revive')   return p.currentHp <= 0;
+    if (item.id === 'full_restore') return p.currentHp > 0 && p.currentHp < p.maxHp;
+    if (item.id === 'moon_stone') {
+      if (p.currentHp <= 0) return false;
+      if (BRANCHING_EVOLUTIONS[p.speciesId]) return true;
+      const evo = EVOLUTIONS[p.speciesId];
+      return !!(evo && evo.into !== p.speciesId);
+    }
+    if (item.id === 'tm_normal') return p.currentHp > 0 && hasUpgradableMove(p);
+    return true;
+  };
+
+  const rows = state.team.map((p, i) => {
+    const enabled = canTarget(p);
+    const statusText = p.currentHp <= 0 ? 'Fainted' : `${p.currentHp}/${p.maxHp} HP`;
+    return `<div class="equip-pokemon-row" data-idx="${i}"
+        style="${enabled ? 'cursor:pointer;' : 'opacity:0.4;cursor:default;pointer-events:none;'}">
+      <img src="${p.spriteUrl}" class="equip-poke-sprite" onerror="this.style.display='none'">
+      <div class="equip-poke-info">
+        <div class="equip-poke-name">${p.nickname || p.name}</div>
+        <div class="equip-poke-lv">Lv${p.level} — ${statusText}</div>
+      </div>
+    </div>`;
+  }).join('');
+
+  const modal = document.createElement('div');
+  modal.id = 'usable-item-modal';
+  modal.className = 'item-equip-overlay';
+  modal.innerHTML = `
+    <div class="item-equip-box">
+      <div class="equip-item-header">
+        <span class="equip-item-icon">${itemIconHtml(item, 32)}</span>
+        <div>
+          <div class="equip-item-name">${item.name}</div>
+          <div class="equip-item-desc">${item.desc}</div>
+        </div>
+      </div>
+      <div class="equip-pokemon-list">${rows}</div>
+      <button id="btn-cancel-use" class="btn-secondary" style="width:100%;margin-top:8px;">Cancel</button>
+    </div>`;
+  document.body.appendChild(modal);
+
+  modal.querySelector('#btn-cancel-use').addEventListener('click', () => modal.remove());
+
+  modal.querySelectorAll('[data-idx]').forEach(row => {
+    if (row.style.pointerEvents === 'none') return;
+    row.addEventListener('click', async () => {
+      const idx = parseInt(row.dataset.idx);
+      const pokemon = state.team[idx];
+      modal.remove();
+      state.items.splice(bagIdx, 1);
+
+      if (item.id === 'max_revive') {
+        pokemon.currentHp = pokemon.maxHp;
+        showMapNotification(`${pokemon.nickname || pokemon.name} was revived!`);
+        renderItemBadges(state.items);
+        renderTeamBar(state.team);
+
+      } else if (item.id === 'full_restore') {
+        pokemon.currentHp = pokemon.maxHp;
+        showMapNotification(`${pokemon.nickname || pokemon.name} was fully restored!`);
+        renderItemBadges(state.items);
+        renderTeamBar(state.team);
+
+      } else if (item.id === 'rare_candy') {
+        for (let i = 0; i < 3; i++) {
+          if (pokemon.level < 100) pokemon.level++;
+        }
+        showMapNotification(`${pokemon.nickname || pokemon.name} grew to Lv ${pokemon.level}!`);
+        renderItemBadges(state.items);
+        renderTeamBar(state.team);
+        await checkAndEvolveTeam();
+
+      } else if (item.id === 'moon_stone') {
+        renderItemBadges(state.items);
+        await applyEvolution(pokemon);
+
+      } else if (item.id === 'tm_normal') {
+        const type = await pickMoveToUpgrade(pokemon);
+        if (!type) {
+          // Cancelled — refund the TM (it was already removed from the bag above).
+          state.items.splice(bagIdx, 0, item);
+          renderItemBadges(state.items);
+          if (afterUse) afterUse();
+          return;
+        }
+        upgradeMoveTier(pokemon, type);
+        const newMove = (getMovesForPokemon(pokemon).find(m => m.type === type)) || {};
+        showMapNotification(`${pokemon.nickname || pokemon.name} learned ${newMove.name || 'a stronger move'}!`);
+        renderItemBadges(state.items);
+        renderTeamBar(state.team);
+
+      }
+      if (afterUse) afterUse();
+    });
+  });
+}
+
+async function applyEvolution(pokemon) {
+  // Eviolite blocks all evolutions — check before showing any branching popup.
+  if (pokemon.heldItem?.id === 'eviolite') return;
+
+  let evo;
+  const branchingChoices = BRANCHING_EVOLUTIONS[pokemon.speciesId];
+  if (branchingChoices) {
+    evo = await showBranchingChoice(pokemon, branchingChoices);
+  } else {
+    evo = EVOLUTIONS[pokemon.speciesId];
+    if (!evo) return;
+  }
+  await playEvoAnimation(pokemon, evo);
+
+  const oldHpRatio = pokemon.currentHp / pokemon.maxHp;
+  const newSpecies = await fetchPokemonById(evo.into);
+
+  pokemon.speciesId = evo.into;
+  pokemon.name      = evo.name;
+  pokemon.spriteUrl = pokemon.isShiny
+    ? `sprites/pokemon/shiny/${evo.into}.png`
+    : `sprites/pokemon/${evo.into}.png`;
+
+  if (newSpecies) {
+    pokemon.types     = newSpecies.types;
+    pokemon.baseStats = newSpecies.baseStats;
+    const hpBuff      = pokemon.statBuffs?.hp ?? 0;
+    const newMax      = Math.floor(calcHp(newSpecies.baseStats.hp, pokemon.level) * (1 + 0.1 * hpBuff));
+    pokemon.maxHp     = newMax;
+    pokemon.currentHp = Math.max(1, Math.floor(oldHpRatio * newMax));
+  }
+
+  const normalUrl = `sprites/pokemon/${pokemon.speciesId}.png`;
+  markPokedexCaught(pokemon.speciesId, pokemon.name, pokemon.types, normalUrl);
+  if (pokemon.isShiny) markShinyDexCaught(pokemon.speciesId, pokemon.name, pokemon.types, pokemon.spriteUrl);
+  checkDexAchievements();
+  renderItemBadges(state.items);
+  renderTeamBar(state.team);
+  saveRun();
+}
+
+async function doPokeCenterNode(node) {
+  state.usedPokecenter = true;
+  for (const p of state.team) p.currentHp = p.maxHp;
+  let msg = '🏥 Your team was fully healed!';
+  if (hasPerk('healer_heart')) {
+    applyLevelGain(state.team, [], new Set(state.team.map((_, i) => i)), 0, false, 2, getLevelCapForMap());
+    await checkAndEvolveTeam();
+    msg = "🏥 Fully healed — and the nurse's training granted +2 levels!";
+  }
+  advanceFromNode(state.map, node.id);
+  showMapScreen();
+  showMapNotification(msg);
+}
+
+// ---- ❓ Random events ----
+
+// Sync species instance from the static dex (era stats applied) — used by
+// events that add/replace team members outside the normal catch flow.
+function instanceFromStatic(id, level, shiny = false) {
+  const e = getStaticPokedexEntry(id);
+  if (!e) return null;
+  const inst = createInstance(
+    { id, name: e.name, types: e.types, baseStats: applyEraStats(id, e.baseStats) },
+    level, shiny, getMoveТierForMap(state.currentMap));
+  if (typeof loadBuffsIntoPokemon === 'function') loadBuffsIntoPokemon(inst);
+  return inst;
+}
+
+async function randomEventSpecies(count = 1) {
+  const picks = await getCatchChoices(getEncounterMapIndex(), Math.max(3, count),
+    getCatchGenRange().maxGenId, true, getCatchGenRange().minGenId);
+  return picks.slice(0, count);
+}
+
+// Villain-faction thief flavour per gen.
+function thiefFlavor() {
+  const g = getRunGen();
+  if (g === '3') return state.villainTeam === 'magma'
+    ? { name: 'Magma Thief', ids: [261, 322] } : { name: 'Aqua Thief', ids: [261, 318] };
+  if (g === '4') return { name: 'Galactic Thief', ids: [434, 431] };
+  if (g === '5') return { name: 'Plasma Thief', ids: [504, 509] };
+  if (g === '2') return { name: 'Rocket Thief', ids: [41, 109] };
+  return { name: 'Rocket Thief', ids: [41, 109] };
+}
+
+async function doEventNode(node, eventId) {
+  const done = msg => {
+    state.savedQuestionResolve = null;
+    advanceFromNode(state.map, node.id);
+    showMapScreen();
+    if (msg) showMapNotification(msg);
+  };
+  const level = Math.max(2, getLevelForNode(node) - 1);
+
+  switch (eventId) {
+    case 'fountain': {
+      for (const p of state.team) p.currentHp = p.maxHp;
+      renderTeamBar(state.team);
+      return done('⛲ A hidden spring fully restored your team!');
+    }
+    case 'berry_bush': {
+      for (const p of state.team) {
+        if (p.currentHp > 0) p.currentHp = Math.min(p.maxHp, p.currentHp + Math.floor(p.maxHp * 0.3));
+      }
+      renderTeamBar(state.team);
+      return done('🫐 You found a berry bush — everyone recovered some HP!');
+    }
+    case 'rare_candy': {
+      grantUsable('rare_candy');
+      renderItemBadges(state.items);
+      return done('🍬 You dug up a Rare Candy!');
+    }
+    case 'escape_rope': {
+      grantUsable('escape_rope');
+      renderItemBadges(state.items);
+      return done('🪢 You found an Escape Rope in the tall grass!');
+    }
+    case 'free_tutor': {
+      const cands = state.team.filter(p => getMovesForPokemon(p).some(m => !m.noDamage && (m.tier ?? 0) < 2));
+      if (!cands.length) { grantUsable('rare_candy'); renderItemBadges(state.items); return done('🎓 The wandering tutor had nothing to teach — took a Rare Candy instead!'); }
+      const p = cands.sort((a, b) => b.level - a.level)[0];
+      const mv = getMovesForPokemon(p).find(m => !m.noDamage && (m.tier ?? 0) < 2);
+      upgradeMoveTier(p, mv.type);
+      const learned = getMovesForPokemon(p).find(m => m.type === mv.type) || {};
+      return done(`🎓 A wandering tutor taught ${p.nickname || p.name} ${learned.name || 'a stronger move'}!`);
+    }
+    case 'wounded_mon': {
+      const [sp] = await randomEventSpecies(1);
+      if (!sp || state.team.length >= 6) return done('…the clearing was empty.');
+      const id = sp.id ?? sp.speciesId;
+      const inst = instanceFromStatic(id, Math.max(2, level - 1));
+      if (!inst) return done('…the clearing was empty.');
+      inst.currentHp = Math.max(1, Math.floor(inst.maxHp * 0.35));
+      markPokedexCaught(id, inst.name, inst.types, `sprites/pokemon/${id}.png`);
+      state.team.push(inst);
+      if (state.team.length > state.maxTeamSize) state.maxTeamSize = state.team.length;
+      renderTeamBar(state.team);
+      return done(`💕 A wounded ${inst.name} trusts you — it joined your team!`);
+    }
+    case 'egg': {
+      // justLaid: the egg node's own advance must not consume a tick.
+      state.pendingEgg = { hatchIn: 3, level, justLaid: true };
+      return done('🥚 You found a Pokémon egg! It rustles… (hatches in 3 nodes)');
+    }
+    case 'thief': {
+      const flavor = thiefFlavor();
+      // The thief grabs a random bag item before the fight (held-type only).
+      const stealable = state.items.map((it, i) => ({ it, i })).filter(x => !x.it.usable);
+      let stolen = null;
+      if (stealable.length) {
+        const pick = stealable[Math.floor(rng() * stealable.length)];
+        stolen = pick.it;
+        state.items.splice(pick.i, 1);
+        renderItemBadges(state.items);
+      }
+      const size = state.currentMap >= 3 ? 2 : 1;
+      const enemyTeam = flavor.ids.slice(0, size).map(id => {
+        const inst = instanceFromStatic(resolveEvoForLevel(id, level + 1), level + 1);
+        return inst;
+      }).filter(Boolean);
+      if (!enemyTeam.length) { if (stolen) state.items.push(stolen); return done(); }
+      showScreen('battle-screen');
+      document.getElementById('battle-title').textContent = `${flavor.name} attacks!`;
+      document.getElementById('battle-subtitle').textContent = stolen
+        ? `They snatched your ${stolen.name} — win it back!` : 'Chase them off!';
+      const won = await new Promise(resolve => {
+        runBattleScreen(enemyTeam, false, () => resolve(true), () => resolve(false), flavor.name, [], 2);
+      });
+      if (!won) { showGameOver(); return; }
+      let msg;
+      if (stolen) { state.items.push(stolen); msg = `👊 You recovered your ${stolen.name}`; }
+      else msg = '👊 You chased the thief off';
+      grantRandomHeldItem();
+      renderItemBadges(state.items);
+      return done(msg + ' — and they dropped their loot!');
+    }
+    case 'mini_boss': {
+      const [sp] = await randomEventSpecies(1);
+      if (!sp) return done();
+      const id = resolveEvoForLevel(sp.id ?? sp.speciesId, level + 4);
+      const boss = instanceFromStatic(id, level + 4);
+      if (!boss) return done();
+      boss.heldItem = { id: TYPE_ITEM_MAP[boss.types[0]] || 'scope_lens', name: 'Boost', icon: '💪' };
+      const fight = await showGbaDialog({
+        lines: [`A fearsome ${boss.name} (Lv${boss.level}) guards a treasure…`],
+        choices: [{ label: 'Fight it!', value: true }, { label: 'Back away', value: false }],
+      });
+      if (!fight) return done('You backed away quietly.');
+      showScreen('battle-screen');
+      document.getElementById('battle-title').textContent = `Alpha ${boss.name} blocks the path!`;
+      document.getElementById('battle-subtitle').textContent = 'Defeat it for a reward!';
+      const won = await new Promise(resolve => {
+        runBattleScreen([boss], false, () => resolve(true), () => resolve(false), null, [], 0);
+      });
+      if (!won) { showGameOver(); return; }
+      grantRandomHeldItem();
+      renderItemBadges(state.items);
+      return done('🏆 The alpha fell — its treasure is yours!');
+    }
+    case 'wonder_trade': {
+      const doIt = await showGbaDialog({
+        lines: ['A mysterious machine hums… It offers to trade ONE RANDOM team member for a surprise!'],
+        choices: [{ label: 'Trade! (random)', value: true }, { label: 'No thanks', value: false }],
+      });
+      if (!doIt) return done('You left the machine alone.');
+      const idx = Math.floor(rng() * state.team.length);
+      const out = state.team[idx];
+      if (out.heldItem) { state.items.push(out.heldItem); out.heldItem = null; }
+      const [sp] = await randomEventSpecies(1);
+      const id = sp ? (sp.id ?? sp.speciesId) : 129;
+      const inst = instanceFromStatic(resolveEvoForLevel(id, out.level), out.level, rng() < shinyRollOdds() * 3);
+      markPokedexCaught(inst.speciesId, inst.name, inst.types, `sprites/pokemon/${inst.speciesId}.png`);
+      state.team[idx] = inst;
+      renderTeamBar(state.team);
+      renderItemBadges(state.items);
+      return done(`🔄 ${out.nickname || out.name} left… and ${inst.name} arrived${inst.isShiny ? ' — SHINY!' : '!'}`);
+    }
+    default:
+      return done();
+  }
+}
+
+// Egg progress: ticks on every node advance; hatches into a random species
+// (or a Rare Candy if the team is full).
+async function tickEggProgress() {
+  if (!state.pendingEgg || state.isEndlessMode) return;
+  if (state.pendingEgg.justLaid) { delete state.pendingEgg.justLaid; return; }
+  state.pendingEgg.hatchIn--;
+  if (state.pendingEgg.hatchIn > 0) {
+    showMapNotification(`🥚 The egg rustles… (${state.pendingEgg.hatchIn} to go)`);
+    return;
+  }
+  const { level } = state.pendingEgg;
+  state.pendingEgg = null;
+  if (state.team.length >= 6) {
+    grantUsable('rare_candy');
+    renderItemBadges(state.items);
+    showMapNotification('🥚 The egg hatched, but your team is full — the hatchling left a Rare Candy!');
+    return;
+  }
+  const [sp] = await randomEventSpecies(1);
+  if (!sp) return;
+  const id = sp.id ?? sp.speciesId;
+  const inst = instanceFromStatic(id, Math.max(2, level - 1), rng() < shinyRollOdds() * 2);
+  if (!inst) return;
+  markPokedexCaught(id, inst.name, inst.types, `sprites/pokemon/${id}.png`);
+  state.team.push(inst);
+  if (state.team.length > state.maxTeamSize) state.maxTeamSize = state.team.length;
+  renderTeamBar(state.team);
+  showMapNotification(`🐣 The egg hatched into ${inst.isShiny ? 'a SHINY ' : ''}${inst.name}!`);
+}
+
+// ---- Route Perks (roguelike boons drafted after each badge) ----
+
+// Pool intentionally larger than the 8 drafts a run allows, so choices stay
+// meaningful to the end. Recurring perks re-trigger on every later badge;
+// instant perks apply once on pick.
+const ROUTE_PERKS = [
+  { id: 'lucky_finder', icon: '🎁', name: 'Treasure Eye',      desc: 'Item nodes offer 4 choices instead of 3' },
+  { id: 'catch_expert', icon: '🎯', name: "Ranger's Instinct", desc: 'Catch encounters offer 4 Pokémon instead of 3', excludeNuzlocke: true },
+  { id: 'trainer_xp',   icon: '📚', name: 'Battle Scholar',    desc: '+1 level for the whole team after trainer battles' },
+  { id: 'healer_heart', icon: '💖', name: "Nurse's Favor",     desc: 'Pokémon Centers also grant +2 levels (up to the cap)' },
+  { id: 'shiny_hunter', icon: '✨', name: 'Shine Seeker',      desc: 'Shiny odds are doubled' },
+  { id: 'trader',       icon: '🔁', name: 'Master Haggler',    desc: 'Trade nodes offer +5 levels instead of +3' },
+  { id: 'iron_will',    icon: '🛡️', name: 'Iron Will',         desc: 'Fainted Pokémon no longer earn less XP' },
+  { id: 'head_start',   icon: '🚀', name: 'Trailblazer',       desc: '+1 level for the whole team when entering a new map' },
+  { id: 'rope_stash',   icon: '🪢', name: 'Escape Artist',     desc: 'Gain an Escape Rope now and after every badge', excludeNuzlocke: true, recurring: true },
+  { id: 'deep_pockets', icon: '👜', name: 'Deep Pockets',      desc: 'Gain a random held item now and after every badge', recurring: true },
+  { id: 'candy_stash',  icon: '🍬', name: 'Sweet Tooth',       desc: 'Gain 2 Rare Candies right now', instant: true },
+  { id: 'tutor_pass',   icon: '🎓', name: 'Old Master',        desc: 'Your strongest Pokémon upgrades a move right now', instant: true },
+];
+
+function hasPerk(id) {
+  return !state.isEndlessMode && Array.isArray(state.perks) && state.perks.includes(id);
+}
+
+// Shiny odds in one place so the Shine Seeker perk applies everywhere.
+function shinyRollOdds() {
+  return (hasShinyCharm() ? 0.02 : 0.01) * (hasPerk('shiny_hunter') ? 2 : 1);
+}
+
+function grantUsable(id) {
+  const it = USABLE_ITEM_POOL.find(x => x.id === id);
+  if (it) state.items.push({ ...it });
+}
+
+function applyInstantPerk(id) {
+  if (id === 'candy_stash') { grantUsable('rare_candy'); grantUsable('rare_candy'); }
+  if (id === 'rope_stash') grantUsable('escape_rope');
+  if (id === 'deep_pockets') grantRandomHeldItem();
+  if (id === 'tutor_pass') {
+    const cands = state.team.filter(p => getMovesForPokemon(p).some(m => !m.noDamage && (m.tier ?? 0) < 2));
+    if (cands.length) {
+      const p = cands.sort((a, b) => b.level - a.level)[0];
+      const mv = getMovesForPokemon(p).find(m => !m.noDamage && (m.tier ?? 0) < 2);
+      if (mv) { upgradeMoveTier(p, mv.type); showMapNotification(`${p.nickname || p.name} mastered a stronger move!`); }
+    }
+  }
+}
+
+function grantRandomHeldItem() {
+  const owned = new Set([...state.items.filter(i => !i.usable).map(i => i.id),
+    ...state.team.filter(p => p.heldItem).map(p => p.heldItem.id)]);
+  const pool = ITEM_POOL.filter(i => !owned.has(i.id) && (i.minMap === undefined || state.currentMap >= i.minMap) && !i.gen2Only);
+  if (!pool.length) return;
+  const item = pool[Math.floor(rng() * pool.length)];
+  state.items.push({ ...item });
+  showMapNotification(`${item.icon} Found a ${item.name}!`);
+}
+
+// Recurring perks fire on every badge earned after they were picked.
+function applyPerBadgePerks() {
+  if (hasPerk('rope_stash')) grantUsable('escape_rope');
+  if (hasPerk('deep_pockets')) grantRandomHeldItem();
+}
+
+// Roll (and persist) 3 draft options, show the picker, apply the choice.
+// pendingPerkDraft survives refreshes so a mid-draft reload re-offers it.
+function showPerkDraft() {
+  return new Promise(resolve => {
+    if (state.isEndlessMode) { resolve(); return; }
+    if (!Array.isArray(state.perks)) state.perks = [];
+    if (!Array.isArray(state.pendingPerkDraft) || !state.pendingPerkDraft.length) {
+      const avail = ROUTE_PERKS.filter(p => !state.perks.includes(p.id) && !(state.nuzlockeMode && p.excludeNuzlocke));
+      for (let i = avail.length - 1; i > 0; i--) { const j = Math.floor(rng() * (i + 1)); [avail[i], avail[j]] = [avail[j], avail[i]]; }
+      state.pendingPerkDraft = avail.slice(0, 3).map(p => p.id);
+      saveRun();
+    }
+    const offers = state.pendingPerkDraft.map(id => ROUTE_PERKS.find(p => p.id === id)).filter(Boolean);
+    if (!offers.length) { state.pendingPerkDraft = null; resolve(); return; }
+
+    document.getElementById('item-equip-modal')?.remove();
+    const modal = document.createElement('div');
+    modal.id = 'item-equip-modal';
+    modal.className = 'item-equip-overlay';
+    modal.innerHTML = `
+      <div class="item-equip-box">
+        <div class="equip-item-header">
+          <span class="equip-item-icon" style="font-size:28px;">🏅</span>
+          <div>
+            <div class="equip-item-name">Route Bonus</div>
+            <div class="equip-item-desc">Your victory earned you a boon — choose one for the rest of the run.</div>
+          </div>
+        </div>
+        <div class="equip-pokemon-list">
+          ${offers.map(p => `
+            <div class="equip-pokemon-row">
+              <span style="font-size:24px;width:34px;text-align:center;">${p.icon}</span>
+              <div class="equip-poke-info">
+                <div class="equip-poke-name">${p.name}</div>
+                <div class="equip-poke-lv">${p.desc}</div>
+              </div>
+              <div class="equip-btn-group"><button class="equip-btn" data-perk="${p.id}">Pick ▸</button></div>
+            </div>`).join('')}
+        </div>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.querySelectorAll('button[data-perk]').forEach(btn => {
+      btn.onclick = () => {
+        const id = btn.dataset.perk;
+        state.perks.push(id);
+        state.pendingPerkDraft = null;
+        applyInstantPerk(id);
+        saveRun();
+        renderItemBadges(state.items);
+        modal.remove();
+        const perk = ROUTE_PERKS.find(p => p.id === id);
+        showMapNotification(`${perk.icon} ${perk.name} acquired!`);
+        resolve();
+      };
+    });
+  });
+}
+
+// ---- Trainer Battle Node ----
+
+// Gens 4/5 have no hand-curated archetype pools — derive them from the
+// archetype's specialty types within the run's dex slice, so a Hiker still
+// fields Rock/Ground mons in Sinnoh/Unova and the map label stays truthful.
+// (aceTrainer/oldGuy are 'Various' → map's random BST pool.)
+const ARCHETYPE_TYPES = {
+  bugCatcher: ['Bug'], hiker: ['Rock', 'Ground'], fisher: ['Water'], captain: ['Water'],
+  fireSpitter: ['Fire'], policeman: ['Fire'], Scientist: ['Electric', 'Poison'],
+  teamRocket: ['Poison'], biker: ['Poison'], birdCatcher: ['Flying'],
+  nerd: ['Electric'], medium: ['Ghost'], schoolBoy: ['Normal'],
+};
+function archetypeGenPool(key, range) {
+  const types = ARCHETYPE_TYPES[key];
+  if (!types) return null;
+  const ids = new Set();
+  for (const t of types) {
+    for (const id of getSpeciesIdsByType(t, range.maxGenId)) {
+      if (id >= range.minGenId) ids.add(id);
+    }
+  }
+  // Starved slice (e.g. Sinnoh Fire = only Magmortar once starter lines are
+  // out — the real D/P had this exact problem): widen with earlier-gen
+  // species of the same type, Platinum-style (Ponyta, Houndour, …).
+  if (ids.size < 3) {
+    for (const t of types) for (const id of getSpeciesIdsByType(t, range.maxGenId)) ids.add(id);
+  }
+  return ids.size ? [...ids] : null;
+}
+
+// Species pools for each trainer archetype (Gen 1 IDs).
+// null = use the map's random BST pool instead.
+const TRAINER_BATTLE_CONFIG = {
+  // ── Bug Catcher: classic insect collector. Adds Scyther's Scizor evo line. ──
+  bugCatcher:  { name: 'Bug Catcher',   sprite: 'bugcatcher',
+                 pool: [10,11,12,13,14,15,46,47,48,49,123,127],
+                 gen2Pool: [10,11,12,13,14,15,46,47,48,49,123,165,166,167,168,193,204,205,212,213,214],
+                 gen3Pool: [265,266,267,268,269,283,284,290,291,313,314,347,348] },
+
+  // ── Hiker: rocks/ground/mountain Pokémon. ──
+  hiker:       { name: 'Hiker',         sprite: 'hiker',
+                 pool: [27,28,50,51,66,67,68,74,75,76,95,111,112],
+                 gen2Pool: [74,75,76,95,194,195,208,220,221],
+                 gen3Pool: [74,75,76,299,304,305,306,322,323,328,329,343,344] },
+
+  // ── Fisherman: rod-and-line catchable fish — small, sport-fishing vibe. ──
+  // Differs from Captain by featuring rod-caught water Pokémon (Magikarp,
+  // Goldeen, Horsea, Marill, Remoraid, Krabby, Chinchou) instead of the
+  // ocean-going giants the Captain favors.
+  fisher:      { name: 'Fisherman',     sprite: 'fisherman',
+                 pool: [54,55,60,61,98,99,116,117,118,119,129,130],
+                 gen2Pool: [98,99,116,117,118,119,129,130,170,171,183,184,194,211,222,223,224,230],
+                 gen3Pool: [118,119,129,130,318,319,339,340,341,342,349,350,370] },
+
+  // ── Captain: naval / open-ocean Water — big, intimidating sea creatures. ──
+  // Differs from Fisherman by leaning into Tentacruel, Slowbro/Slowking,
+  // Cloyster, Starmie, Lapras, Mantine, Politoed — things you'd see from
+  // the deck of a ship, not pulled in on a rod.
+  captain:     { name: 'Sailor',        sprite: 'sailor',
+                 pool: [8,9,72,73,80,90,91,121,131],
+                 gen2Pool: [8,9,72,73,80,90,91,121,131,186,199,226],
+                 gen3Pool: [72,73,278,279,320,321,363,364,365,366,367,368,369] },
+
+  // ── Team Rocket Grunt: criminal vibe — pests, scavengers, dark types. ──
+  // Differs from Biker by mixing Dark (Houndour, Sneasel, Murkrow) and rats /
+  // alley cats (Rattata, Meowth) with the classic Grimer/Muk. The Biker keeps
+  // the pure-Poison sewer Pokémon.
+  teamRocket:  { name: 'Team Rocket Grunt', sprite: 'teamrocket',
+                 pool: [19,20,23,24,41,42,52,53,88,89],
+                 gen2Pool: [19,20,41,42,52,53,88,89,169,198,215,228,229],
+                 gen3Pool: [41,42,261,262,274,275,302,318,335,336] },
+
+  // ── Biker: pure Poison street thug. ──
+  // Differs from Team Rocket by being strictly Poison-type — no rats, no Dark
+  // types. Ekans / Koffing / Nidoran / Tentacool / Spinarak / Qwilfish.
+  biker:       { name: 'Biker',         sprite: 'biker',
+                 pool: [23,24,29,30,31,32,33,34,72,73,109,110],
+                 gen2Pool: [23,24,29,30,31,32,33,34,72,73,109,110,167,168,211],
+                 gen3Pool: [41,42,88,89,109,110,316,317,336] },
+
+  // ── Officer: police K9 unit — fire dogs + investigative themes. ──
+  policeman:   { name: 'Officer',       sprite: 'policeman',
+                 pool: [58,59],
+                 gen2Pool: [58,59,228,229],
+                 gen3Pool: [58,59,261,262] },
+
+  // ── Fire trainer (Burglar): all-Fire arsonist. ──
+  fireSpitter: { name: 'Firebreather',  sprite: 'burglar',
+                 pool: [4,5,6,37,38,58,59,77,78,126,136],
+                 gen2Pool: [37,38,58,59,126,136,228,229,240],
+                 gen3Pool: [37,38,58,59,218,219,322,323,324] },
+
+  // ── Super Nerd: pure Electric specialists. Replaces Scientist in Gen 2. ──
+  nerd:        { name: 'Super Nerd',    sprite: 'supernerd',
+                 pool: [25,26,81,82,100,101,125,135],
+                 gen2Pool: [25,26,81,82,100,101,125,135,170,171,179,180,181,239],
+                 gen3Pool: [25,26,81,82,100,101,309,310,311,312] },
+
+  // ── Scientist: kept for Gen 1 mode only. ──
+  Scientist:   { name: 'Scientist',     sprite: 'scientist',
+                 pool: [81,82,88,89,92,93,94,100,101,137],
+                 gen2Pool: [81,82,201,233,239],
+                 gen3Pool: [81,82,233,343,344,374,375] },
+
+  // ── Medium: pure Ghost (small pool intentional). ──
+  medium:      { name: 'Medium',        sprite: 'medium',
+                 pool: [92,93,94],
+                 gen2Pool: [92,93,94,200],
+                 gen3Pool: [302,353,354,355,356] },
+
+  // ── School Kid: beginner Normal-types — youngster's first team. ──
+  // Differs from Old Man by leaning younger/smaller (Rattata, Eevee, Sentret,
+  // Aipom, baby Pokémon) instead of the bulky veteran-Normal lineup.
+  schoolBoy:   { name: 'Schoolboy',     sprite: 'schoolkid',
+                 pool: [19,20,133,143],
+                 gen2Pool: [19,20,133,161,162,172,173,174,175,190,206],
+                 gen3Pool: [263,264,287,288,293,294,295,300,301] },
+
+  // ── Bird Catcher: pure Flying — actual birds and raptors. ──
+  // Differs from Old Man by being strictly flying / avian (Pidgey, Spearow,
+  // Doduo, Farfetch'd, Hoothoot, Natu, Murkrow, Skarmory, Aerodactyl), while
+  // Old Man keeps the bulky ground-bound Normal-types.
+  birdCatcher: { name: 'Bird Keeper',   sprite: 'birdkeeper',
+                 pool: [16,17,18,21,22,83,84,85,142],
+                 gen2Pool: [16,17,18,21,22,83,84,85,142,163,164,177,178,198,225,227],
+                 gen3Pool: [227,276,277,278,279,333,334,357] },
+
+  // ── Ace Trainer: elite mixed-type fighters. Adds the new Gen 2 cross-gen evos. ──
+  aceTrainer:  { name: 'Ace Trainer',   sprite: 'acetrainer',
+                 pool: null,
+                 gen2Pool: [56,63,66,79,96,102,106,107,113,116,137,147,177,196,197,199,201,202,203,212,214,230,233,236,238,242],
+                 gen3Pool: [281,282,286,297,310,326,330,332,334,335,336,340,342,350,359,362,365,371,372] },
+
+  // ── Old Man / Gentleman: veteran Normal-types — bulky, well-established. ──
+  // Strips the pure-Flying birds (moved to Bird Catcher) and keeps the
+  // grandfatherly mix of Tauros / Miltank / Granbull / Stantler / Furret /
+  // Chansey-Blissey / Lickitung.
+  oldGuy:      { name: 'Gentleman',     sprite: 'gentleman',
+                 pool: null,
+                 gen2Pool: [53,108,113,128,161,162,190,206,209,210,234,241,242],
+                 gen3Pool: [287,288,289,295,301,327,335,352,357] },
+};
+
+// Campaign trainer gradient (indexed by map): a lone low-level mon on the
+// first routes, growing to full six-mon squads on the road to the Elite Four.
+// Levels stay BELOW the route ladder everywhere — the growing squad size is
+// what carries the late-game challenge (route fights must stay clearly
+// winnable one by one; the walls are the gyms/E4, which run full-strength
+// teams with items). Simulated winrates decline ~100% → ~78% across maps.
+const TRAINER_TEAM_SIZES    = [1, 2, 2, 3, 3, 4, 4, 5, 6];
+const TRAINER_LEVEL_OFFSETS = [-3, -3, -2, -1, -1, -1, -1, -2, -4];
+
+async function doTrainerNode(node) {
+  const key = node.trainerSprite || 'aceTrainer';
+  const config = TRAINER_BATTLE_CONFIG[key] || TRAINER_BATTLE_CONFIG.aceTrainer;
+  let teamSize;
+  if (state.isEndlessMode) {
+    const slot = (endlessState.regionNumber - 1) * 3 + endlessState.mapIndexInRegion;
+    const bossSize = ENDLESS_TEAM_SIZES[slot] ?? 4;
+    teamSize = Math.max(1, bossSize - 1);
+  } else {
+    teamSize = TRAINER_TEAM_SIZES[Math.min(state.currentMap, TRAINER_TEAM_SIZES.length - 1)];
+  }
+  const levelOffset = state.isEndlessMode ? 0
+    : TRAINER_LEVEL_OFFSETS[Math.min(state.currentMap, TRAINER_LEVEL_OFFSETS.length - 1)];
+  const level = Math.max(1, getLevelForNode(node) + levelOffset);
+  const moveTier = getMoveТierForMap(state.currentMap);
+
+  let speciesList;
+  // Gen 3 archetypes without a gen3Pool fall through to the map's random BST
+  // pool (which is already gen-range-correct) — never to the Gen 1 pool.
+  const _tRunGen = getRunGen();
+  const activePool = _tRunGen === '3' ? (config.gen3Pool || null)
+    : (_tRunGen === '4' || _tRunGen === '5') ? archetypeGenPool(key, GEN_RUN_CONFIG[_tRunGen].catch)
+    : (state.gen2Mode && config.gen2Pool) ? config.gen2Pool : config.pool;
+  if (activePool) {
+    // Dedupe pool, filter out evolved forms the battle level can't reach, then shuffle
+    const eligible = [...new Set(activePool)]
+      .filter(id => minLevelForSpecies(id) <= level);
+    const raw = eligible.length ? eligible : [...new Set(activePool)]; // fallback: use full pool
+    // Collapse evolution chains: at high level, e.g. Zubat/Golbat/Crobat all
+    // resolve to Crobat, which would let a trainer roll 3 of the same mon.
+    // Keep one pool entry per distinct evolved species.
+    const seenEvolved = new Set();
+    const pool = [];
+    for (const id of raw) {
+      const ev = resolveEvoForLevel(id, level);
+      if (seenEvolved.has(ev)) continue;
+      seenEvolved.add(ev);
+      pool.push(id);
+    }
+    const shuffled = [...pool];
+    for (let i = shuffled.length - 1; i > 0; i--) {
+      const j = Math.floor(rng() * (i + 1));
+      [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
+    }
+    const ids = Array.from({ length: teamSize }, (_, i) => resolveEvoForLevel(shuffled[i % shuffled.length], level));
+    const fetched = await Promise.all(ids.map(id => fetchPokemonById(id)));
+    speciesList = fetched.filter(Boolean);
+  } else {
+    // Request enough choices to fill the (now larger) team, wrapping if the
+    // encounter pool returns fewer distinct species than we need.
+    const rawChoices = await getCatchChoices(getEncounterMapIndex(), Math.max(teamSize, 6), getCatchGenRange().maxGenId, !state.isEndlessMode, getCatchGenRange().minGenId);
+    const picked = rawChoices.length
+      ? Array.from({ length: teamSize }, (_, i) => rawChoices[i % rawChoices.length])
+      : [];
+    speciesList = (await Promise.all(picked.map(async sp => {
+      const rawId = sp.id ?? sp.speciesId;
+      const evoId = resolveEvoForLevel(rawId, level);
+      return evoId !== rawId ? (await fetchPokemonById(evoId) || sp) : sp;
+    }))).filter(Boolean);
+  }
+
+  if (!speciesList.length) { advanceFromNode(state.map, node.id); showMapScreen(); return; }
+  const enemyTeam = speciesList.map(sp => createInstance(sp, level, false, moveTier));
+
+  const titleEl = document.getElementById('battle-title');
+  const subEl   = document.getElementById('battle-subtitle');
+  if (titleEl) titleEl.textContent = `${config.name} wants to battle!`;
+  if (subEl)   subEl.textContent   = `${enemyTeam.length} Pokémon — Lv ~${level}`;
+
+  const won = await new Promise(resolve => {
+    runBattleScreen(enemyTeam, false, () => resolve(true), () => resolve(false), config.sprite, [], 2, true);
+  });
+  if (!won) { showGameOver(); return; }
+  if (state.isEndlessMode) await applyEndlessBugTrait();
+  advanceFromNode(state.map, node.id);
+  showMapScreen();
+}
+
+// ---- Legendary Node ----
+
+async function doLegendaryNode(node) {
+  const teamLegendIds = state.team.map(p => p.speciesId);
+  let minLegendId, maxLegendId;
+  if (state.isEndlessMode) {
+    const range = getStageGenRange(endlessState.stageNumber);
+    minLegendId = range.minGenId;
+    maxLegendId = range.maxGenId;
+  } else {
+    const range = GEN_RUN_CONFIG[getRunGen()].catch;
+    minLegendId = range.minGenId;
+    maxLegendId = range.maxGenId;
+  }
+  const available = LEGENDARY_IDS.filter(id => id >= minLegendId && id <= maxLegendId
+    && !teamLegendIds.includes(id)
+    && !(state.isEndlessMode && MYTHICAL_IDS.has(id))); // mythicals are campaign-only
+  if (available.length === 0) { advanceFromNode(state.map, node.id); showMapScreen(); return; }
+  const legendId = available[Math.floor(rng() * available.length)];
+  const species = await fetchPokemonById(legendId);
+  if (!species) { advanceFromNode(state.map, node.id); showMapScreen(); return; }
+
+  const level = state.isEndlessMode ? getLevelForNode(node) + 5 : GEN_RUN_CONFIG[getRunGen()].levels()[state.currentMap][1];
+  const legendary = createInstance(species, level, rng() < shinyRollOdds(), 2);
+
+  const titleEl = document.getElementById('battle-title');
+  const subEl = document.getElementById('battle-subtitle');
+  if (titleEl) titleEl.textContent = `A legendary ${legendary.name} appeared!`;
+  if (subEl) subEl.textContent = `Lv ${legendary.level} — Defeat it to add it to your team!`;
+
+  await runBattleScreen([legendary], false, async () => {
+    // Escape Rope was used — skip the capture flow but keep the run going.
+    if (state._escapedViaRope) {
+      state._escapedViaRope = false;
+      advanceFromNode(state.map, node.id);
+      showMapScreen();
+      return;
+    }
+    // Win — offer to add legendary to team
+    const normalUrl = `sprites/pokemon/${legendary.speciesId}.png`;
+    markPokedexCaught(legendary.speciesId, legendary.name, legendary.types, normalUrl);
+    if (legendary.isShiny) markShinyDexCaught(legendary.speciesId, legendary.name, legendary.types, legendary.spriteUrl);
+    checkDexAchievements();
+    showSwapScreen(legendary, node);
+  }, () => {
+    showGameOver();
+  }, null, [], 0); // Legendary battles give 0 extra levels (already challenging enough)
+}
+
+// ---- Move Tutor Node ----
+
+// Modal to pick WHICH of a Pokémon's moves to level up. Resolves with the
+// chosen type, or null if cancelled. Auto-resolves when there's only one
+// upgradable move (no choice to make).
+function pickMoveToUpgrade(pokemon) {
+  return new Promise(resolve => {
+    const moves = getMovesForPokemon(pokemon).filter(m => !m.noDamage && (m.tier ?? 0) < 2);
+    if (moves.length === 0) { resolve(null); return; }
+    if (moves.length === 1) { resolve(moves[0].type); return; }
+
+    const isSp = (pokemon.baseStats?.special || 0) >= (pokemon.baseStats?.atk || 0);
+    document.getElementById('move-upgrade-modal')?.remove();
+    const modal = document.createElement('div');
+    modal.id = 'move-upgrade-modal';
+    modal.className = 'item-equip-overlay';
+    const rows = moves.map(m => {
+      const next = MOVE_POOL[m.type]?.[isSp ? 'special' : 'physical']?.[(m.tier ?? 0) + 1];
+      const tierLabel = ['Tier 1', 'Tier 2', 'Mastered'][m.tier ?? 0];
+      return `<button class="equip-btn move-up-pick" data-type="${m.type}" style="display:flex;justify-content:space-between;align-items:center;gap:10px;width:100%;margin-bottom:6px;">
+        <span><span class="type-badge type-${m.type.toLowerCase()}">${m.type}</span> ${m.name} <span style="opacity:.65;">(${tierLabel})</span></span>
+        <span style="white-space:nowrap;">→ ${next?.name || 'Mastered'}</span>
+      </button>`;
+    }).join('');
+    modal.innerHTML = `
+      <div class="item-equip-box">
+        <div class="equip-item-header">
+          <span class="equip-item-icon" style="font-size:28px;">💿</span>
+          <div>
+            <div class="equip-item-name">${pokemon.nickname || pokemon.name}</div>
+            <div class="equip-item-desc">Which move should level up?</div>
+          </div>
+        </div>
+        <div class="equip-pokemon-list">${rows}</div>
+        <button id="btn-cancel-moveup" class="btn-secondary" style="width:100%;margin-top:8px;">Cancel</button>
+      </div>`;
+    document.body.appendChild(modal);
+    modal.querySelectorAll('.move-up-pick').forEach(b => b.addEventListener('click', () => { modal.remove(); resolve(b.dataset.type); }));
+    modal.querySelector('#btn-cancel-moveup').addEventListener('click', () => { modal.remove(); resolve(null); });
+  });
+}
+
+function doMoveTutorNode(node) {
+  document.getElementById('item-equip-modal')?.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'item-equip-modal';
+  modal.className = 'item-equip-overlay';
+
+  const rows = state.team.map((p, i) => {
+    const moves = getMovesForPokemon(p).filter(m => !m.noDamage);
+    const upgradable = moves.some(m => (m.tier ?? 0) < 2);
+    const summary = moves.map(m => `${m.name} (${['T1', 'T2', 'Max'][m.tier ?? 0]})`).join(' · ');
+    return `<div class="equip-pokemon-row" style="${upgradable ? '' : 'opacity:0.45;'}">
+      <img src="${p.spriteUrl}" class="equip-poke-sprite" onerror="this.style.display='none'">
+      <div class="equip-poke-info">
+        <div class="equip-poke-name">${p.nickname || p.name}</div>
+        <div class="equip-poke-lv">Lv${p.level} &bull; ${summary}</div>
+      </div>
+      <div class="equip-btn-group">
+        ${upgradable
+          ? `<button class="equip-btn" data-tutor="${i}">Teach ▸</button>`
+          : `<span style="font-size:10px;color:#888;">Mastered!</span>`}
+      </div>
+    </div>`;
+  }).join('');
+
+  modal.innerHTML = `
+    <div class="item-equip-box">
+      <div class="equip-item-header">
+        <span class="equip-item-icon" style="font-size:28px;">♪</span>
+        <div>
+          <div class="equip-item-name">Move Tutor</div>
+          <div class="equip-item-desc">Teach one Pokémon a more powerful move.</div>
+        </div>
+      </div>
+      <div class="equip-pokemon-list">${rows}</div>
+      <button id="btn-skip-tutor" class="btn-secondary" style="width:100%;margin-top:8px;">Skip</button>
+    </div>`;
+
+  document.body.appendChild(modal);
+
+  const finish = () => {
+    modal.remove();
+    advanceFromNode(state.map, node.id);
+    showMapScreen();
+  };
+
+  modal.querySelectorAll('button[data-tutor]').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const idx = parseInt(btn.dataset.tutor);
+      const pokemon = state.team[idx];
+      const type = await pickMoveToUpgrade(pokemon);
+      if (!type) return; // cancelled — keep the tutor open
+      upgradeMoveTier(pokemon, type);
+      const newMove = getMovesForPokemon(pokemon).find(m => m.type === type) || {};
+      modal.remove();
+      advanceFromNode(state.map, node.id);
+      showMapScreen();
+      showMapNotification(`${pokemon.nickname || pokemon.name} learned ${newMove.name || 'a stronger move'}!`);
+    });
+  });
+
+  modal.querySelector('#btn-skip-tutor').addEventListener('click', finish);
+}
+
+// ---- Trade Node ----
+
+async function doTradeNode(node) {
+  showScreen('trade-screen');
+  document.getElementById('trade-desc').textContent = "Trade one of your Pokémon for a random Pokémon 3 levels higher.";
+
+  const listEl = document.getElementById('trade-team-list');
+  listEl.innerHTML = '';
+
+  for (let i = 0; i < state.team.length; i++) {
+    const mine = state.team[i];
+    const typeBadges = (mine.types || []).map(t =>
+      `<span class="type-badge type-${t.toLowerCase()}">${t}</span>`
+    ).join('');
+
+    const li = document.createElement('li');
+    li.className = 'trade-member-row';
+    li.innerHTML = `
+      <img class="trade-member-sprite" src="${mine.spriteUrl || ''}" alt="${mine.name}" loading="lazy">
+      <div class="trade-member-info">
+        <div class="trade-member-name">${mine.nickname || mine.name}</div>
+        <div class="trade-member-level">Lv ${mine.level}</div>
+        <div class="trade-member-types">${typeBadges}</div>
+      </div>
+      <div class="trade-member-arrow">→</div>
+    `;
+
+    const idx = i;
+    const doTrade = async () => {
+      let pool = await getCatchChoices(getEncounterMapIndex(), 3, getCatchGenRange().maxGenId, !state.isEndlessMode, getCatchGenRange().minGenId);
+      // Never offer the same species back. The bucket has dozens of options,
+      // so this filter essentially never empties; fall back if it somehow does.
+      const filtered = pool.filter(sp => (sp.id ?? sp.speciesId) !== mine.speciesId);
+      const choices = filtered.length > 0 ? filtered : pool;
+      const species = choices[Math.floor(rng() * choices.length)];
+      if (!species) { advanceFromNode(state.map, node.id); showMapScreen(); return; }
+      const offerLevel = Math.min(100, mine.level + (hasPerk('trader') ? 5 : 3));
+      const offer = createInstance(species, offerLevel, rng() < shinyRollOdds(), Math.max(getMoveТierForMap(state.currentMap), mine.moveTier ?? 0));
+      const released = state.team[idx];
+      if (released.heldItem) state.items.push(released.heldItem);
+      loadBuffsIntoPokemon(offer);
+      state.team.splice(idx, 1, offer);
+      const normalUrl = `sprites/pokemon/${offer.speciesId}.png`;
+      markPokedexCaught(offer.speciesId, offer.name, offer.types, normalUrl);
+      if (offer.isShiny) markShinyDexCaught(offer.speciesId, offer.name, offer.types, offer.spriteUrl);
+      checkDexAchievements();
+      advanceFromNode(state.map, node.id);
+
+      // Show full-screen reveal
+      const offerCaught = _isDexCaught(getPokedex()[offer.speciesId]);
+      const offerHofBadge = hofHasEvoLine(offer.speciesId);
+      showScreen('shiny-screen');
+      document.getElementById('shiny-content').innerHTML = `
+        <div class="shiny-title">You received ${offer.name}!</div>
+        <div style="color:var(--text-dim);font-size:10px;margin-bottom:8px;">
+          ${released.nickname || released.name} was sent to the trainer.</div>
+        ${renderPokemonCard(offer, false, false, offerCaught, offerHofBadge)}
+        <button id="btn-trade-continue" class="btn-primary" style="margin-top:12px;">Continue</button>
+      `;
+      document.getElementById('btn-trade-continue').onclick = () => showMapScreen();
+    };
+
+    li.addEventListener('click', doTrade);
+    listEl.appendChild(li);
+  }
+
+  document.getElementById('btn-skip-trade').onclick = () => {
+    advanceFromNode(state.map, node.id);
+    showMapScreen();
+  };
+}
+
+async function doShinyNode(node) {
+  let choices = await getCatchChoices(getEncounterMapIndex(), 3, getCatchGenRange().maxGenId, !state.isEndlessMode, getCatchGenRange().minGenId);
+  const level = getLevelForNode(node);
+  const species = choices[0];
+  if (!species) { advanceFromNode(state.map, node.id); showMapScreen(); return; }
+
+  const shiny = createInstance(species, level, true, getMoveТierForMap(state.currentMap));
+  loadBuffsIntoPokemon(shiny);
+
+  const shinyCaught = !!(getShinyDex()[shiny.speciesId]);
+  const shinyStarterBadge = hofHasEvoLine(shiny.speciesId);
+  showScreen('shiny-screen');
+  document.getElementById('shiny-content').innerHTML = `
+    <div class="shiny-title">✨ A Shiny Pokemon appeared!</div>
+    <div class="poke-choice-wrap">
+      ${renderPokemonCard(shiny, false, false, shinyCaught, shinyStarterBadge)}
+      ${renderTraitPreview(shiny, state.team)}
+    </div>
+    <button id="btn-take-shiny" class="btn-primary">Take ${shiny.name}!</button>
+    <button id="btn-skip-shiny" class="btn-secondary" style="margin-top:6px;">Skip</button>
+  `;
+  document.getElementById('btn-take-shiny').onclick = () => {
+    const normalUrl = `sprites/pokemon/${shiny.speciesId}.png`;
+    markPokedexCaught(shiny.speciesId, shiny.name, shiny.types, normalUrl);
+    markShinyDexCaught(shiny.speciesId, shiny.name, shiny.types, shiny.spriteUrl);
+    checkDexAchievements();
+    if (state.team.length < 6) {
+      loadBuffsIntoPokemon(shiny);
+      state.team.push(shiny);
+      if (state.team.length > state.maxTeamSize) state.maxTeamSize = state.team.length;
+      advanceFromNode(state.map, node.id);
+      showMapScreen();
+    } else {
+      showSwapScreen(shiny, node);
+    }
+  };
+  document.getElementById('btn-skip-shiny').onclick = () => {
+    advanceFromNode(state.map, node.id);
+    showMapScreen();
+  };
+}
+
+
+// ---- Battle Screen ----
+
+// ─── Interactive turn-based battle (normal mode) ──────────────────────────────
+
+function moveEffVs(move, defenderTypes) {
+  return move.noDamage ? 0 : getTypeEffectiveness(move.type, defenderTypes || ['Normal']);
+}
+// Best (highest expected damage) move of `attacker` against `defender`.
+// Damage estimates come from calcDamagePreview (battle.js) — the same pipeline
+// the resolver uses, at average variance, consuming no rng.
+function bestMoveVs(attacker, defender) {
+  const moves = getMovesForPokemon(attacker);
+  let best = moves[0], bestDmg = -1;
+  for (const m of moves) {
+    const d = calcDamagePreview(attacker, defender, m);
+    if (d > bestDmg) { bestDmg = d; best = m; }
+  }
+  return best;
+}
+// Can this Pokémon affect that defender at all? (Un-transformed Ditto counts
+// as capable — it will copy the enemy's types on its first turn.)
+function canAffect(attacker, defender) {
+  if (attacker.speciesId === 132 && !attacker._transformed) return true;
+  return getMovesForPokemon(attacker).some(m =>
+    !m.noDamage && getTypeEffectiveness(m.type, defender.types || ['Normal']) > 0);
+}
+
+function aiPlayerAction(active, team, idx, enemy) {
+  // Auto mode: if the active Pokémon can't touch the enemy (immunity) but a
+  // benched teammate can, switch instead of failing attacks forever.
+  if (!canAffect(active, enemy)) {
+    const alt = team.findIndex((p, i) => i !== idx && p.currentHp > 0 && canAffect(p, enemy));
+    if (alt >= 0) return { type: 'switch', idx: alt };
+  }
+  return { type: 'attack', move: bestMoveVs(active, enemy) };
+}
+
+// True mutual-immunity standoff: no alive member of either side can affect
+// any alive member of the other. The battle can never end — detect it so the
+// campaign can resolve it gracefully instead of grinding to the round cap.
+function battleIsDeadlocked(pTeam, eTeam) {
+  const aliveP = pTeam.filter(p => p.currentHp > 0);
+  const aliveE = eTeam.filter(p => p.currentHp > 0);
+  if (!aliveP.length || !aliveE.length) return false;
+  const pCan = aliveP.some(p => aliveE.some(e => canAffect(p, e)));
+  const eCan = aliveE.some(e => aliveP.some(p => canAffect(e, p)));
+  return !pCan && !eCan;
+}
+// Improved enemy AI: take the KO when it's there; otherwise, if about to be
+// knocked out, bail to a Pokémon that survives (and ideally threatens) the player.
+function chooseEnemyAction(active, team, idx, playerActive, switchedLast) {
+  const myMove = bestMoveVs(active, playerActive);
+  const myDmg = calcDamagePreview(active, playerActive, myMove);
+  if (myDmg >= playerActive.currentHp) return { type: 'attack', move: myMove }; // lethal — go for it
+
+  const playerDmg = calcDamagePreview(playerActive, active, bestMoveVs(playerActive, active));
+  const aboutToDie = playerDmg >= active.currentHp;
+
+  if (aboutToDie && !switchedLast) {
+    const cands = team.map((p, i) => ({ p, i })).filter(x => x.i !== idx && x.p.currentHp > 0);
+    let pick = null, bestScore = -Infinity, pickSurvives = false;
+    for (const c of cands) {
+      const incoming = calcDamagePreview(playerActive, c.p, bestMoveVs(playerActive, c.p));
+      const outgoing = calcDamagePreview(c.p, playerActive, bestMoveVs(c.p, playerActive));
+      const survives = incoming < c.p.currentHp;
+      const score = (survives ? 1000 : 0) + outgoing - incoming;
+      if (score > bestScore) { bestScore = score; pick = c.i; pickSurvives = survives; }
+    }
+    if (pick !== null && pickSurvives && rng() < 0.85) return { type: 'switch', idx: pick };
+  }
+  return { type: 'attack', move: myMove };
+}
+// Interactive driver over the shared round-stepper (battle.js). The engine
+// loop, damage, items, statuses and turn order are the SAME code the Battle
+// Tower runs — only the action providers and the animation sink differ here.
+const BATTLE_ABORTED = Symbol('battle-aborted');
+
+async function runInteractiveBattle(pTeamRaw, eTeamRaw, enemyItems, opts = {}) {
+  const ctx = makeBattleContext(pTeamRaw, eTeamRaw, { traitsConfig: opts.traitsConfig || null });
+  const { pTeam, eTeam } = ctx;
+  const hpTrack = { player: pTeam.map(p => p.currentHp), enemy: eTeam.map(p => p.currentHp) };
+  const myGen = runGeneration;
+  const aborted = () => myGen !== runGeneration;
+  const result = playerWonOverride => ({
+    playerWon: playerWonOverride !== undefined ? playerWonOverride : battleOver(ctx) === 'playerWon',
+    pTeam, eTeam, playerParticipants: ctx.playerParticipants,
+  });
+
+  const startEvents = battleStart(ctx, true);
+  if (ctx.pIdx < 0 || ctx.eIdx < 0) return result(ctx.pIdx >= 0 && ctx.eIdx < 0);
+  if (startEvents.length) await animateInteractiveEvents(startEvents, pTeam, eTeam, hpTrack);
+  if (aborted()) return result(false);
+
+  let enemySwitchedLast = false;
+  const io = {
+    interactive: true,
+    allowStruggle: !!opts.allowStruggle, // Battle Tower manual mode
+    playerAction: async c => {
+      battleSpeedMultiplier = _battleAuto ? SKIP_SPEED : 1;
+      const action = await awaitPlayerAction(pTeam, c.pIdx, eTeam[c.eIdx]);
+      if (aborted()) throw BATTLE_ABORTED;
+      return action;
+    },
+    enemyAction: c => {
+      const action = chooseEnemyAction(eTeam[c.eIdx], eTeam, c.eIdx, pTeam[c.pIdx], enemySwitchedLast);
+      enemySwitchedLast = action.type === 'switch';
+      return action;
+    },
+    // Replacements are handled below, after the round (the player picks via
+    // the party selector; a reset mid-selection must not touch engine state).
+    onFaint: () => {},
+    emit: async events => {
+      if (aborted()) throw BATTLE_ABORTED; // stop mutating/consuming rng mid-round
+      await animateInteractiveEvents(events, pTeam, eTeam, hpTrack);
+    },
+  };
+
+  try {
+    while (!battleOver(ctx)) {
+      // Mutual immunity: neither side can ever land a hit — hand the standoff
+      // back to runBattleScreen for a graceful flee/retreat ending. Not needed
+      // when Struggle is allowed (Battle Tower manual): the battle always resolves.
+      if (!opts.allowStruggle && battleIsDeadlocked(pTeam, eTeam)) return { ...result(false), deadlock: true };
+      await runBattleRound(ctx, io);
+      if (aborted()) return result(false);
+
+      // Replacements after faints.
+      if (eTeam[ctx.eIdx].currentHp <= 0) {
+        const n = eTeam.findIndex(p => p.currentHp > 0);
+        if (n >= 0) {
+          ctx.eIdx = n;
+          await animateInteractiveEvents([{ type: 'send_out', side: 'enemy', idx: n, name: eTeam[n].name }], pTeam, eTeam, hpTrack);
+        }
+      }
+      if (pTeam[ctx.pIdx].currentHp <= 0 && pTeam.some(p => p.currentHp > 0)) {
+        const nextIdx = _battleAuto ? pTeam.findIndex(p => p.currentHp > 0) : await openPartySelector(pTeam, ctx.pIdx, true);
+        if (aborted()) return result(false);
+        ctx.pIdx = nextIdx;
+        ctx.playerParticipants.add(nextIdx);
+        await animateInteractiveEvents([{ type: 'send_out', side: 'player', idx: nextIdx, name: pTeam[nextIdx].nickname || pTeam[nextIdx].name }], pTeam, eTeam, hpTrack);
+      }
+    }
+  } catch (e) {
+    if (e === BATTLE_ABORTED) return result(false);
+    throw e;
+  }
+
+  return result();
+}
+
+// Anti over-level: cap the team at the current map's boss level so XP keeps
+// flowing (1/2/3 per fight) but the team never blows past the challenge. The cap
+// is exactly the highest-level Pokémon of the map's leader (no buffer).
+// I+II: a consistent per-map ace level (Gen 1 curve) so the difficulty doesn't
+// swing with whichever gen's leader is randomly rolled.
+function bothGensMapAceLevel(mapIndex) {
+  if (mapIndex >= 8) return Math.max(...ELITE_4.flatMap(b => b.team).map(p => p.level));
+  const t = GYM_LEADERS[mapIndex]?.team;
+  return t && t.length ? Math.max(...t.map(p => p.level)) : 100;
+}
+
+function getLevelCapForMap() {
+  if (state.bothGens) return Math.min(100, bothGensMapAceLevel(state.currentMap));
+  const cfg = GEN_RUN_CONFIG[getRunGen()];
+  const team = state.currentMap >= 8
+    ? cfg.elite().flatMap(b => b.team)
+    : cfg.leaders()[state.currentMap]?.team;
+  if (!team || !team.length) return 100;
+  return Math.min(100, Math.max(...team.map(p => p.level)));
+}
+
+function runBattleScreen(enemyTeam, isBoss, onWin, onLose, enemyName = null, enemyItems = [], baseGainOverride = null, showPlayerPortrait = null, traitsConfig = null, forceAllParticipants = false) {
+  // Snapshot the run generation — if the player resets mid-battle this no longer
+  // matches runGeneration, and every continuation below bails instead of
+  // mutating the freshly-started run's state.
+  const battleGen = runGeneration;
+  const battleAborted = () => battleGen !== runGeneration;
+  // Clear stale Escape Rope flag from a previous battle.
+  state._escapedViaRope = false;
+  // In endless mode, always apply traits — compute them if not pre-computed by the caller
+  if (state.isEndlessMode && traitsConfig === null) {
+    const tiers = computeTraitTiers(state.team);
+    traitsConfig = buildTraitsConfig(tiers, {});
+    renderBattleTraitBars(tiers, null);
+  }
+
+  return new Promise(async resolve => {
+    // Clean up trait bars when the battle resolves (works for both win and loss paths)
+    const _origResolve = resolve;
+    resolve = (val) => { if (state.isEndlessMode) clearBattleTraitBars(); _origResolve(val); };
+    showScreen('battle-screen');
+    const showPlayer = showPlayerPortrait !== null ? showPlayerPortrait : !!(isBoss || enemyName);
+    renderTrainerIcons(state.trainer, enemyName || null, showPlayer);
+
+    const pTeamCopy = state.team.map(p => ({ ...p }));
+    // enemyTeam HP init (runBattle will deep-copy, but we need initial state for animation)
+    const eTeamInit = enemyTeam.map(p => ({
+      ...p,
+      currentHp: p.currentHp !== undefined ? p.currentHp : calcHp(p.baseStats.hp, p.level),
+      maxHp: p.maxHp !== undefined ? p.maxHp : calcHp(p.baseStats.hp, p.level),
+    }));
+
+    renderBattleField(pTeamCopy, eTeamInit);
+
+    const settings = getSettings();
+    const autoSkip = settings.autoSkipAllBattles || (!isBoss && settings.autoSkipBattles);
+    const skipBtn = document.getElementById('btn-auto-battle');
+    const continueEl = document.getElementById('btn-continue-battle');
+    let manuallySkipped = false;
+    let playerWon, resultP, resultE, playerParticipants;
+
+    // Battle Tower fights turn-based like the campaign unless the player
+    // explicitly switched the Tower to Auto.
+    const endlessManual = state.isEndlessMode && !settings.endlessAuto;
+    if (state.isEndlessMode && !endlessManual) {
+      // ── Auto path (precompute + animate) — keeps Battle Tower traits intact ──
+      const r = await runBattle(pTeamCopy, enemyTeam, state.items, enemyItems, null, traitsConfig);
+      playerWon = r.playerWon; resultP = r.pTeam; resultE = r.eTeam; playerParticipants = r.playerParticipants;
+
+      skipBtn.disabled = false;
+      skipBtn.textContent = 'Skip';
+      battleSpeedMultiplier = autoSkip ? SKIP_SPEED : 1;
+      skipBtn.style.display = autoSkip ? 'none' : 'block';
+      if (!autoSkip) skipBtn.onclick = () => { battleSpeedMultiplier = SKIP_SPEED; skipBtn.disabled = true; manuallySkipped = true; };
+      continueEl.style.display = 'none';
+      continueEl.textContent = 'Continue';
+      continueEl.disabled = false;
+
+      const autoSpeedTimer = setTimeout(() => {
+        if (battleSpeedMultiplier < OVERTIME_SPEED) battleSpeedMultiplier = OVERTIME_SPEED;
+      }, 30_000);
+      await animateBattleVisually(r.detailedLog, pTeamCopy, eTeamInit);
+      clearTimeout(autoSpeedTimer);
+      document.getElementById('overtime-banner')?.remove();
+      document.getElementById('battle-msg-box')?.remove();
+      if (battleAborted()) return;
+    } else {
+      // ── Interactive turn-based path (campaign, and Battle Tower manual mode) ──
+      skipBtn.style.display = 'none';
+      continueEl.style.display = 'none';
+      continueEl.textContent = 'Continue';
+      continueEl.disabled = false;
+      battleSpeedMultiplier = 1;
+      _battleAuto = false;
+      const res = await runInteractiveBattle(pTeamCopy, eTeamInit, enemyItems, {
+        isBoss, enemyName,
+        traitsConfig: state.isEndlessMode ? traitsConfig : null,
+        allowStruggle: state.isEndlessMode,
+      });
+      document.getElementById('battle-command').style.display = 'none';
+      document.getElementById('battle-party-select').style.display = 'none';
+      document.getElementById('overtime-banner')?.remove();
+      if (battleAborted()) return;
+
+      // Mutual immunity standoff — nobody can land a hit. Classic ending:
+      // flee a normal battle (advance, no rewards — Escape Rope semantics);
+      // retreat from a boss back to the map to rethink the team.
+      if (res.deadlock) {
+        renderBattleField(res.pTeam, res.eTeam);
+        showBattleHitMessage('Neither side can land a hit!');
+        const box = document.getElementById('battle-msg-box');
+        if (box) clearTimeout(box._hideTimer); // keep the message up
+        skipBtn.style.display = 'none';
+        continueEl.style.display = 'block';
+        continueEl.textContent = isBoss ? 'Retreat' : 'Run away';
+        continueEl.disabled = false;
+        continueEl.onclick = () => {
+          if (battleAborted()) return;
+          document.getElementById('battle-msg-box')?.remove();
+          if (isBoss) {
+            showMapScreen();          // gym stays unbeaten — no game over
+            resolve(false);
+          } else {
+            state._escapedViaRope = true;
+            if (onWin) onWin();       // advance the node, no XP / no capture
+            resolve(true);
+          }
+        };
+        if (_battleAuto) continueEl.onclick();
+        return;
+      }
+
+      document.getElementById('battle-msg-box')?.remove();
+      playerWon = res.playerWon; resultP = res.pTeam; resultE = res.eTeam; playerParticipants = res.playerParticipants;
+    }
+
+    // Show final HP state after the battle
+    renderBattleField(resultP, resultE);
+
+    if (playerWon) {
+      // Sync battle-result HP onto state team, then apply level gains
+      for (let i = 0; i < state.team.length; i++) {
+        if (resultP[i]) state.team[i].currentHp = resultP[i].currentHp;
+      }
+      const maxEnemyLevel = Math.max(...resultE.map(p => p.level));
+      const effectiveParticipants = forceAllParticipants
+        ? new Set(state.team.map((_, i) => i))
+        : playerParticipants;
+      // Override 0 = the fight yields NO experience at all (wild Pokémon,
+      // legendaries, alphas) — not even catch-up or Lucky Egg crumbs. XP
+      // comes from trainers, rivals and leaders only.
+      const levelUps = baseGainOverride === 0 ? []
+        : applyLevelGain(state.team, state.nuzlockeMode ? [] : state.items, effectiveParticipants, maxEnemyLevel, state.nuzlockeMode, baseGainOverride, state.isEndlessMode ? Infinity : getLevelCapForMap());
+      const skipAll = autoSkip || manuallySkipped || _battleAuto;
+      battleSpeedMultiplier = skipAll ? SKIP_SPEED : 1;
+      skipBtn.textContent = 'Skip';
+      skipBtn.style.display = skipAll ? 'none' : 'block';
+      if (!skipAll) {
+        skipBtn.disabled = false;
+        skipBtn.onclick = () => { battleSpeedMultiplier = SKIP_SPEED; skipBtn.disabled = true; manuallySkipped = true; };
+      }
+
+      const continueBtn = document.getElementById('btn-continue-battle');
+      if (!skipAll) {
+        continueBtn.style.display = 'block';
+        continueBtn.onclick = () => { battleSpeedMultiplier = 1000; manuallySkipped = true; continueBtn.disabled = true; };
+      }
+
+      await animateLevelUp(levelUps);
+      // Reset may have fired during the level-up animation — bail before we
+      // touch state.team (which is now the new run's team).
+      if (battleAborted()) return;
+      skipBtn.style.display = 'none';
+
+      // Nuzlocke: remove fainted Pokemon permanently, return their items to bag.
+      // Done BEFORE checkAndEvolveTeam so a lost Pokemon never plays an
+      // evolution animation for a slot that is about to disappear.
+      // Rival battles (Silver / Team Aqua-Magma) are exempt — winning one
+      // doesn't permanently faint your team; doSilverNode full-heals after.
+      if (state.nuzlockeMode && !isRivalEnemyToken(enemyName)) {
+        const fainted = state.team.filter(p => p.currentHp <= 0);
+        for (const p of fainted) {
+          if (p.heldItem) state.items.push(p.heldItem);
+        }
+        state.team = state.team.filter(p => p.currentHp > 0);
+        if (fainted.length > 0) { renderTeamBar(state.team); renderItemBadges(state.items); }
+        if (state.team.length === 0) {
+          showGameOver();
+          resolve(false);
+          return;
+        }
+      }
+
+      await checkAndEvolveTeam();
+      // Reset may have fired during level-up / evolution animations.
+      if (battleAborted()) return;
+
+      if (skipAll || manuallySkipped) {
+        if (onWin) onWin();
+        resolve(true);
+      } else {
+        continueBtn.disabled = false;
+        continueBtn.onclick = () => { if (battleAborted()) return; if (onWin) onWin(); resolve(true); };
+      }
+    } else {
+      skipBtn.style.display = 'none';
+      const continueBtnEl = document.getElementById('btn-continue-battle');
+      continueBtnEl.style.display = 'block';
+      continueBtnEl.textContent = 'Continue...';
+
+      // Escape Rope: on non-boss loss, offer to consume a rope and revive the
+      // last fainted slot at 1 HP instead of game-over.
+      const ropeIdx = (!isBoss && !state.isEndlessMode && !state.nuzlockeMode)
+        ? state.items.findIndex(it => it.id === 'escape_rope')
+        : -1;
+      if (ropeIdx !== -1) {
+        const ropeBtn = document.createElement('button');
+        ropeBtn.className = 'btn-primary';
+        ropeBtn.textContent = '🪢 Use Escape Rope';
+        ropeBtn.style.cssText = 'margin-left:8px;';
+        ropeBtn.onclick = () => {
+          state.items.splice(ropeIdx, 1);
+          // Whole team fainted; revive only the last slot at 1 HP.
+          for (const p of state.team) p.currentHp = 0;
+          const lastIdx = state.team.length - 1;
+          if (state.team[lastIdx]) state.team[lastIdx].currentHp = 1;
+          renderTeamBar(state.team);
+          renderItemBadges(state.items);
+          state._escapedViaRope = true;
+          ropeBtn.remove();
+          continueBtnEl.textContent = 'Continue';
+          continueBtnEl.onclick = () => { if (battleAborted()) return; if (onWin) onWin(); resolve(true); };
+        };
+        continueBtnEl.parentElement?.insertBefore(ropeBtn, continueBtnEl.nextSibling);
+      }
+
+      continueBtnEl.onclick = () => {
+        if (battleAborted()) return;
+        if (onLose) onLose();
+        resolve(false);
+      };
+      // Auto mode: don't wait for a manual click on defeat either.
+      if (_battleAuto) continueBtnEl.onclick();
+    }
+  });
+}
+
+// ---- End Screens ----
+
+function showBadgeScreen(leader) {
+  showScreen('badge-screen');
+  document.getElementById('badge-msg').textContent = `You earned the ${leader.badge}!`;
+  document.getElementById('badge-leader').textContent = '';
+  document.getElementById('badge-count-display').textContent = `Badges: ${state.badges}/8`;
+  const badgeImg = document.getElementById('badge-icon-img');
+  if (badgeImg) {
+    badgeImg.src = `sprites/badges/${state.badges + GEN_RUN_CONFIG[getRunGen()].badgeOffset}.png`;
+  }
+
+  const nextBtn = document.getElementById('btn-next-map');
+  // Spacebar shortcut while the badge screen is visible
+  const onKey = (e) => {
+    if (e.code !== 'Space' && e.key !== ' ') return;
+    if (!document.getElementById('badge-screen')?.classList.contains('active')) return;
+    e.preventDefault();
+    advance();
+  };
+  const advance = async () => {
+    document.removeEventListener('keydown', onKey);
+    if (!state.isEndlessMode) {
+      applyPerBadgePerks();
+      await showPerkDraft();
+    }
+    if (state.currentMap >= 7) {
+      state.eliteIndex = 0;
+      startMap(8);
+    } else {
+      startMap(state.currentMap + 1);
+    }
+  };
+  nextBtn.onclick = advance;
+  document.addEventListener('keydown', onKey);
+}
+
+async function showGameOver() {
+  // Normal mode: a wipe lets you retry the current level (with a freshly
+  // generated map) instead of losing the whole run — unless the player chose
+  // "BLACK OUT" at the journey's start (state.retryOnWipe === false; old saves
+  // lack the field and keep the retry default). Nuzlocke keeps its permadeath,
+  // and Battle Tower keeps its own flow → real game over.
+  if (!state.nuzlockeMode && !state.isEndlessMode && state.retryOnWipe !== false && state.mapStartSnapshot) {
+    return showLevelRetryScreen();
+  }
+  return doGameOver();
+}
+
+async function doGameOver() {
+  localStorage.setItem('poke_win_streak', '0');
+  clearSavedRun();
+  if (typeof syncToCloud === 'function') {
+    await Promise.race([syncToCloud(), new Promise(r => setTimeout(r, 3000))]);
+  }
+  initGame();
+}
+
+// Restart the current level from the state the player had when it began, with a
+// brand-new map layout. The run is NOT lost. Unlimited retries.
+function retryCurrentMap() {
+  const snap = state.mapStartSnapshot;
+  if (!snap) return doGameOver(); // safety fallback
+  state.team = JSON.parse(JSON.stringify(snap.team));
+  state.items = JSON.parse(JSON.stringify(snap.items));
+  state.maxTeamSize = snap.maxTeamSize;
+  state.pendingRetry = false;
+  // Restart the map from scratch — on the Elite Four (map 8) this means the
+  // whole gauntlet, not just the boss you fell on (eliteIndex tracks progress).
+  state.eliteIndex = 0;
+  // New seed → a different map layout (deterministic on reload via saveRun).
+  const newSeed = (Date.now() ^ (Math.random() * 0x100000000 | 0)) >>> 0;
+  seedRng(newSeed);
+  state.runSeed = newSeed;
+  const attempts = (state.mapRetries || 0) + 1;
+  startMap(state.currentMap); // regenerates map + re-heals + re-snapshots
+  state.mapRetries = attempts; // survives startMap's reset; persisted below
+  saveRun();
+}
+
+// Reuses the existing (otherwise unused) #gameover-screen as a "retry the
+// level" prompt. Keeps the saved run intact so a refresh resumes here.
+function showLevelRetryScreen() {
+  const titleEl = document.querySelector('#gameover-screen .gameover-title');
+  if (titleEl) titleEl.textContent = 'You blacked out!';
+
+  const badgesEl = document.getElementById('gameover-badges');
+  const attemptNum = (state.mapRetries || 0) + 1; // the attempt that just failed
+  if (badgesEl) badgesEl.innerHTML =
+    `Level <b>${state.currentMap + 1}</b> · ${state.badges} badge${state.badges === 1 ? '' : 's'}`
+    + ` · <span class="retry-attempts">💀 Attempt ${attemptNum}</span>`;
+
+  // Compact fainted-team strip — the run isn't lost, no need for full cards.
+  const teamEl = document.getElementById('gameover-team');
+  if (teamEl) {
+    teamEl.innerHTML = state.team.map(p => `
+      <div class="ko-chip">
+        <img src="${p.spriteUrl}" alt="${p.nickname || p.name}" loading="lazy">
+        <span>Lv${p.level}</span>
+      </div>`).join('');
+  }
+
+  const hintEl = document.getElementById('gameover-hint');
+  if (hintEl) hintEl.textContent =
+    'Your team returns to how it was when you entered this level — on a brand-new map. Unlimited retries.';
+
+  const retryBtn = document.getElementById('btn-retry');
+  if (retryBtn) {
+    retryBtn.textContent = '🔄 Retry Level';
+    retryBtn.onclick = retryCurrentMap;
+  }
+
+  state.pendingRetry = true;
+  saveRun();
+  showScreen('gameover-screen');
+}
+
+function showWinScreen() {
+  showScreen('win-screen');
+  document.getElementById('win-team').innerHTML = state.team.map(p => {
+    const itemHtml = p.heldItem
+      ? `<div style="display:flex;align-items:center;gap:4px;font-size:8px;color:var(--text-dim);margin-top:4px;">${itemIconHtml(p.heldItem, 14)}<span>${p.heldItem.name}</span></div>`
+      : '';
+    return `<div style="display:flex;flex-direction:column;align-items:center;">${renderPokemonCard(p, false, false)}${itemHtml}</div>`;
+  }).join('');
+  document.getElementById('btn-play-again').onclick = () => startNewRun(state.nuzlockeMode, getRunGen(), null, { retryOnWipe: state.retryOnWipe !== false });
+
+  // Mega Stones: winning a run with a line on your team unlocks that line's
+  // stone (bracelet-gated visibility, but the unlock always records).
+  try {
+    const teamRoots = new Set(state.team.map(p => getEvoLineRoot(p.speciesId)));
+    let toastDelay = 4200;
+    for (const baseId of Object.keys(MEGA_FORMS).map(Number)) {
+      if (!teamRoots.has(getEvoLineRoot(baseId))) continue;
+      if (unlockMegaStone(baseId)) {
+        const m = MEGA_FORMS[baseId];
+        const d = toastDelay; toastDelay += 900;
+        setTimeout(() => showAchievementToast({ icon: '💠', name: `${m.megaName}ite obtained!`,
+          desc: hasMegaBracelet() ? `${m.megaName} can now Mega Evolve — equip its stone.`
+                                  : 'Earn the Mega Bracelet (Battle Tower stage 3) to use it.' }), d);
+      }
+    }
+  } catch {}
+
+  // Track elite four wins
+  const wins = incrementEliteWins();
+  saveHallOfFameEntry(state.team, wins, state.nuzlockeMode, false, null, state.starterSpeciesId, state.gen2Mode, getRunGen());
+  const winsEl = document.getElementById('win-run-count');
+  if (winsEl) winsEl.textContent = `Championship #${wins}`;
+  if (wins === 10) {
+    const ach = unlockAchievement('elite_10');
+    if (ach) setTimeout(() => showAchievementToast(ach), 3000);
+  }
+  if (wins === 100) {
+    const ach = unlockAchievement('elite_100');
+    if (ach) setTimeout(() => showAchievementToast(ach), 3000);
+  }
+
+  // Starter line achievement
+  const sid = state.starterSpeciesId;
+  const starterAchId = [1,2,3].includes(sid) ? 'starter_1'
+    : [4,5,6].includes(sid) ? 'starter_4'
+    : [7,8,9].includes(sid) ? 'starter_7' : null;
+  if (starterAchId) {
+    const ach = unlockAchievement(starterAchId);
+    if (ach) setTimeout(() => showAchievementToast(ach), 600);
+  }
+
+  // Solo run achievement
+  if (state.maxTeamSize === 1) {
+    const ach = unlockAchievement('solo_run');
+    if (ach) setTimeout(() => showAchievementToast(ach), 1400);
+  }
+
+  // Hard mode win achievement
+  if (state.nuzlockeMode) {
+    const ach = unlockAchievement('nuzlocke_win');
+    if (ach) setTimeout(() => showAchievementToast(ach), 2200);
+  }
+
+  // All 3 legendary birds on team
+  const birdIds = [144, 145, 146];
+  if (birdIds.every(id => state.team.some(p => p.speciesId === id))) {
+    const ach = unlockAchievement('three_birds');
+    if (ach) setTimeout(() => showAchievementToast(ach), 800);
+  }
+
+  // No Pokémon Center used
+  if (!state.usedPokecenter) {
+    const ach = unlockAchievement('no_pokecenter');
+    if (ach) setTimeout(() => showAchievementToast(ach), 1000);
+  }
+
+  // No items picked up
+  if (!state.pickedUpItem) {
+    const ach = unlockAchievement('no_items');
+    if (ach) setTimeout(() => showAchievementToast(ach), 1200);
+  }
+
+  // 4 of 6 Pokémon share a type
+  if (state.team.length === 6) {
+    const typeCounts = {};
+    for (const p of state.team) {
+      for (const t of p.types) {
+        typeCounts[t] = (typeCounts[t] || 0) + 1;
+      }
+    }
+    if (Object.values(typeCounts).some(c => c >= 4)) {
+      const ach = unlockAchievement('type_quartet');
+      if (ach) setTimeout(() => showAchievementToast(ach), 1600);
+    }
+  }
+
+  // Full team of shinies
+  if (state.team.length >= 3 && state.team.every(p => p.isShiny)) {
+    const ach = unlockAchievement('all_shiny_win');
+    if (ach) setTimeout(() => showAchievementToast(ach), 2000);
+  }
+
+  // Consecutive win streak
+  const streak = (parseInt(localStorage.getItem('poke_win_streak') || '0', 10)) + 1;
+  localStorage.setItem('poke_win_streak', String(streak));
+  if (streak >= 2) {
+    const ach = unlockAchievement('back_to_back');
+    if (ach) setTimeout(() => showAchievementToast(ach), 2400);
+  }
+  if (streak >= 3) {
+    const ach = unlockAchievement('back_3_back');
+    if (ach) setTimeout(() => showAchievementToast(ach), 2800);
+  }
+
+  // Per-generation / per-mode achievements
+  checkGenModeWinAchievements();
+
+  clearSavedRun();
+  if (typeof syncToCloud === 'function') syncToCloud();
+}
+
+// Evaluates the generation- and mode-specific achievements on a full game win.
+// Toasts are staggered so several unlocks don't overlap on screen.
+function checkGenModeWinAchievements() {
+  const runGen = getRunGen();
+  const gen2 = runGen === '2';
+  const gen3 = runGen === '3';
+  // Achievement id prefix per gen; 'all' runs earn no per-gen achievements.
+  const g = gen3 ? 'g3' : gen2 ? 'g2' : runGen === '1' ? 'g1' : null;
+  const nuz  = !!state.nuzlockeMode;
+  const team = state.team || [];
+  const sid  = state.starterSpeciesId;
+  let delay = 3200;
+  const grant = id => {
+    const ach = unlockAchievement(id);
+    if (ach) { const d = delay; setTimeout(() => showAchievementToast(ach), d); delay += 700; }
+  };
+  if (!g) return;
+
+  // Starter-line wins, split by generation and mode.
+  const STARTER_LINES = gen3
+    ? { grass: [252,253,254], fire: [255,256,257], water: [258,259,260] }
+    : gen2
+    ? { grass: [152,153,154], fire: [155,156,157], water: [158,159,160] }
+    : { grass: [1,2,3],       fire: [4,5,6],       water: [7,8,9] };
+  const elem = ['grass','fire','water'].find(e => STARTER_LINES[e].includes(sid));
+  if (elem) {
+    if (g !== 'g1' && !nuz) grant(`${g}_${elem}`);
+    if (nuz) grant(`${g}_nuz_${elem}`);
+  }
+
+  // Nuzlocke clear.
+  if (nuz) grant(`${g}_nuz_clear`);
+
+  // No Pokémon Center used — single achievement per gen, not mode-split
+  // (Gen 1's variant is Nuzlocke-only for historical reasons).
+  if (!state.usedPokecenter) {
+    if (g === 'g1') { if (nuz) grant('g1_nuz_nocenter'); }
+    else grant(`${g}_nocenter`);
+  }
+
+  // Rival never defeated — Gen 2 (Silver) and Gen 3 (Team Aqua/Magma).
+  if ((gen2 || gen3) && !state.silverBeaten) grant(`${g}_norival`);
+
+  // Every Pokémon on the team is shiny — no minimum team size.
+  if (team.length > 0 && team.every(p => p.isShiny)) {
+    grant(`${g}_shiny_squad`);
+  }
+
+  // Mode-agnostic team-composition challenges (need a team of 3+).
+  if (team.length >= 3) {
+    // Every Pokémon shares at least one common type.
+    let common = null;
+    for (const p of team) {
+      const ts = new Set(p.types || []);
+      common = common === null ? ts : new Set([...common].filter(t => ts.has(t)));
+    }
+    if (common && common.size > 0) grant(`${g}_monotype`);
+
+    // Every Pokémon is single-stage (never evolves, no pre-evolution).
+    if (team.every(p => isSingleStage(p.speciesId))) {
+      grant(`${g}_single_stage`);
+    }
+  }
+
+  // Win using zero same-gen Pokémon (Gen 2: 152–251, Gen 3: 252–386).
+  if (gen2 && team.length > 0 && team.every(p => p.speciesId < 152 || p.speciesId > 251)) {
+    grant('g2_no_gen2');
+  }
+  if (gen3 && team.length > 0 && team.every(p => p.speciesId < 252 || p.speciesId > 386)) {
+    grant('g3_no_gen3');
+  }
+}
+
+function shareEndlessRun(stageNum, team) {
+  const stageName = typeof getStageName === 'function' ? getStageName(stageNum) : `Stage ${stageNum}`;
+  const teamLines = team.map(p => {
+    const shiny = p.isShiny ? ' ✨' : '';
+    return `${p.nickname || p.name} Lv.${p.level}${shiny}`;
+  }).join('\n');
+  const text = `🏆 Cleared ${stageName} in Pokelike Battle Tower!\n\nMy team:\n${teamLines}\n\n${window.location.href}`;
+
+  if (navigator.share) {
+    navigator.share({ title: 'Pokelike', text }).catch(() => {});
+  } else {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+  }
+}
+
+function shareRun() {
+  const wins = getEliteWins();
+  const teamLines = state.team.map(p => {
+    const shiny = p.isShiny ? ' ✨' : '';
+    return `${p.nickname || p.name} Lv.${p.level}${shiny}`;
+  }).join('\n');
+  const modeTag = state.nuzlockeMode ? ' (Nuzlocke)' : '';
+  const text = `🏆 Championship #${wins}${modeTag} on Pokelike!\n\nMy team:\n${teamLines}\n\n${window.location.href}`;
+
+  if (navigator.share) {
+    navigator.share({ title: 'Pokelike', text }).catch(() => {});
+  } else {
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}`, '_blank', 'noopener');
+  }
+}
+
+// ── Endless Mode ─────────────────────────────────────────────────────────────
+
+function getUnlockedStageCount() {
+  return Math.max(1, (getHofIndex().maxEndlessStage || 0) + 1);
+}
+
+function unlockNextStage(_completedStage) {
+  // Unlock is now derived from Hall of Fame entries — no localStorage needed.
+}
+
+const MAX_ACCESSIBLE_STAGE = 5;
+
+const STAGE_META = [
+  null,
+  { label: 'Kanto',  gens: 'Gen 1', color: '#e8503a' },
+  { label: 'Johto',  gens: 'Gen 2', color: '#c0a050' },
+  { label: 'Hoenn',  gens: 'Gen 3', color: '#60a878' },
+  { label: 'Sinnoh', gens: 'Gen 4', color: '#7878c8' },
+  { label: 'Unova',  gens: 'Gen 5', color: '#808080' },
+];
+
+const STAGE_REGION_BG = [
+  null,
+  'ui/regions/HGSS_Kanto.jpg',
+  'ui/regions/Johtoart.jpg',
+  'ui/regions/ORAS_Hoenn_Map.jpg',
+  'ui/regions/Pt_Artwork_Sinnoh-Karte_(mit_Zerrwelt).jpg',
+  'ui/regions/Einall_S2W2.jpg',
+];
+
+function getStageName(n) { return STAGE_META[n]?.label || `Stage ${n}`; }
+
+// Starter Pokémon for each endless stage (base forms)
+const REGION_STARTERS = [
+  null,
+  [1,   4,   7],   // Kanto
+  [152, 155, 158], // Johto
+  [252, 255, 258], // Hoenn
+  [387, 390, 393], // Sinnoh
+  [495, 498, 501], // Unova
+];
+
+function showEndlessStageSelect() {
+  const unlocked = Math.min(getUnlockedStageCount(), MAX_ACCESSIBLE_STAGE);
+  const list = document.getElementById('stage-select-list');
+  if (!list) return;
+  list.innerHTML = '';
+  const maxShow = Math.min(unlocked + 1, MAX_ACCESSIBLE_STAGE); // one locked preview, but never beyond the last defined stage
+  for (let s = 1; s <= maxShow; s++) {
+    const isLocked = s > unlocked;
+    const meta = STAGE_META[Math.min(s, 5)];
+    const btn = document.createElement('button');
+    btn.className = isLocked ? 'btn-secondary' : 'btn-primary';
+    const borderColor = (!isLocked && meta) ? meta.color : '';
+    const bg = STAGE_REGION_BG[s];
+    const bgStyle = bg
+      ? `background-image:url('${bg}');background-size:cover;background-position:center;`
+      : `background:linear-gradient(135deg,#1a0a3e,#3a0a6e);`;
+    btn.style.cssText = `width:200px;${isLocked ? `opacity:0.45;cursor:not-allowed;${bgStyle}` : `${bgStyle}${borderColor ? `border-color:${borderColor};box-shadow:0 0 6px ${borderColor}55;` : ''}`}`;
+    if (isLocked) {
+      btn.innerHTML = `<div style="background:rgba(0,0,0,0.55);padding:4px 8px;border-radius:4px;color:#fff;">🔒 ${getStageName(s)}</div>`;
+    } else if (meta) {
+      btn.innerHTML = `<div style="background:rgba(0,0,0,0.5);padding:4px 8px;border-radius:4px;color:#fff;"><div>▶ ${meta.label}</div><div style="font-size:5px;opacity:0.85;margin-top:2px;">${meta.gens}</div></div>`;
+    } else {
+      btn.innerHTML = `<div style="background:rgba(0,0,0,0.5);padding:4px 8px;border-radius:4px;color:#fff;"><div>▶ ${getStageName(s)}</div><div style="font-size:5px;opacity:0.85;margin-top:2px;">All Gens</div></div>`;
+    }
+    if (!isLocked) btn.addEventListener('click', () => startEndlessRun(s));
+    list.appendChild(btn);
+  }
+  showScreen('endless-stage-select');
+}
+
+async function startEndlessRun(stageNum = 1, forcedStarterId = null, forcedStarterShiny = null) {
+  runGeneration++;
+  clearSavedRun();
+  const seed = (Date.now() ^ (Math.random() * 0x100000000 | 0)) >>> 0;
+  seedRng(seed);
+  const savedTrainer = localStorage.getItem('poke_trainer') || 'boy';
+  _tabStale = false; _forceNextSave = true;
+  document.getElementById('tab-takeover-overlay')?.remove();
+  state = {
+    runId: Date.now() + ':' + Math.floor(Math.random() * 1e9), saveSeq: 0,
+    currentMap: 0, currentNode: null, team: [], items: [], badges: 0,
+    map: null, eliteIndex: 0, trainer: savedTrainer, starterSpeciesId: null,
+    maxTeamSize: 1, nuzlockeMode: false, usedPokecenter: false, pickedUpItem: false,
+    runSeed: seed, isEndlessMode: true,
+  };
+  endlessState = {
+    active: true, stageNumber: stageNum, regionNumber: 1, mapIndexInRegion: 0,
+    currentRegion: null, traitTiers: {},
+  };
+  clearEndlessState();
+  if (forcedStarterId && localStorage.getItem('poke_trainer')) {
+    await pickForcedStarter(forcedStarterId, forcedStarterShiny);
+    return;
+  }
+  if (!localStorage.getItem('poke_trainer')) {
+    await showTrainerSelect();
+  } else {
+    await showStarterSelect();
+  }
+}
+
+async function continueEndlessRun() {
+  try {
+    if (!loadRun()) return;
+    if (!loadEndlessState()) return;
+    if (!endlessState.active) { initGame(); return; }
+    if (!state.map) {
+      const isFirstMap = endlessState.regionNumber === 1 && endlessState.mapIndexInRegion === 0;
+      const fakeMapIndex = isFirstMap ? 2 : Math.min(7, endlessState.stageNumber + endlessState.regionNumber);
+      state.map = generateMap(fakeMapIndex, false);
+    }
+    if (endlessState.currentRegion) {
+      if (state.currentNode && !state.currentNode.visited) {
+        await onEndlessNodeClick(state.currentNode);
+      } else {
+        showEndlessMapScreen();
+      }
+    } else {
+      startEndlessRegion();
+    }
+  } catch (e) {
+    console.error('continueEndlessRun failed:', e);
+    initGame();
+  }
+}
+
+async function startEndlessRegion() {
+  if (!endlessState._preRolled) {
+    endlessState.currentRegion = rollRegion(endlessState.stageNumber, endlessState.regionNumber);
+  }
+  endlessState._preRolled = false;
+  endlessState.mapIndexInRegion = 0;
+  saveEndlessState();
+
+  startEndlessMap();
+}
+
+function startEndlessMap() {
+  // Full heal at the start of every map in endless mode
+  for (const p of state.team) p.currentHp = p.maxHp;
+
+  // R1M1 always uses fakeMapIndex 2 so move tier and layout stay identical to stage 1.
+  // Other maps scale with stage+region as before.
+  const isFirstMap = endlessState.regionNumber === 1 && endlessState.mapIndexInRegion === 0;
+  const fakeMapIndex = isFirstMap ? 2 : Math.min(7, endlessState.stageNumber + endlessState.regionNumber);
+  state.currentMap = fakeMapIndex;
+  state.map = generateMap(fakeMapIndex, false);
+  state.endlessLevelRange = getEndlessLevelRange(endlessState.stageNumber, endlessState.regionNumber, endlessState.mapIndexInRegion);
+
+  // Pick map background based on trainer type; finalBoss for stage final boss
+  const _btTrainer    = endlessState.currentRegion?.trainers[endlessState.mapIndexInRegion];
+  const _btType       = (_btTrainer?.archetype?.type || '').split('/')[0].toLowerCase() || 'normal';
+  const _isFinalBoss  = endlessState.mapIndexInRegion === 2 && endlessState.regionNumber === 3;
+  endlessState.currentMapBg = _isFinalBoss
+    ? 'ui/mapsBattleTower/finalBoss.png'
+    : `ui/mapsBattleTower/${_btType}.png`;
+
+  saveEndlessState();
+  saveRun();
+  showEndlessMapScreen();
+}
+
+function showEndlessMapScreen() {
+  showScreen('map-screen');
+  const region = endlessState.currentRegion;
+  const mapNum = endlessState.mapIndexInRegion + 1;
+  const isBoss = endlessState.mapIndexInRegion === 2;
+  const isFinalBoss = isBoss && endlessState.regionNumber === 3;
+  const trainerName = region.trainers[endlessState.mapIndexInRegion]?.archetype?.name || '???';
+
+  const mapInfo = document.getElementById('map-info');
+  if (mapInfo) {
+    const label = isFinalBoss ? 'STAGE FINAL BOSS' : isBoss ? 'BIG BOSS' : `Map ${mapNum}/2`;
+    const manual = !getSettings().endlessAuto;
+    mapInfo.innerHTML = `<span style="font-size:9px">${getStageName(endlessState.stageNumber)} R${endlessState.regionNumber} — ${label}: <b>${trainerName}</b></span>
+      <button id="btn-endless-battle-mode" class="btn-secondary" style="font-size:9px;padding:3px 8px;margin-left:8px;vertical-align:middle;"
+        title="How the next battles are fought">${manual ? '🎮 Manual' : '⚡ Auto'}</button>`;
+    document.getElementById('btn-endless-battle-mode').onclick = () => {
+      const s = getSettings();
+      s.endlessAuto = !s.endlessAuto;
+      saveSettings(s);
+      showEndlessMapScreen();
+    };
+  }
+
+  const badgePanelEndless = document.getElementById('badge-count-panel');
+  if (badgePanelEndless) badgePanelEndless.innerHTML = '';
+
+  renderTeamBar(state.team);
+  renderItemBadges(state.items);
+  renderEndlessTraitPanel(state.team);
+  renderEndlessRegionPanel(endlessState.currentRegion, endlessState.mapIndexInRegion);
+
+  const mapContainer = document.getElementById('map-container');
+  const bg = endlessState.currentMapBg || 'ui/mapsNormalMode/map1.png';
+  mapContainer.style.backgroundImage = `url('${bg}')`;
+  renderMap(state.map, mapContainer, onEndlessNodeClick);
+}
+
+async function onEndlessNodeClick(node) {
+  if (!node.accessible) return;
+  state.currentNode = node;
+  // Lock sibling nodes before saving so F5 can't switch to a different path choice
+  for (const n of Object.values(state.map.nodes)) {
+    if (n.layer === node.layer && n.id !== node.id && n.accessible) {
+      n.accessible = false;
+    }
+  }
+  if (node.type === NODE_TYPES.BOSS) {
+    saveRun();
+    saveEndlessState();
+    await doEndlessBossNode();
+    return;
+  }
+  // Non-boss nodes use the standard handler. showMapScreen() auto-delegates to showEndlessMapScreen().
+  await onNodeClick(node);
+}
+
+async function applyEndlessBugTrait() {
+  endlessState.traitTiers = computeTraitTiers(state.team);
+  const bugBonus = getBugLevelBonus(endlessState.traitTiers);
+  if (bugBonus <= 0) return;
+  const leveled = [];
+  for (const p of state.team) {
+    if (p.currentHp > 0) {
+      const oldLevel = p.level;
+      p.level = p.level + bugBonus;
+      const hpBuff = p.statBuffs?.hp ?? 0;
+      const buffMult = 1 + 0.1 * hpBuff;
+      p.maxHp = Math.floor(calcHp(p.baseStats.hp, p.level) * buffMult);
+      p.currentHp = Math.min(p.currentHp + (p.maxHp - Math.floor(calcHp(p.baseStats.hp, oldLevel) * buffMult)), p.maxHp);
+      leveled.push({ name: p.nickname || p.name, spriteUrl: p.spriteUrl, level: p.level });
+    }
+  }
+  const { autoSkipAllBattles, autoSkipBattles } = getSettings();
+  const skipFast = autoSkipAllBattles || autoSkipBattles;
+  if (leveled.length) showBugLevelUpBanner(leveled, skipFast ? 250 : 1500);
+  await new Promise(r => setTimeout(r, skipFast ? 400 : 1600));
+  await checkAndEvolveTeam();
+}
+
+async function doEndlessBossNode() {
+  const region = endlessState.currentRegion;
+  const trainerData = region.trainers[endlessState.mapIndexInRegion];
+  const isBigBoss = endlessState.mapIndexInRegion === 2;
+
+  // Fetch all species — use fetchIds when available (supports form slugs like 'deoxys-attack')
+  const fetchIds = trainerData.fetchIds || trainerData.speciesIds;
+  const speciesArr = await Promise.all(fetchIds.map(id => fetchPokemonById(id)));
+  const enemyTeam = speciesArr
+    .map((sp, i) => ({ sp, i }))
+    .filter(({ sp }) => sp != null)
+    .map(({ sp, i }) => {
+      const offset = trainerData.levelOffsets ? (trainerData.levelOffsets[i] ?? i) : i;
+      return createInstance(sp, trainerData.level + offset, false, Math.min(2, trainerData.moveTier));
+    });
+
+  if (enemyTeam.length === 0) {
+    // Fallback if fetching fails
+    advanceEndless();
+    return;
+  }
+
+  // Compute traits right before the fight (enemy bosses also get type trait benefits)
+  endlessState.traitTiers = computeTraitTiers(state.team);
+  const enemyTiers = trainerData.allTraits != null
+    ? Object.fromEntries(Object.keys(TRAIT_DESCRIPTIONS).map(t => [t, trainerData.allTraits]))
+    : trainerData.specificTraits
+      ? trainerData.specificTraits
+      : trainerData.copyPlayerTraits
+        ? computeMirroredTraits(endlessState.traitTiers, computeTraitTiers(enemyTeam, 0))
+        : computeTraitTiers(enemyTeam, trainerData.traitBonus ?? 0);
+  const traitsConfig = buildTraitsConfig(endlessState.traitTiers, enemyTiers);
+  renderBattleTraitBars(endlessState.traitTiers, enemyTiers);
+
+  const isStageFinal = isBigBoss && endlessState.regionNumber === 3;
+  const title = isStageFinal
+    ? `${getStageName(endlessState.stageNumber)} Final Boss: ${trainerData.archetype.name}!`
+    : isBigBoss ? `Big Boss: ${trainerData.archetype.name}!`
+    : `Trainer: ${trainerData.archetype.name}!`;
+  const battleInfoEl = document.getElementById('battle-title');
+  if (battleInfoEl) battleInfoEl.textContent = title;
+  const battleSubEl = document.getElementById('battle-subtitle');
+  if (battleSubEl) battleSubEl.textContent = '';
+  const enemySideLabel = document.getElementById('enemy-side-label');
+  if (enemySideLabel) enemySideLabel.textContent = trainerData.archetype.name;
+
+  const won = await runBattleScreen(
+    enemyTeam, true, null, null,
+    trainerData.archetype.sprite,
+    [],
+    null, // baseGainOverride — use default level gain
+    true, // showPlayerPortrait
+    traitsConfig
+  );
+  // clearTraitBar() is handled automatically by runBattleScreen in endless mode
+
+  if (!won) {
+    clearEndlessState();
+    clearSavedRun();
+    showGameOver();
+    return;
+  }
+
+  await applyEndlessBugTrait();
+
+  if (isBigBoss) await showStatBuffScreen();
+
+  advanceEndless();
+}
+
+async function showStatBuffScreen() {
+  return new Promise(resolve => {
+    const titleEl  = document.getElementById('stat-buff-title');
+    const subEl    = document.getElementById('stat-buff-subtitle');
+    const choicesEl = document.getElementById('stat-buff-choices');
+
+    const STATS = [
+      ['hp',      'HP',  'stat-hp'],
+      ['atk',     'ATK', 'stat-atk'],
+      ['def',     'DEF', 'stat-def'],
+      ['speed',   'SPE', 'stat-spe'],
+      ['special', 'SP.A', 'stat-spa'],
+      ['spdef',   'SP.D', 'stat-spd'],
+    ];
+
+    function showPhase1() {
+      showScreen('stat-buff-screen');
+      titleEl.textContent = 'Region Cleared!';
+      const maxPts = getMaxBuffPoints();
+      subEl.textContent = maxPts > 0 ? `Choose a Pokémon to power up (cap: ${maxPts} pts)` : 'Beat a stage to unlock buffs';
+      choicesEl.innerHTML = '';
+      for (const p of state.team) {
+        const totalPts = getTotalBuffPoints(p.statBuffs || {});
+        const capped = totalPts >= maxPts;
+        const wrap = document.createElement('div');
+        wrap.className = 'stat-buff-poke-wrap';
+        wrap.innerHTML = renderPokemonCard(p, false, false);
+        const label = document.createElement('div');
+        label.style.cssText = 'font-size:8px;text-align:center;margin-top:2px;color:' + (capped ? '#888' : '#c8a0ff') + ';';
+        label.textContent = maxPts > 0 ? `${totalPts}/${maxPts} pts` : '—';
+        wrap.appendChild(label);
+        const card = wrap.querySelector('.poke-card');
+        if (capped || maxPts === 0) {
+          card.style.opacity = '0.45';
+          card.style.cursor = 'default';
+        } else {
+          card.style.cursor = 'pointer';
+          card.addEventListener('click', () => showPhase2(p));
+        }
+        choicesEl.appendChild(wrap);
+      }
+
+      const skip = document.createElement('button');
+      skip.className = 'btn-secondary';
+      skip.style.cssText = 'margin-top:12px;width:100%;';
+      skip.textContent = 'Skip';
+      skip.addEventListener('click', () => resolve());
+      choicesEl.appendChild(skip);
+    }
+
+    function showPhase2(pokemon) {
+      titleEl.textContent = pokemon.nickname || pokemon.name;
+      const maxPts = getMaxBuffPoints();
+      const totalPts = getTotalBuffPoints(pokemon.statBuffs || {});
+      const atCap = totalPts >= maxPts;
+      subEl.textContent = atCap
+        ? `Fully buffed (${totalPts}/${maxPts} pts)`
+        : `Choose a stat to boost (+10%) — ${totalPts}/${maxPts} pts used`;
+      choicesEl.innerHTML = '';
+
+      const isSpecialAttacker = (pokemon.baseStats?.special ?? 0) >= (pokemon.baseStats?.atk ?? 0);
+      const hiddenAttackStat = isSpecialAttacker ? 'atk' : 'special';
+
+      for (const [key, lbl, cls] of STATS) {
+        if (key === hiddenAttackStat) continue;
+        if (!pokemon.statBuffs) pokemon.statBuffs = {};
+        const buffCount = pokemon.statBuffs[key] ?? 0;
+        const maxed = buffCount >= 10 || atCap;
+        const rawVal = key === 'spdef'
+          ? (pokemon.baseStats?.spdef ?? pokemon.baseStats?.special ?? 0)
+          : (pokemon.baseStats?.[key] ?? 0);
+        const grayPct = Math.round((rawVal / 255) * 100);
+        const bluePct = Math.round((buffCount / 10) * grayPct);
+
+        const row = document.createElement('div');
+        row.className = `stat-buff-row${maxed ? ' maxed' : ''}`;
+        row.innerHTML = `
+          <span class="stat-buff-lbl">${lbl}</span>
+          <div class="stat-buff-bar-wrap">
+            <div class="stat-bar-bg">
+              <div class="stat-bar-fill ${cls}" style="width:${grayPct}%"></div>
+              ${buffCount > 0 ? `<div class="stat-buff-overlay" style="width:${bluePct}%"></div>` : ''}
+            </div>
+          </div>
+          <span class="stat-buff-count">${buffCount}/10</span>
+        `;
+        if (!maxed) {
+          row.addEventListener('click', () => {
+            applyStatBuff(pokemon, key);
+            checkMaxStatAchievements(pokemon);
+            resolve();
+          });
+        }
+        choicesEl.appendChild(row);
+      }
+
+      const back = document.createElement('button');
+      back.className = 'btn-secondary';
+      back.style.cssText = 'margin-top:12px;width:100%;';
+      back.textContent = '← Back';
+      back.addEventListener('click', showPhase1);
+      choicesEl.appendChild(back);
+    }
+
+    showPhase1();
+  });
+}
+
+function loadPersistentBuffs() {
+  try {
+    const store = JSON.parse(localStorage.getItem('poke_stat_buffs') || '{}');
+    // Migrate old evo-line root IDs whenever a baby-form pre-evolution is added
+    const migrations = [
+      [143, 446],  // Snorlax   → Munchlax
+      [122, 439],  // Mr. Mime  → Mime Jr.
+      [113, 440],  // Chansey   → Happiny
+      [185, 438],  // Sudowoodo → Bonsly
+      [226, 458],  // Mantine   → Mantyke
+      [315, 406],  // Roselia   → Budew
+      [416, 415],  // Vespiquen → Combee
+      [424, 190],  // Ambipom   → Aipom
+      [414, 412],  // Mothim    → Burmy
+      [413, 412],  // Wormadam  → Burmy
+    ];
+    let dirty = false;
+    for (const [oldKey, newKey] of migrations) {
+      if (store[oldKey] !== undefined && store[newKey] === undefined) {
+        store[newKey] = store[oldKey];
+        delete store[oldKey];
+        dirty = true;
+      }
+    }
+    if (dirty) savePersistentBuffs(store);
+    return store;
+  } catch { return {}; }
+}
+function savePersistentBuffs(store) {
+  try { localStorage.setItem('poke_stat_buffs', JSON.stringify(store)); } catch {}
+}
+
+function getMaxBuffPoints() {
+  return Math.min((endlessState?.stageNumber ?? 1) * 10, 50);
+}
+
+function getTotalBuffPoints(buffs) {
+  // atk and special always mirror each other, so count only the higher of the two
+  const atkPts = Math.max(buffs.atk ?? 0, buffs.special ?? 0);
+  return atkPts + (buffs.hp ?? 0) + (buffs.def ?? 0) + (buffs.speed ?? 0) + (buffs.spdef ?? 0);
+}
+
+// Returns the base-form species ID for any member of an evolution line.
+function getEvoLineRoot(speciesId) {
+  const parentOf = {};
+  for (const [from, evo] of Object.entries(EVOLUTIONS)) {
+    parentOf[evo.into] = Number(from);
+  }
+  for (const [fromId, choices] of Object.entries(BRANCHING_EVOLUTIONS)) {
+    for (const evo of choices) parentOf[evo.into] = Number(fromId);
+  }
+  let id = speciesId;
+  while (parentOf[id] !== undefined) id = parentOf[id];
+  return id;
+}
+
+// Does the player's Hall of Fame contain any Pokémon from this evolution line?
+// Reads the persistent index so unlocks survive HoF entry pruning.
+function hofHasEvoLine(speciesId) {
+  const root = getEvoLineRoot(speciesId);
+  return getHofIndex().evoLineRoots.includes(root);
+}
+
+function loadBuffsIntoPokemon(p) {
+  if (!state.isEndlessMode) return;
+  const store = loadPersistentBuffs();
+  const buffs = store[getEvoLineRoot(p.speciesId)];
+  if (!buffs) return;
+  p.statBuffs = { ...buffs };
+  const hpBuff = buffs.hp ?? 0;
+  if (hpBuff > 0) {
+    const buffedMaxHp = Math.floor(calcHp(p.baseStats.hp, p.level) * (1 + 0.1 * hpBuff));
+    const diff = buffedMaxHp - p.maxHp;
+    p.maxHp = buffedMaxHp;
+    p.currentHp = Math.min(p.currentHp + diff, p.maxHp);
+  }
+}
+
+function checkMaxStatAchievements(pokemon) {
+  const BUFF_KEYS = ['hp', 'atk', 'def', 'speed', 'special', 'spdef'];
+  const maxedCount = BUFF_KEYS.filter(k => (pokemon.statBuffs?.[k] ?? 0) >= 10).length;
+  for (const threshold of [1, 2, 3, 4]) {
+    if (maxedCount >= threshold) {
+      const ach = unlockAchievement(`max_stats_${threshold}`);
+      if (ach) showAchievementToast(ach);
+    }
+  }
+  if (maxedCount >= 5) {
+    const ach = unlockAchievement('max_stats_all');
+    if (ach) showAchievementToast(ach);
+  }
+}
+
+function applyStatBuff(pokemon, statKey) {
+  if (!pokemon.statBuffs) pokemon.statBuffs = {};
+  pokemon.statBuffs[statKey] = Math.min(10, (pokemon.statBuffs[statKey] ?? 0) + 1);
+  // Mirror attack buffs so physical/special evolution switches don't lose progress
+  if (statKey === 'atk')     pokemon.statBuffs.special = Math.min(10, (pokemon.statBuffs.special ?? 0) + 1);
+  if (statKey === 'special') pokemon.statBuffs.atk     = Math.min(10, (pokemon.statBuffs.atk     ?? 0) + 1);
+  if (statKey === 'hp') {
+    const hpGain = Math.floor(calcHp(pokemon.baseStats.hp, pokemon.level) * 0.1);
+    pokemon.maxHp += hpGain;
+    pokemon.currentHp = Math.min(pokemon.currentHp + hpGain, pokemon.maxHp);
+  }
+  // Persist buffs by evo line root so they apply to the whole evolution line
+  const store = loadPersistentBuffs();
+  store[getEvoLineRoot(pokemon.speciesId)] = { ...pokemon.statBuffs };
+  savePersistentBuffs(store);
+  checkMaxStatAchievements(pokemon);
+  saveRun();
+  saveEndlessState();
+  if (typeof syncToCloud === 'function') syncToCloud();
+}
+
+function advanceEndless() {
+  endlessState.mapIndexInRegion++;
+  saveEndlessState();
+
+  if (endlessState.mapIndexInRegion >= 3) {
+    endlessState.regionNumber++;
+    if (endlessState.regionNumber > 3) {
+      // All 3 regions cleared — the stage final boss was the last big boss, so go to next stage
+      const completedStage = endlessState.stageNumber;
+      saveHallOfFameEntry(state.team, completedStage, false, true, completedStage, state.starterSpeciesId);
+      unlockNextStage(completedStage);
+      // Mega Bracelet: clearing the Hoenn tower stage unlocks Mega Evolution.
+      if (completedStage >= 3 && grantMegaBracelet()) {
+        setTimeout(() => showAchievementToast({ icon: '🧿', name: 'Mega Bracelet obtained!',
+          desc: 'Mega Evolution unlocked — win runs with a Mega-capable line to earn its stone.' }), 2500);
+      }
+      [1, 2, 3, 4, 5].forEach(threshold => {
+        if (completedStage === threshold) {
+          const ach = unlockAchievement(`endless_stage_${threshold}`);
+          if (ach) showAchievementToast(ach);
+        }
+      });
+      checkStarterCollectionAchievements();
+      clearEndlessState();
+      clearSavedRun();
+      if (typeof syncToCloud === 'function') syncToCloud();
+      renderStageComplete(completedStage, state.team, () => {
+        showEndlessStageSelect();
+      });
+    } else {
+      startEndlessRegion();
+    }
+  } else {
+    startEndlessMap();
+  }
+}
+
+// ---- Keyboard shortcuts ----
+document.addEventListener('keydown', e => {
+  if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.isContentEditable) return;
+  const activeScreen = document.querySelector('.screen.active')?.id;
+
+  // Space = skip/cancel on any screen that has such a button
+  if (e.code === 'Space' && !e.shiftKey) {
+    const skipMap = {
+      'battle-screen': 'btn-auto-battle',
+      'catch-screen':  'btn-skip-catch',
+      'item-screen':   'btn-skip-item',
+      'swap-screen':   'btn-cancel-swap',
+      'trade-screen':  'btn-skip-trade',
+    };
+    const btnId = skipMap[activeScreen];
+    if (btnId) {
+      const btn = document.getElementById(btnId);
+      if (btn && !btn.disabled) { e.preventDefault(); btn.click(); }
+      return;
+    }
+  }
+
+  if (activeScreen === 'catch-screen') {
+    const idx = ['Digit1', 'Digit2', 'Digit3'].indexOf(e.code);
+    if (idx === -1) return;
+    const slot = document.getElementById('catch-choices')?.children[idx];
+    if (!slot) return;
+    e.preventDefault();
+    if (e.shiftKey) {
+      slot.querySelector('.reroll-btn')?.click();
+    } else {
+      slot.querySelector('.poke-card')?.click();
+    }
+    return;
+  }
+
+  if (activeScreen === 'item-screen' && !e.shiftKey) {
+    const idx = ['Digit1', 'Digit2', 'Digit3'].indexOf(e.code);
+    if (idx === -1) return;
+    const slot = document.getElementById('item-choices')?.children[idx];
+    if (!slot) return;
+    e.preventDefault();
+    slot.click();
+    return;
+  }
+
+  if (activeScreen === 'swap-screen' && !e.shiftKey) {
+    const idx = ['Digit1', 'Digit2', 'Digit3', 'Digit4', 'Digit5', 'Digit6'].indexOf(e.code);
+    if (idx === -1) return;
+    const slot = document.getElementById('swap-choices')?.children[idx];
+    if (!slot) return;
+    e.preventDefault();
+    slot.click();
+    return;
+  }
+
+  if (activeScreen === 'map-screen' && !e.shiftKey) {
+    const idx = ['Digit1', 'Digit2'].indexOf(e.code);
+    if (idx === -1) return;
+    if (!state?.map) return;
+    const accessible = Object.values(state.map.nodes)
+      .filter(n => n.accessible && !n.visited)
+      .sort((a, b) => a.layer !== b.layer ? a.layer - b.layer : a.col - b.col);
+    const node = accessible[idx];
+    if (!node) return;
+    e.preventDefault();
+    if (state.isEndlessMode) onEndlessNodeClick(node);
+    else onNodeClick(node);
+  }
+});
+
+// ---- Boot ----
+window.addEventListener('DOMContentLoaded', initGame);

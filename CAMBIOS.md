@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Pokelike y Más juegos (Subversión 0.12)
+- `site/pokelike/`: Pokelike 1.6 (de la copia pcasaspere/pokelike_v2 de pokelike.xyz), preparado con `tools/actualizar_pokelike.py preparar`: sin anuncios ni Google Analytics, fuente local, botón Volver arriba a la izquierda (`window.PB_VOLVER_TOP`) y los sprites de PokeAPI (649 Pokémon, normales y shiny) dentro de la app (`data/pokedex.json` apunta a `sprites/pokemon/`).
+- En GitHub Actions, `actualizar_pokelike.py web` baja la última versión de pokelike.xyz y los sprites; cada versión nueva se respalda en la rama `respaldo-pokelike` (etiqueta `pokelike-<versión>-<hash>`). Si falla, se usa la copia del repo.
+- `site/pokeisaac-boton.js`: un solo botón "Más juegos" que abre una ventana con PokéIsaac, PokéSurvivor y Pokelike.
+
 ## PokéSurvivor (Subversión 0.12)
 - Copia completa del código de JayElDragon/poke-survivor (Godot 4.7, juego 6.2) en `juegos/poke-survivor/`, como respaldo por si el original desaparece. Se añadió el preset de exportación "Web" (sin hilos).
 - En GitHub Actions, el trabajo `survivor` descarga Godot 4.7.2, exporta el juego a `site/pokesurvivor/` y lo pasa a los trabajos del APK y de Windows. No se sube al repo (el .pck pesa unos 148 MB).

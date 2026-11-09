@@ -1,0 +1,5761 @@
+// ui.js - Screen transitions and UI helpers
+
+// Speed multiplier for battle animation (1 = normal, SKIP_SPEED = fast/skip)
+const SKIP_SPEED = 3;
+const OVERTIME_SPEED = 5;
+let battleSpeedMultiplier = 1;
+
+let _hoverEnabled = true;
+document.addEventListener('mousemove',   () => { _hoverEnabled = true; }, { capture: true, passive: true });
+document.addEventListener('touchstart',  () => { _hoverEnabled = true; }, { capture: true, passive: true });
+
+// Touch devices (no hover): tooltips positioned at the pointer end up hidden
+// under the finger. Dock them as a bottom sheet instead (.docked in CSS).
+function isTouchUI() {
+  return window.matchMedia('(hover: none)').matches;
+}
+
+const _itemTooltip = (() => {
+  let el = null;
+  const get = () => el || (el = document.getElementById('item-tooltip'));
+  return {
+    show(text, x, y) {
+      const t = get(); if (!t) return;
+      t.textContent = text;
+      if (isTouchUI()) {
+        t.classList.add('docked');
+        t.style.left = ''; t.style.top = '';
+      } else {
+        t.classList.remove('docked');
+        t.style.left = x + 'px'; t.style.top = y + 'px';
+      }
+      t.classList.add('visible');
+    },
+    hide() { const t = get(); if (t) t.classList.remove('visible', 'docked'); },
+  };
+})();
+
+const _traitTooltip = (() => {
+  let el = null;
+  const get = () => el || (el = document.getElementById('trait-tooltip'));
+  document.addEventListener('click', () => { const t = get(); if (t) t.classList.remove('visible'); });
+  return {
+    show(desc, anchorRect) {
+      const t = get();
+      if (!t) return;
+      t.textContent = desc;
+      t.classList.add('visible');
+      if (isTouchUI()) {
+        t.classList.add('docked');
+        t.style.left = ''; t.style.top = '';
+        return;
+      }
+      t.classList.remove('docked');
+      // Position below the tapped trait, clamped so it stays on screen
+      const left = Math.max(8, Math.min(anchorRect.left, window.innerWidth - 210));
+      t.style.left = left + 'px';
+      t.style.top = (anchorRect.bottom + 6) + 'px';
+    },
+    hide() { const t = get(); if (t) t.classList.remove('visible', 'docked'); },
+  };
+})();
+
+// Held-item badge on battle cards: tap/click shows the item's name + effect.
+document.addEventListener('click', e => {
+  const badge = e.target.closest('.battle-held-item');
+  if (badge) {
+    e.stopPropagation();
+    const text = badge.dataset.itemDesc
+      ? `${badge.dataset.itemName} — ${badge.dataset.itemDesc}`
+      : badge.dataset.itemName;
+    _itemTooltip.show(text, e.clientX + 14, e.clientY - 8);
+    return;
+  }
+  // Tapping anywhere else dismisses the item tooltip (mainly for the docked
+  // touch variant — on desktop mouseleave handlers already hide it).
+  _itemTooltip.hide();
+});
+
+document.addEventListener('mouseover', e => {
+  if (!_hoverEnabled || !state?.isEndlessMode) return;
+  const badge = e.target.closest('.type-badge');
+  if (!badge) return;
+  const tc = [...badge.classList].find(c => c !== 'type-badge' && c.startsWith('type-'));
+  if (!tc) return;
+  const type = tc.replace('type-', '').replace(/^./, c => c.toUpperCase());
+  if (!TRAIT_DESCRIPTIONS?.[type]) return;
+  const counts = {};
+  for (const p of state.team) { const m = p.isShiny ? 2 : 1; for (const t of (p.types || [])) counts[t] = (counts[t] || 0) + m; }
+  const count = counts[type] ?? 0;
+  const maxTier = TRAIT_DESCRIPTIONS[type].length;
+  const tier = Math.min(maxTier, Math.floor(count / 2));
+  const next = tier < maxTier ? (tier + 1) * 2 : null;
+  const progress = next != null ? ` (${count}/${next})` : ' (maxed)';
+  const desc = TRAIT_DESCRIPTIONS[type][0];
+  _itemTooltip.show(`${type}: ${desc}${progress}`, e.clientX + 14, e.clientY - 8);
+});
+document.addEventListener('mouseout', e => {
+  if (e.target.classList?.contains('type-badge')) _itemTooltip.hide();
+});
+
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById(id);
+  if (s) s.classList.add('active');
+  const tt = document.getElementById('map-node-tooltip');
+  if (tt) tt.classList.remove('visible');
+  _itemTooltip.hide();
+  _hoverEnabled = false;
+}
+
+function hpBarColor(pct) {
+  if (pct > 0.5) return '#00FF4A';
+  if (pct > 0.1) return '#EAFF00';
+  return '#FF0000';
+}
+
+function renderHpBar(current, max) {
+  const pct = Math.min(1, Math.max(0, current / max));
+  const color = hpBarColor(pct);
+  return `<div class="hp-bar-bg"><div class="hp-bar-fill" style="width:${Math.floor(pct*100)}%;background:${color}"><div class="hp-bar-shadow"></div></div></div>
+          <span class="hp-text">${Math.max(0,current)}/${max}</span>`;
+}
+
+function renderPokemonCard(pokemon, onClick, selected, dexCaught = false, hofStarterBadge = false) {
+  const pct = pokemon.currentHp / pokemon.maxHp;
+  const typeHtml = (pokemon.types || ['???']).map(t =>
+    `<span class="type-badge type-${t.toLowerCase()}">${t}</span>`
+  ).join('');
+  const move = getMoveForPokemon(pokemon);
+  const catClass = move.isSpecial ? 'move-cat-special' : 'move-cat-physical';
+  const catLabel = move.isSpecial ? 'Special' : 'Physical';
+  const moveTypeClass = move.type ? `type-${move.type.toLowerCase()}` : '';
+  return `<div class="poke-card${selected?' selected':''}" ${onClick?`role="button" tabindex="0"`:''}">
+    <div class="poke-sprite-wrap">
+      <img src="${pokemon.spriteUrl || ''}" alt="${pokemon.name}" class="poke-sprite${pokemon.isShiny?' shiny':''}"
+           onerror="this.src='';this.style.display='none'">
+      ${pokemon.isShiny ? '<span class="shiny-badge">★ Shiny</span>' : ''}
+      ${hofStarterBadge
+        ? '<img class="dex-caught-badge" src="sprites/items/great-ball.png" alt="HoF Starter" title="Already in your Hall of Fame PC">'
+        : dexCaught
+          ? '<img class="dex-caught-badge" src="sprites/items/poke-ball.png" alt="Caught" title="Already in Pokédex">'
+          : ''}
+    </div>
+    <div class="poke-name">${pokemon.nickname || pokemon.name}</div>
+    <div class="poke-level">Lv. ${pokemon.level}</div>
+    <div class="poke-types">${typeHtml}</div>
+    <div class="poke-stats-bars">${((() => {
+      const isSpecialAttacker = (pokemon.baseStats?.special ?? 0) >= (pokemon.baseStats?.atk ?? 0);
+      const hiddenAttackStat = isSpecialAttacker ? 'atk' : 'special';
+      return [
+        ['ATK', pokemon.baseStats.atk,     'stat-atk', 'atk'],
+        ['SP.A', pokemon.baseStats.special ?? 0, 'stat-spa', 'special'],
+        ['SPE', pokemon.baseStats.speed,   'stat-spe', 'speed'],
+        ['HP',  pokemon.baseStats.hp,      'stat-hp',  'hp'],
+        ['DEF', pokemon.baseStats.def,     'stat-def', 'def'],
+        ['SP.D', pokemon.baseStats.spdef ?? pokemon.baseStats.special ?? 0, 'stat-spd', 'spdef'],
+      ].filter(([,,,key]) => key !== hiddenAttackStat);
+    })()).map(([lbl, val, cls, key]) => {
+      const buffCount = pokemon.statBuffs?.[key] ?? 0;
+      const grayPct = Math.round((val / 255) * 100);
+      const bluePct = Math.round((buffCount / 10) * grayPct);
+      // Value-scaled bar color (255 = max possible base stat): low stats
+      // render dark red, high stats light green — the lighter the bar, the
+      // better the stat. Each bar sweeps dark→light along its length.
+      const t = Math.min(1, val / 255);
+      const hue = Math.round(t * 130);
+      const barCol  = `hsl(${hue},78%,${Math.round(34 + t * 28)}%)`;
+      const barDark = `hsl(${hue},70%,${Math.round(20 + t * 16)}%)`;
+      const baseVal = key === 'hp'
+        ? (pokemon.maxHp ?? Math.floor(val * pokemon.level / 50) + pokemon.level + 10)
+        : Math.floor(val * pokemon.level / 50) + 5;
+      const effectiveVal = (key !== 'hp' && buffCount > 0)
+        ? Math.floor(baseVal * (1 + 0.1 * buffCount))
+        : baseVal;
+      return `<div class="stat-row" data-tooltip="${lbl}: ${effectiveVal}${buffCount > 0 ? ` (+${buffCount*10}%)` : ''}">
+        <span class="stat-lbl">${lbl}</span>
+        <div class="stat-bar-bg">
+          <div class="stat-bar-fill ${cls}" style="width:${grayPct}%;background:linear-gradient(90deg,${barDark},${barCol})"></div>
+          ${buffCount > 0 ? `<div class="stat-buff-overlay" style="width:${bluePct}%"></div>` : ''}
+        </div>
+        <span class="stat-val">${effectiveVal}</span>
+      </div>`;
+    }).join('')}</div>
+    <div class="poke-hp">${renderHpBar(pokemon.currentHp, pokemon.maxHp)}</div>
+    <div class="poke-move">
+      <div class="move-header"><span class="move-cat-badge ${catClass}">${catLabel}</span></div>
+      ${((typeof getMovesForPokemon === 'function') ? getMovesForPokemon(pokemon) : [move]).map(m => `
+      <div class="poke-move-row">
+        <span class="move-name">${m.name}</span>
+        <span class="poke-move-row-meta">
+          <span class="type-badge ${m.type ? `type-${m.type.toLowerCase()}` : ''}">${m.type}</span>
+          ${!m.noDamage ? `<span class="move-power-badge">${m.power} PWR</span>` : ''}
+        </span>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+
+// ---- Trait preview below pick options ----
+function renderTraitPreview(pokemon, currentTeam) {
+  if (!state.isEndlessMode) return '';
+
+  // Count all types across team + this pokemon (shiny = 2)
+  const countAfter = {};
+  for (const p of [...currentTeam, pokemon]) {
+    const mult = p.isShiny ? 2 : 1;
+    for (const t of (p.types || [])) countAfter[t] = (countAfter[t] || 0) + mult;
+  }
+  const countBefore = {};
+  for (const p of currentTeam) {
+    const mult = p.isShiny ? 2 : 1;
+    for (const t of (p.types || [])) countBefore[t] = (countBefore[t] || 0) + mult;
+  }
+
+  const tierOf = n => n >= 6 ? 3 : n >= 4 ? 2 : n >= 2 ? 1 : 0;
+  const nextOf  = n => n < 2 ? 2 : n < 4 ? 4 : 6;
+
+  const myTypes = pokemon.types || [];
+  if (myTypes.length === 0) return '';
+
+  const rows = myTypes.map(type => {
+    const count    = countAfter[type] || 0;
+    const prevTier = tierOf(countBefore[type] || 0);
+    const newTier  = tierOf(count);
+    const tierUp   = newTier > prevTier;
+    const isNew    = prevTier === 0 && newTier > 0;
+    const next     = nextOf(count);
+
+    const traitEntry = getTraitDisplayData([...currentTeam, pokemon]).find(e => e.type === type);
+    const desc = traitEntry?.description ?? null;
+
+    let tierLabel = newTier > 0 ? ` T${newTier}` : '';
+    if (tierUp) tierLabel += ' ▲';
+    const newBadge = isNew ? `<span class="trait-preview-new-tag">NEW</span>` : '';
+
+    return `<div class="trait-preview-row${tierUp ? ' trait-preview-row-up' : ''}">
+      <div class="trait-preview-row-header">
+        <span class="trait-preview-count">${count}/${next}</span>
+        <span class="type-badge type-${type.toLowerCase()}" style="font-size:7px;padding:2px 5px;">${type}${tierLabel}</span>
+        ${newBadge}
+      </div>
+      ${desc ? `<div class="trait-preview-desc">${desc}</div>` : `<div class="trait-preview-desc" style="font-style:italic;">No trait</div>`}
+    </div>`;
+  }).join('');
+
+  return `<div class="poke-trait-preview">${rows}</div>`;
+}
+
+// ---- Team hover card popup ----
+function showTeamHoverCard(pokemon, anchorEl) {
+  const popup = document.getElementById('team-hover-card');
+  if (!popup) return;
+  popup.innerHTML = renderPokemonCard(pokemon, false, false);
+  popup.style.display = 'block';
+
+  const rect = anchorEl.getBoundingClientRect();
+  const popupW = popup.offsetWidth || 200;
+  const popupH = popup.offsetHeight || 300;
+
+  // Prefer below, fall back to above
+  let top = rect.bottom + 6;
+  if (top + popupH > window.innerHeight - 8) top = rect.top - popupH - 6;
+
+  // Clamp horizontally
+  let left = rect.left;
+  if (left + popupW > window.innerWidth - 8) left = window.innerWidth - popupW - 8;
+  if (left < 8) left = 8;
+
+  popup.style.left = left + 'px';
+  popup.style.top  = top + 'px';
+}
+
+function hideTeamHoverCard() {
+  const popup = document.getElementById('team-hover-card');
+  if (popup) popup.style.display = 'none';
+}
+
+function getMoveForPokemon(pokemon) {
+  return getBestMove(pokemon.types || ['Normal'], pokemon.baseStats, pokemon.speciesId, pokemon.moveTier ?? 1, pokemon.heldItem);
+}
+
+let _dragIdx = null;
+let _teamHoverCardDismissListener = null;
+
+function renderTeamBar(team, el, showTypes = false, forceReorder = false, afterEquipChange = null) {
+  const isMain = forceReorder || !el;
+  if (!el) el = document.getElementById('team-bar');
+  if (!el) return;
+  // Safety net: remove any orphaned drag ghost left behind by a reorder gesture
+  // that got interrupted (e.g. the dragged slot was re-rendered out mid-drag).
+  document.querySelectorAll('.team-drag-ghost').forEach(g => g.remove());
+  el.innerHTML = '';
+
+  // On mobile, mouseenter/mouseleave never fire for "leave", so tapping outside
+  // the team bar should dismiss the hover card.
+  if (isMain && !_teamHoverCardDismissListener) {
+    _teamHoverCardDismissListener = (e) => {
+      const popup  = document.getElementById('team-hover-card');
+      const teamBar = document.getElementById('team-bar');
+      if (!popup || popup.style.display === 'none') return;
+      if (!popup.contains(e.target) && !teamBar?.contains(e.target)) {
+        hideTeamHoverCard();
+      }
+    };
+    document.addEventListener('touchstart', _teamHoverCardDismissListener, { passive: true });
+    document.addEventListener('click',      _teamHoverCardDismissListener);
+    // Global safety net: any pointer release while no drag is active clears
+    // stray drag ghosts, so a leaked ghost can never get stuck on screen.
+    document.addEventListener('pointerup', () => {
+      if (_dragIdx === null) document.querySelectorAll('.team-drag-ghost').forEach(g => g.remove());
+    });
+    document.addEventListener('pointercancel', () => {
+      if (_dragIdx === null) document.querySelectorAll('.team-drag-ghost').forEach(g => g.remove());
+    });
+  }
+
+  team.forEach((p, i) => {
+    const pct = p.currentHp / p.maxHp;
+    const color = hpBarColor(pct);
+    const slot = document.createElement('div');
+    slot.className = 'team-slot';
+    slot.style.cursor = isMain ? 'grab' : 'default';
+    slot.innerHTML = `
+      <img src="${p.spriteUrl||''}" alt="${p.name}" class="team-sprite" onerror="this.src='';this.style.display='none'">
+      <div class="team-slot-name">${p.nickname||p.name}</div>
+      <div class="team-slot-lv">Lv${p.level}</div>
+      ${showTypes ? `<div style="display:flex;gap:2px;flex-wrap:wrap;justify-content:center;margin:1px 0;">${(p.types||[]).map(t=>`<span class="type-badge type-${t.toLowerCase()}" style="font-size:5px;padding:1px 2px;">${t}</span>`).join('')}</div>` : ''}
+      <div class="hp-bar-bg sm"><div class="hp-bar-fill" style="width:${Math.floor(pct*100)}%;background:${color}"></div></div>
+      ${p.heldItem ? `<div class="team-slot-item">${itemIconHtml(p.heldItem, 16)}</div>` : ''}`;
+    slot.addEventListener('mouseenter', () => { if (_hoverEnabled) showTeamHoverCard(p, slot); });
+    slot.addEventListener('mousemove',  () => { if (_hoverEnabled) showTeamHoverCard(p, slot); });
+    slot.addEventListener('mouseleave', () => hideTeamHoverCard());
+    if (isMain && p.heldItem) {
+      const itemEl = slot.querySelector('.team-slot-item');
+      itemEl?.addEventListener('mousemove', e => { if (_hoverEnabled) _itemTooltip.show(`${p.heldItem.name}: ${p.heldItem.desc}`, e.clientX, e.clientY); });
+      itemEl?.addEventListener('mouseleave', () => _itemTooltip.hide());
+      itemEl?.addEventListener('click', e => {
+        e.stopPropagation();
+        hideTeamHoverCard();
+        openItemEquipModal(p.heldItem, {
+          fromPokemonIdx: i,
+          onComplete: () => {
+            if (afterEquipChange) {
+              afterEquipChange();
+            } else {
+              renderItemBadges(state.items);
+              renderTeamBar(state.team);
+            }
+          },
+        });
+      });
+    }
+    if (isMain) {
+      slot.style.touchAction = 'none';
+      slot.addEventListener('pointerdown', (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        if (e.target.closest('.team-slot-item')) return;
+        e.preventDefault();
+        slot.setPointerCapture(e.pointerId);
+        _dragIdx = i;
+
+        const rect = slot.getBoundingClientRect();
+        const offsetX = e.clientX - rect.left;
+        const offsetY = e.clientY - rect.top;
+
+        // Clear any stale ghost from a previous (possibly interrupted) gesture
+        // before spawning a new one.
+        document.querySelectorAll('.team-drag-ghost').forEach(g => g.remove());
+        const ghost = slot.cloneNode(true);
+        ghost.classList.add('team-drag-ghost');
+        ghost.style.cssText = `position:fixed;pointer-events:none;z-index:9999;width:${rect.width}px;opacity:0.85;left:${e.clientX - offsetX}px;top:${e.clientY - offsetY}px;transform:scale(1.05);transition:none;`;
+        document.body.appendChild(ghost);
+        slot.style.opacity = '0.3';
+
+        let _didDrag = false;
+        const _downX = e.clientX, _downY = e.clientY;
+        const onMove = (ev) => {
+          if (!_didDrag && (Math.abs(ev.clientX - _downX) > 6 || Math.abs(ev.clientY - _downY) > 6)) _didDrag = true;
+          ghost.style.left = (ev.clientX - offsetX) + 'px';
+          ghost.style.top  = (ev.clientY - offsetY) + 'px';
+          document.querySelectorAll('.team-slot-dragover').forEach(s => s.classList.remove('team-slot-dragover'));
+          const target = document.elementFromPoint(ev.clientX, ev.clientY)?.closest('.team-slot');
+          if (target && target !== slot) target.classList.add('team-slot-dragover');
+        };
+
+        const cleanup = () => {
+          // Remove ALL drag ghosts, not just this gesture's, so an overlapping
+          // or interrupted gesture can't leave one stuck.
+          document.querySelectorAll('.team-drag-ghost').forEach(g => g.remove());
+          slot.style.opacity = '';
+          document.querySelectorAll('.team-slot-dragover').forEach(s => s.classList.remove('team-slot-dragover'));
+          _dragIdx = null;
+          slot.removeEventListener('pointermove', onMove);
+          slot.removeEventListener('pointerup', onUp);
+          slot.removeEventListener('pointercancel', cleanup);
+        };
+
+        const onUp = (ev) => {
+          const target = document.elementFromPoint(ev.clientX, ev.clientY)?.closest('.team-slot');
+          if (target && target !== slot) {
+            const slots = [...el.querySelectorAll('.team-slot')];
+            const targetIdx = slots.indexOf(target);
+            if (_dragIdx !== null && targetIdx !== -1 && targetIdx !== _dragIdx) {
+              [team[_dragIdx], team[targetIdx]] = [team[targetIdx], team[_dragIdx]];
+              cleanup();
+              renderTeamBar(team, forceReorder ? el : undefined, showTypes, forceReorder, afterEquipChange);
+              return;
+            }
+          }
+          if (!_didDrag) showTeamHoverCard(p, slot);
+          cleanup();
+        };
+
+        slot.addEventListener('pointermove', onMove);
+        slot.addEventListener('pointerup', onUp);
+        slot.addEventListener('pointercancel', cleanup);
+      });
+    }
+    el.appendChild(slot);
+  });
+}
+
+function renderItemBadges(items, el, afterUse = null) {
+  if (!el) el = document.getElementById('item-bar');
+  if (!el) return;
+  el.innerHTML = '';
+  if (items.length === 0) {
+    el.innerHTML = '<span style="color:var(--text-dim);font-size:10px;">Bag empty</span>';
+    return;
+  }
+  // Mega Stones collapse into ONE grouped chip (they'd otherwise flood the
+  // bag bar); clicking it opens the stone bag to pick one to assign.
+  const stoneEntries = [];
+  const restEntries = [];
+  items.forEach((it, idx) => ((it.id || '').startsWith('mega_stone_') ? stoneEntries : restEntries).push({ it, idx }));
+  if (stoneEntries.length) {
+    const chip = document.createElement('span');
+    chip.className = 'item-badge item-badge--stones';
+    chip.innerHTML = `<img src="sprites/items/key-stone.png" class="item-sprite-icon" style="width:18px;height:18px;image-rendering:pixelated;vertical-align:middle;" onerror="this.replaceWith(document.createTextNode('💠'))"> Mega Stones ×${stoneEntries.length}`;
+    chip.style.cursor = 'pointer';
+    chip.addEventListener('mousemove', e => { if (_hoverEnabled) _itemTooltip.show('Your Mega Stone collection — tap to assign one to its Pokémon.', e.clientX, e.clientY); });
+    chip.addEventListener('mouseleave', () => _itemTooltip.hide());
+    chip.addEventListener('click', () => openMegaStoneBag(stoneEntries, afterUse));
+    el.appendChild(chip);
+  }
+  restEntries.forEach(({ it, idx }) => {
+    const span = document.createElement('span');
+    span.className = 'item-badge';
+    span.innerHTML = `${itemIconHtml(it, 18)} ${it.name}`;
+    span.style.cursor = 'pointer';
+    span.addEventListener('mousemove', e => { if (_hoverEnabled) _itemTooltip.show(it.desc, e.clientX, e.clientY); });
+    span.addEventListener('mouseleave', () => _itemTooltip.hide());
+
+    span.addEventListener('click', () => {
+      if (it.usable) {
+        openUsableItemModal(it, idx, afterUse);
+      } else {
+        openItemEquipModal(it, {
+          fromBagIdx: idx,
+          onComplete: () => {
+            renderItemBadges(state.items);
+            renderTeamBar(state.team);
+            if (afterUse) afterUse();
+          },
+        });
+      }
+    });
+
+    el.appendChild(span);
+  });
+}
+
+// The grouped Mega Stone bag: list every stone with its real sprite and
+// whether its Pokémon is on the team, then hand off to the equip modal.
+function openMegaStoneBag(stoneEntries, afterUse = null) {
+  document.getElementById('item-equip-modal')?.remove();
+  const modal = document.createElement('div');
+  modal.id = 'item-equip-modal';
+  modal.className = 'item-equip-overlay';
+  const rows = stoneEntries.map(({ it, idx }) => {
+    const m = (typeof MEGA_FORMS !== 'undefined' && MEGA_FORMS[it.megaBaseId]) || null;
+    const holderOnTeam = m && state.team.some(p =>
+      typeof getEvoLineRoot === 'function' && getEvoLineRoot(p.speciesId) === getEvoLineRoot(it.megaBaseId));
+    return `<div class="equip-pokemon-row" style="${holderOnTeam ? '' : 'opacity:0.55;'}">
+      ${itemIconHtml(it, 26)}
+      <div class="equip-poke-info">
+        <div class="equip-poke-name">${it.name}</div>
+        <div class="equip-poke-lv">${m ? `Mega ${m.megaName}` : ''}${holderOnTeam ? '' : ' — line not on team'}</div>
+      </div>
+      <div class="equip-btn-group"><button class="equip-btn" data-stone="${idx}">Assign ▸</button></div>
+    </div>`;
+  }).join('');
+  modal.innerHTML = `
+    <div class="item-equip-box">
+      <div class="equip-item-header">
+        <img src="sprites/items/key-stone.png" style="width:28px;height:28px;image-rendering:pixelated;" onerror="this.replaceWith(document.createTextNode('💠'))">
+        <div>
+          <div class="equip-item-name">Mega Stones</div>
+          <div class="equip-item-desc">Give a stone to its Pokémon to Mega Evolve it. Remove it to revert.</div>
+        </div>
+      </div>
+      <div class="equip-pokemon-list">${rows}</div>
+      <button id="btn-close-stone-bag" class="btn-secondary" style="width:100%;margin-top:8px;">Close</button>
+    </div>`;
+  document.body.appendChild(modal);
+  modal.querySelector('#btn-close-stone-bag').onclick = () => modal.remove();
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  modal.querySelectorAll('button[data-stone]').forEach(btn => {
+    btn.onclick = () => {
+      const idx = +btn.dataset.stone;
+      const it = state.items[idx];
+      modal.remove();
+      if (!it) return;
+      openItemEquipModal(it, {
+        fromBagIdx: idx,
+        onComplete: () => {
+          renderItemBadges(state.items);
+          renderTeamBar(state.team);
+          if (afterUse) afterUse();
+        },
+      });
+    };
+  });
+}
+
+
+// Render battlefield — first alive pokemon on each side starts as active
+// Small held-item badge shown on the battle card. Tap/click opens the item
+// tooltip (docked to the bottom on touch devices).
+function battleHeldItemHtml(p) {
+  if (!p.heldItem) return '';
+  const desc = (p.heldItem.desc || '').replace(/"/g, '&quot;');
+  return `<button class="battle-held-item" data-item-name="${p.heldItem.name}" data-item-desc="${desc}" title="${p.heldItem.name}" aria-label="Held item: ${p.heldItem.name}">${itemIconHtml(p.heldItem, 14)}</button>`;
+}
+
+function renderBattleField(pTeam, eTeam) {
+  const pEl = document.getElementById('player-side');
+  const eEl = document.getElementById('enemy-side');
+  const pActiveIdx = pTeam.findIndex(p => p.currentHp > 0);
+  const eActiveIdx = eTeam.findIndex(p => p.currentHp > 0);
+
+  if (pEl) {
+    pEl.innerHTML = pTeam.map((p, i) => {
+      const fainted = p.currentHp <= 0;
+      const active  = i === pActiveIdx;
+      const hpBlock = renderHpBar(p.currentHp, p.maxHp);
+      return `<div class="battle-pokemon ${fainted?'fainted':''} ${active?'active-pokemon':''}" data-idx="${i}">
+        <div class="battle-poke-name">${p.nickname||p.name} Lv${p.level}</div>
+        <div class="poke-hp">${hpBlock}</div>
+        <img src="ui/battleBase.png" class="battle-base" alt="">
+        <img src="${p.spriteUrl||''}" alt="${p.name}" class="battle-sprite" onerror="this.src=''">
+        <div class="battle-stages"></div>
+        ${battleHeldItemHtml(p)}
+      </div>`;
+    }).join('');
+  }
+  if (eEl) {
+    eEl.innerHTML = eTeam.map((p, i) => {
+      const fainted = p.currentHp <= 0;
+      const active  = i === eActiveIdx;
+      return `<div class="battle-pokemon ${fainted?'fainted':''} ${active?'active-pokemon':''}" data-idx="${i}">
+        <div class="battle-poke-name">${p.name} Lv${p.level}</div>
+        <div class="poke-hp">${renderHpBar(p.currentHp, p.maxHp)}</div>
+        <img src="ui/battleBase.png" class="battle-base" alt="">
+        <img src="${p.spriteUrl||''}" alt="${p.name}" class="battle-sprite" onerror="this.src=''">
+        <div class="battle-stages"></div>
+        ${battleHeldItemHtml(p)}
+      </div>`;
+    }).join('');
+  }
+}
+
+// Animate HP bar from fromHp to toHp smoothly
+function animateHpBar(containerEl, fromHp, toHp, maxHp, duration = 250) {
+  return animateHpBarFull(containerEl, fromHp, maxHp, toHp, maxHp, duration);
+}
+
+// Smoothly interpolate both currentHp AND maxHp — used on level-ups so the
+// "X/Y" text doesn't snap to the new max before the bar visually grows.
+function animateHpBarFull(containerEl, fromHp, fromMax, toHp, toMax, duration = 250) {
+  return new Promise(resolve => {
+    const fillEl = containerEl.querySelector('.hp-bar-fill');
+    const textEl = containerEl.querySelector('.hp-text');
+    if (!fillEl) { resolve(); return; }
+
+    const safeFromMax = Math.max(1, fromMax);
+    const safeToMax   = Math.max(1, toMax);
+    const fromPct = Math.min(1, Math.max(0, fromHp / safeFromMax));
+    const toPct   = Math.min(1, Math.max(0, toHp / safeToMax));
+    const scaledDuration = duration / battleSpeedMultiplier;
+    const start = performance.now();
+
+    function frame(now) {
+      const elapsed = now - start;
+      const t = Math.min(elapsed / scaledDuration, 1);
+      const curPct = fromPct + (toPct - fromPct) * t;
+      const curHp  = Math.round(fromHp + (toHp - fromHp) * t);
+      const curMax = Math.round(fromMax + (toMax - fromMax) * t);
+
+      fillEl.style.width = `${Math.floor(curPct * 100)}%`;
+      fillEl.style.background = hpBarColor(curPct);
+      if (textEl) textEl.textContent = `${Math.max(0, curHp)}/${curMax}`;
+
+      if (t < 1) {
+        requestAnimationFrame(frame);
+      } else {
+        resolve();
+      }
+    }
+
+    requestAnimationFrame(frame);
+  });
+}
+
+// ─── Attack particle animations ──────────────────────────────────────────────
+
+// ---- Move Animations ----
+
+const TYPE_COLORS_RGB = {
+  normal:'200,200,200', fire:'255,120,30', water:'60,140,255',
+  electric:'255,220,0', grass:'50,200,50', ice:'150,220,255',
+  fighting:'220,60,30', poison:'160,60,220', ground:'180,140,60',
+  flying:'130,180,255', psychic:'255,80,180', bug:'100,200,50',
+  rock:'160,130,80', ghost:'100,60,180', dragon:'60,80,220',
+  dark:'80,60,80', steel:'160,160,180', fairy:'255,140,200',
+};
+
+function resizeCanvasIfNeeded(canvas) {
+  if (canvas.width !== window.innerWidth || canvas.height !== window.innerHeight) {
+    canvas.width  = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+}
+
+function animCanvas(attackerEl, targetEl) {
+  const canvas = document.getElementById('battle-anim-canvas');
+  if (!canvas) return null;
+  resizeCanvasIfNeeded(canvas);
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  const aR = attackerEl.getBoundingClientRect();
+  const tR = targetEl.getBoundingClientRect();
+  const from = { x: aR.left + aR.width/2,  y: aR.top  + aR.height/2 };
+  const to   = { x: tR.left + tR.width/2,  y: tR.top  + tR.height/2 };
+  return { canvas, ctx, from, to };
+}
+
+// Ownership token: when animations overlap (or one is aborted), only the
+// LATEST run may clear/hide the shared canvas — an older run finishing late
+// must not blank out the new one mid-flight.
+let _canvasRunToken = 0;
+
+function runCanvas(canvas, ctx, duration, drawFn) {
+  return new Promise(resolve => {
+    const scaledDuration = duration / battleSpeedMultiplier;
+    const token = ++_canvasRunToken;
+    // The clock starts at the FIRST PAINTED FRAME, not at scheduling time —
+    // on busy frames the first RAF can arrive late enough to skip the whole
+    // travel phase (seen as "only the impact sparks appeared").
+    let start = null;
+    function frame(now) {
+      if (token !== _canvasRunToken) { resolve(); return; } // superseded
+      if (start === null) start = now;
+      const t = Math.min((now - start) / scaledDuration, 1);
+      try {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        drawFn(ctx, t);
+      } catch(e) {
+        if (token === _canvasRunToken) canvas.style.display = 'none';
+        resolve();
+        return;
+      }
+      if (t < 1) requestAnimationFrame(frame);
+      else {
+        if (token === _canvasRunToken) { ctx.clearRect(0, 0, canvas.width, canvas.height); canvas.style.display = 'none'; }
+        resolve();
+      }
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+function runParticleCanvas(canvas, ctx, particles, duration) {
+  return new Promise(resolve => {
+    const scaledDuration = duration / battleSpeedMultiplier;
+    const token = ++_canvasRunToken;
+    let start = null;
+    function frame(now) {
+      if (token !== _canvasRunToken) { resolve(); return; } // superseded
+      if (start === null) start = now;
+      const elapsed = now - start;
+      const scaledElapsed = elapsed * battleSpeedMultiplier;
+      try {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        let anyAlive = false;
+        for (const p of particles) { p.tick(scaledElapsed); if (p.alive) { p.draw(ctx); anyAlive = true; } }
+        if (elapsed < scaledDuration || anyAlive) requestAnimationFrame(frame);
+        else {
+          if (token === _canvasRunToken) { ctx.clearRect(0, 0, canvas.width, canvas.height); canvas.style.display = 'none'; }
+          resolve();
+        }
+      } catch(e) {
+        if (token === _canvasRunToken) canvas.style.display = 'none';
+        resolve();
+      }
+    }
+    requestAnimationFrame(frame);
+  });
+}
+
+function animSplash(canvas, ctx, from, to) {
+  // Water droplets arc up from the attacker and fall back down
+  return runCanvas(canvas, ctx, 700, (ctx, t) => {
+    const drops = [
+      { ox: -18, delay: 0.0, height: 55 },
+      { ox:   0, delay: 0.1, height: 75 },
+      { ox:  18, delay: 0.2, height: 55 },
+      { ox:  -9, delay: 0.3, height: 40 },
+      { ox:   9, delay: 0.35, height: 40 },
+    ];
+    for (const d of drops) {
+      const lt = Math.max(0, (t - d.delay) / (1 - d.delay));
+      if (lt <= 0) continue;
+      const a = lt < 0.8 ? 1 : 1 - (lt - 0.8) / 0.2;
+      // parabolic arc: up then down
+      const x = from.x + d.ox;
+      const y = from.y - Math.sin(lt * Math.PI) * d.height;
+      ctx.beginPath();
+      ctx.arc(x, y, 5 * (1 - lt * 0.4), 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(80,160,255,${a * 0.85})`;
+      ctx.fill();
+      // small ripple at the bottom when drop falls back
+      if (lt > 0.7) {
+        const rt = (lt - 0.7) / 0.3;
+        ctx.beginPath();
+        ctx.arc(x, from.y, rt * 14, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(80,200,255,${(1 - rt) * 0.5})`;
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+      }
+    }
+  });
+}
+
+function animTeleport(canvas, ctx, from, to) {
+  // Expanding psychic rings burst from the attacker, then a quick flash
+  return runCanvas(canvas, ctx, 500, (ctx, t) => {
+    // Three rings expanding outward
+    for (let i = 0; i < 3; i++) {
+      const delay = i * 0.12;
+      const rt = Math.max(0, (t - delay) / (1 - delay));
+      const a = (1 - rt) * 0.8;
+      if (a <= 0) continue;
+      ctx.beginPath();
+      ctx.arc(from.x, from.y, rt * 45 * (1 + i * 0.25), 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(200,120,255,${a})`;
+      ctx.lineWidth = 3 - i * 0.8;
+      ctx.stroke();
+    }
+    // Central flash that peaks at t=0.25 then fades
+    const flash = t < 0.25 ? t / 0.25 : 1 - (t - 0.25) / 0.75;
+    if (flash > 0) {
+      ctx.beginPath();
+      ctx.arc(from.x, from.y, flash * 20, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(230,180,255,${flash * 0.6})`;
+      ctx.fill();
+    }
+  });
+}
+
+// Windup → strike → recoil lunge toward the target, layered on top of every
+// move animation so each hit reads as a committed strike. Physical moves
+// commit further than ranged/special ones. Runs on the attacker container
+// (no base transform there, so it composes cleanly).
+function lungeAttacker(el, from, to, physical) {
+  if (!el || !el.animate) return;
+  const dx = to.x - from.x, dy = to.y - from.y;
+  const d = Math.hypot(dx, dy) || 1;
+  const reach = physical ? Math.min(96, d * 0.45) : 16;
+  const tx = (dx / d) * reach, ty = (dy / d) * reach;
+  const dur = (physical ? 580 : 470) / (typeof battleSpeedMultiplier !== 'undefined' ? battleSpeedMultiplier : 1);
+  try {
+    el.animate([
+      { transform: 'translate(0,0) scale(1)' },
+      { transform: `translate(${(-tx * 0.3).toFixed(1)}px, ${(-ty * 0.3).toFixed(1)}px) scale(0.96)`, offset: 0.18 },
+      { transform: `translate(${tx.toFixed(1)}px, ${ty.toFixed(1)}px) scale(1.12)`, offset: physical ? 0.42 : 0.52 },
+      { transform: 'translate(0,0) scale(1)' },
+    ], { duration: dur, easing: 'cubic-bezier(0.3, 0.85, 0.35, 1)' });
+  } catch {}
+}
+
+// Type-coloured energy gather on the attacker just before a move fires — a
+// telegraphed wind-up layered on top of every move's own animation.
+function chargeAttacker(el, moveType, tier = 1) {
+  if (!el) return;
+  const rgb = TYPE_COLORS_RGB[(moveType || 'normal').toLowerCase()] || '200,200,200';
+  const c = document.createElement('div');
+  c.className = 'attack-charge';
+  c.style.setProperty('--c', rgb);
+  c.style.setProperty('--chs', String(1 + tier * 0.35)); // wind-up grows with tier
+  el.appendChild(c);
+  setTimeout(() => c.remove(), 500 + tier * 110);
+}
+
+
+// ─── Elemental attack engine ──────────────────────────────────────────────────
+// One spectacular, type-aware animation system for every move. SPECIAL moves
+// fire a type-styled projectile (comet / wave / bolt / leaves / shards / helix
+// / rings / …) that detonates into a matching elemental burst; PHYSICAL moves
+// strike the target directly with type-coloured slashes and a heavier
+// shockwave. Every cast pre-rolls its own randomness, so no two look alike.
+
+const ELEMENT_FX = {
+  normal:   { motion: 'comet',    burst: 'sparks'   },
+  fire:     { motion: 'flamejet', burst: 'embers'   },
+  water:    { motion: 'waterjet', burst: 'splash'   },
+  electric: { motion: 'bolt',     burst: 'sparks'   },
+  grass:    { motion: 'vines',    burst: 'petals'   },
+  ice:      { motion: 'shards',   burst: 'crystals' },
+  fighting: { motion: 'comet',    burst: 'impact'   },
+  poison:   { motion: 'spray',    burst: 'bubbles'  },
+  ground:   { motion: 'quake',    burst: 'rubble'   },
+  flying:   { motion: 'gust',     burst: 'gusts'    },
+  psychic:  { motion: 'mind',     burst: 'rings'    },
+  bug:      { motion: 'swarm',    burst: 'sparks'   },
+  rock:     { motion: 'lob',      burst: 'rubble'   },
+  ghost:    { motion: 'spectral', burst: 'vortex'   },
+  dragon:   { motion: 'serpent',  burst: 'impact'   },
+  dark:     { motion: 'grab',     burst: 'vortex'   },
+  steel:    { motion: 'beam',     burst: 'impact'   },
+  fairy:    { motion: 'moonbeam', burst: 'stars'    },
+};
+
+// Move tier lookup: each type's MOVE_POOL lists its physical/special moves in
+// tier order, and names are unique — so the animators can recover a move's
+// tier (0..2) from the attack event's moveName with no engine/schema changes.
+const MOVE_TIER_BY_NAME = (() => {
+  const m = { Struggle: 0, Tackle: 0 };
+  try {
+    for (const pools of Object.values(MOVE_POOL)) {
+      for (const cat of ['physical', 'special']) {
+        (pools[cat] || []).forEach((mv, i) => { m[mv.name] = i; });
+      }
+    }
+  } catch {}
+  return m;
+})();
+
+// Epicness per tier: T0 restrained, T1 the baseline, T2 a full spectacle —
+// more instances and particles, bigger and faster everything, longer runtime,
+// extra shockwave rings, a screen flash and a lingering secondary burst.
+const TIER_FX = [
+  { scale: 0.8,  count: 0.65, dur: 0.85, rings: 1, flashA: 0.10, extra: 0 },
+  { scale: 1.0,  count: 1.0,  dur: 1.0,  rings: 2, flashA: 0.22, extra: 0 },
+  { scale: 1.45, count: 1.8,  dur: 1.3,  rings: 4, flashA: 0.40, extra: 1 },
+];
+
+function animElementalAttack(canvas, ctx, from, to, type, isSpecial, tier = 1, attackerEl = null, targetEl = null) {
+  const fx  = ELEMENT_FX[type] || ELEMENT_FX.normal;
+  const rgb = TYPE_COLORS_RGB[type] || '200,200,200';
+  const E   = TIER_FX[Math.max(0, Math.min(2, tier))] || TIER_FX[1];
+  // Signature moves override the type's generic motion so every animation
+  // honors the attack's NAME, and spectacle scales with power (TIER_FX):
+  // tier 0 is modest, tier 2 is a show-stopper. Physical moves named after
+  // projectiles/phenomena (Twister, Icicle Crash...) route through the
+  // projectile pipeline instead of the melee dash.
+  const tierC = Math.max(0, Math.min(2, tier));
+  // Full name-faithful table. Contact moves (punches, bites, claws, slams)
+  // keep the melee dash — their names ARE physical blows. Everything named
+  // after a projectile or phenomenon plays that phenomenon.
+  const SIGNATURE_MOTIONS = {
+    // Normal — Swift shoots stars; Hyper Voice/Boomburst are sound
+    'normal:s:0': 'swift', 'normal:s:1': 'soundwave', 'normal:s:2': 'soundwave',
+    // Fire — Ember lobs cinders; Fire Blast is the blazing star
+    'fire:p:0': 'embervolley', 'fire:s:2': 'fireblast',
+    // Electric — Thunder strikes from the sky
+    'electric:s:2': 'skythunder',
+    // Grass — whips lash, leaves fly, orbs swirl, Solar Beam charges & fires
+    'grass:p:0': 'vines', 'grass:p:1': 'leafstorm', 'grass:p:2': 'vines',
+    'grass:s:0': 'leafstorm', 'grass:s:1': 'energyball', 'grass:s:2': 'solarbeam',
+    // Water / Ice / Dragon (established)
+    'water:s:0': 'bubblestream', 'water:s:1': 'wave', 'water:p:0': 'waterjet',
+    'ice:s:0': 'icywind', 'ice:s:1': 'icebeam', 'ice:s:2': 'blizzard',
+    'ice:p:0': 'icywind', 'ice:p:2': 'iciclecrash',
+    'dragon:s:0': 'dragonbreath', 'dragon:s:1': 'dragonpulse', 'dragon:s:2': 'dracometeor',
+    'dragon:p:0': 'twister',
+    // Fighting — Force Palm shocks, Aura Sphere / Focus Blast are orbs
+    'fighting:s:0': 'dragonpulse', 'fighting:s:1': 'energyball', 'fighting:s:2': 'energyball',
+    // Poison — Sting is a needle volley, Gunk Shot hurls filth, Sludge Bomb lobs
+    'poison:p:0': 'shards', 'poison:p:2': 'spray', 'poison:s:1': 'lob',
+    // Ground — Mud Shot slings mud; Earthquake/Precipice Blades shake the earth
+    'ground:p:0': 'spray', 'ground:p:1': 'quake', 'ground:p:2': 'quake',
+    // Flying — Sky Attack dives from above, Air Slash throws blades, Hurricane storms
+    'flying:p:2': 'skydive', 'flying:s:1': 'airblades', 'flying:s:2': 'hurricane',
+    // Psychic — Confusion warps, Psycho Boost is an orb, Psybeam is a beam
+    'psychic:p:0': 'mind', 'psychic:p:2': 'energyball', 'psychic:s:0': 'beam',
+    // Bug — Bug Buzz is sound, Pollen Puff is a lobbed orb
+    'bug:s:1': 'soundwave', 'bug:s:2': 'energyball',
+    // Rock — Throw lobs, Slide rains boulders, Stone Edge erupts blades, Power Gem gleams
+    'rock:p:0': 'lob', 'rock:p:1': 'rockslide', 'rock:p:2': 'stoneedge', 'rock:s:1': 'swift',
+    // Ghost — Shadow Ball is an orb
+    'ghost:s:1': 'energyball',
+    // Dark — Snarl is sound, Dark Pulse pulses, Night Daze floods darkness
+    'dark:s:0': 'soundwave', 'dark:s:1': 'dragonpulse', 'dark:s:2': 'nightdaze',
+    // Steel — Steel Wing throws blades, Doom Desire rains light from the sky
+    'steel:s:0': 'airblades', 'steel:s:2': 'dracometeor',
+    // Fairy — Fairy Wind blows, Dazzling Gleam blinds
+    'fairy:p:0': 'gust', 'fairy:s:1': 'gleam',
+  };
+  const sigMotion = SIGNATURE_MOTIONS[`${type}:${isSpecial ? 's' : 'p'}:${tierC}`];
+  const motion = sigMotion || fx.motion;
+  // Signature physical moves are projectiles/phenomena — they play the
+  // travel+impact pipeline rather than the melee dash.
+  const projectileLike = isSpecial || !!sigMotion;
+  const dx = to.x - from.x, dy = to.y - from.y;
+  const dist = Math.hypot(dx, dy) || 1;
+  const nx = dx / dist, ny = dy / dist;
+  const px = -ny, py = nx; // perpendicular
+
+  // ── per-cast randomness, rolled ONCE so frames stay coherent ──
+  const R = Array.from({ length: 48 }, () => Math.random());
+  const arcMag = dist * (0.12 + R[0] * 0.25) * (R[1] < 0.5 ? -1 : 1);
+  const boltCount = 1 + (tier >= 1 ? 0 : 0) + (tier >= 2 ? 2 : 0);
+  const boltVariants = Array.from({ length: 5 + tier * 2 }, () => {
+    const segs = 7, pts = [];
+    for (let s = 0; s <= segs; s++) {
+      const t = s / segs;
+      const off = (s === 0 || s === segs) ? 0 : (Math.random() - 0.5) * dist * 0.28;
+      pts.push({ x: from.x + dx * t + px * off, y: from.y + dy * t + py * off });
+    }
+    return pts;
+  });
+  const burstN = Math.round(26 * E.count);
+  const burstVecs = Array.from({ length: burstN }, (_, i) => {
+    const ang = (i / burstN) * Math.PI * 2 + R[2] * 6.28;
+    const sp = (30 + Math.random() * 80) * E.scale;
+    return { ax: Math.cos(ang) * sp, ay: Math.sin(ang) * sp, sz: (2 + Math.random() * 5) * E.scale, ph: Math.random() * 6.28 };
+  });
+  const slashN = 3 + tier;
+  const slashes = Array.from({ length: slashN }, (_, i) => ({
+    ang: R[3] * Math.PI + i * (Math.PI / slashN) + (Math.random() - 0.5) * 0.5,
+    len: (46 + Math.random() * 30) * E.scale,
+    delay: i * (0.28 / slashN),
+  }));
+  // Side projectiles for T2 comets/shards (a volley instead of a lone shot)
+  const sideOffsets = tier >= 2 ? [-26, 26] : [];
+
+  const pathAt = (t, off = 0) => ({
+    x: from.x + dx * t + px * (arcMag * Math.sin(Math.PI * t) + off),
+    y: from.y + dy * t + py * (arcMag * Math.sin(Math.PI * t) + off),
+  });
+  const path = t => pathAt(t, 0);
+  const lobPath = t => ({
+    x: from.x + dx * t,
+    y: from.y + dy * t - (dist * 0.35) * Math.sin(Math.PI * t),
+  });
+  const glowDot = (x, y, r, core, edge, a) => {
+    const g = ctx.createRadialGradient(x, y, 0, x, y, r);
+    g.addColorStop(0, `rgba(${core},${a})`);
+    g.addColorStop(0.45, `rgba(${edge},${a * 0.8})`);
+    g.addColorStop(1, `rgba(${edge},0)`);
+    ctx.beginPath(); ctx.arc(x, y, r, 0, Math.PI * 2); ctx.fillStyle = g; ctx.fill();
+  };
+  const tailStroke = (headT, span, width, alpha, off = 0) => {
+    const t0 = Math.max(0, headT - span);
+    const g0 = pathAt(t0, off), g1 = pathAt(headT, off);
+    const g = ctx.createLinearGradient(g0.x, g0.y, g1.x, g1.y);
+    g.addColorStop(0, `rgba(${rgb},0)`); g.addColorStop(1, `rgba(${rgb},${alpha})`);
+    ctx.beginPath();
+    for (let s = 0; s <= 12; s++) { const p = pathAt(t0 + (headT - t0) * s / 12, off); s === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y); }
+    ctx.strokeStyle = g; ctx.lineWidth = width; ctx.lineCap = 'round'; ctx.stroke();
+  };
+
+  // ── travel renderers (special phase 1): each type draws ITS phenomenon ──
+  const jitter = (k, f = 1) => Math.sin(k * 12.9898 + R[4] * 78.233) * f;
+  const flake = (x, y, r, rot, a) => { // 6-spoke snowflake
+    ctx.save(); ctx.translate(x, y); ctx.rotate(rot);
+    ctx.strokeStyle = `rgba(240,250,255,${a})`; ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+    for (let s = 0; s < 6; s++) {
+      ctx.rotate(Math.PI / 3);
+      ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(r, 0);
+      ctx.moveTo(r * 0.55, 0); ctx.lineTo(r * 0.78, -r * 0.24);
+      ctx.moveTo(r * 0.55, 0); ctx.lineTo(r * 0.78, r * 0.24);
+      ctx.stroke();
+    }
+    ctx.restore();
+  };
+  const travel = (st) => {
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter'; // additive glow — colors bloom
+    ctx.shadowColor = `rgba(${rgb},0.85)`;
+    // shadowBlur is the classic canvas cost sink — keep it modest, and the
+    // gradient-heavy motions below zero it out entirely (their glow is baked
+    // into the radial gradients already).
+    // Only the classic sparse motions keep canvas shadowBlur (it's the big
+    // canvas cost sink); the gradient/particle-heavy ones bake their own glow.
+    ctx.shadowBlur = ['comet', 'bolt', 'shards', 'lob', 'gust', 'mind',
+      'spectral', 'grab', 'beam', 'moonbeam', 'serpent', 'quake'].includes(motion) ? 10 * E.scale : 0;
+    switch (motion) {
+
+      case 'comet': { // normal/fighting: energy comet with flickering tongues
+        for (const off of [0, ...sideOffsets]) {
+          const lag = off === 0 ? 0 : 0.08;
+          const tt = st - lag; if (tt <= 0) continue;
+          const p = pathAt(tt, off);
+          tailStroke(tt, 0.3, (off === 0 ? 10 : 6) * E.scale, off === 0 ? 0.9 : 0.6, off);
+          glowDot(p.x, p.y, (off === 0 ? 22 : 13) * E.scale, '255,255,230', rgb, 1);
+          const bang = Math.atan2(dy, dx) + Math.PI;
+          for (let f = 0; f < 3; f++) {
+            const fl = (0.7 + 0.3 * Math.sin(st * 42 + f * 2.1)) * (off === 0 ? 27 : 15) * E.scale;
+            const fa = bang + (f - 1) * 0.38 + Math.sin(st * 31 + f) * 0.12;
+            ctx.beginPath();
+            ctx.moveTo(p.x + Math.cos(fa + 0.5) * 8, p.y + Math.sin(fa + 0.5) * 8);
+            ctx.lineTo(p.x + Math.cos(fa) * fl, p.y + Math.sin(fa) * fl);
+            ctx.lineTo(p.x + Math.cos(fa - 0.5) * 8, p.y + Math.sin(fa - 0.5) * 8);
+            ctx.closePath();
+            ctx.fillStyle = `rgba(${rgb},${0.5 - f * 0.11})`;
+            ctx.fill();
+          }
+        }
+        break;
+      }
+
+      case 'flamejet': { // FIRE: a roaring flamethrower cone from the attacker
+        const front = Math.min(1, st * 1.3);
+        const puffs = Math.round(30 * E.count);
+        for (let k = 0; k < puffs; k++) {
+          const ft2 = ((k * 0.618 + st * 2.4) % 1) * front;          // flowing distribution
+          const spread = (5 + ft2 * 30) * E.scale;                    // widening cone
+          const b = pathAt(ft2, jitter(k, spread));
+          const sz = (5 + ft2 * 15) * E.scale * (0.8 + 0.2 * Math.sin(st * 52 + k));
+          const g = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, sz);
+          g.addColorStop(0, 'rgba(255,242,170,0.95)');
+          g.addColorStop(0.45, 'rgba(255,140,30,0.8)');
+          g.addColorStop(1, 'rgba(190,35,0,0)');
+          ctx.beginPath(); ctx.arc(b.x, b.y, sz, 0, 6.283); ctx.fillStyle = g; ctx.fill();
+        }
+        // white-hot nozzle core at the source
+        glowDot(from.x + dx * 0.04, from.y + dy * 0.04, 12 * E.scale, '255,255,220', rgb, 0.95);
+        break;
+      }
+
+      case 'waterjet': { // WATER: a thick pressurized jet with a foam core
+        const front = Math.min(1, st * 1.35);
+        const W0 = 14 * E.scale, W1 = 6 * E.scale;
+        const wob = t2 => Math.sin(t2 * 9 + st * 20) * 7 * E.scale;
+        const edge = (t2, sgn) => {
+          const w = (W0 - (W0 - W1) * (t2 / Math.max(front, 0.01))) * sgn;
+          const b = pathAt(t2, wob(t2));
+          return { x: b.x + px * w, y: b.y + py * w };
+        };
+        ctx.beginPath();
+        for (let s2 = 0; s2 <= 16; s2++) { const p2 = edge((s2 / 16) * front, 1); s2 === 0 ? ctx.moveTo(p2.x, p2.y) : ctx.lineTo(p2.x, p2.y); }
+        for (let s2 = 16; s2 >= 0; s2--) { const p2 = edge((s2 / 16) * front, -1); ctx.lineTo(p2.x, p2.y); }
+        ctx.closePath();
+        ctx.fillStyle = `rgba(${rgb},0.75)`; ctx.fill();
+        // foam core line
+        ctx.strokeStyle = 'rgba(235,250,255,0.9)'; ctx.lineWidth = 4 * E.scale; ctx.lineCap = 'round';
+        ctx.beginPath();
+        for (let s2 = 0; s2 <= 16; s2++) { const b = pathAt((s2 / 16) * front, wob((s2 / 16) * front)); s2 === 0 ? ctx.moveTo(b.x, b.y) : ctx.lineTo(b.x, b.y); }
+        ctx.stroke();
+        // droplets spraying off the head
+        const hd = pathAt(front, wob(front));
+        for (let k = 0; k < Math.round(7 * E.count); k++) {
+          glowDot(hd.x + jitter(k, 20), hd.y + jitter(k + 3, 20), 4 * E.scale, '230,248,255', rgb, 0.85);
+        }
+        break;
+      }
+
+      case 'vines': { // GRASS: vines erupt beneath the victim and lash upward
+        const g2 = Math.min(1, st * 1.2);
+        const vines = 4 + tier;
+        for (let v = 0; v < vines; v++) {
+          const baseX = to.x + (v - (vines - 1) / 2) * 14 * E.scale;
+          const baseY = to.y + 58;
+          const h = (75 + (v % 3) * 14) * E.scale * g2;
+          const sway = Math.sin(st * 9 + v * 1.7) * 15;
+          const tipX = to.x + Math.sin(v * 2.1 + st * 5) * 22 * E.scale;
+          const tipY = baseY - h;
+          ctx.strokeStyle = `rgba(${rgb},0.95)`;
+          ctx.lineWidth = (5 - (v % 3)) * E.scale; ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(baseX, baseY);
+          ctx.quadraticCurveTo(baseX + sway, baseY - h * 0.55, tipX, tipY);
+          ctx.stroke();
+          // leaf at each tip
+          ctx.save(); ctx.translate(tipX, tipY); ctx.rotate(Math.sin(st * 7 + v) * 0.8);
+          ctx.beginPath(); ctx.ellipse(0, 0, 8 * E.scale, 3.4 * E.scale, 0.6, 0, 6.283);
+          ctx.fillStyle = `rgba(${rgb},0.95)`; ctx.fill(); ctx.restore();
+        }
+        break;
+      }
+
+      case 'bolt': { // ELECTRIC (beloved — untouched): jagged living lightning
+        for (let bIdx = 0; bIdx < boltCount; bIdx++) {
+          const v = boltVariants[(Math.floor(st * 14) + bIdx * 2) % boltVariants.length];
+          const upTo = Math.max(2, Math.ceil(v.length * Math.min(1, st * 2.2)));
+          ctx.strokeStyle = `rgba(255,255,240,${0.95 - bIdx * 0.25})`; ctx.lineWidth = 4 * E.scale; ctx.lineCap = 'round'; ctx.lineJoin = 'round';
+          ctx.beginPath(); v.slice(0, upTo).forEach((p, i) => i === 0 ? ctx.moveTo(p.x, p.y) : ctx.lineTo(p.x, p.y)); ctx.stroke();
+          ctx.strokeStyle = `rgba(${rgb},${0.7 - bIdx * 0.2})`; ctx.lineWidth = 9 * E.scale; ctx.stroke();
+        }
+        break;
+      }
+
+      case 'swift': { // SWIFT / POWER GEM: a stream of spinning stars/gems
+        const front = Math.min(1, st * 1.4);
+        const N = Math.round(8 * E.count);
+        for (let k = 0; k < N; k++) {
+          const t2 = ((k * 0.13 + st * 1.15) % 1);
+          if (t2 > front) continue;
+          const b = pathAt(t2, Math.sin(t2 * 8 + k * 2.1) * 20 * E.scale);
+          const r2 = (5 + (k % 3) * 3) * E.scale, rot = st * 10 + k;
+          ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(rot);
+          ctx.beginPath();
+          for (let s2 = 0; s2 < 10; s2++) {
+            const rr = s2 % 2 ? r2 * 0.45 : r2;
+            const a2 = (s2 / 10) * 6.283;
+            s2 === 0 ? ctx.moveTo(Math.cos(a2) * rr, Math.sin(a2) * rr) : ctx.lineTo(Math.cos(a2) * rr, Math.sin(a2) * rr);
+          }
+          ctx.closePath();
+          ctx.fillStyle = `rgba(${rgb},0.95)`; ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.4; ctx.stroke();
+          ctx.restore();
+          glowDot(b.x, b.y, r2 * 1.7, '255,255,240', rgb, 0.35);
+        }
+        break;
+      }
+
+      case 'soundwave': { // HYPER VOICE / BOOMBURST / BUG BUZZ / SNARL: sound waves
+        const mang = Math.atan2(dy, dx);
+        const spreadA = 0.55 + 0.15 * E.scale;
+        for (let k = 0; k < 4 + tier; k++) {
+          const rr = ((st * 1.7 + k * 0.22) % 1) * dist * 1.15;
+          if (rr < 6) continue;
+          const a2 = Math.max(0, 0.8 * (1 - rr / (dist * 1.15)));
+          const wob = Math.sin(st * 40 + k) * 3;
+          ctx.strokeStyle = `rgba(${rgb},${a2})`; ctx.lineWidth = (4 - (k % 3)) * E.scale;
+          ctx.beginPath(); ctx.arc(from.x, from.y, rr + wob, mang - spreadA, mang + spreadA); ctx.stroke();
+          ctx.strokeStyle = `rgba(255,255,255,${a2 * 0.6})`; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.arc(from.x, from.y, rr + wob - 4, mang - spreadA * 0.7, mang + spreadA * 0.7); ctx.stroke();
+        }
+        // the victim rattles under the din
+        if (st > 0.45) {
+          const sh = Math.sin(st * 70) * 3 * E.scale;
+          ctx.strokeStyle = `rgba(${rgb},0.5)`; ctx.lineWidth = 2.5;
+          ctx.beginPath(); ctx.arc(to.x + sh, to.y, 26 * E.scale, 0, 6.283); ctx.stroke();
+        }
+        break;
+      }
+
+      case 'embervolley': { // EMBER: arcing cinders spitting at the foe
+        const N = Math.round(9 * E.count);
+        for (let k = 0; k < N; k++) {
+          const t2 = st * 1.25 - k * 0.09; if (t2 <= 0 || t2 > 1) continue;
+          const b = { x: lobPath(t2).x + jitter(k, 14), y: lobPath(t2).y + jitter(k + 3, 10) };
+          const g2 = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, 7 * E.scale);
+          g2.addColorStop(0, 'rgba(255,240,170,0.95)');
+          g2.addColorStop(0.5, `rgba(${rgb},0.85)`);
+          g2.addColorStop(1, 'rgba(120,20,0,0)');
+          ctx.beginPath(); ctx.arc(b.x, b.y, 7 * E.scale, 0, 6.283); ctx.fillStyle = g2; ctx.fill();
+          // trailing spark
+          glowDot(b.x - nx * 10, b.y - ny * 10 - 4, 2.5 * E.scale, '255,200,120', rgb, 0.5);
+        }
+        break;
+      }
+
+      case 'fireblast': { // FIRE BLAST: the blazing five-armed star
+        const front = Math.min(1, st * 1.25);
+        const b = pathAt(front);
+        const grow = (0.5 + front * 0.7) * E.scale;
+        const armL = 34 * grow * (1 + 0.08 * Math.sin(st * 30));
+        ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(Math.sin(st * 4) * 0.15);
+        for (let a3 = 0; a3 < 5; a3++) {
+          const ang2 = -Math.PI / 2 + a3 * (6.283 / 5);
+          const ex2 = Math.cos(ang2) * armL, ey2 = Math.sin(ang2) * armL;
+          const g2 = ctx.createLinearGradient(0, 0, ex2, ey2);
+          g2.addColorStop(0, 'rgba(255,245,180,0.95)');
+          g2.addColorStop(0.6, `rgba(${rgb},0.9)`);
+          g2.addColorStop(1, 'rgba(190,30,0,0.4)');
+          ctx.strokeStyle = g2; ctx.lineWidth = 10 * grow; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(ex2, ey2); ctx.stroke();
+          // flame tongue flickering at each arm tip
+          const fl = (0.7 + 0.3 * Math.sin(st * 46 + a3 * 2)) * 12 * grow;
+          glowDot(ex2, ey2, fl, '255,220,140', rgb, 0.9);
+        }
+        ctx.restore();
+        glowDot(b.x, b.y, 15 * grow, '255,255,210', rgb, 1);
+        break;
+      }
+
+      case 'skythunder': { // THUNDER: the storm itself drops bolts on the foe
+        // brooding cloud bank over the victim
+        for (let k = 0; k < 5; k++) {
+          const cx2 = to.x + (k - 2) * 26 * E.scale + jitter(k, 6);
+          const g2 = ctx.createRadialGradient(cx2, 16, 0, cx2, 16, 30 * E.scale);
+          g2.addColorStop(0, 'rgba(70,70,95,0.85)'); g2.addColorStop(1, 'rgba(30,30,50,0)');
+          ctx.beginPath(); ctx.arc(cx2, 16, 30 * E.scale, 0, 6.283); ctx.fillStyle = g2; ctx.fill();
+        }
+        // flickering sky flash
+        if (Math.sin(st * 43 + R[5] * 6) > 0.55) {
+          ctx.fillStyle = 'rgba(255,255,220,0.08)'; ctx.fillRect(0, 0, canvas.width, canvas.height);
+        }
+        // bolts crash down in sequence
+        for (let k = 0; k < 3; k++) {
+          const bt = st * 1.35 - k * 0.3; if (bt <= 0 || bt > 0.45) continue;
+          const ba = bt < 0.12 ? 1 : Math.max(0, 1 - (bt - 0.12) * 3.5);
+          const bx2 = to.x + (k - 1) * 24 * E.scale;
+          ctx.strokeStyle = `rgba(255,255,240,${ba})`; ctx.lineWidth = 5 * E.scale; ctx.lineJoin = 'round';
+          ctx.beginPath();
+          let yy = 20; ctx.moveTo(bx2, yy);
+          for (let s2 = 1; s2 <= 6; s2++) {
+            const ty2 = 20 + (to.y - 20) * (s2 / 6);
+            ctx.lineTo(bx2 + Math.sin(s2 * 9 + k * 4 + R[8 + k] * 7) * 14, ty2);
+          }
+          ctx.stroke();
+          ctx.strokeStyle = `rgba(${rgb},${ba * 0.8})`; ctx.lineWidth = 11 * E.scale; ctx.stroke();
+          // ground flash ring where it lands
+          ctx.strokeStyle = `rgba(255,255,220,${ba})`; ctx.lineWidth = 3;
+          ctx.beginPath(); ctx.arc(bx2, to.y, (1 - ba) * 30 * E.scale + 6, 0, 6.283); ctx.stroke();
+        }
+        break;
+      }
+
+      case 'leafstorm': { // RAZOR LEAF / MAGICAL LEAF: a storm of spinning leaves
+        const front = Math.min(1, st * 1.35);
+        const N = Math.round(11 * E.count);
+        for (let k = 0; k < N; k++) {
+          const t2 = ((k * 0.09 + st * 1.2) % 1);
+          if (t2 > front) continue;
+          const b = pathAt(t2, Math.sin(t2 * 7 + k * 1.8) * 24 * E.scale);
+          const r2 = (7 + (k % 3) * 3) * E.scale;
+          ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(st * 12 + k * 1.3);
+          ctx.beginPath(); ctx.ellipse(0, 0, r2, r2 * 0.42, 0, 0, 6.283);
+          ctx.fillStyle = `rgba(${rgb},0.92)`; ctx.fill();
+          ctx.strokeStyle = 'rgba(240,255,220,0.85)'; ctx.lineWidth = 1.3; ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(-r2, 0); ctx.lineTo(r2, 0);
+          ctx.strokeStyle = 'rgba(255,255,255,0.55)'; ctx.stroke();
+          ctx.restore();
+        }
+        break;
+      }
+
+      case 'energyball': { // ENERGY BALL / AURA SPHERE / SHADOW BALL...: a living orb
+        const front = Math.min(1, st * 1.15);
+        const hd = pathAt(front);
+        tailStroke(front, 0.25, 9 * E.scale, 0.5);
+        const r2 = 15 * E.scale * (1 + 0.12 * Math.sin(st * 26));
+        glowDot(hd.x, hd.y, r2 * 1.6, '255,255,255', rgb, 0.95);
+        ctx.strokeStyle = `rgba(${rgb},0.9)`; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(hd.x, hd.y, r2, 0, 6.283); ctx.stroke();
+        // orbiting motes
+        for (let k = 0; k < 3 + tier; k++) {
+          const oa = st * 16 + k * (6.283 / (3 + tier));
+          const ox = hd.x + Math.cos(oa) * r2 * 1.5, oy = hd.y + Math.sin(oa) * r2 * 0.9;
+          glowDot(ox, oy, 3.5 * E.scale, '255,255,255', rgb, 0.9);
+        }
+        break;
+      }
+
+      case 'solarbeam': { // SOLAR BEAM: gather the sun, then FIRE
+        const CH = 0.45;
+        const orb = { x: from.x + dx * 0.06, y: from.y - 44 * E.scale };
+        if (st < CH) {
+          const ct = st / CH;
+          // light motes converge from a wide ring into the charging orb
+          for (let k = 0; k < Math.round(10 * E.count); k++) {
+            const a2 = R[k % 24] * 6.283, rr = (90 - ct * 70) * E.scale * (0.7 + R[(k + 5) % 24] * 0.6);
+            const mx2 = orb.x + Math.cos(a2 + ct * 2) * rr, my2 = orb.y + Math.sin(a2 + ct * 2) * rr;
+            glowDot(mx2, my2, 3 * E.scale, '255,255,210', '255,230,120', 0.8);
+          }
+          glowDot(orb.x, orb.y, (6 + ct * 16) * E.scale, '255,255,235', '255,230,120', 0.95);
+        } else {
+          const bt = (st - CH) / (1 - CH);
+          const reach = Math.min(1, bt * 1.6);
+          const ex2 = orb.x + (to.x - orb.x) * reach, ey2 = orb.y + (to.y - orb.y) * reach;
+          const W3 = (16 - bt * 6) * E.scale;
+          ctx.strokeStyle = `rgba(${rgb},0.55)`; ctx.lineWidth = W3 * 2.1; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(orb.x, orb.y); ctx.lineTo(ex2, ey2); ctx.stroke();
+          ctx.strokeStyle = 'rgba(255,255,225,0.95)'; ctx.lineWidth = W3;
+          ctx.beginPath(); ctx.moveTo(orb.x, orb.y); ctx.lineTo(ex2, ey2); ctx.stroke();
+          glowDot(orb.x, orb.y, 18 * E.scale, '255,255,235', '255,230,120', 1);
+          if (reach >= 1) glowDot(to.x, to.y, (14 + bt * 16) * E.scale, '255,255,230', rgb, 0.9);
+        }
+        break;
+      }
+
+      case 'airblades': { // AIR SLASH / STEEL WING: crescent blades scythe across
+        const mang = Math.atan2(dy, dx);
+        for (let k = 0; k < 3 + (tier >= 2 ? 1 : 0); k++) {
+          const t2 = st * 1.3 - k * 0.14; if (t2 <= 0 || t2 > 1) continue;
+          const b = pathAt(t2, (k - 1) * 20 * E.scale);
+          const r2 = 16 * E.scale, spin = mang + Math.sin(st * 18 + k) * 0.3;
+          ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(spin);
+          ctx.beginPath(); ctx.arc(0, 0, r2, -0.6, 2.2);
+          ctx.arc(Math.cos(0.8) * r2 * 0.45, Math.sin(0.8) * r2 * 0.45, r2 * 0.72, 2.1, -0.5, true);
+          ctx.closePath();
+          ctx.fillStyle = `rgba(${rgb},0.75)`; ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 1.8; ctx.stroke();
+          ctx.restore();
+        }
+        break;
+      }
+
+      case 'hurricane': { // HURRICANE: a cyclone swallows the victim
+        const grow = Math.min(1, st * 1.6);
+        for (let arm = 0; arm < 3; arm++) {
+          ctx.strokeStyle = `rgba(${rgb},${0.65 - arm * 0.12})`;
+          ctx.lineWidth = (4.5 - arm) * E.scale; ctx.lineCap = 'round';
+          ctx.beginPath();
+          for (let s2 = 0; s2 <= 22; s2++) {
+            const t2 = s2 / 22;
+            const rr = t2 * 62 * E.scale * grow;
+            const a2 = st * 11 + arm * 2.09 + t2 * 5.5;
+            const x2 = to.x + Math.cos(a2) * rr, y2 = to.y + Math.sin(a2) * rr * 0.75;
+            s2 === 0 ? ctx.moveTo(x2, y2) : ctx.lineTo(x2, y2);
+          }
+          ctx.stroke();
+        }
+        // debris + wind streaks caught in the rotation
+        for (let k = 0; k < Math.round(9 * E.count); k++) {
+          const oa = st * 14 + k * 0.8;
+          const rr = (18 + (k % 4) * 14) * E.scale * grow;
+          const x2 = to.x + Math.cos(oa) * rr, y2 = to.y + Math.sin(oa) * rr * 0.75;
+          ctx.strokeStyle = `rgba(235,245,255,${0.5 - (k % 3) * 0.12})`; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(x2, y2);
+          ctx.lineTo(x2 - Math.sin(oa) * 12, y2 + Math.cos(oa) * 9); ctx.stroke();
+        }
+        break;
+      }
+
+      case 'skydive': { // SKY ATTACK: a dive-bomb streaking down from the sky
+        const sgn2 = Math.sign(dx) || 1;
+        const sx2 = to.x - sgn2 * 150, sy2 = -40;
+        const tt = Math.min(1, st * 1.2);
+        // ease-in dive along a shallow curve
+        const cx3 = sx2 + (to.x - sx2) * 0.4, cy3 = -20;
+        const q = t2 => ({
+          x: (1 - t2) * (1 - t2) * sx2 + 2 * (1 - t2) * t2 * cx3 + t2 * t2 * to.x,
+          y: (1 - t2) * (1 - t2) * sy2 + 2 * (1 - t2) * t2 * cy3 + t2 * t2 * to.y,
+        });
+        const hd = q(tt);
+        // streaking wing trails
+        for (let k = 0; k < 3; k++) {
+          const b0 = q(Math.max(0, tt - 0.22 - k * 0.05));
+          ctx.strokeStyle = `rgba(255,255,255,${0.65 - k * 0.18})`;
+          ctx.lineWidth = (7 - k * 2) * E.scale; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(b0.x, b0.y + k * 4); ctx.lineTo(hd.x, hd.y); ctx.stroke();
+        }
+        glowDot(hd.x, hd.y, 17 * E.scale, '255,255,240', rgb, 1);
+        if (tt >= 1) { // slam flash
+          const ft2 = Math.min(1, (st * 1.2 - 1) * 3), fa = 1 - ft2;
+          ctx.strokeStyle = `rgba(255,255,255,${fa})`; ctx.lineWidth = 4;
+          ctx.beginPath(); ctx.arc(to.x, to.y, ft2 * 46 * E.scale, 0, 6.283); ctx.stroke();
+        }
+        break;
+      }
+
+      case 'rockslide': { // ROCK SLIDE: boulders avalanche from above
+        const N = 5;
+        for (let k = 0; k < N; k++) {
+          const t2 = (st - k * 0.1) / 0.4; if (t2 <= 0) continue;
+          const ex2 = to.x + (R[6 + k] - 0.5) * 100 * E.scale;
+          const ey2 = to.y + (R[14 + k] - 0.5) * 24 * E.scale;
+          const r2 = (9 + R[22 + k] * 7) * E.scale;
+          if (t2 < 1) {
+            const iy = -20 + (ey2 + 20) * t2;
+            ctx.save(); ctx.translate(ex2, iy); ctx.rotate(t2 * 7 + k);
+            ctx.beginPath();
+            for (let s2 = 0; s2 < 7; s2++) {
+              const a2 = (s2 / 7) * 6.283, rr = r2 * (0.75 + ((s2 * 37 + k) % 5) * 0.09);
+              s2 === 0 ? ctx.moveTo(Math.cos(a2) * rr, Math.sin(a2) * rr) : ctx.lineTo(Math.cos(a2) * rr, Math.sin(a2) * rr);
+            }
+            ctx.closePath();
+            ctx.fillStyle = `rgba(${rgb},0.95)`; ctx.fill();
+            ctx.strokeStyle = 'rgba(60,40,15,0.9)'; ctx.lineWidth = 2; ctx.stroke();
+            ctx.restore();
+          } else {
+            const bt = Math.min(1, (t2 - 1) * 2.2), ba = 1 - bt;
+            ctx.strokeStyle = `rgba(200,170,120,${ba * 0.8})`; ctx.lineWidth = 3;
+            ctx.beginPath(); ctx.arc(ex2, ey2, 6 + bt * 26 * E.scale, 0, 6.283); ctx.stroke();
+            for (let s2 = 0; s2 < 5; s2++) {
+              const a2 = s2 * 1.257 + R[30 + k] * 6.28;
+              glowDot(ex2 + Math.cos(a2) * bt * 22, ey2 + Math.sin(a2) * bt * 16 - bt * 10, 3 * E.scale, rgb, '90,60,25', ba * 0.9);
+            }
+          }
+        }
+        break;
+      }
+
+      case 'stoneedge': { // STONE EDGE: faceted rock shards burst up around the foe
+        ctx.globalCompositeOperation = 'source-over'; // solid rock, no additive glow
+        const N = 7;
+        const gy = to.y + 32;
+        for (let k = 0; k < N; k++) {
+          const t2 = (st * 1.5 - k * 0.07); if (t2 <= 0) continue;
+          // overshoot pop: bursts past full height then settles
+          const gr = Math.min(1, t2 * 2.6);
+          const grow = gr < 1 ? gr * (1 + 0.25 * (1 - gr)) : 1;
+          const ex2 = to.x + (k - (N - 1) / 2) * 19 * E.scale + jitter(k, 5);
+          const H = (30 + ((k * 29) % 3) * 17 + (k === 3 ? 14 : 0)) * E.scale * grow;
+          const W3 = (8 + ((k * 13) % 2) * 3) * E.scale;
+          const tilt = ((k % 2 ? 1 : -1) * (0.10 + ((k * 7) % 3) * 0.06));
+          ctx.save(); ctx.translate(ex2, gy); ctx.rotate(tilt);
+          // jagged silhouette: irregular angular shard
+          const ridge = [
+            [-W3, 0], [-W3 * 0.75, -H * 0.42], [-W3 * 0.32, -H * 0.66],
+            [-W3 * 0.12, -H], [W3 * 0.28, -H * 0.72], [W3 * 0.5, -H * 0.8],
+            [W3 * 0.78, -H * 0.34], [W3, 0],
+          ];
+          // dark base face
+          ctx.beginPath(); ridge.forEach((p2, i) => i === 0 ? ctx.moveTo(p2[0], p2[1]) : ctx.lineTo(p2[0], p2[1]));
+          ctx.closePath();
+          const gDark = ctx.createLinearGradient(0, -H, 0, 0);
+          gDark.addColorStop(0, 'rgba(150,120,75,1)'); gDark.addColorStop(1, 'rgba(72,52,26,1)');
+          ctx.fillStyle = gDark; ctx.fill();
+          ctx.strokeStyle = 'rgba(30,20,8,0.95)'; ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.stroke();
+          // lit facet (left side catches the light)
+          ctx.beginPath();
+          ctx.moveTo(-W3, 0); ctx.lineTo(-W3 * 0.75, -H * 0.42); ctx.lineTo(-W3 * 0.32, -H * 0.66);
+          ctx.lineTo(-W3 * 0.12, -H); ctx.lineTo(-W3 * 0.05, -H * 0.5); ctx.lineTo(-W3 * 0.28, 0);
+          ctx.closePath();
+          const gLit = ctx.createLinearGradient(0, -H, 0, 0);
+          gLit.addColorStop(0, 'rgba(235,215,170,0.95)'); gLit.addColorStop(1, 'rgba(165,135,85,0.9)');
+          ctx.fillStyle = gLit; ctx.fill();
+          // razor glint along the summit edge
+          ctx.strokeStyle = `rgba(255,252,235,${0.85 * grow})`; ctx.lineWidth = 1.5;
+          ctx.beginPath(); ctx.moveTo(-W3 * 0.32, -H * 0.66); ctx.lineTo(-W3 * 0.12, -H); ctx.lineTo(W3 * 0.28, -H * 0.72); ctx.stroke();
+          // fracture crack on the dark face
+          ctx.strokeStyle = 'rgba(30,20,8,0.6)'; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.moveTo(W3 * 0.15, -H * 0.62); ctx.lineTo(W3 * 0.38, -H * 0.36); ctx.lineTo(W3 * 0.22, -H * 0.14); ctx.stroke();
+          ctx.restore();
+          // eruption dust + flung pebbles while rising
+          if (gr < 1) {
+            for (let d2 = 0; d2 < 3; d2++) {
+              const da = (1 - gr);
+              ctx.fillStyle = `rgba(150,120,80,${0.5 * da})`;
+              ctx.beginPath();
+              ctx.arc(ex2 + jitter(k + d2, 14), gy - 2 - d2 * 5 - gr * 10, (4 - d2) * E.scale, 0, 6.283);
+              ctx.fill();
+              ctx.fillStyle = `rgba(90,65,32,${0.8 * da})`;
+              ctx.beginPath();
+              ctx.arc(ex2 + jitter(k + d2 + 3, 18), gy - 8 - gr * 26, 1.8 * E.scale, 0, 6.283);
+              ctx.fill();
+            }
+          }
+        }
+        break;
+      }
+
+      case 'nightdaze': { // NIGHT DAZE: darkness floods out and detonates
+        const grow = Math.min(1, st * 1.3);
+        // the field dims
+        ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = `rgba(8,4,18,${0.32 * grow})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.globalCompositeOperation = 'lighter';
+        // rings of dark energy rushing the victim
+        for (let k = 0; k < 4; k++) {
+          const rr = ((st * 1.5 + k * 0.25) % 1) * 70 * E.scale;
+          const a2 = Math.max(0, 0.8 - rr / (70 * E.scale));
+          ctx.strokeStyle = `rgba(${rgb},${a2})`; ctx.lineWidth = 4 * E.scale;
+          ctx.beginPath(); ctx.arc(to.x, to.y, rr, 0, 6.283); ctx.stroke();
+        }
+        // jagged violet flash flickering at the core
+        if (Math.sin(st * 38) > -0.2) {
+          ctx.beginPath();
+          for (let s2 = 0; s2 < 14; s2++) {
+            const a2 = (s2 / 14) * 6.283 + st * 3;
+            const rr = (s2 % 2 ? 10 : 26) * E.scale * grow * (0.85 + 0.15 * Math.sin(st * 44 + s2));
+            s2 === 0 ? ctx.moveTo(to.x + Math.cos(a2) * rr, to.y + Math.sin(a2) * rr)
+                     : ctx.lineTo(to.x + Math.cos(a2) * rr, to.y + Math.sin(a2) * rr);
+          }
+          ctx.closePath();
+          ctx.fillStyle = 'rgba(150,80,255,0.55)'; ctx.fill();
+          ctx.strokeStyle = 'rgba(240,220,255,0.9)'; ctx.lineWidth = 1.6; ctx.stroke();
+        }
+        break;
+      }
+
+      case 'gleam': { // DAZZLING GLEAM: blinding rays sweep the field
+        const grow = Math.min(1, st * 1.5);
+        const mang = Math.atan2(dy, dx);
+        for (let k = 0; k < 7; k++) {
+          const a2 = mang + (k - 3) * 0.24 + Math.sin(st * 9) * 0.05;
+          const L = dist * 1.15 * grow * (0.75 + (k % 3) * 0.12);
+          const g2 = ctx.createLinearGradient(from.x, from.y, from.x + Math.cos(a2) * L, from.y + Math.sin(a2) * L);
+          g2.addColorStop(0, 'rgba(255,255,255,0.9)');
+          g2.addColorStop(0.5, `rgba(${rgb},0.5)`);
+          g2.addColorStop(1, `rgba(${rgb},0)`);
+          ctx.strokeStyle = g2; ctx.lineWidth = (5 - (k % 3)) * E.scale; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(from.x, from.y);
+          ctx.lineTo(from.x + Math.cos(a2) * L, from.y + Math.sin(a2) * L); ctx.stroke();
+        }
+        glowDot(from.x, from.y, 15 * E.scale * (1 + 0.2 * Math.sin(st * 24)), '255,255,255', rgb, 1);
+        // sparkling glints popping over the victim as the light hits
+        if (st > 0.4) {
+          for (let k = 0; k < 5; k++) {
+            const pt = ((st - 0.4) * 2 + k * 0.23) % 1, pa = 1 - pt;
+            const x2 = to.x + jitter(k, 30), y2 = to.y + jitter(k + 6, 24);
+            const r2 = (3 + pt * 8) * E.scale;
+            ctx.strokeStyle = `rgba(255,255,255,${pa})`; ctx.lineWidth = 1.8;
+            ctx.beginPath();
+            ctx.moveTo(x2 - r2, y2); ctx.lineTo(x2 + r2, y2);
+            ctx.moveTo(x2, y2 - r2); ctx.lineTo(x2, y2 + r2);
+            ctx.stroke();
+          }
+        }
+        break;
+      }
+
+      case 'dragonbreath': { // DRAGON BREATH: a scorching cone of draconic energy
+        const front = Math.min(1, st * 1.3);
+        const puffs = Math.round(34 * E.count);
+        for (let k = 0; k < puffs; k++) {
+          const ft2 = ((k * 0.618 + st * 2.2) % 1) * front;
+          const spread = (5 + ft2 * 30) * E.scale;
+          const b = pathAt(ft2, jitter(k, spread));
+          const sz = (6 + ft2 * 16) * E.scale * (0.8 + 0.2 * Math.sin(st * 48 + k));
+          const g2 = ctx.createRadialGradient(b.x, b.y, 0, b.x, b.y, sz);
+          g2.addColorStop(0, 'rgba(235,220,255,0.95)');
+          g2.addColorStop(0.45, `rgba(${rgb},0.8)`);
+          g2.addColorStop(1, 'rgba(40,10,120,0)');
+          ctx.beginPath(); ctx.arc(b.x, b.y, sz, 0, 6.283); ctx.fillStyle = g2; ctx.fill();
+        }
+        // roar arcs rippling out of the maw
+        const mang = Math.atan2(dy, dx);
+        for (let s2 = 0; s2 < 3; s2++) {
+          const rr = ((st * 2 + s2 * 0.33) % 1) * dist * front;
+          if (rr < 8) continue;
+          ctx.strokeStyle = `rgba(${rgb},${0.55 * (1 - rr / dist)})`; ctx.lineWidth = 3 * E.scale;
+          ctx.beginPath(); ctx.arc(from.x, from.y, rr, mang - 0.5, mang + 0.5); ctx.stroke();
+        }
+        glowDot(from.x + dx * 0.04, from.y + dy * 0.04, 10 * E.scale, '240,225,255', rgb, 0.95);
+        break;
+      }
+
+      case 'dragonpulse': { // DRAGON PULSE: a shockwave core trailing energy rings
+        const front = Math.min(1, st * 1.15);
+        const hd = pathAt(front);
+        // rings emitted along the flight path, expanding as they age
+        for (let k = 0; k < 5; k++) {
+          const born = k / 5 * front;
+          if (born > front) continue;
+          const age = Math.max(0, front - born);
+          const b = pathAt(born);
+          const rr = (6 + age * 90) * E.scale;
+          const a2 = Math.max(0, 0.7 - age * 1.4);
+          if (a2 <= 0) continue;
+          ctx.strokeStyle = `rgba(${rgb},${a2})`; ctx.lineWidth = 3.5 * E.scale;
+          ctx.beginPath(); ctx.arc(b.x, b.y, rr, 0, 6.283); ctx.stroke();
+        }
+        // pulsing core with a bright shell
+        const pulse = 1 + 0.25 * Math.sin(st * 34);
+        glowDot(hd.x, hd.y, 17 * E.scale * pulse, '235,225,255', rgb, 1);
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 2.5;
+        ctx.beginPath(); ctx.arc(hd.x, hd.y, 11 * E.scale * pulse, 0, 6.283); ctx.stroke();
+        tailStroke(front, 0.22, 8 * E.scale, 0.5);
+        break;
+      }
+
+      case 'twister': { // TWISTER: a spinning tornado grinds toward the victim
+        const front = Math.min(1, st * 1.1);
+        const b = pathAt(front);
+        const baseY = b.y + 30 * E.scale;
+        const layers = 7;
+        for (let l = 0; l < layers; l++) {
+          const lt = l / (layers - 1);
+          const w = (7 + lt * 26) * E.scale;
+          const y2 = baseY - lt * 62 * E.scale;
+          const sway = Math.sin(st * 26 - l * 0.9) * (3 + lt * 8) * E.scale;
+          ctx.strokeStyle = `rgba(${rgb},${0.9 - lt * 0.35})`;
+          ctx.lineWidth = 3.2 * E.scale; ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.ellipse(b.x + sway, y2, w, w * 0.32, 0, 0, 6.283);
+          ctx.stroke();
+        }
+        // debris flecks orbiting the funnel
+        for (let k = 0; k < Math.round(6 * E.count); k++) {
+          const oa = st * 22 + k * 1.05;
+          const lt = (k % 3) / 3 + 0.2;
+          glowDot(b.x + Math.cos(oa) * (10 + lt * 24) * E.scale, baseY - lt * 55 * E.scale + Math.sin(oa) * 4, 2.5 * E.scale, '230,225,255', rgb, 0.85);
+        }
+        break;
+      }
+
+      case 'iciclecrash': { // ICICLE CRASH: massive icicles drop and shatter
+        const N = 5;
+        for (let k = 0; k < N; k++) {
+          const t2 = (st - k * 0.11) / 0.42; if (t2 <= 0) continue;
+          const ex = to.x + (R[6 + k] - 0.5) * 90 * E.scale;
+          const ey = to.y + (R[14 + k] - 0.5) * 26 * E.scale;
+          const sy = -30;
+          const L = (26 + R[22 + k] * 14) * E.scale; // icicle length
+          if (t2 < 1) {
+            const iy = sy + (ey - sy) * t2;
+            // falling icicle: elongated crystal spike pointing down
+            ctx.save(); ctx.translate(ex, iy);
+            ctx.fillStyle = `rgba(${rgb},0.9)`;
+            ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            ctx.moveTo(0, L); ctx.lineTo(-6 * E.scale, -L * 0.4); ctx.lineTo(0, -L); ctx.lineTo(6 * E.scale, -L * 0.4);
+            ctx.closePath(); ctx.fill(); ctx.stroke();
+            ctx.restore();
+            // speed streak above it
+            ctx.strokeStyle = `rgba(220,244,255,0.5)`; ctx.lineWidth = 2;
+            ctx.beginPath(); ctx.moveTo(ex, iy - L - 26); ctx.lineTo(ex, iy - L - 6); ctx.stroke();
+          } else {
+            // shatter: shard burst + ring
+            const bt = Math.min(1, (t2 - 1) * 2.4), ba = 1 - bt;
+            ctx.strokeStyle = `rgba(255,255,255,${ba * 0.9})`; ctx.lineWidth = 2.5;
+            ctx.beginPath(); ctx.arc(ex, ey, 6 + bt * 30 * E.scale, 0, 6.283); ctx.stroke();
+            for (let s2 = 0; s2 < 6; s2++) {
+              const a2 = s2 * 1.047 + R[30 + k] * 6.28;
+              const rr = (6 + bt * 26) * E.scale;
+              ctx.save(); ctx.translate(ex + Math.cos(a2) * rr, ey + Math.sin(a2) * rr); ctx.rotate(a2);
+              ctx.fillStyle = `rgba(${rgb},${ba})`;
+              ctx.beginPath(); ctx.moveTo(5 * E.scale, 0); ctx.lineTo(-3 * E.scale, -2.4 * E.scale); ctx.lineTo(-3 * E.scale, 2.4 * E.scale);
+              ctx.closePath(); ctx.fill(); ctx.restore();
+            }
+          }
+        }
+        break;
+      }
+
+      case 'dracometeor': { // DRACO METEOR: an orb rockets skyward, then comets RAIN
+        const CH = 0.22;
+        if (st < CH) {
+          // charge: energy orb climbs off the top of the screen
+          const ct = st / CH;
+          const oy = from.y - ct * (from.y + 50);
+          ctx.strokeStyle = `rgba(${rgb},${0.7 * (1 - ct * 0.5)})`;
+          ctx.lineWidth = 6 * E.scale; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(from.x, from.y - 10); ctx.lineTo(from.x, oy + 14); ctx.stroke();
+          glowDot(from.x, oy, (10 + ct * 9) * E.scale, '255,240,255', rgb, 0.95);
+        }
+        const mt = (st - CH) / (1 - CH);
+        if (mt > 0) {
+          const N = 6;
+          for (let k = 0; k < N; k++) {
+            const t2 = (mt - k * 0.085) / 0.5; if (t2 <= 0) continue;
+            const offX = (R[6 + k] - 0.5) * 130 * E.scale;
+            const offY = (R[14 + k] - 0.5) * 34 * E.scale;
+            const ex = to.x + offX, ey = to.y + offY;
+            const sx = ex + 70 + R[22 + k] * 50, sy = -40;
+            const tt = Math.min(1, t2);
+            const mx2 = sx + (ex - sx) * tt, my2 = sy + (ey - sy) * tt;
+            if (t2 < 1) {
+              // streaking comet: long gradient tail + white-hot head
+              const tlen = 0.32;
+              const bx2 = sx + (ex - sx) * Math.max(0, tt - tlen), by2 = sy + (ey - sy) * Math.max(0, tt - tlen);
+              const g2 = ctx.createLinearGradient(bx2, by2, mx2, my2);
+              g2.addColorStop(0, `rgba(${rgb},0)`); g2.addColorStop(1, `rgba(${rgb},0.95)`);
+              ctx.strokeStyle = g2; ctx.lineWidth = (k === 0 ? 11 : 7) * E.scale; ctx.lineCap = 'round';
+              ctx.beginPath(); ctx.moveTo(bx2, by2); ctx.lineTo(mx2, my2); ctx.stroke();
+              glowDot(mx2, my2, (k === 0 ? 16 : 11) * E.scale, '255,246,255', rgb, 1);
+            } else {
+              // touchdown: shock ring + starburst flash
+              const bt = Math.min(1, (t2 - 1) * 2.2), ba = 1 - bt;
+              ctx.strokeStyle = `rgba(${rgb},${ba})`; ctx.lineWidth = 4 * E.scale;
+              ctx.beginPath(); ctx.arc(ex, ey, 8 + bt * 42 * E.scale, 0, 6.283); ctx.stroke();
+              glowDot(ex, ey, (20 - bt * 12) * E.scale, '255,255,255', rgb, ba);
+              for (let s2 = 0; s2 < 5; s2++) {
+                const a2 = R[30 + k] * 6.28 + s2 * 1.257;
+                ctx.strokeStyle = `rgba(255,240,255,${ba * 0.85})`; ctx.lineWidth = 2.5;
+                ctx.beginPath(); ctx.moveTo(ex + Math.cos(a2) * 6, ey + Math.sin(a2) * 6);
+                ctx.lineTo(ex + Math.cos(a2) * (12 + bt * 26) * E.scale, ey + Math.sin(a2) * (12 + bt * 26) * E.scale); ctx.stroke();
+              }
+            }
+          }
+        }
+        break;
+      }
+
+      case 'bubblestream': { // BUBBLE: a wobbling stream of glassy bubbles
+        const front = Math.min(1, st * 1.5);
+        const N = Math.round(15 * E.count);
+        for (let k = 0; k < N; k++) {
+          const t2 = ((k * 0.077 + st * 1.1) % 1);
+          if (t2 > front) continue;
+          const b = pathAt(t2, Math.sin(t2 * 9 + k * 2.4 + st * 5) * 16 * E.scale);
+          const r2 = (3.5 + (k % 4) * 2.4) * E.scale;
+          ctx.fillStyle = `rgba(${rgb},0.22)`;
+          ctx.beginPath(); ctx.arc(b.x, b.y, r2, 0, 6.283); ctx.fill();
+          ctx.strokeStyle = 'rgba(215,242,255,0.95)'; ctx.lineWidth = 1.8;
+          ctx.stroke();
+          ctx.fillStyle = 'rgba(255,255,255,0.9)';
+          ctx.beginPath(); ctx.arc(b.x - r2 * 0.35, b.y - r2 * 0.35, r2 * 0.25, 0, 6.283); ctx.fill();
+        }
+        if (st > 0.55) { // bubbles popping on the victim
+          for (let k = 0; k < 4; k++) {
+            const pt = ((st - 0.55) / 0.45 + k * 0.22) % 1, pa = 1 - pt;
+            ctx.strokeStyle = `rgba(220,245,255,${pa * 0.9})`; ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(to.x + jitter(k, 26), to.y + jitter(k + 5, 22), 4 + pt * 16 * E.scale, 0, 6.283);
+            ctx.stroke();
+          }
+        }
+        break;
+      }
+
+      case 'wave': { // SURF: a rolling tsunami sweeps over the victim
+        const sgn = Math.sign(dx) || 1;
+        const floor = Math.max(from.y, to.y) + 26;
+        const span = Math.abs(dx) + 80;
+        const cx2 = from.x + sgn * st * span;
+        const H = (58 + 20 * E.scale) * Math.min(1, st * 3.2) * (1 + 0.06 * Math.sin(st * 22));
+        // trailing water body
+        const back = from.x - sgn * 60;
+        const bodyG = ctx.createLinearGradient(0, floor - H, 0, floor + 14);
+        bodyG.addColorStop(0, `rgba(${rgb},0.85)`); bodyG.addColorStop(1, `rgba(${rgb},0.25)`);
+        ctx.fillStyle = bodyG;
+        ctx.beginPath();
+        ctx.moveTo(back, floor + 14);
+        ctx.lineTo(back, floor - H * 0.3);
+        ctx.quadraticCurveTo(cx2 - sgn * 90, floor - H * 0.5, cx2 - sgn * 34, floor - H);
+        // curling crest tip
+        ctx.quadraticCurveTo(cx2 + sgn * 16, floor - H * 1.06, cx2 + sgn * 12, floor - H * 0.62);
+        ctx.quadraticCurveTo(cx2 + sgn * 4, floor - H * 0.42, cx2 + sgn * 30, floor - H * 0.18);
+        ctx.lineTo(cx2 + sgn * 34, floor + 14);
+        ctx.closePath(); ctx.fill();
+        // foam along the crest + curl
+        for (let k = 0; k < Math.round(12 * E.count); k++) {
+          const ft2 = k / 12;
+          const fx2 = cx2 - sgn * 34 + sgn * ft2 * 48 + jitter(k, 6);
+          const fy2 = floor - H * (1 - ft2 * 0.55) + jitter(k + 7, 5);
+          glowDot(fx2, fy2, (3 + (k % 3) * 2) * E.scale, '240,250,255', '190,225,255', 0.9);
+        }
+        // spray thrown ahead of the wave
+        for (let k = 0; k < 6; k++) {
+          glowDot(cx2 + sgn * (20 + k * 9) + jitter(k, 8), floor - H * 0.75 - jitter(k + 3, 18), 2.6 * E.scale, '235,248,255', rgb, 0.8);
+        }
+        break;
+      }
+
+      case 'icywind': { // ICY WIND: sinuous freezing gusts carrying snowflakes
+        const front = Math.min(1, st * 1.4);
+        for (let s2 = 0; s2 < 3; s2++) {
+          ctx.strokeStyle = `rgba(225,246,255,${0.55 - s2 * 0.13})`;
+          ctx.lineWidth = (5 - s2) * E.scale; ctx.lineCap = 'round';
+          ctx.beginPath();
+          for (let seg = 0; seg <= 16; seg++) {
+            const t2 = (seg / 16) * front;
+            const b = pathAt(t2, Math.sin(t2 * 7 + st * 10 + s2 * 2.1) * (10 + s2 * 9) * E.scale);
+            seg === 0 ? ctx.moveTo(b.x, b.y) : ctx.lineTo(b.x, b.y);
+          }
+          ctx.stroke();
+        }
+        const N = Math.round(11 * E.count);
+        for (let k = 0; k < N; k++) {
+          const t2 = ((k * 0.11 + st * 1.35) % 1) * front;
+          const b = pathAt(t2, Math.sin(t2 * 8 + k * 1.9) * 18 * E.scale);
+          flake(b.x, b.y, (3.4 + (k % 3) * 1.8) * E.scale, st * 7 + k, 0.9);
+        }
+        break;
+      }
+
+      case 'icebeam': { // ICE BEAM: a crystalline ray that freezes on contact
+        const front = Math.min(1, st * 1.5);
+        const P = t2 => ({ x: from.x + dx * t2, y: from.y + dy * t2 });
+        const hd = P(front);
+        // outer glow + icy core
+        ctx.strokeStyle = `rgba(${rgb},0.55)`; ctx.lineWidth = 15 * E.scale; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(hd.x, hd.y); ctx.stroke();
+        ctx.strokeStyle = 'rgba(255,255,255,0.95)'; ctx.lineWidth = 4.5 * E.scale;
+        ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(hd.x, hd.y); ctx.stroke();
+        // jagged crystal edges riding the beam
+        for (const sgn of [-1, 1]) {
+          ctx.strokeStyle = 'rgba(210,240,255,0.85)'; ctx.lineWidth = 1.8;
+          ctx.beginPath();
+          for (let seg = 0; seg <= 14; seg++) {
+            const t2 = (seg / 14) * front;
+            const w = (8 + ((seg % 2) ? 4 : -2)) * E.scale * sgn;
+            const b = P(t2);
+            seg === 0 ? ctx.moveTo(b.x + px * w, b.y + py * w) : ctx.lineTo(b.x + px * w, b.y + py * w);
+          }
+          ctx.stroke();
+        }
+        // sparkling flakes drifting off the ray
+        for (let k = 0; k < Math.round(7 * E.count); k++) {
+          const t2 = ((k * 0.17 + st * 1.8) % 1) * front;
+          const b = P(t2);
+          flake(b.x + jitter(k, 14), b.y + jitter(k + 4, 14), 3 * E.scale, st * 9 + k, 0.8);
+        }
+        glowDot(hd.x, hd.y, 13 * E.scale, '255,255,255', rgb, 0.95);
+        break;
+      }
+
+      case 'blizzard': { // BLIZZARD: a howling whole-field snowstorm
+        const W2 = canvas.width, H2 = canvas.height;
+        const dir = Math.sign(dx) || 1;
+        // slanted gust bands sweeping across
+        for (let g2 = 0; g2 < 3; g2++) {
+          const gx2 = (((g2 * 0.37 + st * 1.1) % 1) * (W2 + 300) - 150) * dir + (dir < 0 ? W2 : 0);
+          ctx.save();
+          ctx.translate(gx2, H2 / 2); ctx.rotate(dir * 0.22);
+          ctx.fillStyle = `rgba(235,248,255,${0.10 + 0.05 * Math.sin(st * 18 + g2 * 2)})`;
+          ctx.fillRect(-70, -H2, 140, H2 * 2);
+          ctx.restore();
+        }
+        // wind-driven flakes with streaks (parallax speeds)
+        const N = Math.round(34 * E.count);
+        for (let k = 0; k < N; k++) {
+          const sp2 = 0.55 + (k % 5) * 0.16;
+          const x2 = ((R[k % 48] + st * sp2 * dir + 1) % 1) * W2;
+          const y2 = ((R[(k * 7 + 3) % 48] + st * sp2 * 0.5) % 1) * H2;
+          ctx.strokeStyle = `rgba(230,246,255,${0.35 + (k % 3) * 0.12})`;
+          ctx.lineWidth = 1.6; ctx.lineCap = 'round';
+          ctx.beginPath(); ctx.moveTo(x2, y2); ctx.lineTo(x2 - dir * (14 + (k % 4) * 7) * E.scale, y2 + 6); ctx.stroke();
+          if (k % 2 === 0) flake(x2, y2, (2.6 + (k % 3) * 1.7) * E.scale, st * 6 + k, 0.85);
+        }
+        // the victim ices over as the storm peaks
+        if (st > 0.55) {
+          const cg = (st - 0.55) / 0.45;
+          ctx.strokeStyle = `rgba(255,255,255,${0.9 * cg})`; ctx.lineWidth = 2.5;
+          ctx.fillStyle = `rgba(${rgb},${0.3 * cg})`;
+          const CR = 40 * E.scale * cg;
+          ctx.beginPath();
+          for (let s2 = 0; s2 < 6; s2++) { const a2 = s2 * 1.047 + 0.52; s2 === 0 ? ctx.moveTo(to.x + Math.cos(a2) * CR, to.y + Math.sin(a2) * CR) : ctx.lineTo(to.x + Math.cos(a2) * CR, to.y + Math.sin(a2) * CR); }
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          for (let s2 = 0; s2 < 6; s2++) { const a2 = s2 * 1.047 + 0.52; ctx.beginPath(); ctx.moveTo(to.x, to.y); ctx.lineTo(to.x + Math.cos(a2) * CR, to.y + Math.sin(a2) * CR); ctx.stroke(); }
+        }
+        break;
+      }
+
+      case 'shards': { // ICE: shard volley, then frost crystallizes ON the victim
+        const n = 4 + tier * 2;
+        for (let k = 0; k < n; k++) {
+          const off = (k - (n - 1) / 2) * 13, tt = st - k * 0.03; if (tt <= 0) continue;
+          const b = { x: from.x + dx * tt + px * off, y: from.y + dy * tt + py * off };
+          ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(Math.atan2(dy, dx));
+          ctx.beginPath(); ctx.moveTo(12 * E.scale, 0); ctx.lineTo(-8 * E.scale, -4 * E.scale); ctx.lineTo(-8 * E.scale, 4 * E.scale); ctx.closePath();
+          ctx.fillStyle = `rgba(${rgb},0.95)`; ctx.fill();
+          ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.4; ctx.stroke();
+          ctx.restore();
+        }
+        if (st > 0.55) { // hex crystal growing over the target
+          const cg = (st - 0.55) / 0.45;
+          ctx.strokeStyle = `rgba(255,255,255,${0.9 * cg})`; ctx.lineWidth = 2.5;
+          ctx.fillStyle = `rgba(${rgb},${0.25 * cg})`;
+          const CR = 34 * E.scale * cg;
+          ctx.beginPath();
+          for (let s2 = 0; s2 < 6; s2++) { const a2 = s2 * 1.047 + 0.52; s2 === 0 ? ctx.moveTo(to.x + Math.cos(a2) * CR, to.y + Math.sin(a2) * CR) : ctx.lineTo(to.x + Math.cos(a2) * CR, to.y + Math.sin(a2) * CR); }
+          ctx.closePath(); ctx.fill(); ctx.stroke();
+          for (let s2 = 0; s2 < 6; s2++) { const a2 = s2 * 1.047 + 0.52; ctx.beginPath(); ctx.moveTo(to.x, to.y); ctx.lineTo(to.x + Math.cos(a2) * CR, to.y + Math.sin(a2) * CR); ctx.stroke(); }
+        }
+        break;
+      }
+
+      case 'spray': { // POISON: arcing spray of acid glops that drip
+        const globs = 5 + tier * 2;
+        for (let k = 0; k < globs; k++) {
+          const tt = st - k * (0.5 / globs); if (tt <= 0) continue;
+          const p = { x: lobPath(tt).x + px * jitter(k, 16), y: lobPath(tt).y + py * jitter(k, 10) };
+          glowDot(p.x, p.y, (9 - (k % 3) * 2) * E.scale, '230,180,255', rgb, 0.95);
+          glowDot(p.x + 3, p.y + 9 * tt * 3, 4 * E.scale, rgb, rgb, 0.6); // drip
+        }
+        break;
+      }
+
+      case 'quake': { // GROUND: fissure racing along the floor + rock spikes
+        const reach = st;
+        {
+          const gy = Math.max(from.y, to.y) + 14;
+          ctx.strokeStyle = 'rgba(70,45,18,0.95)'; ctx.lineWidth = 4 * E.scale; ctx.lineJoin = 'round';
+          ctx.beginPath();
+          for (let s2 = 0; s2 <= 12; s2++) {
+            const tt2 = (s2 / 12) * reach;
+            const jx = from.x + dx * tt2, jy = gy + ((s2 % 2) ? -5 : 5) * E.scale;
+            s2 === 0 ? ctx.moveTo(jx, jy) : ctx.lineTo(jx, jy);
+          }
+          ctx.stroke();
+        }
+        const n = Math.round(8 * E.count);
+        for (let s = 0; s < n; s++) {
+          const tt = s / n; if (tt > reach) break;
+          const b = { x: from.x + dx * tt, y: Math.max(from.y, to.y) + 14 };
+          const h = 16 * E.scale * Math.sin(Math.min(1, (reach - tt) * 5) * Math.PI);
+          if (h <= 0) continue;
+          ctx.beginPath(); ctx.moveTo(b.x - 7 * E.scale, b.y); ctx.lineTo(b.x, b.y - h - 8); ctx.lineTo(b.x + 7 * E.scale, b.y); ctx.closePath();
+          ctx.fillStyle = `rgba(${rgb},0.9)`; ctx.fill();
+          glowDot(b.x, b.y - 4, 10 * E.scale, rgb, '90,60,20', 0.5);
+        }
+        break;
+      }
+
+      case 'gust': { // FLYING: wind crescents + drifting feathers
+        const n = 3 + tier;
+        for (let k = 0; k < n; k++) {
+          const tt = st - k * 0.06; if (tt <= 0) continue;
+          const b = path(tt);
+          ctx.strokeStyle = `rgba(${rgb},${0.9 - k * 0.18})`; ctx.lineWidth = (4 - k * 0.6) * E.scale;
+          ctx.beginPath(); ctx.arc(b.x, b.y, (16 + k * 7) * E.scale, tt * 9, tt * 9 + Math.PI * 1.2); ctx.stroke();
+        }
+        for (let k = 0; k < Math.round(4 * E.count); k++) { // feathers rocking down
+          const tt = st - k * 0.09; if (tt <= 0) continue;
+          const b = path(tt);
+          const fy = b.y + tt * 30 + k * 6, fxx = b.x + Math.sin(tt * 12 + k) * 18;
+          ctx.save(); ctx.translate(fxx, fy); ctx.rotate(Math.sin(tt * 10 + k) * 0.9);
+          ctx.beginPath(); ctx.ellipse(0, 0, 7 * E.scale, 2.4 * E.scale, 0, 0, 6.283);
+          ctx.fillStyle = `rgba(255,255,255,${0.85 - k * 0.15})`; ctx.fill(); ctx.restore();
+        }
+        break;
+      }
+
+      case 'mind': { // PSYCHIC: reality bends AROUND the victim — contracting rings
+        const rings2 = 4 + tier;
+        for (let k = 0; k < rings2; k++) {
+          const ph2 = (st * 1.5 + k / rings2) % 1;
+          const rr = (78 * (1 - ph2) + 8) * E.scale;
+          ctx.strokeStyle = `rgba(${rgb},${0.85 * ph2})`; ctx.lineWidth = 3 * E.scale;
+          ctx.beginPath(); ctx.arc(to.x, to.y, rr, 0, 6.283); ctx.stroke();
+        }
+        for (let s2 = 0; s2 < 3; s2++) { // counter-rotating lens arcs
+          const a2 = st * (s2 % 2 ? 8 : -8) + s2 * 2.1;
+          ctx.strokeStyle = `rgba(255,220,245,${0.7})`; ctx.lineWidth = 2.5;
+          ctx.beginPath(); ctx.arc(to.x, to.y, (26 + s2 * 12) * E.scale, a2, a2 + 1.4); ctx.stroke();
+        }
+        glowDot(to.x, to.y, (10 + 5 * Math.sin(st * 22)) * E.scale, '255,230,250', rgb, 0.85);
+        break;
+      }
+
+      case 'swarm': { // BUG: a buzzing swarm converges on the victim
+        const bugs = Math.round(14 * E.count);
+        for (let k = 0; k < bugs; k++) {
+          const lag = (k % 5) * 0.06;
+          const tt = Math.max(0, Math.min(1, st * 1.25 - lag));
+          const scatter = (1 - tt) * 60 * E.scale;
+          const bx2 = from.x + dx * tt + px * jitter(k, scatter) + Math.sin(st * 60 + k * 2) * 4;
+          const by2 = from.y + dy * tt + py * jitter(k + 7, scatter) + Math.cos(st * 55 + k) * 4;
+          glowDot(bx2, by2, 3.5 * E.scale, '240,255,220', rgb, 0.9);
+          ctx.strokeStyle = `rgba(255,255,255,${0.5 + 0.4 * Math.sin(st * 70 + k)})`; ctx.lineWidth = 1.4;
+          ctx.beginPath(); ctx.moveTo(bx2 - 5, by2 - 3); ctx.lineTo(bx2, by2); ctx.lineTo(bx2 + 5, by2 - 3); ctx.stroke();
+        }
+        break;
+      }
+
+      case 'lob': { // ROCK: tumbling boulder(s) on a gravity arc
+        for (const off of [0, ...sideOffsets]) {
+          const tt = st - (off === 0 ? 0 : 0.09); if (tt <= 0) continue;
+          const p = { x: lobPath(tt).x + px * off * 0.4, y: lobPath(tt).y + py * off * 0.4 };
+          ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(tt * 9);
+          ctx.beginPath();
+          for (let s = 0; s < 7; s++) { const a2 = (s / 7) * 6.283; const r = (11 + ((s * 37) % 5)) * (off === 0 ? E.scale : E.scale * 0.7); ctx.lineTo(Math.cos(a2) * r, Math.sin(a2) * r); }
+          ctx.closePath(); ctx.fillStyle = `rgba(${rgb},0.98)`; ctx.fill();
+          ctx.strokeStyle = 'rgba(70,50,25,0.9)'; ctx.lineWidth = 2; ctx.stroke();
+          ctx.restore();
+          ctx.strokeStyle = `rgba(255,255,255,0.4)`; ctx.lineWidth = 2; // speed lines
+          ctx.beginPath(); ctx.moveTo(p.x - nx * 24, p.y - ny * 24); ctx.lineTo(p.x - nx * 10, p.y - ny * 10); ctx.stroke();
+        }
+        break;
+      }
+
+      case 'spectral': { // GHOST: a wailing wisp, then spectral claws rake the victim
+        const w = t2 => pathAt(t2, Math.sin(t2 * 11) * dist * 0.14);
+        const n = 4 + tier;
+        for (let k = 0; k < n; k++) {
+          const tt = st - k * 0.05; if (tt <= 0) continue;
+          const b = w(tt);
+          glowDot(b.x, b.y, (15 - k * 2.2) * E.scale, '200,170,255', rgb, (0.85 - k * 0.14) * (0.7 + 0.3 * Math.sin(st * 25)));
+        }
+        if (st > 0.6) { // three curved claw rakes materialize across the victim
+          const cg = (st - 0.6) / 0.4;
+          for (let c2 = 0; c2 < 3; c2++) {
+            const sweep = Math.min(1, cg * 1.5 - c2 * 0.15); if (sweep <= 0) continue;
+            const a2 = -0.7 + c2 * 0.28;
+            ctx.strokeStyle = `rgba(230,210,255,${0.9 * sweep})`; ctx.lineWidth = 4 - c2;
+            ctx.beginPath();
+            ctx.arc(to.x - 10 + c2 * 10, to.y - 8 + c2 * 8, 34 * E.scale, a2, a2 + 1.5 * sweep);
+            ctx.stroke();
+          }
+        }
+        break;
+      }
+
+      case 'serpent': { // DRAGON: a serpentine energy dragon snakes to its prey
+        const segs = 20;
+        const bodyAt = t2 => pathAt(t2, Math.sin(t2 * 12 + st * 4) * 20 * E.scale);
+        ctx.lineCap = 'round';
+        for (const [w2, col] of [[11 * E.scale, `rgba(${rgb},0.85)`], [4.5 * E.scale, 'rgba(220,235,255,0.95)']]) {
+          ctx.beginPath();
+          let started = false;
+          for (let s2 = 0; s2 <= segs; s2++) {
+            const tt = st - s2 * 0.028; if (tt <= 0) break;
+            const b = bodyAt(tt);
+            started ? ctx.lineTo(b.x, b.y) : ctx.moveTo(b.x, b.y); started = true;
+          }
+          ctx.strokeStyle = col; ctx.lineWidth = w2; ctx.stroke();
+        }
+        // head: horned triangle facing travel
+        const hp2 = bodyAt(st), hp1 = bodyAt(Math.max(0, st - 0.03));
+        const ha = Math.atan2(hp2.y - hp1.y, hp2.x - hp1.x);
+        ctx.save(); ctx.translate(hp2.x, hp2.y); ctx.rotate(ha);
+        ctx.beginPath(); ctx.moveTo(16 * E.scale, 0); ctx.lineTo(-7 * E.scale, -9 * E.scale); ctx.lineTo(-3 * E.scale, 0); ctx.lineTo(-7 * E.scale, 9 * E.scale); ctx.closePath();
+        ctx.fillStyle = `rgba(${rgb},1)`; ctx.fill();
+        ctx.strokeStyle = 'rgba(255,255,255,0.9)'; ctx.lineWidth = 1.6; ctx.stroke();
+        ctx.beginPath(); ctx.moveTo(-6 * E.scale, -8 * E.scale); ctx.lineTo(-14 * E.scale, -14 * E.scale); ctx.stroke(); // horn
+        ctx.beginPath(); ctx.moveTo(-6 * E.scale, 8 * E.scale); ctx.lineTo(-14 * E.scale, 14 * E.scale); ctx.stroke();
+        ctx.restore();
+        break;
+      }
+
+      case 'grab': { // DARK: shadow tendrils rise beneath the victim and seize it
+        ctx.save(); ctx.globalCompositeOperation = 'source-over';
+        ctx.fillStyle = `rgba(15,8,20,${(0.14 + tier * 0.06) * Math.sin(st * Math.PI)})`;
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.restore();
+        const g2 = Math.min(1, st * 1.25);
+        const tendrils = 5 + tier;
+        for (let v = 0; v < tendrils; v++) {
+          const a2 = (v / tendrils) * 6.283 + R[6];
+          const baseX = to.x + Math.cos(a2) * 42 * E.scale;
+          const baseY = to.y + 52;
+          const tipX = to.x + Math.cos(a2 + st * 2) * 12 * E.scale;
+          const tipY = to.y + 40 - (86 * E.scale * g2) * (0.75 + (v % 3) * 0.12);
+          ctx.strokeStyle = `rgba(${rgb},0.9)`; ctx.lineWidth = (5 - (v % 3)) * E.scale; ctx.lineCap = 'round';
+          ctx.beginPath();
+          ctx.moveTo(baseX, baseY);
+          ctx.quadraticCurveTo(baseX + Math.sin(st * 8 + v) * 18, baseY - 50 * E.scale, tipX, Math.max(tipY, to.y - 46));
+          ctx.stroke();
+        }
+        break;
+      }
+
+      case 'beam': { // STEEL (beloved — untouched): charge-up laser with rings
+        if (st < 0.25) { glowDot(from.x, from.y, (10 + st * 60) * E.scale, '240,245,255', rgb, st * 4); break; }
+        const bt = (st - 0.25) / 0.75;
+        const w = (7 + Math.sin(bt * 30) * 3) * E.scale;
+        const g = ctx.createLinearGradient(from.x, from.y, to.x, to.y);
+        g.addColorStop(0, 'rgba(255,255,255,0.95)'); g.addColorStop(1, `rgba(${rgb},0.9)`);
+        ctx.strokeStyle = g; ctx.lineWidth = w; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(to.x, to.y); ctx.stroke();
+        if (tier >= 2) {
+          ctx.lineWidth = w * 0.4; ctx.strokeStyle = `rgba(${rgb},0.6)`;
+          for (const off of [-12, 12]) {
+            ctx.beginPath(); ctx.moveTo(from.x + px * off, from.y + py * off); ctx.lineTo(to.x + px * off, to.y + py * off); ctx.stroke();
+          }
+        }
+        for (let s = 0; s < 3 + tier; s++) {
+          const tt = (bt * 2 + s / (3 + tier)) % 1;
+          const b = { x: from.x + dx * tt, y: from.y + dy * tt };
+          ctx.strokeStyle = `rgba(${rgb},${0.8 * (1 - tt)})`; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.arc(b.x, b.y, (10 + tt * 8) * E.scale, 0, 6.283); ctx.stroke();
+        }
+        break;
+      }
+
+      case 'moonbeam': { // FAIRY: a moonlight column descends onto the victim
+        const g2 = Math.min(1, st * 1.4);
+        const topY = Math.max(0, to.y - 220 * E.scale);
+        const bw = 26 * E.scale * (0.8 + 0.2 * Math.sin(st * 18));
+        const grad = ctx.createLinearGradient(to.x, topY, to.x, to.y);
+        grad.addColorStop(0, `rgba(${rgb},0)`);
+        grad.addColorStop(0.5, `rgba(255,235,250,${0.5 * g2})`);
+        grad.addColorStop(1, `rgba(${rgb},${0.85 * g2})`);
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(to.x - bw * 0.4, topY);
+        ctx.lineTo(to.x + bw * 0.4, topY);
+        ctx.lineTo(to.x + bw, to.y + 8);
+        ctx.lineTo(to.x - bw, to.y + 8);
+        ctx.closePath(); ctx.fill();
+        const n = Math.round(8 * E.count); // twinkling cross-sparkles riding the beam
+        for (let k = 0; k < n; k++) {
+          const ph2 = ((k / n) + st * 1.2) % 1;
+          const sy2 = topY + (to.y - topY) * ph2;
+          const sx2 = to.x + jitter(k, bw * 0.8);
+          const rs = (4 + (k % 3) * 2) * E.scale * (0.6 + 0.4 * Math.sin(st * 30 + k));
+          ctx.strokeStyle = `rgba(255,255,255,${0.9 - ph2 * 0.3})`; ctx.lineWidth = 2;
+          ctx.beginPath(); ctx.moveTo(sx2 - rs, sy2); ctx.lineTo(sx2 + rs, sy2);
+          ctx.moveTo(sx2, sy2 - rs); ctx.lineTo(sx2, sy2 + rs); ctx.stroke();
+        }
+        break;
+      }
+    }
+    ctx.restore();
+  };
+
+  // ── impact burst (both categories) ──
+  const impact = (it, heavy) => {
+    const a = 1 - it;
+    ctx.save();
+    ctx.globalCompositeOperation = 'lighter';
+    // Electric detonations strobe the whole screen for two frames
+    if (type === 'electric' && it < 0.12) {
+      ctx.fillStyle = `rgba(255,255,255,${(0.12 - it) * 2.2})`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    // Tier-2 drama: a screen-wide type-tinted flash right at detonation
+    if (E.flashA > 0 && it < 0.3) {
+      ctx.fillStyle = `rgba(${rgb},${E.flashA * (1 - it / 0.3) * 0.5})`;
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+    }
+    // white core flash + type shockwave ring(s)
+    glowDot(to.x, to.y, (16 * (1 - it) + 6) * E.scale, '255,255,255', rgb, a * 0.95);
+    for (let rI = 0; rI < E.rings; rI++) {
+      const rt = Math.max(0, it - rI * 0.12);
+      if (rt <= 0) continue;
+      ctx.strokeStyle = `rgba(${rgb},${a * (0.85 - rI * 0.15)})`;
+      ctx.lineWidth = (heavy ? 5 : 3) - rI;
+      ctx.beginPath(); ctx.arc(to.x, to.y, rt * ((heavy ? 64 : 50) + rI * 16) * E.scale, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.shadowColor = `rgba(${rgb},0.8)`; ctx.shadowBlur = 12 * E.scale;
+
+    for (const v of burstVecs) {
+      const bx = to.x + v.ax * it, byRaw = to.y + v.ay * it;
+      switch (fx.burst) {
+        case 'embers':   glowDot(bx, byRaw - it * 26 * E.scale, v.sz + 2, '255,220,120', rgb, a); break;
+        case 'splash': { const g2 = it * it * 70 * E.scale; glowDot(bx, byRaw + g2 - 30 * it, v.sz, '225,245,255', rgb, a); break; }
+        case 'sparks': {
+          ctx.strokeStyle = `rgba(${rgb},${a})`; ctx.lineWidth = 2 * E.scale;
+          ctx.beginPath(); ctx.moveTo(bx, byRaw); ctx.lineTo(bx + v.ax * 0.12, byRaw + v.ay * 0.12); ctx.stroke(); break;
+        }
+        case 'petals': { const sway = Math.sin(it * 10 + v.ph) * 7; ctx.save(); ctx.translate(bx + sway, byRaw + it * 22); ctx.rotate(it * 7 + v.ph);
+          ctx.beginPath(); ctx.ellipse(0, 0, 6 * E.scale, 2.6 * E.scale, 0, 0, Math.PI * 2); ctx.fillStyle = `rgba(${rgb},${a})`; ctx.fill(); ctx.restore(); break; }
+        case 'crystals': { ctx.save(); ctx.translate(to.x + v.ax * Math.min(it * 1.6, 0.55), to.y + v.ay * Math.min(it * 1.6, 0.55)); ctx.rotate(v.ph);
+          ctx.beginPath(); ctx.moveTo(0, -v.sz - 3); ctx.lineTo(v.sz * 0.6, 0); ctx.lineTo(0, v.sz + 3); ctx.lineTo(-v.sz * 0.6, 0); ctx.closePath();
+          ctx.fillStyle = `rgba(${rgb},${a})`; ctx.fill(); ctx.strokeStyle = `rgba(255,255,255,${a})`; ctx.lineWidth = 1; ctx.stroke(); ctx.restore(); break; }
+        case 'bubbles': glowDot(bx, byRaw - it * 18, v.sz * (1 + it), rgb, rgb, a * 0.8); break;
+        case 'rubble': { const g2 = it * it * 90 * E.scale; ctx.save(); ctx.translate(bx, byRaw + g2 - 20 * it); ctx.rotate(v.ph + it * 5);
+          ctx.fillStyle = `rgba(${rgb},${a})`; ctx.fillRect(-v.sz, -v.sz, v.sz * 2, v.sz * 2); ctx.restore(); break; }
+        case 'gusts': { ctx.strokeStyle = `rgba(${rgb},${a * 0.9})`; ctx.lineWidth = 2 * E.scale;
+          ctx.beginPath(); ctx.arc(to.x, to.y, 8 + Math.hypot(v.ax, v.ay) * it, v.ph, v.ph + 1.1); ctx.stroke(); break; }
+        case 'rings': break; // rings drawn below
+        case 'vortex': { const ang = v.ph + it * 5, r = (1 - it) * Math.hypot(v.ax, v.ay);
+          glowDot(to.x + Math.cos(ang) * r, to.y + Math.sin(ang) * r, v.sz, '200,170,255', rgb, a * 0.9); break; }
+        case 'stars': { ctx.save(); ctx.translate(bx, byRaw); ctx.rotate(v.ph + it * 4); ctx.fillStyle = `rgba(255,255,255,${a})`;
+          ctx.strokeStyle = `rgba(${rgb},${a})`; ctx.lineWidth = 1.6;
+          ctx.beginPath(); for (let s = 0; s < 5; s++) { const a2 = (s / 5) * Math.PI * 2; ctx.lineTo(Math.cos(a2) * (v.sz + 3), Math.sin(a2) * (v.sz + 3)); ctx.lineTo(Math.cos(a2 + 0.63) * v.sz * 0.45, Math.sin(a2 + 0.63) * v.sz * 0.45); }
+          ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore(); break; }
+        case 'impact': { ctx.strokeStyle = `rgba(${rgb},${a})`; ctx.lineWidth = 3 * E.scale;
+          ctx.beginPath(); ctx.moveTo(to.x + v.ax * it * 0.4, to.y + v.ay * it * 0.4); ctx.lineTo(to.x + v.ax * it, to.y + v.ay * it); ctx.stroke(); break; }
+      }
+    }
+    if (fx.burst === 'rings') {
+      for (let s = 0; s < 4 + tier; s++) {
+        const rr = it * (26 + s * 18) * E.scale;
+        ctx.strokeStyle = `rgba(${rgb},${a * (1 - s * 0.15)})`; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(to.x, to.y, rr, 0, Math.PI * 2); ctx.stroke();
+      }
+    }
+    // Per-element impact garnish — the finisher that sells the hit
+    if (type === 'fire' || (type === 'normal' && heavy)) { // rising flame pillar
+      for (let f = 0; f < 6; f++) {
+        const fh = (30 + f * 9) * E.scale * Math.sin(Math.min(1, it * 1.6) * Math.PI);
+        if (fh <= 0) continue;
+        const fxx = to.x + (f - 2.5) * 7 * E.scale;
+        ctx.beginPath();
+        ctx.moveTo(fxx - 6, to.y + 8);
+        ctx.quadraticCurveTo(fxx + Math.sin(it * 30 + f) * 6, to.y - fh / 2, fxx, to.y - fh);
+        ctx.quadraticCurveTo(fxx - Math.sin(it * 26 + f) * 6, to.y - fh / 2, fxx + 6, to.y + 8);
+        ctx.fillStyle = `rgba(${rgb},${a * (0.55 - f * 0.06)})`; ctx.fill();
+      }
+    } else if (type === 'water') { // geyser column
+      const ch = 60 * E.scale * Math.sin(Math.min(1, it * 1.4) * Math.PI);
+      if (ch > 0) {
+        ctx.strokeStyle = `rgba(${rgb},${a * 0.8})`; ctx.lineWidth = 10 * E.scale; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(to.x, to.y + 6); ctx.lineTo(to.x, to.y - ch); ctx.stroke();
+        glowDot(to.x, to.y - ch, 10 * E.scale, '230,248,255', rgb, a);
+      }
+    } else if (type === 'ice') { // erupting ground spikes
+      for (let s2 = 0; s2 < 5; s2++) {
+        const sx2 = to.x + (s2 - 2) * 13 * E.scale;
+        const sh = (18 + (s2 % 2) * 10) * E.scale * Math.min(1, it * 2);
+        ctx.beginPath(); ctx.moveTo(sx2 - 5, to.y + 12); ctx.lineTo(sx2, to.y + 12 - sh); ctx.lineTo(sx2 + 5, to.y + 12); ctx.closePath();
+        ctx.fillStyle = `rgba(${rgb},${a})`; ctx.fill();
+        ctx.strokeStyle = `rgba(255,255,255,${a})`; ctx.lineWidth = 1; ctx.stroke();
+      }
+    } else if (type === 'grass') { // orbiting leaf vortex closing in
+      for (let s2 = 0; s2 < 7; s2++) {
+        const ang2 = it * 9 + s2 * 0.9;
+        const rr2 = (34 - it * 20) * E.scale;
+        ctx.save(); ctx.translate(to.x + Math.cos(ang2) * rr2, to.y + Math.sin(ang2) * rr2 * 0.6); ctx.rotate(ang2 * 2);
+        ctx.beginPath(); ctx.ellipse(0, 0, 7 * E.scale, 3 * E.scale, 0, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${rgb},${a})`; ctx.fill(); ctx.restore();
+      }
+    } else if (type === 'flying') { // rising tornado of wind arcs
+      for (let s2 = 0; s2 < 5; s2++) {
+        const ty2 = to.y + 12 - s2 * 12 * E.scale;
+        ctx.strokeStyle = `rgba(${rgb},${a * (0.9 - s2 * 0.14)})`; ctx.lineWidth = 3;
+        ctx.beginPath(); ctx.arc(to.x, ty2, (8 + s2 * 6) * E.scale, it * 12 + s2, it * 12 + s2 + Math.PI * 1.4); ctx.stroke();
+      }
+    } else if ((type === 'ghost' || type === 'dark') && it < 0.35) { // implode first…
+      const imp = 1 - it / 0.35;
+      ctx.strokeStyle = `rgba(${rgb},${imp})`; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(to.x, to.y, imp * 46 * E.scale, 0, Math.PI * 2); ctx.stroke();
+    } else if (type === 'dragon') { // roar cone toward the victim
+      const ang3 = Math.atan2(dy, dx);
+      for (let s2 = 0; s2 < 3; s2++) {
+        const rr3 = it * (30 + s2 * 22) * E.scale;
+        ctx.strokeStyle = `rgba(${rgb},${a * (0.9 - s2 * 0.2)})`; ctx.lineWidth = 4 - s2;
+        ctx.beginPath(); ctx.arc(to.x, to.y, rr3, ang3 - 0.7, ang3 + 0.7); ctx.stroke();
+      }
+    }
+
+    // Tier-2 lingering secondary burst: a delayed echo of element particles
+    if (E.extra && it > 0.45) {
+      const et = (it - 0.45) / 0.55, ea = 1 - et;
+      for (let k = 0; k < 10; k++) {
+        const v = burstVecs[k];
+        glowDot(to.x + v.ax * 0.5 * et, to.y + v.ay * 0.5 * et - et * 18, v.sz * 0.8, '255,255,255', rgb, ea * 0.7);
+      }
+      ctx.strokeStyle = `rgba(255,255,255,${ea * 0.5})`; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(to.x, to.y, et * 90 * E.scale, 0, Math.PI * 2); ctx.stroke();
+    }
+    ctx.restore();
+  };
+
+  if (projectileLike) {
+    const TRAVEL = 0.52;
+    return runCanvas(canvas, ctx, Math.round(980 * E.dur), (c, t) => {
+      if (t < TRAVEL) travel(t / TRAVEL);
+      else impact((t - TRAVEL) / (1 - TRAVEL), tier >= 2);
+    });
+  }
+  // Physical: a readable body blow — the attacker DASHES in (sprite
+  // afterimages streak along the path), a jagged white contact star freezes
+  // the hit, the victim is knocked back, then type-coloured slashes and a
+  // heavy shockwave finish it.
+  const DASH = 0.30, CONTACT = 0.46;
+  const spriteImg = attackerEl && attackerEl.querySelector && attackerEl.querySelector('.battle-sprite');
+  const flipped = !!(attackerEl && attackerEl.closest && attackerEl.closest('#player-side'));
+  const starPts = Array.from({ length: 12 }, (_, i) => (i % 2 ? 0.45 : 1) * (0.85 + R[10 + (i % 8)] * 0.3));
+  const durMs = Math.round(760 * E.dur);
+  // Knockback on the victim, timed to the contact frame.
+  if (targetEl && targetEl.animate) {
+    setTimeout(() => {
+      try {
+        targetEl.animate([
+          { transform: 'translate(0,0)' },
+          { transform: `translate(${(nx * 18).toFixed(1)}px, ${(ny * 12).toFixed(1)}px)`, offset: 0.35 },
+          { transform: 'translate(0,0)' },
+        ], { duration: 340 / battleSpeedMultiplier, easing: 'cubic-bezier(0.2,0.8,0.4,1)' });
+      } catch {}
+    }, (durMs * DASH) / battleSpeedMultiplier);
+  }
+  return runCanvas(canvas, ctx, durMs, (c, t) => {
+    ctx.save();
+    if (t < DASH) {
+      // ── dash: sprite afterimages + speed lines racing at the target ──
+      const st = t / DASH;
+      const head = Math.min(1, st * 1.15);
+      ctx.globalCompositeOperation = 'source-over';
+      if (spriteImg && spriteImg.complete && spriteImg.naturalWidth > 0) {
+        const r2 = spriteImg.getBoundingClientRect();
+        for (let k = 3; k >= 0; k--) {
+          const gt = head - k * 0.16; if (gt <= 0) continue;
+          const gx = from.x + dx * gt * 0.82, gy = from.y + dy * gt * 0.82;
+          ctx.save();
+          ctx.globalAlpha = k === 0 ? 0.9 : 0.45 - k * 0.1;
+          ctx.translate(gx, gy);
+          if (flipped) ctx.scale(-1, 1);
+          try { ctx.drawImage(spriteImg, -r2.width / 2, -r2.height / 2, r2.width, r2.height); } catch {}
+          ctx.restore();
+        }
+      }
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.strokeStyle = `rgba(${rgb},0.75)`; ctx.lineCap = 'round';
+      for (let k = 0; k < 5; k++) { // speed lines hugging the dash path
+        const off2 = (k - 2) * 11;
+        const t0 = Math.max(0, head - 0.3), t1 = head;
+        ctx.lineWidth = 3 - Math.abs(k - 2) * 0.6;
+        ctx.beginPath();
+        ctx.moveTo(from.x + dx * t0 * 0.82 + px * off2, from.y + dy * t0 * 0.82 + py * off2);
+        ctx.lineTo(from.x + dx * t1 * 0.82 + px * off2, from.y + dy * t1 * 0.82 + py * off2);
+        ctx.stroke();
+      }
+    } else if (t < CONTACT) {
+      // ── CONTACT: jagged white impact star + hit-stop flash ──
+      const ct2 = (t - DASH) / (CONTACT - DASH);
+      const pop = ct2 < 0.4 ? ct2 / 0.4 : 1;
+      const SR = (34 + tier * 10) * E.scale * pop;
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.save();
+      ctx.translate(to.x, to.y);
+      ctx.rotate(R[9] * 6.28);
+      ctx.beginPath();
+      starPts.forEach((m2, i) => {
+        const a2 = (i / starPts.length) * Math.PI * 2;
+        const rr = SR * m2;
+        i === 0 ? ctx.moveTo(Math.cos(a2) * rr, Math.sin(a2) * rr) : ctx.lineTo(Math.cos(a2) * rr, Math.sin(a2) * rr);
+      });
+      ctx.closePath();
+      ctx.fillStyle = `rgba(255,255,255,${0.95 - ct2 * 0.3})`;
+      ctx.fill();
+      ctx.strokeStyle = `rgba(${rgb},${0.9 - ct2 * 0.3})`; ctx.lineWidth = 3; ctx.stroke();
+      ctx.restore();
+      // radial burst lines around the star
+      ctx.strokeStyle = `rgba(255,255,255,${0.8 * (1 - ct2)})`; ctx.lineWidth = 2;
+      for (let s2 = 0; s2 < 8; s2++) {
+        const a3 = R[9] * 6.28 + (s2 / 8) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(to.x + Math.cos(a3) * SR * 0.9, to.y + Math.sin(a3) * SR * 0.9);
+        ctx.lineTo(to.x + Math.cos(a3) * (SR * 0.9 + 26 * pop), to.y + Math.sin(a3) * (SR * 0.9 + 26 * pop));
+        ctx.stroke();
+      }
+    } else {
+      // ── follow-through: type slashes + heavy shockwave burst ──
+      const ft = (t - CONTACT) / (1 - CONTACT);
+      ctx.globalCompositeOperation = 'lighter';
+      ctx.shadowColor = `rgba(${rgb},0.9)`; ctx.shadowBlur = 14 * E.scale;
+      for (const s of slashes) {
+        const lt = (ft - s.delay) / 0.4; if (lt <= 0 || lt > 1) continue;
+        const swipe = (lt - 0.5) * 2;
+        const cx2 = to.x + Math.cos(s.ang) * swipe * s.len;
+        const cy2 = to.y + Math.sin(s.ang) * swipe * s.len;
+        const tx2 = to.x + Math.cos(s.ang) * Math.max(-1, swipe - 0.7) * s.len;
+        const ty2 = to.y + Math.sin(s.ang) * Math.max(-1, swipe - 0.7) * s.len;
+        const g = ctx.createLinearGradient(tx2, ty2, cx2, cy2);
+        g.addColorStop(0, `rgba(${rgb},0)`); g.addColorStop(0.7, `rgba(${rgb},0.9)`); g.addColorStop(1, 'rgba(255,255,255,0.95)');
+        ctx.strokeStyle = g; ctx.lineWidth = 7 * E.scale; ctx.lineCap = 'round';
+        ctx.beginPath(); ctx.moveTo(tx2, ty2); ctx.lineTo(cx2, cy2); ctx.stroke();
+      }
+      ctx.shadowBlur = 0;
+      impact(ft, true);
+      // Tier-2 physicals carve a bright X-flash mid-burst
+      if (tier >= 2 && ft > 0.25 && ft < 0.7) {
+        const xa = (ft - 0.25) / 0.45;
+        ctx.strokeStyle = `rgba(255,255,255,${(1 - xa) * 0.9})`; ctx.lineWidth = 5;
+        for (const ang of [0.6, 2.2]) {
+          ctx.beginPath();
+          ctx.moveTo(to.x - Math.cos(ang) * 60 * xa, to.y - Math.sin(ang) * 60 * xa);
+          ctx.lineTo(to.x + Math.cos(ang) * 60 * xa, to.y + Math.sin(ang) * 60 * xa);
+          ctx.stroke();
+        }
+      }
+    }
+    ctx.restore();
+  });
+}
+
+function playAttackAnimation(moveType, attackerEl, targetEl, isSpecial = true, moveName = '') {
+  if (!attackerEl || !targetEl) return Promise.resolve();
+  const ac = animCanvas(attackerEl, targetEl);
+  if (!ac) return Promise.resolve();
+  const { canvas, ctx, from, to } = ac;
+
+  const tier = MOVE_TIER_BY_NAME[moveName] ?? 1;
+
+  // Every attack gets an energy charge + a lunge toward its target (both
+  // concurrent with the elemental animation); both grow with the move tier.
+  if (moveName !== 'Splash' && moveName !== 'Teleport') {
+    chargeAttacker(attackerEl, moveType, tier);
+    lungeAttacker(attackerEl, from, to, !isSpecial);
+  }
+
+  // Useless move gimmicks keep their bespoke animations.
+  if (moveName === 'Splash')   return animSplash(canvas, ctx, from, to);
+  if (moveName === 'Teleport') return animTeleport(canvas, ctx, from, to);
+
+  return animElementalAttack(canvas, ctx, from, to, (moveType || 'normal').toLowerCase(), isSpecial, tier, attackerEl, targetEl);
+}
+
+/* ── particle factories ── */
+function rnd(a, b) { return a + Math.random() * (b - a); }
+function lerp(a, b, t) { return a + (b - a) * t; }
+
+function buildParticles(type, from, to) {
+  const dx = to.x - from.x, dy = to.y - from.y;
+  const dist = Math.hypot(dx, dy);
+  const nx = dx / dist, ny = dy / dist; // normalised direction
+
+  const ps = [];
+
+  if (type === 'fire') {
+    // Fireball: glowing orb travels from attacker to target with ember trail, then explodes
+    const TRAVEL = 400;
+
+    // Main fireball orb
+    let fbx = from.x, fby = from.y, fbAge = 0;
+    ps.push({ alive: true,
+      tick(ms) { fbAge = ms;
+        const t = Math.min(ms / TRAVEL, 1);
+        fbx = lerp(from.x, to.x, t); fby = lerp(from.y, to.y, t);
+        this.alive = ms < TRAVEL + 80; },
+      draw(ctx) {
+        const a = Math.max(0, 1 - Math.max(0, fbAge - TRAVEL) / 80);
+        // outer heat glow
+        const glow = ctx.createRadialGradient(fbx, fby, 0, fbx, fby, 26);
+        glow.addColorStop(0, `rgba(255,120,0,${a * 0.35})`);
+        glow.addColorStop(1, `rgba(180,30,0,0)`);
+        ctx.beginPath(); ctx.arc(fbx, fby, 26, 0, Math.PI * 2);
+        ctx.fillStyle = glow; ctx.fill();
+        // inner fireball
+        const core = ctx.createRadialGradient(fbx, fby, 0, fbx, fby, 13);
+        core.addColorStop(0,   `rgba(255,255,200,${a})`);
+        core.addColorStop(0.3, `rgba(255,160,20,${a})`);
+        core.addColorStop(0.7, `rgba(220,50,0,${a * 0.85})`);
+        core.addColorStop(1,   `rgba(80,0,0,0)`);
+        ctx.beginPath(); ctx.arc(fbx, fby, 13, 0, Math.PI * 2);
+        ctx.fillStyle = core; ctx.fill();
+      }
+    });
+
+    // Ember trail — particles spawned at positions along the fireball's path
+    for (let i = 0; i < 38; i++) {
+      const spawnFrac = i / 38;
+      const spawnMs   = spawnFrac * TRAVEL;
+      const spawnX    = lerp(from.x, to.x, spawnFrac);
+      const spawnY    = lerp(from.y, to.y, spawnFrac);
+      const evx = rnd(-0.5, 0.5);
+      const evy = rnd(-1.4, 0.2); // hot air rises
+      const life = rnd(180, 340);
+      const startSize = rnd(3, 8);
+      let age = -spawnMs;
+      ps.push({ alive: true,
+        tick(ms) { age = ms - spawnMs; this.alive = age < life; },
+        draw(ctx) {
+          if (age < 0) return;
+          const t = age / life;
+          const a = Math.max(0, t < 0.12 ? t / 0.12 : 1 - (t - 0.12) / 0.88);
+          const ex = spawnX + evx * age * 0.05;
+          const ey = spawnY + evy * age * 0.05;
+          const s  = lerp(startSize, startSize * 2.8, t);
+          const grad = ctx.createRadialGradient(ex, ey, 0, ex, ey, s);
+          grad.addColorStop(0,   `rgba(255,230,120,${a * 0.95})`);
+          grad.addColorStop(0.4, `rgba(240,90,10,${a * 0.75})`);
+          grad.addColorStop(1,   `rgba(120,20,0,0)`);
+          ctx.beginPath(); ctx.arc(ex, ey, s, 0, Math.PI * 2);
+          ctx.fillStyle = grad; ctx.fill();
+        }
+      });
+    }
+
+    // Impact explosion burst
+    for (let i = 0; i < 20; i++) {
+      const delay = TRAVEL + i * 10;
+      const angle = rnd(0, Math.PI * 2);
+      const speed = rnd(1.0, 2.4);
+      const life  = rnd(220, 380);
+      const size  = rnd(5, 12);
+      let px = to.x, py = to.y, age = -delay;
+      ps.push({ alive: true,
+        tick(ms) { age = ms - delay; if (age < 0) { this.alive = true; return; }
+          px += Math.cos(angle) * speed * 1.6;
+          py += Math.sin(angle) * speed * 1.6 - age * 0.0012;
+          this.alive = age < life; },
+        draw(ctx) {
+          if (age < 0) return;
+          const t = age / life;
+          const a = Math.max(0, t < 0.1 ? t / 0.1 : 1 - (t - 0.1) / 0.9);
+          const s = lerp(size, size * 2.4, t);
+          const grad = ctx.createRadialGradient(px, py, 0, px, py, s);
+          grad.addColorStop(0,   `rgba(255,240,160,${a})`);
+          grad.addColorStop(0.3, `rgba(255,110,15,${a * 0.9})`);
+          grad.addColorStop(0.7, `rgba(180,35,0,${a * 0.5})`);
+          grad.addColorStop(1,   `rgba(60,0,0,0)`);
+          ctx.beginPath(); ctx.arc(px, py, s, 0, Math.PI * 2);
+          ctx.fillStyle = grad; ctx.fill();
+        }
+      });
+    }
+
+    // Impact shockwave ring
+    let impactAge = -TRAVEL;
+    ps.push({ alive: true,
+      tick(ms) { impactAge = ms - TRAVEL; this.alive = impactAge < 360; },
+      draw(ctx) {
+        if (impactAge < 0) return;
+        const t = impactAge / 360;
+        ctx.beginPath(); ctx.arc(to.x, to.y, t * 40, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255,110,0,${(1 - t) * 0.6})`; ctx.lineWidth = 3 * (1 - t) + 1; ctx.stroke();
+      }
+    });
+
+  } else if (type === 'water') {
+    // Water Gun: a coherent pressurised stream (grows like the ice beam but wavy+blue)
+    let streamAge = 0;
+    ps.push({
+      alive: true,
+      tick(ms) { streamAge = ms; this.alive = ms < 680; },
+      draw(ctx) {
+        const growT = Math.min(streamAge / 300, 1);
+        const fadeA = Math.max(0, 1 - Math.max(0, streamAge - 420) / 260);
+        // Draw the stream as a series of short segments with a sine-wave wobble
+        const segs = 40;
+        const drawSegs = Math.ceil(growT * segs);
+        const waveFreq = 3.5; // oscillations along the stream
+        const waveAmp  = 5;   // perpendicular pixels
+        const phase = streamAge * 0.012; // scrolling phase = water flowing
+        // Compute wave points once, reuse for all three strokes
+        const pts = [];
+        for (let s = 0; s <= drawSegs; s++) {
+          const t = s / segs;
+          const bx = lerp(from.x, to.x, t), by = lerp(from.y, to.y, t);
+          const wave = Math.sin(t * Math.PI * 2 * waveFreq - phase) * waveAmp;
+          pts.push(bx - ny * wave, by + nx * wave);
+        }
+        const strokePath = () => {
+          ctx.beginPath();
+          for (let s = 0; s < pts.length; s += 2)
+            s === 0 ? ctx.moveTo(pts[s], pts[s+1]) : ctx.lineTo(pts[s], pts[s+1]);
+        };
+        strokePath(); ctx.strokeStyle = `rgba(60,140,255,${fadeA * 0.45})`;
+        ctx.lineWidth = 12; ctx.lineCap = 'round'; ctx.stroke();
+        strokePath(); ctx.strokeStyle = `rgba(100,190,255,${fadeA * 0.85})`;
+        ctx.lineWidth = 5; ctx.stroke();
+        strokePath(); ctx.strokeStyle = `rgba(220,240,255,${fadeA * 0.7})`;
+        ctx.lineWidth = 1.5; ctx.stroke();
+      }
+    });
+    // Foam bubbles riding the stream tip
+    for (let i = 0; i < 12; i++) {
+      const delay = i * 22;
+      const life  = rnd(200, 320);
+      const perpOff = rnd(-6, 6);
+      let age = -delay;
+      ps.push({
+        alive: true,
+        tick(ms) { age = ms - delay; this.alive = age < life; },
+        draw(ctx) {
+          if (age < 0) return;
+          const t = Math.min(age / 260, 1) * Math.min((delay / (12 * 22)), 1);
+          const bx = lerp(from.x, to.x, t) - ny * perpOff;
+          const by = lerp(from.y, to.y, t) + nx * perpOff;
+          const a  = Math.max(0, 1 - age / life);
+          ctx.beginPath(); ctx.arc(bx, by, rnd(2, 4), 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(190,225,255,${a * 0.75})`; ctx.fill();
+        }
+      });
+    }
+    // Splash at impact
+    let splashAge = -1;
+    ps.push({
+      alive: true,
+      tick(ms) { splashAge = ms - 280; this.alive = splashAge < 420; },
+      draw(ctx) {
+        if (splashAge < 0) return;
+        const t = splashAge / 420;
+        for (let r = 1; r <= 3; r++) {
+          ctx.beginPath(); ctx.arc(to.x, to.y, Math.max(0, t * 38 * r / 3), 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(80,180,255,${(1 - t) * 0.6 / r})`;
+          ctx.lineWidth = 3 * (1 - t) + 0.5; ctx.stroke();
+        }
+      }
+    });
+
+  } else if (type === 'electric') {
+    // Thunderbolt: animated zigzag bolt
+    let bolts = [];
+    function makeBolt(ox, oy) {
+      const segs = 10;
+      const pts = [{ x: from.x + ox, y: from.y + oy }];
+      for (let i = 1; i < segs; i++) {
+        const t = i / segs;
+        const bx = lerp(from.x + ox, to.x + ox, t) + rnd(-18, 18);
+        const by = lerp(from.y + oy, to.y + oy, t) + rnd(-18, 18);
+        pts.push({ x: bx, y: by });
+      }
+      pts.push({ x: to.x + ox, y: to.y + oy });
+      return pts;
+    }
+    for (let b = 0; b < 3; b++) bolts.push(makeBolt(rnd(-6, 6), rnd(-6, 6)));
+    let boltAge = 0;
+    ps.push({
+      alive: true,
+      tick(ms) { boltAge = ms; if (ms % 80 < 40) bolts = bolts.map(() => makeBolt(rnd(-6,6), rnd(-6,6))); this.alive = ms < 500; },
+      draw(ctx) {
+        const growT = Math.min(boltAge / 200, 1);
+        for (const bolt of bolts) {
+          const showSegs = Math.ceil(growT * bolt.length);
+          ctx.beginPath();
+          ctx.moveTo(bolt[0].x, bolt[0].y);
+          for (let i = 1; i < showSegs; i++) ctx.lineTo(bolt[i].x, bolt[i].y);
+          const a = Math.max(0, 1 - Math.max(0, boltAge - 350) / 150);
+          ctx.strokeStyle = `rgba(255,255,80,${a * 0.9})`;
+          ctx.lineWidth = 2.5;
+          ctx.shadowColor = 'rgba(255,255,0,0.8)'; ctx.shadowBlur = 10;
+          ctx.stroke();
+          ctx.shadowBlur = 0;
+          // core white line
+          ctx.beginPath(); ctx.moveTo(bolt[0].x, bolt[0].y);
+          for (let i = 1; i < showSegs; i++) ctx.lineTo(bolt[i].x, bolt[i].y);
+          ctx.strokeStyle = `rgba(255,255,255,${a * 0.6})`;
+          ctx.lineWidth = 1;
+          ctx.stroke();
+        }
+      }
+    });
+
+  } else if (type === 'grass') {
+    // Vine Whip: two bezier vines that grow from attacker and lash the target
+    const midX = (from.x + to.x) / 2, midY = (from.y + to.y) / 2;
+    // Perpendicular offset for each vine's control point (one curves up, one down)
+    for (let v = 0; v < 2; v++) {
+      const sign   = v === 0 ? 1 : -1;
+      const curveMag = dist * 0.30 * sign;
+      const cpx = midX - ny * curveMag + rnd(-10, 10);
+      const cpy = midY + nx * curveMag + rnd(-10, 10);
+      const totalLife = 580;
+      const growEnd   = 320; // ms until vine fully extended
+      const fadeStart = 400;
+      const delay = v * 60;
+      let age = -delay;
+
+      // helper: point on quadratic bezier at t
+      function bpx(t) { return (1-t)*(1-t)*from.x + 2*(1-t)*t*cpx + t*t*to.x; }
+      function bpy(t) { return (1-t)*(1-t)*from.y + 2*(1-t)*t*cpy + t*t*to.y; }
+
+      ps.push({
+        alive: true,
+        tick(ms) { age = ms - delay; this.alive = age < totalLife; },
+        draw(ctx) {
+          if (age < 0) return;
+          const growT = Math.min(age / growEnd, 1);
+          const fadeA = Math.max(0, 1 - Math.max(0, age - fadeStart) / (totalLife - fadeStart));
+          const segs  = 30;
+          const drawSegs = Math.ceil(growT * segs);
+
+          // Vine body (3 passes: glow, main, highlight)
+          const passes = [
+            { lw: 7,   color: `rgba(30,90,10,${fadeA * 0.4})` },
+            { lw: 3.5, color: `rgba(50,140,20,${fadeA * 0.9})` },
+            { lw: 1.2, color: `rgba(130,210,70,${fadeA * 0.55})` },
+          ];
+          for (const { lw, color } of passes) {
+            ctx.beginPath();
+            for (let s = 0; s <= drawSegs; s++) {
+              const t = s / segs;
+              s === 0 ? ctx.moveTo(bpx(t), bpy(t)) : ctx.lineTo(bpx(t), bpy(t));
+            }
+            ctx.strokeStyle = color; ctx.lineWidth = lw;
+            ctx.lineCap = 'round'; ctx.lineJoin = 'round'; ctx.stroke();
+          }
+
+          // Leaves every ~5 segments
+          for (let s = 4; s < drawSegs; s += 5) {
+            const t = s / segs;
+            const lx = bpx(t), ly = bpy(t);
+            // tangent direction
+            const t2 = Math.min(t + 0.02, 1);
+            const tang = Math.atan2(bpy(t2) - ly, bpx(t2) - lx);
+            const leafSide = s % 10 < 5 ? 1 : -1;
+            ctx.save();
+            ctx.translate(lx, ly);
+            ctx.rotate(tang + leafSide * Math.PI / 3.5);
+            ctx.beginPath();
+            ctx.ellipse(4, 0, 7, 3, 0, 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(70,170,35,${fadeA * 0.85})`; ctx.fill();
+            ctx.restore();
+          }
+
+          // Whip-tip flash when vine is fully extended
+          if (growT >= 1) {
+            const flashA = Math.max(0, 1 - Math.max(0, age - growEnd) / 120) * fadeA;
+            ctx.beginPath(); ctx.arc(to.x, to.y, Math.max(0, 10 * flashA), 0, Math.PI * 2);
+            ctx.fillStyle = `rgba(150,255,80,${flashA * 0.6})`; ctx.fill();
+          }
+        }
+      });
+    }
+
+  } else if (type === 'ice') {
+    // Freeze: spinning snowflake orb travels to target, then shatters into crystal shards
+    const TRAVEL = 370;
+    let orbX = from.x, orbY = from.y, orbAge = 0;
+    ps.push({ alive: true,
+      tick(ms) { orbAge = ms;
+        const t = Math.min(ms / TRAVEL, 1);
+        orbX = lerp(from.x, to.x, t); orbY = lerp(from.y, to.y, t);
+        this.alive = ms < TRAVEL + 80; },
+      draw(ctx) {
+        const a = Math.max(0, 1 - Math.max(0, orbAge - TRAVEL) / 80);
+        // outer glow
+        const glow = ctx.createRadialGradient(orbX, orbY, 0, orbX, orbY, 22);
+        glow.addColorStop(0, `rgba(200,245,255,${a * 0.45})`);
+        glow.addColorStop(1, `rgba(100,200,255,0)`);
+        ctx.beginPath(); ctx.arc(orbX, orbY, 22, 0, Math.PI * 2);
+        ctx.fillStyle = glow; ctx.fill();
+        // spinning snowflake
+        ctx.save(); ctx.translate(orbX, orbY); ctx.rotate(orbAge * 0.005);
+        for (let s = 0; s < 6; s++) {
+          const ang = (s / 6) * Math.PI * 2;
+          const ex = Math.cos(ang) * 10, ey = Math.sin(ang) * 10;
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(ex, ey);
+          ctx.strokeStyle = `rgba(215,248,255,${a})`; ctx.lineWidth = 2; ctx.stroke();
+          // branch arms
+          const perp = ang + Math.PI / 2;
+          const bx = Math.cos(ang) * 6, by = Math.sin(ang) * 6;
+          ctx.beginPath();
+          ctx.moveTo(bx, by); ctx.lineTo(bx + Math.cos(perp) * 3.5, by + Math.sin(perp) * 3.5);
+          ctx.moveTo(bx, by); ctx.lineTo(bx - Math.cos(perp) * 3.5, by - Math.sin(perp) * 3.5);
+          ctx.strokeStyle = `rgba(180,235,255,${a * 0.85})`; ctx.lineWidth = 1.2; ctx.stroke();
+        }
+        // center dot
+        ctx.beginPath(); ctx.arc(0, 0, 2.5, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(240,252,255,${a})`; ctx.fill();
+        ctx.restore();
+      }
+    });
+    // Crystal shard burst at impact
+    for (let i = 0; i < 12; i++) {
+      const delay = TRAVEL + i * 12;
+      const angle = rnd(0, Math.PI * 2);
+      const speed = rnd(0.8, 2.0);
+      const life  = rnd(260, 440);
+      const size  = rnd(4, 10);
+      let px = to.x, py = to.y, age = -delay;
+      ps.push({ alive: true,
+        tick(ms) { age = ms - delay; if (age < 0) { this.alive = true; return; }
+          px += Math.cos(angle) * speed * 1.4;
+          py += Math.sin(angle) * speed * 1.4;
+          this.alive = age < life; },
+        draw(ctx) {
+          if (age < 0) return;
+          const a = Math.max(0, 1 - age / life);
+          const s = size * (1 - age / life * 0.5);
+          ctx.save(); ctx.translate(px, py); ctx.rotate(angle + age * 0.004);
+          ctx.beginPath();
+          ctx.moveTo(0, -s); ctx.lineTo(s * 0.4, 0); ctx.lineTo(0, s); ctx.lineTo(-s * 0.4, 0); ctx.closePath();
+          ctx.fillStyle = `rgba(175,232,255,${a * 0.9})`; ctx.fill();
+          ctx.strokeStyle = `rgba(230,250,255,${a})`; ctx.lineWidth = 1; ctx.stroke();
+          ctx.restore();
+        }
+      });
+    }
+    // Shockwave ring
+    let iceRingAge = -TRAVEL;
+    ps.push({ alive: true,
+      tick(ms) { iceRingAge = ms - TRAVEL; this.alive = iceRingAge < 380; },
+      draw(ctx) {
+        if (iceRingAge < 0) return;
+        const t = iceRingAge / 380;
+        ctx.beginPath(); ctx.arc(to.x, to.y, t * 48, 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(150,225,255,${(1 - t) * 0.65})`; ctx.lineWidth = 2.5 * (1 - t) + 0.5; ctx.stroke();
+      }
+    });
+
+  } else if (type === 'fighting') {
+    // Mach Punch: glowing red orb travels from attacker to target, then impact burst
+    const fTravelTime = 240;
+    let fpx = from.x, fpy = from.y, fAge = 0;
+    ps.push({ alive: true,
+      tick(ms) { fAge = ms;
+        const t = Math.min(ms / fTravelTime, 1);
+        fpx = lerp(from.x, to.x, t); fpy = lerp(from.y, to.y, t);
+        this.alive = ms < fTravelTime + 60; },
+      draw(ctx) {
+        const tTravel = Math.min(fAge / fTravelTime, 1);
+        const a = Math.max(0, 1 - Math.max(0, fAge - fTravelTime) / 60);
+        // motion trail
+        for (let ti = 0; ti < tTravel; ti += 0.09) {
+          if (tTravel - ti > 0.4) continue;
+          const tx = lerp(from.x, to.x, ti), ty = lerp(from.y, to.y, ti);
+          const ta = ((ti - (tTravel - 0.4)) / 0.4) * a * 0.45;
+          ctx.beginPath(); ctx.arc(tx, ty, 10 * ta, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(220,40,40,${ta})`; ctx.fill();
+        }
+        const s = 14;
+        const grad = ctx.createRadialGradient(fpx, fpy, 0, fpx, fpy, s);
+        grad.addColorStop(0, `rgba(255,200,200,${a})`);
+        grad.addColorStop(0.4, `rgba(220,40,40,${a * 0.9})`);
+        grad.addColorStop(1, `rgba(100,0,0,0)`);
+        ctx.beginPath(); ctx.arc(fpx, fpy, s, 0, Math.PI * 2);
+        ctx.fillStyle = grad; ctx.fill();
+      }
+    });
+    // Impact burst after travel
+    for (let i = 0; i < 6; i++) {
+      const delay = fTravelTime + i * 40;
+      const angle = (i / 6) * Math.PI * 2 + rnd(0, 0.5);
+      const speed = rnd(1.0, 1.8);
+      const life  = rnd(220, 320);
+      let px = to.x, py = to.y, age = -delay;
+      ps.push({
+        alive: true,
+        tick(ms) { age = ms - delay; if (age < 0) { this.alive = true; return; }
+          px += Math.cos(angle) * speed * 1.5; py += Math.sin(angle) * speed * 1.5;
+          this.alive = age < life; },
+        draw(ctx) {
+          if (age < 0) return;
+          const a = Math.max(0, 1 - age / life);
+          const s = (12 + 8 * (1 - age / life)) * a;
+          ctx.save(); ctx.translate(px, py); ctx.rotate(angle);
+          ctx.beginPath();
+          ctx.moveTo(0, -s); ctx.lineTo(s * 0.3, -s * 0.3); ctx.lineTo(s, 0);
+          ctx.lineTo(s * 0.3, s * 0.3); ctx.lineTo(0, s);
+          ctx.lineTo(-s * 0.3, s * 0.3); ctx.lineTo(-s, 0);
+          ctx.lineTo(-s * 0.3, -s * 0.3); ctx.closePath();
+          ctx.fillStyle = `rgba(220,40,40,${a * 0.85})`; ctx.fill();
+          ctx.restore();
+        }
+      });
+    }
+    // shockwave ring at impact
+    let ringAge = -fTravelTime;
+    ps.push({ alive: true,
+      tick(ms) { ringAge = ms - fTravelTime; this.alive = ringAge < 350; },
+      draw(ctx) {
+        if (ringAge < 0) return;
+        const t = ringAge / 350;
+        ctx.beginPath(); ctx.arc(to.x, to.y, Math.max(0, t * 45), 0, Math.PI * 2);
+        ctx.strokeStyle = `rgba(255,80,80,${(1 - t) * 0.8})`; ctx.lineWidth = 3; ctx.stroke();
+      }
+    });
+
+  } else if (type === 'poison') {
+    // Sludge Bomb: purple bubble stream
+    for (let i = 0; i < 18; i++) {
+      const delay = i * 25;
+      const spread = rnd(-20, 20);
+      const speed = rnd(0.55, 0.85);
+      const cos = Math.cos(spread * Math.PI / 180);
+      const sin = Math.sin(spread * Math.PI / 180);
+      const vx = (nx * cos - ny * sin) * speed;
+      const vy = (ny * cos + nx * sin) * speed;
+      const life = rnd(380, 540);
+      const size = rnd(5, 13);
+      let px = from.x + rnd(-5, 5), py = from.y + rnd(-5, 5);
+      let age = -delay;
+      ps.push({
+        alive: true,
+        tick(ms) { age = ms - delay; if (age < 0) { this.alive = true; return; }
+          px += vx * 1.8; py += vy * 1.8; this.alive = age < life; },
+        draw(ctx) {
+          if (age < 0) return;
+          const a = Math.max(0, 1 - age / life);
+          const s = size * (0.5 + 0.5 * (1 - age / life));
+          const grad = ctx.createRadialGradient(px - s * 0.2, py - s * 0.2, s * 0.1, px, py, s);
+          grad.addColorStop(0, `rgba(220,180,255,${a})`);
+          grad.addColorStop(0.5, `rgba(160,60,200,${a * 0.9})`);
+          grad.addColorStop(1, `rgba(80,0,120,0)`);
+          ctx.beginPath(); ctx.arc(px, py, s, 0, Math.PI * 2);
+          ctx.fillStyle = grad; ctx.fill();
+          // bubble highlight
+          ctx.beginPath(); ctx.arc(px - s * 0.3, py - s * 0.3, s * 0.25, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,255,255,${a * 0.4})`; ctx.fill();
+        }
+      });
+    }
+
+  } else if (type === 'ground') {
+    // Earthquake: brown rock shards + quake wave at target
+    for (let i = 0; i < 15; i++) {
+      const delay = i * 30;
+      const angle = rnd(Math.PI * 1.1, Math.PI * 1.9); // upward spread
+      const speed = rnd(1.0, 2.0);
+      const life  = rnd(400, 600);
+      const size  = rnd(6, 14);
+      let px = lerp(from.x, to.x, rnd(0.3, 1.0));
+      let py = lerp(from.y, to.y, rnd(0.3, 1.0));
+      let vx = Math.cos(angle) * speed, vy = Math.sin(angle) * speed;
+      let age = -delay;
+      ps.push({
+        alive: true,
+        tick(ms) { age = ms - delay; if (age < 0) { this.alive = true; return; }
+          px += vx * 2; vy += 0.08; py += vy * 2; this.alive = age < life; },
+        draw(ctx) {
+          if (age < 0) return;
+          const a = Math.max(0, 1 - age / life);
+          ctx.save(); ctx.translate(px, py); ctx.rotate(age * 0.005);
+          ctx.beginPath();
+          ctx.moveTo(0, -size); ctx.lineTo(size * 0.6, 0); ctx.lineTo(0, size * 0.5);
+          ctx.lineTo(-size * 0.6, 0); ctx.closePath();
+          ctx.fillStyle = `rgba(160,100,40,${a * 0.9})`; ctx.fill();
+          ctx.restore();
+        }
+      });
+    }
+    // Quake lines
+    let qAge = 0;
+    ps.push({ alive: true, tick(ms) { qAge = ms; this.alive = ms < 500; },
+      draw(ctx) {
+        for (let i = 1; i <= 3; i++) {
+          const r = Math.max(0.01, (qAge / 500) * 60 * i / 3);
+          const a = (1 - qAge / 500) * 0.6;
+          ctx.beginPath(); ctx.ellipse(to.x, to.y, r, r * 0.35, 0, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(140,80,20,${a})`; ctx.lineWidth = 2; ctx.stroke();
+        }
+      }
+    });
+
+  } else if (type === 'flying') {
+    // Wing Attack / Air Slash: white curved wind blades
+    for (let i = 0; i < 4; i++) {
+      const delay = i * 80;
+      const offset = (i - 1.5) * 20;
+      const life = 400;
+      let age = -delay;
+      ps.push({
+        alive: true,
+        tick(ms) { age = ms - delay; this.alive = age < life; },
+        draw(ctx) {
+          if (age < 0) return;
+          const t = age / life;
+          const tx = lerp(from.x, to.x, t);
+          const ty = lerp(from.y, to.y, t);
+          const perpX = -ny * offset, perpY = nx * offset;
+          const a = Math.max(0, Math.sin(t * Math.PI));
+          ctx.save(); ctx.translate(tx + perpX, ty + perpY);
+          const ang = Math.atan2(dy, dx);
+          ctx.rotate(ang);
+          ctx.beginPath();
+          ctx.moveTo(-20, 0);
+          ctx.bezierCurveTo(-10, -12, 10, -12, 20, 0);
+          ctx.bezierCurveTo(10, 12, -10, 12, -20, 0);
+          ctx.fillStyle = `rgba(200,230,255,${a * 0.75})`; ctx.fill();
+          ctx.restore();
+        }
+      });
+    }
+
+  } else if (type === 'psychic') {
+    // Psychic: pink expanding rings + orbiting sparkles
+    let pAge = 0;
+    ps.push({ alive: true, tick(ms) { pAge = ms; this.alive = ms < 700; },
+      draw(ctx) {
+        for (let i = 0; i < 3; i++) {
+          const lag = i * 120;
+          const t = Math.max(0, Math.min((pAge - lag) / 450, 1));
+          if (t <= 0) continue;
+          const r = lerp(10, 55, t);
+          const a = (1 - t) * 0.7;
+          ctx.beginPath(); ctx.arc(to.x, to.y, r, 0, Math.PI * 2);
+          ctx.strokeStyle = `rgba(255,80,180,${a})`; ctx.lineWidth = 3; ctx.stroke();
+        }
+        // orbital sparks
+        for (let s = 0; s < 5; s++) {
+          const ang = (pAge * 0.006) + (s / 5) * Math.PI * 2;
+          const orb = lerp(from.x, to.x, Math.min(pAge / 350, 1));
+          const orby = lerp(from.y, to.y, Math.min(pAge / 350, 1));
+          const r = 18;
+          const sx = orb + Math.cos(ang) * r, sy = orby + Math.sin(ang) * r;
+          const a = Math.max(0, 1 - Math.max(0, pAge - 400) / 300);
+          ctx.beginPath(); ctx.arc(sx, sy, 3, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(255,100,200,${a})`; ctx.fill();
+        }
+      }
+    });
+
+  } else if (type === 'bug') {
+    // Bug Buzz: yellow-green spore cloud
+    for (let i = 0; i < 25; i++) {
+      const delay = i * 15;
+      const angle = rnd(0, Math.PI * 2);
+      const spread = rnd(-25, 25);
+      const speed = rnd(0.5, 0.9);
+      const cos = Math.cos(spread * Math.PI / 180);
+      const sin = Math.sin(spread * Math.PI / 180);
+      const vx = (nx * cos - ny * sin) * speed;
+      const vy = (ny * cos + nx * sin) * speed;
+      const life = rnd(300, 500);
+      const size = rnd(3, 8);
+      let px = from.x, py = from.y, age = -delay;
+      ps.push({
+        alive: true,
+        tick(ms) { age = ms - delay; if (age < 0) { this.alive = true; return; }
+          px += vx * 1.8 + Math.sin(age * 0.05 + angle) * 0.4;
+          py += vy * 1.8; this.alive = age < life; },
+        draw(ctx) {
+          if (age < 0) return;
+          const a = Math.max(0, 1 - age / life);
+          ctx.beginPath(); ctx.arc(px, py, Math.max(0, size * a), 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(150,220,30,${a * 0.85})`; ctx.fill();
+        }
+      });
+    }
+
+  } else if (type === 'rock') {
+    // Rock Slide: grey tumbling boulders
+    for (let i = 0; i < 10; i++) {
+      const delay = i * 40;
+      const spread = rnd(-12, 12);
+      const speed = rnd(0.75, 1.1);
+      const cos = Math.cos(spread * Math.PI / 180);
+      const sin = Math.sin(spread * Math.PI / 180);
+      const vx = (nx * cos - ny * sin) * speed;
+      const vy = (ny * cos + nx * sin) * speed;
+      const life = rnd(350, 500);
+      const size = rnd(8, 16);
+      const sides = Math.floor(rnd(5, 8));
+      let px = from.x + rnd(-8, 8), py = from.y + rnd(-8, 8), rot = rnd(0, Math.PI * 2);
+      let age = -delay;
+      ps.push({
+        alive: true,
+        tick(ms) { age = ms - delay; if (age < 0) { this.alive = true; return; }
+          px += vx * 2.0; py += vy * 2.0; rot += 0.07; this.alive = age < life; },
+        draw(ctx) {
+          if (age < 0) return;
+          const a = Math.max(0, 1 - age / life);
+          ctx.save(); ctx.translate(px, py); ctx.rotate(rot);
+          ctx.beginPath();
+          for (let s = 0; s < sides; s++) {
+            const ang = (s / sides) * Math.PI * 2;
+            const r = size * (0.8 + 0.2 * Math.cos(ang * 3));
+            s === 0 ? ctx.moveTo(Math.cos(ang)*r, Math.sin(ang)*r)
+                    : ctx.lineTo(Math.cos(ang)*r, Math.sin(ang)*r);
+          }
+          ctx.closePath();
+          ctx.fillStyle = `rgba(140,130,110,${a * 0.9})`;
+          ctx.strokeStyle = `rgba(80,70,60,${a})`; ctx.lineWidth = 1.5;
+          ctx.fill(); ctx.stroke();
+          ctx.restore();
+        }
+      });
+    }
+
+  } else if (type === 'ghost') {
+    // Shadow Ball: dark purple wisp
+    let gAge = 0;
+    let px = from.x, py = from.y;
+    let wobble = 0;
+    ps.push({ alive: true,
+      tick(ms) { gAge = ms;
+        const t = Math.min(ms / 500, 1);
+        px = lerp(from.x, to.x, t); py = lerp(from.y, to.y, t);
+        wobble = Math.sin(ms * 0.015) * 8;
+        this.alive = ms < 600; },
+      draw(ctx) {
+        const a = Math.max(0, 1 - Math.max(0, gAge - 450) / 150);
+        const s = 22;
+        const grad = ctx.createRadialGradient(px + wobble, py, 0, px + wobble, py, s);
+        grad.addColorStop(0, `rgba(200,100,255,${a})`);
+        grad.addColorStop(0.4, `rgba(100,0,180,${a * 0.8})`);
+        grad.addColorStop(1, `rgba(20,0,60,0)`);
+        ctx.beginPath(); ctx.arc(px + wobble, py, s, 0, Math.PI * 2);
+        ctx.fillStyle = grad; ctx.fill();
+        // trailing wisps
+        for (let t2 = 0.1; t2 < 1; t2 += 0.2) {
+          const trail_t = Math.min(gAge / 500 - t2, 0);
+          if (trail_t >= 0) continue;
+          const twx = lerp(from.x, to.x, Math.max(0, gAge / 500 - t2));
+          const twy = lerp(from.y, to.y, Math.max(0, gAge / 500 - t2));
+          ctx.beginPath(); ctx.arc(twx, twy, Math.max(0, s * t2 * 0.6), 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(100,0,180,${a * t2 * 0.4})`; ctx.fill();
+        }
+      }
+    });
+
+  } else if (type === 'dragon') {
+    // Dragon Rage: rainbow energy beam
+    let dAge = 0;
+    ps.push({ alive: true, tick(ms) { dAge = ms; this.alive = ms < 700; },
+      draw(ctx) {
+        const growT = Math.min(dAge / 320, 1);
+        const fadeA = Math.max(0, 1 - Math.max(0, dAge - 450) / 250);
+        const endX = lerp(from.x, to.x, growT), endY = lerp(from.y, to.y, growT);
+        const colors = ['255,60,60','255,160,0','255,255,0','60,220,60','60,160,255','160,80,255'];
+        for (let c = 0; c < colors.length; c++) {
+          const offset = (c - 2.5) * 3;
+          const perpX = -ny * offset, perpY = nx * offset;
+          ctx.beginPath();
+          ctx.moveTo(from.x + perpX, from.y + perpY);
+          ctx.lineTo(endX + perpX, endY + perpY);
+          ctx.strokeStyle = `rgba(${colors[c]},${fadeA * 0.7})`;
+          ctx.lineWidth = 3; ctx.stroke();
+        }
+        // white core
+        ctx.beginPath(); ctx.moveTo(from.x, from.y); ctx.lineTo(endX, endY);
+        ctx.strokeStyle = `rgba(255,255,255,${fadeA * 0.4})`; ctx.lineWidth = 1.5; ctx.stroke();
+      }
+    });
+
+  } else if (type === 'dark') {
+    // Dark Pulse / Night Slash: black energy slashes
+    for (let i = 0; i < 5; i++) {
+      const delay = i * 60;
+      const life = 350;
+      let age = -delay;
+      ps.push({
+        alive: true,
+        tick(ms) { age = ms - delay; this.alive = age < life; },
+        draw(ctx) {
+          if (age < 0) return;
+          const t = age / life;
+          const tx = lerp(from.x, to.x, t);
+          const ty = lerp(from.y, to.y, t);
+          const a = Math.sin(t * Math.PI) * 0.9;
+          const ang = Math.atan2(dy, dx) + (i - 2) * 0.2;
+          const len = 28;
+          ctx.save(); ctx.translate(tx, ty); ctx.rotate(ang);
+          ctx.beginPath(); ctx.moveTo(-len, 0); ctx.lineTo(len, 0);
+          ctx.strokeStyle = `rgba(80,0,120,${a})`; ctx.lineWidth = 5;
+          ctx.shadowColor = 'rgba(60,0,80,0.8)'; ctx.shadowBlur = 8;
+          ctx.stroke();
+          ctx.beginPath(); ctx.moveTo(-len, 0); ctx.lineTo(len, 0);
+          ctx.strokeStyle = `rgba(200,100,255,${a * 0.5})`; ctx.lineWidth = 1.5;
+          ctx.stroke(); ctx.shadowBlur = 0;
+          ctx.restore();
+        }
+      });
+    }
+
+  } else if (type === 'steel') {
+    // Flash Cannon: silver metallic orb travels from attacker to target, then spark burst
+    const sTravelTime = 270;
+    let spx = from.x, spy = from.y, sAge2 = 0;
+    ps.push({ alive: true,
+      tick(ms) { sAge2 = ms;
+        const t = Math.min(ms / sTravelTime, 1);
+        spx = lerp(from.x, to.x, t); spy = lerp(from.y, to.y, t);
+        this.alive = ms < sTravelTime + 60; },
+      draw(ctx) {
+        const tTravel = Math.min(sAge2 / sTravelTime, 1);
+        const a = Math.max(0, 1 - Math.max(0, sAge2 - sTravelTime) / 60);
+        // trailing gleam
+        for (let ti = Math.max(0, tTravel - 0.38); ti < tTravel; ti += 0.07) {
+          const tx = lerp(from.x, to.x, ti), ty = lerp(from.y, to.y, ti);
+          const ta = ((ti - (tTravel - 0.38)) / 0.38) * a * 0.5;
+          ctx.beginPath(); ctx.arc(tx, ty, 9 * ta, 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(180,200,220,${ta})`; ctx.fill();
+        }
+        const s = 12;
+        const grad = ctx.createRadialGradient(spx - s * 0.3, spy - s * 0.3, s * 0.1, spx, spy, s);
+        grad.addColorStop(0, `rgba(255,255,255,${a})`);
+        grad.addColorStop(0.4, `rgba(200,215,230,${a * 0.9})`);
+        grad.addColorStop(1, `rgba(100,120,150,0)`);
+        ctx.beginPath(); ctx.arc(spx, spy, s, 0, Math.PI * 2);
+        ctx.fillStyle = grad; ctx.fill();
+      }
+    });
+    // Spark burst on impact
+    for (let i = 0; i < 20; i++) {
+      const delay = sTravelTime + i * 15;
+      const angle = rnd(0, Math.PI * 2);
+      const speed = rnd(0.8, 2.0);
+      const life  = rnd(200, 360);
+      let px = to.x, py = to.y, age = -delay;
+      ps.push({
+        alive: true,
+        tick(ms) { age = ms - delay; if (age < 0) { this.alive = true; return; }
+          px += Math.cos(angle) * speed * 2; py += Math.sin(angle) * speed * 2;
+          this.alive = age < life; },
+        draw(ctx) {
+          if (age < 0) return;
+          const a = Math.max(0, 1 - age / life);
+          ctx.beginPath();
+          ctx.moveTo(px, py); ctx.lineTo(px - Math.cos(angle) * 10, py - Math.sin(angle) * 10);
+          ctx.strokeStyle = `rgba(200,210,220,${a})`; ctx.lineWidth = 2.5; ctx.stroke();
+          ctx.beginPath(); ctx.arc(px, py, Math.max(0, 2.5 * a), 0, Math.PI * 2);
+          ctx.fillStyle = `rgba(240,245,255,${a})`; ctx.fill();
+        }
+      });
+    }
+
+  } else if (type === 'fairy') {
+    // Moonblast: pink sparkles + stars
+    for (let i = 0; i < 22; i++) {
+      const delay = i * 20;
+      const spread = rnd(-30, 30);
+      const speed = rnd(0.5, 0.9);
+      const cos = Math.cos(spread * Math.PI / 180);
+      const sin = Math.sin(spread * Math.PI / 180);
+      const vx = (nx * cos - ny * sin) * speed;
+      const vy = (ny * cos + nx * sin) * speed;
+      const life = rnd(350, 550);
+      const size = rnd(4, 9);
+      let px = from.x + rnd(-6, 6), py = from.y + rnd(-6, 6), rot = rnd(0, Math.PI);
+      let age = -delay;
+      ps.push({
+        alive: true,
+        tick(ms) { age = ms - delay; if (age < 0) { this.alive = true; return; }
+          px += vx * 1.8; py += vy * 1.8; rot += 0.08; this.alive = age < life; },
+        draw(ctx) {
+          if (age < 0) return;
+          const a = Math.max(0, 1 - age / life);
+          ctx.save(); ctx.translate(px, py); ctx.rotate(rot);
+          // 4-point star
+          ctx.beginPath();
+          for (let s = 0; s < 8; s++) {
+            const ang = (s / 8) * Math.PI * 2;
+            const r = s % 2 === 0 ? size : size * 0.4;
+            s === 0 ? ctx.moveTo(Math.cos(ang)*r, Math.sin(ang)*r)
+                    : ctx.lineTo(Math.cos(ang)*r, Math.sin(ang)*r);
+          }
+          ctx.closePath();
+          ctx.fillStyle = `rgba(255,140,200,${a * 0.9})`; ctx.fill();
+          ctx.restore();
+        }
+      });
+    }
+
+  } else {
+    // Normal: white energy orb traveling to target
+    let px = from.x, py = from.y, nAge = 0;
+    ps.push({ alive: true,
+      tick(ms) { nAge = ms;
+        const t = Math.min(ms / 400, 1);
+        px = lerp(from.x, to.x, t); py = lerp(from.y, to.y, t);
+        this.alive = ms < 450; },
+      draw(ctx) {
+        const a = Math.max(0, 1 - Math.max(0, nAge - 350) / 100);
+        const grad = ctx.createRadialGradient(px, py, 0, px, py, 18);
+        grad.addColorStop(0, `rgba(255,255,255,${a})`);
+        grad.addColorStop(1, `rgba(200,200,200,0)`);
+        ctx.beginPath(); ctx.arc(px, py, 18, 0, Math.PI * 2);
+        ctx.fillStyle = grad; ctx.fill();
+      }
+    });
+  }
+
+  return ps;
+}
+
+// Brief screen shake on impactful hits. level: 'light' | 'heavy' | 'brutal'.
+function battleShake(level = 'light') {
+  const field = document.querySelector('#battle-screen .battle-field');
+  if (!field) return;
+  const cls = level === 'brutal' ? 'shake-brutal' : level === 'heavy' ? 'shake-heavy' : 'shake-light';
+  field.classList.remove('shake-light', 'shake-heavy', 'shake-brutal');
+  void field.offsetWidth; // reflow so the animation restarts if re-triggered
+  field.classList.add(cls);
+  setTimeout(() => field.classList.remove(cls), level === 'brutal' ? 520 : level === 'heavy' ? 440 : 320);
+}
+
+// Stylized violence: blood splatter, slash, impact flash and a flying damage
+// number on the struck Pokémon. Heavier on crits / super-effective hits.
+function spawnImpactFX(targetEl, { crit = false, superEff = false, damage = 0 } = {}) {
+  if (!targetEl) return;
+  const heavy = crit || superEff;
+
+  const flash = document.createElement('div');
+  flash.className = 'impact-flash' + (heavy ? ' impact-flash--big' : '');
+  targetEl.appendChild(flash);
+  setTimeout(() => flash.remove(), 320);
+
+  const slash = document.createElement('div');
+  slash.className = 'impact-slash';
+  slash.style.setProperty('--rot', (Math.random() * 110 - 55) + 'deg');
+  targetEl.appendChild(slash);
+  setTimeout(() => slash.remove(), 340);
+
+  const drops = heavy ? 16 : 9;
+  const spread = heavy ? 68 : 42;
+  for (let k = 0; k < drops; k++) {
+    const d = document.createElement('div');
+    d.className = 'impact-drop';
+    const ang = Math.random() * Math.PI * 2;
+    const dist = spread * (0.45 + Math.random() * 0.85);
+    d.style.setProperty('--dx', (Math.cos(ang) * dist).toFixed(1) + 'px');
+    // bias downward so droplets "fall" with a bit of gravity
+    d.style.setProperty('--dy', (Math.sin(ang) * dist * 0.7 + dist * 0.5).toFixed(1) + 'px');
+    d.style.setProperty('--sz', (3 + Math.random() * 5).toFixed(1) + 'px');
+    targetEl.appendChild(d);
+    setTimeout(() => d.remove(), 640);
+  }
+
+  if (damage > 0) {
+    const dn = document.createElement('div');
+    dn.className = 'dmg-number' + (crit ? ' dmg-number--crit' : '');
+    dn.textContent = '-' + damage;
+    // Stack consecutive hits upward so overlapping numbers stay readable.
+    const prior = targetEl.querySelectorAll('.dmg-number').length;
+    if (prior) dn.style.top = `calc(32% - ${Math.min(prior, 3) * 16}px)`;
+    // Hold on screen long enough to actually read (shrinks at skip speeds).
+    const life = 2000 / Math.max(1, Math.min(battleSpeedMultiplier, 4));
+    dn.style.animationDuration = life + 'ms';
+    targetEl.appendChild(dn);
+    setTimeout(() => dn.remove(), life + 60);
+  }
+}
+
+// Lingering blood pool left on the arena floor when a Pokémon is knocked out.
+// Attached to the arena (not the fainting card) so the KO desaturation/fade
+// doesn't grey it out — it stays vivid red.
+function spawnBloodPool(targetEl) {
+  if (!targetEl) return;
+  const field = document.querySelector('#battle-screen .battle-field');
+  if (!field) { targetEl.appendChild(Object.assign(document.createElement('div'), { className: 'blood-pool' })); return; }
+  const cr = targetEl.getBoundingClientRect();
+  const fr = field.getBoundingClientRect();
+  const pool = document.createElement('div');
+  pool.className = 'blood-pool';
+  pool.style.left = (cr.left - fr.left + cr.width / 2) + 'px';
+  pool.style.top = (cr.bottom - fr.top - 26) + 'px';
+  pool.style.bottom = 'auto';
+  field.appendChild(pool);
+  setTimeout(() => pool.remove(), 1750);
+}
+
+// ─── Interactive (turn-based) battle: incremental animator + input UI ─────────
+
+// When true, the player's turns are auto-played by the AI (Auto button).
+let _battleAuto = false;
+
+// Modern floating hit banners over the struck Pokémon: "CRITICAL HIT!",
+// "SUPER EFFECTIVE!", etc. Fire-and-forget (pure CSS animation) so they play
+// SIMULTANEOUSLY with the damage/HP animation. Rendered in a fixed overlay at
+// document level — never clipped by card overflow or covered by neighboring
+// cards (the mobile layout is tight). Stacked with a short cascade when crit
+// and effectiveness both apply. Skipped at high battle speed (Tower skip).
+function spawnHitBanners(targetEl, { crit, typeEff }) {
+  if (!targetEl || battleSpeedMultiplier > 2) return;
+  const banners = [];
+  if (crit) banners.push(['crit', 'Critical hit!']);
+  if (typeEff >= 2) banners.push(['se', 'Super effective!']);
+  else if (typeEff > 0 && typeEff < 1) banners.push(['nve', 'Not very effective']);
+  else if (typeEff === 0) banners.push(['imm', 'No effect']);
+  if (!banners.length) return;
+
+  const rect = targetEl.getBoundingClientRect();
+  const stackH = 38;
+  // Above the card by default; below it when that would leave the viewport.
+  const above = rect.top - 10 - banners.length * stackH > 8;
+  const cx = Math.max(95, Math.min(window.innerWidth - 95, rect.left + rect.width / 2));
+
+  banners.forEach(([kind, text], i) => {
+    const b = document.createElement('div');
+    b.className = `hit-banner hit-banner--${kind}`;
+    b.textContent = text;
+    b.style.left = cx + 'px';
+    b.style.top = (above
+      ? rect.top - 14 - (banners.length - 1 - i) * stackH
+      : rect.bottom + 10 + i * stackH) + 'px';
+    b.style.animationDelay = (i * 110) + 'ms';
+    document.body.appendChild(b);
+    setTimeout(() => b.remove(), 1700 + i * 110);
+  });
+}
+
+// ─── Classic GBA dialog sequence (Professor-style) ────────────────────────────
+// showGbaDialog({ lines, choices }) → Promise resolving to the chosen value
+// (or null when there are no choices). Typewriter text, tap to fast-forward /
+// advance, blinking ▼ between lines, and a classic option box for choices.
+function showGbaDialog({ lines = [], choices = null }) {
+  return new Promise(resolve => {
+    document.getElementById('gba-dialog-overlay')?.remove();
+    const overlay = document.createElement('div');
+    overlay.id = 'gba-dialog-overlay';
+    overlay.innerHTML =
+      `<div class="gba-choice-box" style="display:none;"></div>` +
+      `<div class="gba-dialog-box"><div class="gba-dialog-text"></div><span class="gba-dialog-next">▼</span></div>`;
+    document.body.appendChild(overlay);
+    const textEl = overlay.querySelector('.gba-dialog-text');
+    const nextEl = overlay.querySelector('.gba-dialog-next');
+    const choiceBox = overlay.querySelector('.gba-choice-box');
+    let i = 0, typing = false, typeTimer = null, fullText = '';
+
+    const finish = value => {
+      document.removeEventListener('keydown', onKey);
+      overlay.remove();
+      resolve(value);
+    };
+    const showChoices = () => {
+      nextEl.style.visibility = 'hidden';
+      choiceBox.style.display = '';
+      choiceBox.innerHTML = choices.map((c, k) =>
+        `<button class="gba-choice" data-k="${k}"><span class="gba-choice-cursor">▶</span>${c.label}</button>`).join('');
+      choiceBox.querySelectorAll('.gba-choice').forEach(b => {
+        b.onclick = e => { e.stopPropagation(); finish(choices[+b.dataset.k].value); };
+      });
+      choiceBox.querySelector('.gba-choice')?.focus();
+    };
+    const typeLine = line => {
+      typing = true; fullText = line; textEl.textContent = '';
+      nextEl.style.visibility = 'hidden';
+      let c = 0;
+      clearInterval(typeTimer);
+      typeTimer = setInterval(() => {
+        textEl.textContent = fullText.slice(0, ++c);
+        if (c >= fullText.length) {
+          clearInterval(typeTimer); typing = false;
+          if (i >= lines.length && choices) showChoices();
+          else nextEl.style.visibility = 'visible';
+        }
+      }, 16);
+    };
+    const advance = () => {
+      if (choiceBox.style.display !== 'none') return; // choosing — taps don't advance
+      if (typing) { // fast-forward the current line
+        clearInterval(typeTimer); textEl.textContent = fullText; typing = false;
+        if (i >= lines.length && choices) showChoices();
+        else nextEl.style.visibility = 'visible';
+        return;
+      }
+      if (i < lines.length) { typeLine(lines[i++]); return; }
+      if (!choices) finish(null);
+    };
+    const onKey = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); advance(); } };
+    overlay.addEventListener('click', advance);
+    document.addEventListener('keydown', onKey);
+    advance();
+  });
+}
+
+// Classic GBA-style battle message box (bottom of the battle screen). Still
+// used for blocking notices like the mutual-immunity standoff.
+function showBattleHitMessage(text) {
+  const screen = document.getElementById('battle-screen');
+  if (!screen) return;
+  let box = document.getElementById('battle-msg-box');
+  if (!box) {
+    box = document.createElement('div');
+    box.id = 'battle-msg-box';
+    screen.appendChild(box);
+  }
+  box.textContent = text;
+  box.classList.add('visible');
+  clearTimeout(box._hideTimer);
+  box._hideTimer = setTimeout(() => box.classList.remove('visible'),
+    Math.max(400, 1500 / battleSpeedMultiplier));
+}
+
+// Animate a single round's worth of events on the already-rendered field.
+// hpTrack = { player:[...], enemy:[...] } holds the currently-DISPLAYED HP so
+// bars tween smoothly from frame to frame. Reuses the same FX as the auto path.
+async function animateInteractiveEvents(events, pTeam, eTeam, hpTrack) {
+  const sleep = ms => new Promise(r => setTimeout(r, ms / battleSpeedMultiplier));
+  const elFor = (side, idx) => document.querySelector(`#${side === 'player' ? 'player-side' : 'enemy-side'} .battle-pokemon[data-idx="${idx}"]`);
+  const maxFor = (side, idx) => (side === 'player' ? pTeam : eTeam)[idx]?.maxHp || 1;
+
+  for (const ev of events) {
+    if (ev.type === 'send_out') {
+      const sideId = ev.side === 'player' ? 'player-side' : 'enemy-side';
+      document.querySelectorAll(`#${sideId} .battle-pokemon`).forEach(el => el.classList.remove('active-pokemon'));
+      const el = elFor(ev.side, ev.idx);
+      if (el) {
+        el.classList.remove('fainted');
+        el.classList.add('active-pokemon');
+        const spr = el.querySelector('.battle-sprite');
+        if (spr) { spr.classList.remove('entering'); void spr.offsetWidth; spr.classList.add('entering'); setTimeout(() => spr.classList.remove('entering'), 520); }
+      }
+      await sleep(360);
+
+    } else if (ev.type === 'attack') {
+      const attackerEl = elFor(ev.side, ev.attackerIdx);
+      const targetEl   = elFor(ev.targetSide, ev.targetIdx);
+      if (attackerEl) attackerEl.classList.add('attacking');
+      if (attackerEl && targetEl) await playAttackAnimation(ev.moveType, attackerEl, targetEl, ev.isSpecial, ev.moveName);
+      else await sleep(220);
+      if (attackerEl) attackerEl.classList.remove('attacking');
+
+      if (ev.damage > 0 && targetEl) {
+        const hitClass = `hit-${(ev.moveType || 'normal').toLowerCase()}`;
+        targetEl.classList.add(hitClass);
+        if (typeof spawnImpactFX === 'function') spawnImpactFX(targetEl, { crit: ev.crit, superEff: ev.typeEff >= 2, damage: ev.damage });
+        if (typeof battleShake === 'function') battleShake(ev.crit ? 'brutal' : ev.typeEff >= 2 ? 'heavy' : 'light');
+        // Hit banners (crit / effectiveness) pop concurrently with the HP
+        // animation below — no pause. Plain neutral hits show nothing.
+        if (ev.crit) targetEl.classList.add('crit-flash');
+        spawnHitBanners(targetEl, ev);
+        const track = hpTrack[ev.targetSide];
+        await animateHpBar(targetEl, track[ev.targetIdx], ev.targetHpAfter, maxFor(ev.targetSide, ev.targetIdx));
+        track[ev.targetIdx] = ev.targetHpAfter;
+        await sleep(260);
+        targetEl.classList.remove(hitClass, 'crit-flash');
+      } else if (targetEl) {
+        // Immune hit (×0): the attack failed — flash the banner.
+        if (ev.typeEff === 0) {
+          spawnHitBanners(targetEl, ev);
+          await sleep(420); // brief beat — there's no HP animation to fill it
+        }
+        await sleep(160);
+      }
+      // The attacker's own HP can change (Life Orb) — handled by following 'effect' events.
+
+    } else if (ev.type === 'effect') {
+      const el = elFor(ev.side, ev.idx);
+      const track = hpTrack[ev.side];
+      if (el) { await animateHpBar(el, track[ev.idx], ev.hpAfter, maxFor(ev.side, ev.idx)); }
+      track[ev.idx] = ev.hpAfter;
+      await sleep(120);
+
+    } else if (ev.type === 'stat_change') {
+      const el = elFor(ev.side, ev.idx);
+      if (el && typeof animateStatChange === 'function') animateStatChange(el, ev.stat, ev.change);
+      await sleep(220);
+
+    } else if (ev.type === 'faint') {
+      const el = elFor(ev.side, ev.idx);
+      if (el) { el.classList.add('fainted'); el.classList.remove('active-pokemon'); if (typeof spawnBloodPool === 'function') spawnBloodPool(el); }
+      if (typeof battleShake === 'function') battleShake('brutal');
+      await sleep(420);
+
+    } else if (ev.type === 'status_apply') {
+      const el = elFor(ev.side, ev.idx);
+      if (el) {
+        const icon  = ev.status === 'poison' ? '☠' : '❄';
+        const color = ev.status === 'poison' ? '#a040a0' : '#7ecff0';
+        showStatusBadge(el, icon, color, ev.status);
+      }
+      await sleep(200);
+
+    } else if (ev.type === 'status_tick') {
+      const el = elFor(ev.side, ev.idx);
+      const track = hpTrack[ev.side];
+      if (ev.status === 'poison' && el) {
+        el.classList.add('hit-poison');
+        await animateHpBar(el, track[ev.idx], ev.hpAfter, maxFor(ev.side, ev.idx));
+        track[ev.idx] = ev.hpAfter;
+        el.classList.remove('hit-poison');
+      } else if (ev.status === 'freeze_thaw' && el) {
+        removeStatusBadge(el, 'freeze');
+        const popup = document.createElement('div');
+        popup.className = 'crit-popup';
+        popup.textContent = 'Thawed!';
+        el.appendChild(popup);
+        setTimeout(() => popup.remove(), 800);
+      } else if (ev.status === 'freeze_skip' && el) {
+        el.classList.add('frozen-flash');
+        await sleep(300);
+        el.classList.remove('frozen-flash');
+      } else if (ev.status === 'flinch' && el) {
+        const popup = document.createElement('div');
+        popup.className = 'crit-popup';
+        popup.textContent = 'Flinched!';
+        el.appendChild(popup);
+        setTimeout(() => popup.remove(), 800);
+        await sleep(250);
+      }
+      await sleep(100);
+
+    } else if (ev.type === 'transform') {
+      const el = elFor(ev.side, ev.idx);
+      if (el) {
+        el.classList.add('hit-normal');
+        await sleep(200);
+        const imgEl = el.querySelector('.battle-sprite');
+        if (imgEl && ev.spriteUrl) imgEl.src = ev.spriteUrl;
+        const nameEl = el.querySelector('.battle-poke-name');
+        const p = (ev.side === 'player' ? pTeam : eTeam)[ev.idx];
+        if (nameEl && p) nameEl.textContent = `${ev.name} Lv${p.level}`;
+        el.classList.remove('hit-normal');
+      }
+      await sleep(400);
+
+    } else if (ev.type === 'overtime_start') {
+      if (!document.getElementById('overtime-banner')) {
+        const banner = document.createElement('div');
+        banner.id = 'overtime-banner';
+        banner.className = 'overtime-banner';
+        banner.textContent = '⚡ OVERTIME — 3× Damage!';
+        document.getElementById('battle-screen')?.prepend(banner);
+      }
+      await sleep(800);
+
+    // Battle Tower traits in manual mode: announce the proc; any HP change
+    // arrives as a separate 'effect'/'confusion' event.
+    } else if (ev.type === 'trait_trigger') {
+      const el = elFor(ev.side, ev.idx);
+      if (el) {
+        const popup = document.createElement('div');
+        popup.className = 'crit-popup';
+        popup.textContent = `${ev.traitType} Trait!`;
+        el.appendChild(popup);
+        setTimeout(() => popup.remove(), 800);
+      }
+      await sleep(250);
+
+    } else if (ev.type === 'confusion') {
+      const el = elFor(ev.side, ev.idx);
+      const track = hpTrack[ev.side];
+      if (el) {
+        const popup = document.createElement('div');
+        popup.className = 'crit-popup';
+        popup.textContent = 'Hurt itself!';
+        el.appendChild(popup);
+        setTimeout(() => popup.remove(), 800);
+        el.classList.add('hit-normal');
+        await animateHpBar(el, track[ev.idx], ev.hpAfter, maxFor(ev.side, ev.idx));
+        track[ev.idx] = ev.hpAfter;
+        el.classList.remove('hit-normal');
+      }
+      await sleep(200);
+    }
+  }
+}
+
+// Show the command bar and resolve with the player's chosen action:
+//   { type:'attack', move } | { type:'switch', idx }
+function awaitPlayerAction(pTeam, pIdx, enemyActive) {
+  return new Promise(resolve => {
+    if (_battleAuto) { resolve(aiPlayerAction(pTeam[pIdx], pTeam, pIdx, enemyActive)); return; }
+    const cmd = document.getElementById('battle-command');
+    const moveWrap = document.getElementById('battle-move-buttons');
+    const moves = getMovesForPokemon(pTeam[pIdx]);
+    moveWrap.innerHTML = moves.map((m, i) => {
+      const rgb = (typeof TYPE_COLORS_RGB !== 'undefined' && TYPE_COLORS_RGB[m.type.toLowerCase()]) || '120,120,120';
+      // Effectiveness hint vs the current enemy — ×0 warns that the move fails.
+      const eff = m.noDamage ? null : getTypeEffectiveness(m.type, enemyActive.types || ['Normal']);
+      const effTag = eff === null || eff === 1 ? ''
+        : eff === 0 ? '<span class="move-eff move-eff--none">×0</span>'
+        : eff > 1   ? `<span class="move-eff move-eff--se">×${eff}</span>`
+        :             `<span class="move-eff move-eff--nve">×${eff === 0.25 ? '¼' : '½'}</span>`;
+      return `<button class="move-btn${eff === 0 ? ' move-btn--immune' : ''}" data-mi="${i}" style="--mc:${rgb};">
+        <span class="move-name">${m.name}</span>
+        <span class="move-meta"><span class="move-type-pill" style="background:rgb(${rgb});">${m.type}</span>${m.noDamage ? '' : `<span class="move-pow">⚔ ${m.power}</span>`}${effTag}</span>
+      </button>`;
+    }).join('');
+    const aliveBench = pTeam.filter((p, i) => i !== pIdx && p.currentHp > 0).length;
+    const switchBtn = document.getElementById('btn-battle-switch');
+    switchBtn.disabled = aliveBench === 0;
+    cmd.style.display = 'flex';
+
+    const cleanup = () => { cmd.style.display = 'none'; };
+    moveWrap.querySelectorAll('.move-btn').forEach(b => b.onclick = () => { cleanup(); resolve({ type: 'attack', move: moves[+b.dataset.mi], manual: true }); });
+    switchBtn.onclick = async () => {
+      if (aliveBench === 0) return;
+      const idx = await openPartySelector(pTeam, pIdx, false);
+      if (idx === null) return; // cancelled — leave the command bar up
+      cleanup(); resolve({ type: 'switch', idx });
+    };
+    document.getElementById('btn-battle-auto').onclick = () => { _battleAuto = true; cleanup(); resolve(aiPlayerAction(pTeam[pIdx], pTeam, pIdx, enemyActive)); };
+  });
+}
+
+// Party selector overlay. forced=true (KO replacement) hides Cancel and can't
+// resolve null. Returns the chosen team index, or null if cancelled.
+function openPartySelector(pTeam, currentIdx, forced) {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('battle-party-select');
+    const list = document.getElementById('battle-party-list');
+    const title = document.getElementById('battle-party-title');
+    const cancelBtn = document.getElementById('btn-party-cancel');
+    title.textContent = forced ? 'Choose your next Pokémon' : 'Switch to…';
+    cancelBtn.style.display = forced ? 'none' : '';
+    list.innerHTML = pTeam.map((p, i) => {
+      const dead = p.currentHp <= 0, isCur = i === currentIdx, dis = dead || isCur;
+      const pct = Math.max(0, Math.min(1, p.currentHp / (p.maxHp || 1)));
+      const tag = isCur ? ' (active)' : dead ? ' (fainted)' : '';
+      return `<button class="party-entry${dis ? ' party-entry--dis' : ''}" data-pi="${i}" ${dis ? 'disabled' : ''}>
+        <img src="${p.spriteUrl || ''}" class="party-entry-spr" onerror="this.style.visibility='hidden'">
+        <span class="party-entry-info">
+          <span class="party-entry-name">${p.nickname || p.name} <span class="party-entry-lv">Lv${p.level}</span></span>
+          <span class="party-entry-bar"><span class="party-entry-fill" style="width:${Math.floor(pct * 100)}%;background:${hpBarColor(pct)};"></span></span>
+          <span class="party-entry-hp">${Math.max(0, p.currentHp)}/${p.maxHp}${tag}</span>
+        </span>
+      </button>`;
+    }).join('');
+    overlay.style.display = 'flex';
+    const cleanup = () => { overlay.style.display = 'none'; };
+    list.querySelectorAll('.party-entry:not([disabled])').forEach(b => b.onclick = () => { cleanup(); resolve(+b.dataset.pi); });
+    cancelBtn.onclick = forced ? null : () => { cleanup(); resolve(null); };
+  });
+}
+
+// Visual turn-by-turn battle animation
+async function animateBattleVisually(detailedLog, pTeamInit, eTeamInit) {
+  // Snapshot the run generation so a mid-battle reset stops the animation loop.
+  const animGen = runGeneration;
+  renderBattleField(pTeamInit, eTeamInit);
+
+  // Track live HP and stat stages during animation
+  const logEl = null; // combat log removed
+  const pHp = pTeamInit.map(p => ({ current: p.currentHp, max: p.maxHp }));
+  const eHp = eTeamInit.map(p => ({
+    current: p.currentHp !== undefined ? p.currentHp : p.maxHp,
+    max: p.maxHp,
+  }));
+  // Cumulative maxHp boost per player slot from mid-battle level-ups (gen 2 only).
+  // Sim damage events emit hpAfter on the original maxHp scale; we add this to
+  // shift them onto the leveled-up scale so the bars stay coherent.
+  const pBoost = pTeamInit.map(() => 0);
+  const adjPlayerHp = (idx, hpAfter) => {
+    if (hpAfter <= 0) return 0; // sim says fainted; don't let the boost revive it
+    return Math.min(pHp[idx].max, hpAfter + pBoost[idx]);
+  };
+  const emptyStages = () => ({ atk: 0, def: 0, speed: 0, special: 0, spdef: 0 });
+  const pStages = pTeamInit.map(emptyStages);
+  const eStages = eTeamInit.map(emptyStages);
+  let lastAttack = null; // for replaying animation on Electric second hit
+
+  function addLogEntry(msg, cls = '') {
+    if (!logEl) return;
+    const div = document.createElement('div');
+    div.className = `log-entry ${cls}`;
+    div.textContent = msg;
+    logEl.appendChild(div);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function sleep(ms) {
+    return new Promise(r => setTimeout(r, ms / battleSpeedMultiplier));
+  }
+
+  let i = 0;
+  while (i < detailedLog.length) {
+    // Run was reset mid-battle — stop animating immediately.
+    if (animGen !== runGeneration) return;
+    const event = detailedLog[i];
+
+    // Batch consecutive trait_trigger events into one canvas pass so they animate simultaneously
+    if (event.type === 'trait_trigger') {
+      const canvas = document.getElementById('battle-anim-canvas');
+      const batchTriggers = [];
+      if (canvas) {
+        resizeCanvasIfNeeded(canvas);
+        canvas.style.display = 'block';
+        const ctx = canvas.getContext('2d');
+        const allParticles = [];
+        const flyingEls = [];
+        while (i < detailedLog.length && detailedLog[i].type === 'trait_trigger') {
+          const e = detailedLog[i++];
+          batchTriggers.push(e);
+          const sideId = e.side === 'player' ? 'player-side' : 'enemy-side';
+          const el = document.querySelector(`#${sideId} .battle-pokemon[data-idx="${e.idx}"]`);
+          if (el) {
+            const rect = el.getBoundingClientRect();
+            const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+            const above  = { x: center.x, y: center.y - 30 };
+            allParticles.push(...buildParticles(e.traitType.toLowerCase(), center, above));
+            if (e.traitType === 'Flying') flyingEls.push(el);
+          }
+        }
+        if (allParticles.length > 0) await runParticleCanvas(canvas, ctx, allParticles, 400);
+        else canvas.style.display = 'none';
+        for (const el of flyingEls) {
+          const popup = document.createElement('div');
+          popup.className = 'crit-popup';
+          popup.textContent = 'Dodge!';
+          el.appendChild(popup);
+          setTimeout(() => popup.remove(), 800);
+        }
+      } else {
+        while (i < detailedLog.length && detailedLog[i].type === 'trait_trigger') {
+          batchTriggers.push(detailedLog[i++]);
+        }
+      }
+
+      // Electric second hit: replay the full attack + consume its effect event
+      const hasElectric = batchTriggers.some(e => e.traitType === 'Electric');
+      if (hasElectric && lastAttack) {
+        const effectEvt = detailedLog[i];
+        if (effectEvt?.type === 'effect') {
+          const { attackerEl, targetEl, moveType, moveName, isSpecial } = lastAttack;
+          if (attackerEl) attackerEl.classList.add('attacking');
+          if (attackerEl && targetEl)
+            await playAttackAnimation(moveType, attackerEl, targetEl, isSpecial, moveName);
+          if (attackerEl) attackerEl.classList.remove('attacking');
+          if (targetEl) {
+            const hitClass = `hit-${moveType.toLowerCase()}`;
+            targetEl.classList.add(hitClass);
+            const targetHpTrack = effectEvt.side === 'player' ? pHp : eHp;
+            const prev = targetHpTrack[effectEvt.idx]?.current ?? effectEvt.hpAfter;
+            await animateHpBar(targetEl, prev, effectEvt.hpAfter, targetHpTrack[effectEvt.idx]?.max ?? effectEvt.hpAfter);
+            if (targetHpTrack[effectEvt.idx]) targetHpTrack[effectEvt.idx].current = effectEvt.hpAfter;
+            await sleep(300);
+            targetEl.classList.remove(hitClass);
+          }
+          i++; // consume the Electric effect event
+        }
+      }
+
+      await sleep(80);
+      continue;
+    }
+
+    if (event.type === 'attack') {
+      const attackerSideId = event.side === 'player' ? 'player-side' : 'enemy-side';
+      const targetSideId = event.side === 'player' ? 'enemy-side' : 'player-side';
+      const attackerEl = document.querySelector(`#${attackerSideId} .battle-pokemon[data-idx="${event.attackerIdx}"]`);
+      const targetEl = document.querySelector(`#${targetSideId} .battle-pokemon[data-idx="${event.targetIdx}"]`);
+      lastAttack = { attackerEl, targetEl, moveType: event.moveType, moveName: event.moveName, isSpecial: event.isSpecial };
+      const hitClass = `hit-${event.moveType.toLowerCase()}`;
+
+      if (attackerEl) attackerEl.classList.add('attacking');
+      if (event.moveName === 'Struggle' && attackerEl) {
+        const popup = document.createElement('div');
+        popup.className = 'crit-popup';
+        popup.textContent = 'Struggle!';
+        attackerEl.appendChild(popup);
+        setTimeout(() => popup.remove(), 900);
+      }
+
+      // Play canvas projectile animation concurrently with attacker pulse
+      if (attackerEl && targetEl) {
+        await playAttackAnimation(event.moveType, attackerEl, targetEl, event.isSpecial, event.moveName);
+      } else {
+        await sleep(220);
+      }
+      if (attackerEl) attackerEl.classList.remove('attacking');
+
+      // Look ahead: check if a Flying dodge immediately follows this attack
+      const nextEvt = detailedLog[i + 1];
+      const flyingDodge = nextEvt?.type === 'trait_trigger'
+        && nextEvt.traitType === 'Flying'
+        && nextEvt.side === event.targetSide
+        && nextEvt.idx === event.targetIdx;
+
+      if (flyingDodge && targetEl) {
+        // Show dodge animation instead of hit — consume trait_trigger and effect events
+        const canvas = document.getElementById('battle-anim-canvas');
+        if (canvas) {
+          resizeCanvasIfNeeded(canvas);
+          canvas.style.display = 'block';
+          const ctx = canvas.getContext('2d');
+          const rect = targetEl.getBoundingClientRect();
+          const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+          const above  = { x: center.x, y: center.y - 30 };
+          await runParticleCanvas(canvas, ctx, buildParticles('flying', center, above), 400);
+        }
+        const dodgePopup = document.createElement('div');
+        dodgePopup.className = 'crit-popup';
+        dodgePopup.textContent = 'Dodge!';
+        targetEl.appendChild(dodgePopup);
+        setTimeout(() => dodgePopup.remove(), 800);
+        i++; // consume trait_trigger
+        // Consume the following effect event and sync HP tracker (HP unchanged)
+        if (detailedLog[i + 1]?.type === 'effect' && detailedLog[i + 1].idx === event.targetIdx) {
+          const targetHpTrack = event.targetSide === 'player' ? pHp : eHp;
+          targetHpTrack[event.targetIdx].current = event.targetSide === 'player'
+            ? adjPlayerHp(event.targetIdx, detailedLog[i + 1].hpAfter)
+            : detailedLog[i + 1].hpAfter;
+          i++; // consume effect
+        }
+      } else {
+        // Normal hit flash + HP bar animation
+        if (targetEl) targetEl.classList.add(hitClass);
+        // Violence FX: blood splatter, slash, damage number — scaled to impact.
+        if (targetEl && event.damage > 0) {
+          spawnImpactFX(targetEl, { crit: event.crit, superEff: event.typeEff >= 2, damage: event.damage });
+        }
+        // Screen shake scaled to impact: crit brutal, super-effective heavy,
+        // any landed hit gets a nudge.
+        if (event.crit) battleShake('brutal');
+        else if (event.typeEff >= 2) battleShake('heavy');
+        else if (event.damage > 0) battleShake('light');
+        if (event.crit && targetEl) targetEl.classList.add('crit-flash');
+        // Hit banners pop concurrently with the HP animation — no pause.
+        if (targetEl && event.damage > 0) spawnHitBanners(targetEl, event);
+        if (targetEl) {
+          const targetSide = event.side === 'player' ? 'enemy' : 'player';
+          const targetHpTrack = targetSide === 'player' ? pHp : eHp;
+          const prev = targetHpTrack[event.targetIdx].current;
+          const adjAfter = targetSide === 'player'
+            ? adjPlayerHp(event.targetIdx, event.targetHpAfter)
+            : event.targetHpAfter;
+          await animateHpBar(targetEl, prev, adjAfter, targetHpTrack[event.targetIdx].max);
+          targetHpTrack[event.targetIdx].current = adjAfter;
+        }
+        await sleep(300);
+        if (targetEl) targetEl.classList.remove(hitClass);
+        if (targetEl) targetEl.classList.remove('crit-flash');
+      }
+
+      let effText = '';
+      if (event.typeEff >= 2) effText = ' Super effective!';
+      else if (event.typeEff === 0) effText = ' No effect!';
+      else if (event.typeEff < 1) effText = ' Not very effective...';
+      if (event.crit) effText += ' Critical hit!';
+
+      const sideLabel = event.side === 'player' ? '' : '(enemy) ';
+      addLogEntry(
+        `${sideLabel}${event.attackerName} used ${event.moveName} → ${event.targetName} took ${event.damage} dmg.${effText}`,
+        event.side === 'player' ? 'log-player' : 'log-enemy'
+      );
+
+      await sleep(100);
+
+    } else if (event.type === 'confusion') {
+      const sideId = event.side === 'player' ? 'player-side' : 'enemy-side';
+      const el = document.querySelector(`#${sideId} .battle-pokemon[data-idx="${event.idx}"]`);
+      if (el) {
+        el.classList.add('attacking');
+        await sleep(180);
+        el.classList.remove('attacking');
+        el.classList.add('hit-normal');
+        const popup = document.createElement('div');
+        popup.className = 'crit-popup';
+        popup.textContent = 'Confusion!';
+        el.appendChild(popup);
+        setTimeout(() => popup.remove(), 900);
+        const teamHp = event.side === 'player' ? pHp : eHp;
+        const prev = teamHp[event.idx].current;
+        const adjAfter = event.side === 'player' ? adjPlayerHp(event.idx, event.hpAfter) : event.hpAfter;
+        await animateHpBar(el, prev, adjAfter, teamHp[event.idx].max);
+        teamHp[event.idx].current = adjAfter;
+        await sleep(300);
+        el.classList.remove('hit-normal');
+      }
+
+    } else if (event.type === 'effect') {
+      const sideId = event.side === 'player' ? 'player-side' : 'enemy-side';
+      const el = document.querySelector(`#${sideId} .battle-pokemon[data-idx="${event.idx}"]`);
+      const teamHp = event.side === 'player' ? pHp : eHp;
+      const prev = teamHp[event.idx].current;
+      if (event.newMaxHp) teamHp[event.idx].max = event.newMaxHp;
+      const adjAfter = event.side === 'player' ? adjPlayerHp(event.idx, event.hpAfter) : event.hpAfter;
+
+      if (el) {
+        await animateHpBar(el, prev, adjAfter, teamHp[event.idx].max);
+      }
+      teamHp[event.idx].current = adjAfter;
+
+      addLogEntry(event.reason, 'log-item');
+      await sleep(100);
+
+    } else if (event.type === 'overtime_start') {
+      const existingBanner = document.getElementById('overtime-banner');
+      if (!existingBanner) {
+        const banner = document.createElement('div');
+        banner.id = 'overtime-banner';
+        banner.className = 'overtime-banner';
+        banner.textContent = '⚡ OVERTIME — 3× Damage!';
+        document.getElementById('battle-screen')?.prepend(banner);
+      }
+      addLogEntry('⚡ OVERTIME! All attacks deal 3× damage!', 'log-system');
+      await sleep(Math.round(800 / battleSpeedMultiplier));
+
+    } else if (event.type === 'faint') {
+      const sideId = event.side === 'player' ? 'player-side' : 'enemy-side';
+      const el = document.querySelector(`#${sideId} .battle-pokemon[data-idx="${event.idx}"]`);
+      if (el) { el.classList.add('fainted'); el.classList.remove('active-pokemon'); spawnBloodPool(el); }
+      battleShake('brutal');
+      addLogEntry(`${event.name} fainted!`, 'log-faint');
+      await sleep(300);
+
+    } else if (event.type === 'send_out') {
+      const sideId = event.side === 'player' ? 'player-side' : 'enemy-side';
+      // Clear previous active highlight on this side
+      document.querySelectorAll(`#${sideId} .battle-pokemon`).forEach(el => el.classList.remove('active-pokemon'));
+      const el = document.querySelector(`#${sideId} .battle-pokemon[data-idx="${event.idx}"]`);
+      if (el) {
+        el.classList.add('active-pokemon');
+        // Materialize entrance on the sprite.
+        const spr = el.querySelector('.battle-sprite');
+        if (spr) {
+          spr.classList.remove('entering');
+          void spr.offsetWidth; // restart the animation on re-entry
+          spr.classList.add('entering');
+          setTimeout(() => spr.classList.remove('entering'), 520);
+        }
+      }
+      addLogEntry(`${event.name} was sent out!`, event.side === 'player' ? 'log-player' : 'log-enemy');
+      await sleep(250);
+
+    } else if (event.type === 'transform') {
+      const sideId = event.side === 'player' ? 'player-side' : 'enemy-side';
+      const el = document.querySelector(`#${sideId} .battle-pokemon[data-idx="${event.idx}"]`);
+      if (el) {
+        // Flash white, swap sprite, update name display
+        el.classList.add('hit-normal');
+        await sleep(200);
+        const imgEl = el.querySelector('.battle-sprite');
+        if (imgEl) imgEl.src = event.spriteUrl;
+        const nameEl = el.querySelector('.battle-poke-name');
+        if (nameEl) nameEl.textContent = `${event.name} Lv${pTeamInit[event.idx].level}`;
+        el.classList.remove('hit-normal');
+      }
+      addLogEntry(`${event.name} transformed into ${event.intoName}!`, 'log-player');
+      await sleep(400);
+
+    } else if (event.type === 'stat_change') {
+      const sideId = event.side === 'player' ? 'player-side' : 'enemy-side';
+      const el = document.querySelector(`#${sideId} .battle-pokemon[data-idx="${event.idx}"]`);
+      const stagesArr = event.side === 'player' ? pStages : eStages;
+      if (stagesArr[event.idx]) {
+        stagesArr[event.idx][event.stat] = event.newStage;
+      }
+      if (el) {
+        animateStatChange(el, event.stat, event.change); // fire and forget
+        updateBattleStages(el, stagesArr[event.idx] ?? {});
+      }
+
+    } else if (event.type === 'status_apply') {
+      const sideId = event.side === 'player' ? 'player-side' : 'enemy-side';
+      const el = document.querySelector(`#${sideId} .battle-pokemon[data-idx="${event.idx}"]`);
+      if (el) {
+        const icon  = event.status === 'poison' ? '☠' : '❄';
+        const color = event.status === 'poison' ? '#a040a0' : '#7ecff0';
+        showStatusBadge(el, icon, color, event.status);
+      }
+      await sleep(200);
+
+    } else if (event.type === 'status_tick') {
+      const sideId = event.side === 'player' ? 'player-side' : 'enemy-side';
+      const el = document.querySelector(`#${sideId} .battle-pokemon[data-idx="${event.idx}"]`);
+      const teamHp = event.side === 'player' ? pHp : eHp;
+
+      if (event.status === 'poison' && el) {
+        el.classList.add('hit-poison');
+        const prev = teamHp[event.idx]?.current ?? event.hpAfter - event.hpChange;
+        const adjAfter = event.side === 'player' ? adjPlayerHp(event.idx, event.hpAfter) : event.hpAfter;
+        await animateHpBar(el, prev, adjAfter, teamHp[event.idx]?.max ?? event.hpAfter + 1);
+        if (teamHp[event.idx]) teamHp[event.idx].current = adjAfter;
+        el.classList.remove('hit-poison');
+      } else if (event.status === 'freeze_thaw' && el) {
+        removeStatusBadge(el, 'freeze');
+        const popup = document.createElement('div');
+        popup.className = 'crit-popup';
+        popup.textContent = 'Thawed!';
+        el.appendChild(popup);
+        setTimeout(() => popup.remove(), 800);
+      } else if (event.status === 'freeze_skip' && el) {
+        el.classList.add('frozen-flash');
+        await sleep(300);
+        el.classList.remove('frozen-flash');
+      }
+      await sleep(100);
+
+    } else if (event.type === 'result') {
+      addLogEntry(
+        event.playerWon ? '--- Victory! ---' : '--- Defeat! ---',
+        event.playerWon ? 'log-win' : 'log-lose'
+      );
+    }
+    i++;
+  }
+}
+
+// ── Stat change arrow animation ───────────────────────────────────────────────
+
+function updateBattleStages(pokemonEl, stages) {
+  const el = pokemonEl.querySelector('.battle-stages');
+  if (!el) return;
+  const labels = { atk: 'ATK', def: 'DEF', speed: 'SPE', special: 'SP.A', spdef: 'SP.D' };
+  el.innerHTML = Object.entries(stages)
+    .filter(([, v]) => v !== 0)
+    .map(([stat, v]) => {
+      const cls = v > 0 ? 'stage-up' : 'stage-down';
+      const arrow = v > 0 ? '▲' : '▼';
+      return `<span class="battle-stage-badge ${cls}">${labels[stat] ?? stat} ${arrow}${Math.abs(v)}</span>`;
+    }).join('');
+}
+
+function animateStatChange(pokemonEl, stat, change) {
+  return new Promise(resolve => {
+    const isUp = change > 0;
+    const color = isUp ? '#5af055' : '#f05545';
+    const arrow = isUp ? '▲' : '▼';
+    const statLabels = { atk: 'ATK', def: 'DEF', speed: 'SPE', special: 'SP.A', spdef: 'SP.D' };
+
+    const popup = document.createElement('div');
+    popup.className = 'stat-change-popup';
+    popup.style.color = color;
+    popup.textContent = `${arrow} ${statLabels[stat] || stat}`;
+    pokemonEl.appendChild(popup);
+
+    setTimeout(() => { popup.remove(); resolve(); }, 700 / battleSpeedMultiplier);
+  });
+}
+
+// ── Trait trigger burst animation (reuses existing particle system) ────────────
+
+async function playTraitTriggerAnimation(traitType, pokemonEl) {
+  const canvas = document.getElementById('battle-anim-canvas');
+  if (!canvas) return;
+  resizeCanvasIfNeeded(canvas);
+  canvas.style.display = 'block';
+  const ctx = canvas.getContext('2d');
+  const rect = pokemonEl.getBoundingClientRect();
+  const center = { x: rect.left + rect.width / 2, y: rect.top + rect.height / 2 };
+  const above  = { x: center.x, y: center.y - 30 };
+  const particles = buildParticles(traitType.toLowerCase(), center, above);
+  await runParticleCanvas(canvas, ctx, particles, 400);
+}
+
+// ── Status badge helpers ──────────────────────────────────────────────────────
+
+function showStatusBadge(pokemonEl, icon, color, statusId) {
+  removeStatusBadge(pokemonEl, statusId);
+  const badge = document.createElement('div');
+  badge.className = 'status-badge';
+  badge.dataset.statusId = statusId;
+  badge.style.background = color;
+  badge.textContent = icon;
+  pokemonEl.appendChild(badge);
+}
+
+function removeStatusBadge(pokemonEl, statusId) {
+  pokemonEl.querySelector(`.status-badge[data-status-id="${statusId}"]`)?.remove();
+}
+
+// ── Endless mode UI ───────────────────────────────────────────────────────────
+
+// ── Endless map trait panel ───────────────────────────────────────────────────
+
+function renderEndlessTraitPanel(team) {
+  const panel = document.getElementById('endless-trait-panel');
+  if (!panel) return;
+
+  const data = getTraitDisplayData(team);
+  if (data.length === 0) {
+    panel.style.display = 'none';
+    return;
+  }
+
+  panel.style.display = '';
+  panel.innerHTML = `<div class="hud-label">TRAITS</div>` + data.map(({ type, count, tier, nextThreshold, description, active }) => {
+    const displayCount = Math.min(count, nextThreshold);
+    const pct = (displayCount / nextThreshold) * 100;
+    const tierLabel = tier > 0 ? ` T${tier}` : '';
+    return `<div class="trait-row${active ? '' : ' trait-row-inactive'}">
+      <div class="trait-row-header">
+        <span class="type-badge type-${type.toLowerCase()}" style="font-size:7px;padding:1px 4px;">${type}</span>
+        <span class="trait-count">${count}/${nextThreshold}${tierLabel}</span>
+      </div>
+      <div class="trait-progress-bar">
+        <div class="trait-progress-fill type-${type.toLowerCase()}" style="width:${pct}%"></div>
+      </div>
+      <div class="trait-desc">${description}</div>
+    </div>`;
+  }).join('');
+
+  // Set description data and tap-to-tooltip handler (mobile: desc is hidden in the strip)
+  const rows = panel.querySelectorAll('.trait-row');
+  data.forEach(({ description, nextDescription, tier }, i) => {
+    if (!rows[i]) return;
+    rows[i].dataset.desc = description;
+    if (nextDescription) rows[i].dataset.nextDesc = `Next (T${tier + 1}): ${nextDescription}`;
+  });
+  panel.onclick = (e) => {
+    const row = e.target.closest('.trait-row');
+    if (!row || !row.dataset.desc) return;
+    _traitTooltip.show(row.dataset.desc, row.getBoundingClientRect());
+    e.stopPropagation();
+  };
+  rows.forEach(row => {
+    row.addEventListener('mouseenter', () => {
+      if (row.dataset.nextDesc) _traitTooltip.show(row.dataset.nextDesc, row.getBoundingClientRect());
+    });
+    row.addEventListener('mouseleave', () => _traitTooltip.hide());
+  });
+}
+
+function hideEndlessTraitPanel() {
+  const panel = document.getElementById('endless-trait-panel');
+  if (panel) panel.style.display = 'none';
+}
+
+function renderEndlessRegionPanel(region, currentMapIndex) {
+  const panel = document.getElementById('endless-region-panel');
+  if (!panel || !region) return;
+  panel.style.display = '';
+
+  const header = `<div class="hud-label">${getStageName(region.stageNum)} R${region.regionNum}</div>`;
+  const rows = region.trainers.map((trainer, i) => {
+    const type = trainer.archetype?.type || null;
+    const name = trainer.archetype?.name || '???';
+    const isBigBoss = i === 2;
+    const isDone = i < currentMapIndex;
+    const isCurrent = i === currentMapIndex;
+
+    const types = type ? type.split('/') : [];
+    const typeBadges = types.map(t =>
+      `<span class="type-badge type-${t.trim().toLowerCase()}" style="font-size:6px;padding:1px 3px;margin-right:1px;">${t.trim()}</span>`
+    ).join('');
+
+    const statusIcon = isDone ? '✓ ' : isCurrent ? '▶ ' : '';
+    const rowClass = isDone ? 'region-stage-row done'
+      : isCurrent ? 'region-stage-row current'
+      : isBigBoss ? 'region-stage-row boss'
+      : 'region-stage-row';
+    const speciesAttr = (trainer.speciesIds || []).join(',');
+
+    return `<div class="${rowClass}" data-species="${speciesAttr}" style="cursor:default;">
+      <span style="display:inline-flex;gap:1px;align-items:center;">${typeBadges}</span>
+      <span class="region-stage-name">${statusIcon}${isBigBoss ? '★ ' : ''}${name}</span>
+      <span class="region-stage-level">Lv${trainer.displayLevel ?? trainer.level}</span>
+    </div>`;
+  }).join('');
+
+  panel.innerHTML = header + `<div class="region-stage-list">${rows}</div>`;
+  attachBossTeamTooltips(panel);
+}
+
+function attachBossTeamTooltips(container) {
+  const BASE = 'sprites/pokemon/';
+  let tip = document.getElementById('boss-team-tip');
+  if (!tip) {
+    tip = document.createElement('div');
+    tip.id = 'boss-team-tip';
+    tip.style.cssText = 'position:fixed;z-index:9999;pointer-events:none;display:none;gap:2px;align-items:center;padding:4px 6px;border:2px solid #4a4438;background:#181410;';
+    document.body.appendChild(tip);
+  }
+
+  container.querySelectorAll('[data-species]').forEach(row => {
+    const ids = (row.dataset.species || '').split(',').filter(Boolean);
+    if (!ids.length) return;
+    row.addEventListener('mouseenter', () => {
+      tip.innerHTML = ids.map(id =>
+        `<img src="${BASE}${id}.png" style="width:32px;height:32px;image-rendering:pixelated;" onerror="this.style.display='none'">`
+      ).join('');
+      tip.style.display = 'flex';
+      const r = row.getBoundingClientRect();
+      tip.style.left = (r.right + 6) + 'px';
+      tip.style.top = r.top + 'px';
+    });
+    row.addEventListener('mouseleave', () => { tip.style.display = 'none'; });
+  });
+}
+
+
+function renderBattleTraitBars(playerTiers, enemyTiers) {
+  _fillTraitBarEl('player-battle-traits', playerTiers || {});
+  _fillTraitBarEl('enemy-battle-traits',  enemyTiers  || {});
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    const p = document.getElementById('player-battle-traits');
+    const e = document.getElementById('enemy-battle-traits');
+    if (!p || !e) return;
+    p.style.minHeight = '';
+    e.style.minHeight = '';
+    const maxH = Math.max(p.offsetHeight, e.offsetHeight);
+    if (maxH > 0) { p.style.minHeight = maxH + 'px'; e.style.minHeight = maxH + 'px'; }
+  }));
+}
+
+function _fillTraitBarEl(elId, tiers) {
+  const el = document.getElementById(elId);
+  if (!el) return;
+  el.innerHTML = '';
+  for (const [type, tier] of Object.entries(tiers)) {
+    if (!tier) continue;
+    const badge = document.createElement('span');
+    badge.className = `trait-badge type-badge type-${type.toLowerCase()}`;
+    badge.textContent = `${type} T${tier}`;
+    // Tooltip shows the current-tier description, with graceful fallback for
+    // custom overrides (e.g. Ghetsis Dragon T10, Steven Rock T5) that exceed
+    // the per-trait description array length.
+    const descs = TRAIT_DESCRIPTIONS?.[type];
+    if (descs && descs.length > 0) {
+      const idx = Math.min(tier, descs.length) - 1;
+      badge.title = descs[idx];
+    }
+    el.appendChild(badge);
+  }
+}
+
+function clearBattleTraitBars() {
+  const p = document.getElementById('player-battle-traits');
+  const e = document.getElementById('enemy-battle-traits');
+  if (p) p.innerHTML = '';
+  if (e) e.innerHTML = '';
+}
+
+function renderStageComplete(stageNum, team, onContinue) {
+  const screen = document.getElementById('endless-stage-complete');
+  if (!screen) return;
+  const msgEl    = document.getElementById('stage-complete-msg');
+  const unlockEl = document.getElementById('stage-complete-unlock');
+  const teamEl   = document.getElementById('stage-complete-team');
+  const btnEl    = document.getElementById('btn-stage-continue');
+  const shareEl  = document.getElementById('btn-stage-share');
+  if (msgEl)    msgEl.textContent    = `${getStageName(stageNum)} Complete!`;
+  if (unlockEl) unlockEl.textContent = `${getStageName(stageNum + 1)} unlocked!`;
+  if (teamEl)   teamEl.innerHTML     = team.map(p => renderPokemonCard(p, false, false)).join('');
+  if (btnEl)    btnEl.onclick        = onContinue;
+  if (shareEl)  shareEl.onclick      = () => shareEndlessRun(stageNum, team);
+  showScreen('endless-stage-complete');
+}
+
+// Show a brief notification banner on the map screen
+function showMapNotification(msg) {
+  const mapScreen = document.getElementById('map-screen');
+  if (!mapScreen) return;
+
+  const existing = mapScreen.querySelector('.map-notification');
+  if (existing) existing.remove();
+
+  const div = document.createElement('div');
+  div.className = 'map-notification';
+  div.textContent = msg;
+  mapScreen.appendChild(div);
+
+  setTimeout(() => {
+    div.style.opacity = '0';
+    setTimeout(() => div.remove(), 500);
+  }, 1800);
+}
+
+// Render trainer sprites on both battle sides
+
+// ─── Mega Stones collection modal ─────────────────────────────────────────────
+function openMegaModal() {
+  const existing = document.getElementById('mega-modal');
+  if (existing) { existing.remove(); return; }
+  const owned = getMegaStones();
+  const bracelet = hasMegaBracelet();
+  const SPRITES = 'sprites/pokemon/';
+  const cards = Object.entries(MEGA_FORMS).map(([baseId, m]) => {
+    const has = owned.has(Number(baseId));
+    return `<div style="display:flex;flex-direction:column;align-items:center;gap:3px;width:86px;padding:8px 2px;background:var(--bg-card);border:1px solid var(--border);border-radius:8px;${has ? '' : 'opacity:0.45;filter:grayscale(0.9);'}">
+      <img src="${SPRITES}${m.megaId}.png" loading="lazy" style="width:56px;height:56px;image-rendering:pixelated;" onerror="this.style.visibility='hidden'">
+      <div style="font-size:7px;font-family:'Press Start 2P',monospace;text-align:center;">Mega ${m.megaName}</div>
+      <div style="font-size:7px;color:${has ? 'var(--green)' : 'var(--text-dim)'};">${has ? '💠 ' + m.megaName + 'ite' : 'Locked'}</div>
+    </div>`;
+  }).join('');
+  const modal = document.createElement('div');
+  modal.id = 'mega-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:var(--bg-main);color:var(--text-main);border-radius:12px;max-width:640px;width:94%;max-height:86vh;display:flex;flex-direction:column;overflow:hidden;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:12px 16px;border-bottom:1px solid var(--border);">
+        <div style="font-family:'Press Start 2P',monospace;font-size:11px;">💠 Mega Stones</div>
+        <button onclick="document.getElementById('mega-modal').remove()" style="background:none;border:none;font-size:16px;cursor:pointer;color:inherit;">✕</button>
+      </div>
+      <div style="padding:10px 16px;font-size:11px;line-height:1.6;border-bottom:1px solid var(--border);">
+        ${bracelet
+          ? '🧿 <b>Mega Bracelet owned.</b> Unlocked stones appear in your bag every run — equip one on its Pokémon to keep it Mega-Evolved for the whole journey (remove it to revert).'
+          : '🧿 <b>Mega Bracelet missing.</b> Clear <b>Battle Tower stage 3 (Hoenn)</b> to unlock Mega Evolution.'}
+        Win a run with a line on your team to earn its stone (${owned.size}/${Object.keys(MEGA_FORMS).length}).
+      </div>
+      <div style="display:flex;flex-wrap:wrap;gap:8px;padding:14px 16px;overflow-y:auto;">${cards}</div>
+    </div>`;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+function renderTrainerIcons(gender, enemyName = null, showPlayer = true) {
+  const playerEl = document.getElementById('player-trainer-icon');
+  const enemyEl  = document.getElementById('enemy-trainer-icon');
+  const labelEl  = document.getElementById('enemy-side-label');
+  if (playerEl) {
+    if (showPlayer) playerEl.innerHTML = TRAINER_SVG[gender] || TRAINER_SVG.boy;
+    else playerEl.innerHTML = '';
+  }
+  if (enemyEl) {
+    if (enemyName) {
+      enemyEl.innerHTML = getTrainerImgHtml(enemyName);
+      // Mirror to face player
+      const img = enemyEl.querySelector('img');
+      if (img) img.style.transform = 'scaleX(-1)';
+    } else {
+      enemyEl.innerHTML = ''; // Wild battle — no enemy trainer portrait
+    }
+  }
+  if (labelEl) labelEl.textContent = 'Enemy';
+}
+
+// Play the classic white-flash evolution animation
+async function playEvoAnimation(pokemon, evoData) {
+  const overlay  = document.getElementById('evo-overlay');
+  const msgEl    = document.getElementById('evo-msg');
+  const spriteEl = document.getElementById('evo-sprite');
+  if (!overlay) return;
+
+  const newSpriteUrl = pokemon.isShiny
+    ? `sprites/pokemon/shiny/${evoData.into}.png`
+    : `sprites/pokemon/${evoData.into}.png`;
+  const oldSpriteUrl = pokemon.spriteUrl || '';
+  const displayName  = pokemon.nickname || pokemon.name;
+
+  msgEl.textContent = `What? ${displayName} is evolving!`;
+  spriteEl.src = oldSpriteUrl;
+  spriteEl.style.filter = 'brightness(0) invert(1)'; // white silhouette
+  overlay.style.background = '#111';
+  overlay.style.display = 'flex';
+
+  let skipped = false;
+  const skipResolve = new Promise(r => {
+    overlay.onclick = () => { skipped = true; r(); };
+  });
+  const sleep = ms => skipped ? Promise.resolve() : Promise.race([new Promise(r => setTimeout(r, ms)), skipResolve]);
+
+  // Alternate between old and new silhouette, slow → fast (like the GB games)
+  const delays = [600, 600, 500, 500, 400, 350, 280, 200, 150, 110, 80, 60, 50, 40, 40, 35];
+  for (const d of delays) {
+    if (skipped) break;
+    spriteEl.src = (spriteEl.src.endsWith(oldSpriteUrl) || spriteEl.src === oldSpriteUrl)
+      ? newSpriteUrl : oldSpriteUrl;
+    await sleep(d);
+  }
+
+  // End on new sprite — single white flash to reveal
+  spriteEl.src = newSpriteUrl;
+  overlay.style.background = '#fff';
+  await sleep(120);
+  overlay.style.background = '#111';
+  spriteEl.style.filter = ''; // show in full color
+
+  msgEl.textContent = `${displayName} evolved into ${evoData.name}!`;
+  await sleep(2000);
+
+  overlay.style.display = 'none';
+  overlay.style.background = '#000';
+  overlay.onclick = null;
+  spriteEl.style.filter = '';
+}
+
+// Show branching evolution choice and return the chosen evoData
+function showBranchingChoice(pokemon, choices) {
+  return new Promise(resolve => {
+    const overlay  = document.getElementById('eevee-choice-overlay');
+    const choicesEl = document.getElementById('eevee-choices');
+    const titleEl   = document.getElementById('evo-choice-title');
+    if (titleEl) titleEl.innerHTML = `${pokemon.nickname || pokemon.name} is evolving!<br>Choose its evolution:`;
+    choicesEl.innerHTML = '';
+
+    for (const evoData of choices) {
+      const spriteUrl = pokemon.isShiny
+        ? `sprites/pokemon/shiny/${evoData.into}.png`
+        : `sprites/pokemon/${evoData.into}.png`;
+
+      const card = document.createElement('div');
+      card.style.cssText = 'display:flex;flex-direction:column;align-items:center;gap:8px;cursor:pointer;' +
+        'border:2px solid #555;border-radius:8px;padding:12px 16px;background:#1a1a1a;' +
+        'transition:border-color 0.15s,background 0.15s;';
+      card.onmouseenter = () => { card.style.borderColor = '#fff'; card.style.background = '#2a2a2a'; };
+      card.onmouseleave = () => { card.style.borderColor = '#555'; card.style.background = '#1a1a1a'; };
+
+      const img = document.createElement('img');
+      img.src = spriteUrl;
+      img.style.cssText = 'width:72px;height:72px;image-rendering:pixelated;';
+
+      const nameEl = document.createElement('div');
+      nameEl.textContent = evoData.name;
+      nameEl.style.cssText = "font-family:'Press Start 2P',monospace;font-size:8px;color:#fff;";
+
+      const typeEl = document.createElement('div');
+      typeEl.textContent = evoData.types.join('/');
+      typeEl.style.cssText = "font-family:'Press Start 2P',monospace;font-size:7px;color:#aaa;";
+
+      card.append(img, nameEl, typeEl);
+      card.onclick = () => {
+        overlay.style.display = 'none';
+        resolve(evoData);
+      };
+      choicesEl.appendChild(card);
+    }
+
+    overlay.style.display = 'flex';
+  });
+}
+
+// Check team for pending evolutions after a won battle and play animations
+let _evolveInProgress = false;
+async function checkAndEvolveTeam() {
+  if (_evolveInProgress) return;
+  _evolveInProgress = true;
+  try {
+  const skipAnim = getSettings().autoSkipEvolve;
+  for (const pokemon of state.team) {
+    const wasFainted = pokemon.currentHp <= 0;
+
+    // Eviolite blocks all evolutions — check before showing any branching popup.
+    if (pokemon.heldItem?.id === 'eviolite') continue;
+
+    let evo;
+    const branchingChoices = BRANCHING_EVOLUTIONS[pokemon.speciesId];
+    if (branchingChoices) {
+      if (pokemon.level < branchingChoices[0].level) continue;
+      evo = await showBranchingChoice(pokemon, branchingChoices);
+    } else {
+      evo = EVOLUTIONS[pokemon.speciesId];
+      if (!evo || pokemon.level < evo.level) continue;
+      if (pokemon.speciesId === evo.into) continue;
+    }
+    if (!skipAnim) await playEvoAnimation(pokemon, evo);
+
+    const oldHpRatio = pokemon.currentHp / pokemon.maxHp;
+    const newSpecies = await fetchPokemonById(evo.into);
+
+    pokemon.speciesId = evo.into;
+    pokemon.name      = evo.name;
+    pokemon.spriteUrl = pokemon.isShiny
+      ? `sprites/pokemon/shiny/${evo.into}.png`
+      : `sprites/pokemon/${evo.into}.png`;
+
+    if (newSpecies) {
+      pokemon.types     = newSpecies.types;
+      pokemon.baseStats = newSpecies.baseStats;
+      const hpBuff      = pokemon.statBuffs?.hp ?? 0;
+      const newMax      = Math.floor(calcHp(newSpecies.baseStats.hp, pokemon.level) * (1 + 0.1 * hpBuff));
+      pokemon.maxHp     = newMax;
+      pokemon.currentHp = wasFainted ? 0 : Math.max(1, Math.floor(oldHpRatio * newMax));
+    }
+
+    const normalUrl = `sprites/pokemon/${pokemon.speciesId}.png`;
+    markPokedexCaught(pokemon.speciesId, pokemon.name, pokemon.types, normalUrl);
+    if (pokemon.isShiny) markShinyDexCaught(pokemon.speciesId, pokemon.name, pokemon.types, pokemon.spriteUrl);
+    checkDexAchievements();
+    renderTeamBar(state.team);
+    saveRun();
+  }
+  } finally {
+    _evolveInProgress = false;
+  }
+  // A holder that just evolved into its stone's species Mega Evolves now.
+  if (typeof syncTeamMegaStates === 'function') syncTeamMegaStates();
+}
+
+// Animate level-up events returned by applyLevelGain
+async function animateLevelUp(levelUps) {
+  const pEl = document.getElementById('player-side');
+  if (!pEl || levelUps.length === 0) return;
+  const sleep = ms => new Promise(r => setTimeout(r, ms / battleSpeedMultiplier));
+
+  await Promise.all(levelUps.map(async ({ idx, pokemon, newLevel, preHp }) => {
+    const el = pEl.querySelector(`.battle-pokemon[data-idx="${idx}"]`);
+    if (!el) return;
+
+    if (pokemon.currentHp > 0 && pokemon.currentHp > preHp) {
+      await animateHpBar(el, preHp, pokemon.currentHp, pokemon.maxHp, 400);
+    }
+
+    el.classList.add('level-up');
+    const lvText = document.createElement('div');
+    lvText.className = 'level-up-text';
+    lvText.textContent = `Lv ${newLevel}!`;
+    el.appendChild(lvText);
+
+    // Rising sparkles for extra flair.
+    for (let s = 0; s < 5; s++) {
+      const sp = document.createElement('div');
+      sp.className = 'levelup-sparkle';
+      sp.textContent = '✨';
+      sp.style.left = (18 + Math.random() * 64) + '%';
+      sp.style.animationDelay = (Math.random() * 0.3) + 's';
+      el.appendChild(sp);
+      setTimeout(() => sp.remove(), 1300);
+    }
+
+    await sleep(900);
+    el.classList.remove('level-up');
+    lvText.remove();
+
+    const nameEl = el.querySelector('.battle-poke-name');
+    if (nameEl) nameEl.textContent = `${pokemon.nickname || pokemon.name} Lv${newLevel}`;
+  }));
+}
+
+// Legacy: animate battle log line by line (kept for fallback)
+
+// ---- Achievement Toast ----
+
+let _toastQueue = [];
+let _toastRunning = false;
+
+// Bug trait level-up banner — shows each leveled Pokémon's sprite + new level
+function showBugLevelUpBanner(leveled, duration = 1500) {
+  // leveled: array of { name, spriteUrl, level }
+  const banner = document.createElement('div');
+  banner.style.cssText = [
+    'position:fixed', 'top:56px', 'left:50%', 'transform:translateX(-50%)',
+    'z-index:200', 'display:flex', 'flex-direction:column', 'align-items:center',
+    'gap:4px', 'pointer-events:none', 'opacity:0', 'transition:opacity 0.25s',
+  ].join(';');
+
+  const label = document.createElement('div');
+  label.style.cssText = 'font-family:"Press Start 2P",monospace;font-size:7px;color:#a8d848;text-shadow:1px 1px 0 #000,0 0 8px #78b820;letter-spacing:1px;margin-bottom:2px;';
+  label.textContent = '🐛 Bug Trait — Level Up!';
+  banner.appendChild(label);
+
+  const row = document.createElement('div');
+  row.style.cssText = 'display:flex;gap:6px;align-items:flex-end;';
+  for (const p of leveled) {
+    const card = document.createElement('div');
+    card.style.cssText = 'display:flex;flex-direction:column;align-items:center;background:rgba(0,0,0,0.75);border:2px solid #a8d848;padding:4px 6px;';
+    card.innerHTML = `
+      <img src="${p.spriteUrl}" style="width:40px;height:40px;image-rendering:pixelated;" onerror="this.style.display='none'">
+      <span style="font-family:'Press Start 2P',monospace;font-size:6px;color:#fff;margin-top:2px;">${p.name}</span>
+      <span style="font-family:'Press Start 2P',monospace;font-size:7px;color:#a8d848;">Lv ${p.level}</span>`;
+    row.appendChild(card);
+  }
+  banner.appendChild(row);
+  document.body.appendChild(banner);
+
+  requestAnimationFrame(() => { banner.style.opacity = '1'; });
+  setTimeout(() => {
+    banner.style.opacity = '0';
+    setTimeout(() => banner.remove(), 300);
+  }, duration);
+}
+
+function showAchievementToast(ach) {
+  _toastQueue.push(ach);
+  if (!_toastRunning) _runToastQueue();
+}
+
+function _runToastQueue() {
+  if (_toastQueue.length === 0) { _toastRunning = false; return; }
+  _toastRunning = true;
+  const ach = _toastQueue.shift();
+
+  const toast = document.createElement('div');
+  toast.className = 'achievement-toast';
+  toast.innerHTML = `<span class="ach-toast-icon">${achievementIconHtml(ach)}</span>
+    <div class="ach-toast-text">
+      <div class="ach-toast-label">Achievement Unlocked!</div>
+      <div class="ach-toast-name">${ach.name}</div>
+    </div>`;
+  document.body.appendChild(toast);
+
+  // Animate in
+  requestAnimationFrame(() => toast.classList.add('visible'));
+
+  setTimeout(() => {
+    toast.classList.remove('visible');
+    setTimeout(() => { toast.remove(); _runToastQueue(); }, 400);
+  }, 3000);
+}
+
+// ---- Settings Modal ----
+
+function applyDarkMode() {
+  document.body.classList.toggle('dark-mode', !!getSettings().darkMode);
+}
+
+function openSettingsModal() {
+  const existing = document.getElementById('settings-modal');
+  if (existing) { existing.remove(); return; }
+
+  const modal = document.createElement('div');
+  modal.id = 'settings-modal';
+
+  function row(label, key, disabled = false) {
+    const s = getSettings();
+    return `<label class="settings-row${disabled ? ' settings-row-disabled' : ''}">
+      <span class="settings-label">${label}</span>
+      <input type="checkbox" class="settings-checkbox" data-key="${key}" ${s[key] ? 'checked' : ''} ${disabled ? 'disabled' : ''}>
+    </label>`;
+  }
+
+  function render() {
+    const s = getSettings();
+    modal.innerHTML = `
+      <div class="settings-modal-box">
+        <div class="settings-modal-header">
+          <span>Settings</span>
+          <button class="ach-modal-close" onclick="document.getElementById('settings-modal').remove()">✕</button>
+        </div>
+        <div class="settings-section-title">Display</div>
+        ${row('Dark Mode', 'darkMode')}
+        <div class="settings-section-title">Auto-Skip</div>
+        ${row('Regular Trainers', 'autoSkipBattles', s.autoSkipAllBattles)}
+        ${row('All Fights', 'autoSkipAllBattles')}
+        ${row('Evolutions', 'autoSkipEvolve')}
+      </div>`;
+
+    modal.querySelectorAll('.settings-checkbox').forEach(cb => {
+      cb.onchange = () => {
+        const s2 = getSettings();
+        s2[cb.dataset.key] = cb.checked;
+        saveSettings(s2);
+        applyDarkMode();
+        render();
+      };
+    });
+
+  }
+
+  render();
+  document.body.appendChild(modal);
+}
+
+// ---- Achievements Modal ----
+
+function openAchievementsModal() {
+  const existing = document.getElementById('achievements-modal');
+  if (existing) { existing.remove(); return; }
+
+  const unlocked = getUnlockedAchievements();
+
+  const CATEGORIES = [
+    { key: 'normal',    label: 'Gen 1 — Classic' },
+    { key: 'gen1_nuz',  label: 'Gen 1 — Nuzlocke' },
+    { key: 'gen1_chal', label: 'Gen 1 — Challenges' },
+    { key: 'gen2_norm', label: 'Gen 2 — Normal' },
+    { key: 'gen2_nuz',  label: 'Gen 2 — Nuzlocke' },
+    { key: 'gen2_chal', label: 'Gen 2 — Challenges' },
+    { key: 'gen3_norm', label: 'Gen 3 — Normal' },
+    { key: 'gen3_nuz',  label: 'Gen 3 — Nuzlocke' },
+    { key: 'gen3_chal', label: 'Gen 3 — Challenges' },
+    { key: 'tower',     label: 'Battle Tower' },
+    { key: 'general',   label: 'General' },
+  ];
+
+  const categorySections = CATEGORIES.map(({ key, label }) => {
+    const group = ACHIEVEMENTS.filter(a => a.category === key);
+    const groupUnlocked = group.filter(a => unlocked.has(a.id)).length;
+    const cards = group.map(a => {
+      const done = unlocked.has(a.id);
+      return `<div class="ach-card ${done ? 'unlocked' : 'locked'}">
+        <div class="ach-icon">${achievementIconHtml(a)}</div>
+        <div class="ach-name">${a.name}</div>
+        <div class="ach-desc">${a.desc}</div>
+      </div>`;
+    }).join('');
+    return `
+      <div class="ach-category-header">${label} <span class="ach-category-count">${groupUnlocked}/${group.length}</span></div>
+      <div class="ach-modal-grid">${cards}</div>`;
+  }).join('');
+
+  const modal = document.createElement('div');
+  modal.id = 'achievements-modal';
+  modal.innerHTML = `
+    <div class="ach-modal-box">
+      <div class="ach-modal-header">
+        <span>Achievements (${unlocked.size}/${ACHIEVEMENTS.length})</span>
+        <button class="ach-modal-close" onclick="document.getElementById('achievements-modal').remove()">✕</button>
+      </div>
+      <div class="ach-modal-body">${categorySections}</div>
+    </div>`;
+  document.body.appendChild(modal);
+}
+
+// ---- Pokedex Modal ----
+
+async function openPokedexModal(initialTab = 'normal') {
+  const existing = document.getElementById('pokedex-modal');
+  if (existing) { existing.remove(); return; }
+
+  // Names and types now come from the bundled static pokedex (saves dropped
+  // those fields per entry to shrink cloud payloads). Await the load so the
+  // first paint isn't full of "???" if the JSON is still in flight.
+  if (typeof loadStaticPokedex === 'function') {
+    try { await loadStaticPokedex(); } catch {}
+  }
+
+  const BASE = 'sprites/pokemon/';
+
+  const GEN_HEADERS = { 1: 'Generation I', 152: 'Generation II', 252: 'Generation III', 387: 'Generation IV', 494: 'Generation V' };
+
+  const GEN_RANGES = { 1: [1,151], 152: [152,251], 252: [252,386], 387: [387,493], 494: [494,649] };
+
+  function buildGenCounts(dex, isCaughtFn) {
+    const counts = {};
+    for (const [startId, [min, max]] of Object.entries(GEN_RANGES)) {
+      let caught = 0;
+      for (let id = min; id <= max; id++) { if (isCaughtFn(dex, id)) caught++; }
+      counts[startId] = { caught, total: max - min + 1 };
+    }
+    return counts;
+  }
+
+  function buildNormalGrid() {
+    const dex = getPokedex();
+    const caughtCount = Array.from({length: 649}, (_, i) => i + 1).filter(id => _isDexCaught(dex[id])).length;
+    const genCounts = buildGenCounts(dex, (d, id) => _isDexCaught(d[id]));
+    const towerStageFor = (typeof getBattleTowerLocations === 'function')
+      ? (id) => {
+          const locs = getBattleTowerLocations(id);
+          if (!locs.length) return null;
+          // Compact the list — show each unique location label.
+          return locs.map(l => l.label).join(' • ');
+        }
+      : () => null;
+    const grid = Array.from({ length: 649 }, (_, i) => {
+      const id = i + 1;
+      const gc = genCounts[id];
+      const header = GEN_HEADERS[id] ? `<div class="dex-gen-header">${GEN_HEADERS[id]}<span class="gen-count">${gc.caught}/${gc.total}</span></div>` : '';
+      const e = dex[id];
+      const towerStage = towerStageFor(id);
+      const towerTitle = towerStage ? ` title="Battle Tower: ${towerStage}"` : '';
+      if (_isDexSeen(e)) {
+        // name/types come from the bundled static pokedex (data/pokedex.json),
+        // not from the saved entry — that's the whole point of the slim format.
+        const name  = getSpeciesName(id);
+        const types = getSpeciesTypes(id).map(t =>
+          `<span class="type-badge type-${t.toLowerCase()}">${t}</span>`).join('');
+        return header + `<div class="dex-card dex-caught"${towerTitle}>
+          <div class="dex-num">#${String(id).padStart(3,'0')}</div>
+          <img src="${BASE + id + '.png'}" alt="${name}" class="dex-sprite"
+               loading="lazy" decoding="async"
+               onerror="this.src='';this.style.display='none'">
+          <div class="dex-name">${name}</div>
+          <div class="dex-types">${types}</div>
+        </div>`;
+      }
+      return header + `<div class="dex-card dex-unknown">
+        <div class="dex-num">#${String(id).padStart(3,'0')}</div>
+        <img src="${BASE + id + '.png'}" alt="???" class="dex-sprite dex-silhouette"
+             loading="lazy" decoding="async"
+             onerror="this.src='';this.style.display='none'">
+        <div class="dex-name dex-unknown-name">???</div>
+      </div>`;
+    }).join('');
+    return { grid, count: caughtCount };
+  }
+
+  function buildShinyGrid() {
+    const dex = getShinyDex();
+    const BASE_SHINY = 'sprites/pokemon/shiny/';
+    const count = Array.from({length: 649}, (_, i) => i + 1).filter(id => dex[id]).length;
+    const genCounts = buildGenCounts(dex, (d, id) => !!d[id]);
+    const grid = Array.from({ length: 649 }, (_, i) => {
+      const id = i + 1;
+      const gc = genCounts[id];
+      const header = GEN_HEADERS[id] ? `<div class="dex-gen-header">${GEN_HEADERS[id]}<span class="gen-count">${gc.caught}/${gc.total}</span></div>` : '';
+      const e = dex[id];
+      if (e) {
+        const name  = getSpeciesName(id);
+        const types = getSpeciesTypes(id).map(t =>
+          `<span class="type-badge type-${t.toLowerCase()}">${t}</span>`).join('');
+        return header + `<div class="dex-card shiny-dex-card">
+          <div class="dex-num">#${String(id).padStart(3,'0')}</div>
+          <img src="${BASE_SHINY + id + '.png'}" alt="${name}" class="dex-sprite"
+               loading="lazy" decoding="async"
+               onerror="this.src='';this.style.display='none'">
+          <div class="dex-name">${name}</div>
+          <div class="dex-types">${types}</div>
+          <div class="shiny-star">★</div>
+        </div>`;
+      }
+      return header + `<div class="dex-card dex-unknown">
+        <div class="dex-num">#${String(id).padStart(3,'0')}</div>
+        <img src="${BASE_SHINY + id + '.png'}" alt="???" class="dex-sprite dex-silhouette"
+             loading="lazy" decoding="async"
+             onerror="this.src='';this.style.display='none'">
+        <div class="dex-name dex-unknown-name">???</div>
+      </div>`;
+    }).join('');
+    return { grid, count };
+  }
+
+  const modal = document.createElement('div');
+  modal.id = 'pokedex-modal';
+  modal.innerHTML = `
+    <div class="dex-modal-box">
+      <div class="dex-modal-header">
+        <div class="dex-tabs">
+          <button class="dex-tab" data-tab="normal">📖 Pokédex</button>
+          <button class="dex-tab" data-tab="shiny">✨ Shiny</button>
+        </div>
+        <span class="dex-counts" id="dex-count-label"></span>
+        <button class="ach-modal-close" onclick="document.getElementById('pokedex-modal').remove()">✕</button>
+      </div>
+      <div style="padding:8px 12px 4px;display:flex;flex-direction:column;gap:4px;">
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div style="flex:1;background:#2a0010;height:26px;overflow:hidden;position:relative;border:2px solid #550000;">
+            <div id="dex-progress-bar" style="height:100%;background:repeating-linear-gradient(60deg,#cc1111 0px,#cc1111 16px,#ee3333 16px,#ee3333 32px);transition:width 0.3s;width:0%"></div>
+            <span id="dex-progress-label" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',monospace;font-size:8px;font-weight:bold;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.8);pointer-events:none;"></span>
+          </div>
+          <div id="dex-charm-icon" style="width:28px;height:28px;display:flex;align-items:center;justify-content:center;border:2px solid #550000;background:#1a0004;flex-shrink:0;" title="Shiny Charm — complete the Gen 1 Pokédex to unlock. Doubles all shiny rates.">
+            <img src="sprites/items/shiny-charm.png" alt="Shiny Charm" style="width:24px;height:24px;image-rendering:pixelated;" onerror="this.style.display='none'">
+          </div>
+        </div>
+        <div style="background:#1a1a2e;height:20px;overflow:hidden;position:relative;border:2px solid #333366;">
+          <div id="dex-progress-bar-all" style="height:100%;background:repeating-linear-gradient(60deg,#3344aa 0px,#3344aa 16px,#4455cc 16px,#4455cc 32px);transition:width 0.3s;width:0%"></div>
+          <span id="dex-progress-label-all" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:'Press Start 2P',monospace;font-size:7px;font-weight:bold;color:#fff;text-shadow:0 1px 2px rgba(0,0,0,0.8);pointer-events:none;"></span>
+        </div>
+      </div>
+      <div class="dex-grid" id="dex-grid-content"></div>
+    </div>`;
+
+  function switchTab(tab) {
+    modal.querySelectorAll('.dex-tab').forEach(b => b.classList.toggle('active', b.dataset.tab === tab));
+    modal.querySelector('.dex-modal-box').classList.toggle('shiny-dex-box', tab === 'shiny');
+    const { grid, count } = tab === 'shiny' ? buildShinyGrid() : buildNormalGrid();
+    document.getElementById('dex-grid-content').innerHTML = grid;
+
+    const isShiny = tab === 'shiny';
+    const dexData = isShiny ? getShinyDex() : getPokedex();
+    const isCaught = id => isShiny ? !!dexData[id] : _isDexCaught(dexData[id]);
+
+    // Count every species in the gen — including legendaries — so the % matches
+    // what completionists would expect to fill.
+    const allIds = [
+      ...[...ALL_CATCHABLE_IDS],
+      ...LEGENDARY_IDS.filter(id => id <= 649),
+    ];
+    const gen1Ids = allIds.filter(id => id <= 151);
+    const gen1Total = gen1Ids.length;
+    const gen1Count = gen1Ids.filter(isCaught).length;
+    const gen1Pct = Math.floor(gen1Count / gen1Total * 100);
+
+    const allTotal = allIds.length;
+    const allCount = allIds.filter(isCaught).length;
+    const allPct = Math.floor(allCount / allTotal * 100);
+
+    document.getElementById('dex-count-label').textContent = `${allCount} / ${allTotal}`;
+    document.getElementById('dex-progress-bar').style.width = `${gen1Pct}%`;
+    document.getElementById('dex-progress-label').textContent = `Gen 1 — ${gen1Pct}%`;
+    document.getElementById('dex-progress-bar-all').style.width = `${allPct}%`;
+    document.getElementById('dex-progress-label-all').textContent = `All Gens — ${allPct}%`;
+
+    const charmEl = document.getElementById('dex-charm-icon');
+    if (hasShinyCharm()) {
+      charmEl.style.borderColor = 'gold';
+      charmEl.style.boxShadow = '0 0 6px gold';
+      charmEl.title = 'Shiny Charm — active! Doubles all shiny rates.';
+    }
+
+    modal.onclick = e => {
+      const card = e.target.closest('.dex-card');
+      if (!card) return;
+      const id = parseInt(card.querySelector('.dex-num')?.textContent.replace('#', ''), 10);
+      if (!id) return;
+      const name  = getSpeciesName(id);
+      const types = getSpeciesTypes(id);
+      const spriteUrl = `sprites/pokemon/${id}.png`;
+      const shinySpriteUrl = `sprites/pokemon/shiny/${id}.png`;
+      openDexDetailModal(id, name, spriteUrl, shinySpriteUrl, types);
+    };
+  }
+
+  modal.querySelectorAll('.dex-tab').forEach(b =>
+    b.addEventListener('click', () => switchTab(b.dataset.tab)));
+  document.body.appendChild(modal);
+  switchTab(initialTab);
+}
+
+function openShinyDexModal() { openPokedexModal('shiny'); }
+
+function openDexDetailModal(speciesId, name, spriteUrl, shinySpriteUrl, types) {
+  const existing = document.getElementById('dex-detail-modal');
+  if (existing) existing.remove();
+
+  const numStr = `#${String(speciesId).padStart(3, '0')}`;
+  const typeBadges = types.map(t =>
+    `<span class="type-badge type-${t.toLowerCase()}">${t}</span>`
+  ).join('');
+
+  const isGen1 = speciesId <= 151;
+  const cachedPoke = getCached(`pkrl_poke_${speciesId}`);
+  const { regularMaps } = getPokemonLocations(speciesId, cachedPoke?.bst);
+  const locTags = isGen1
+    ? (regularMaps.length
+        ? regularMaps.map(m => `<span class="dex-detail-loc-tag">${m}</span>`).join('')
+        : '<span class="dex-detail-loc-none">Not found in regular mode</span>')
+    : '<span class="dex-detail-loc-none">Not available</span>';
+  // Exact Battle Tower floors (S#R#M#) — getBattleTowerLocations resolves these
+  // synchronously from evo-line bucket membership, so no BST fetch is needed.
+  const towerFloors = (typeof getBattleTowerLocations === 'function')
+    ? getBattleTowerLocations(speciesId).map(l => l.label)
+    : [];
+  const floorTags = towerFloors.length
+    ? towerFloors.map(f => `<span class="dex-detail-loc-tag dex-detail-loc-tag--tower">${f}</span>`).join('')
+    : '<span class="dex-detail-loc-none">Not found in Battle Tower</span>';
+
+  const modal = document.createElement('div');
+  modal.id = 'dex-detail-modal';
+  modal.innerHTML = `
+    <div class="dex-detail-box">
+      <div class="dex-detail-header">
+        <span class="dex-detail-title">${numStr} ${name}</span>
+        <button class="ach-modal-close" id="dex-detail-close">✕</button>
+      </div>
+      <div class="dex-detail-body">
+        <div class="dex-detail-top">
+          <div class="dex-detail-sprite-wrap">
+            <img id="dex-detail-sprite" class="dex-detail-sprite" src="${spriteUrl}" alt="${name}">
+            <button class="dex-detail-shiny-btn" id="dex-detail-shiny-btn" title="Toggle shiny">★</button>
+          </div>
+          <div class="dex-detail-info">
+            <div class="dex-detail-name">${name}</div>
+            <div class="dex-detail-num">${numStr}</div>
+            <div class="dex-detail-types">${typeBadges}</div>
+            <div class="dex-detail-flavor" id="dex-detail-flavor">Loading...</div>
+          </div>
+        </div>
+        <div class="dex-detail-section-title">Evolution Chain</div>
+        <div class="dex-detail-evo" id="dex-detail-evo">Loading...</div>
+        <div class="dex-detail-section-title">Where to Find</div>
+        <div class="dex-detail-locations">
+          <div class="dex-detail-loc-group">
+            <span class="dex-detail-loc-label">Regular:</span>
+            <div class="dex-detail-loc-tags">${locTags}</div>
+          </div>
+          <div class="dex-detail-loc-group">
+            <span class="dex-detail-loc-label">Battle Tower:</span>
+            <div class="dex-detail-loc-tags" id="dex-detail-floors">${floorTags}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+  document.body.appendChild(modal);
+
+  const spriteEl = document.getElementById('dex-detail-sprite');
+  const shinyBtn = document.getElementById('dex-detail-shiny-btn');
+  let showingShiny = false;
+  shinyBtn.addEventListener('click', e => {
+    e.stopPropagation();
+    showingShiny = !showingShiny;
+    spriteEl.src = showingShiny ? shinySpriteUrl : spriteUrl;
+    shinyBtn.classList.toggle('dex-detail-shiny-btn--active', showingShiny);
+  });
+
+  const close = () => { const m = document.getElementById('dex-detail-modal'); if (m) m.remove(); };
+  document.getElementById('dex-detail-close').addEventListener('click', close);
+  modal.addEventListener('click', e => { if (e.target === modal) close(); });
+
+  // Unseen Pokémon (name '???'): fetch name/types once and fill them in.
+  // Tower floors are already resolved synchronously above — no fetch needed.
+  if (name === '???') {
+    fetchPokemonById(speciesId).then(poke => {
+      if (!document.getElementById('dex-detail-modal') || !poke) return;
+      document.querySelector('#dex-detail-modal .dex-detail-title').textContent = `${numStr} ${poke.name}`;
+      document.querySelector('#dex-detail-modal .dex-detail-name').textContent = poke.name;
+      if (poke.types?.length) {
+        document.querySelector('#dex-detail-modal .dex-detail-types').innerHTML =
+          poke.types.map(t => `<span class="type-badge type-${t.toLowerCase()}">${t}</span>`).join('');
+      }
+    });
+  }
+
+  // Async: flavor text
+  fetchPokemonSpecies(speciesId).then(data => {
+    const el = document.getElementById('dex-detail-flavor');
+    if (el) el.textContent = data.flavorText || '—';
+  });
+
+  // Async: evolution chain
+  (async () => {
+    const { chain } = buildEvoChain(speciesId);
+
+    async function renderEvoNode(node) {
+      const poke = await fetchPokemonById(node.id);
+      if (!document.getElementById('dex-detail-evo')) return null;
+      const isCurrent = node.id === speciesId;
+
+      const wrap = document.createElement('div');
+      wrap.className = 'dex-evo-forward';
+
+      const nodeEl = document.createElement('div');
+      nodeEl.className = 'dex-evo-node' + (isCurrent ? ' dex-evo-node--current' : '');
+      const img = document.createElement('img');
+      img.className = 'dex-evo-sprite';
+      img.src = poke?.spriteUrl || `sprites/pokemon/${node.id}.png`;
+      img.alt = poke?.name || '';
+      const nameEl = document.createElement('div');
+      nameEl.className = 'dex-evo-name';
+      nameEl.textContent = poke?.name || '';
+      nodeEl.appendChild(img);
+      nodeEl.appendChild(nameEl);
+      wrap.appendChild(nodeEl);
+
+      if (node.evolvesInto.length > 0) {
+        const arrow = document.createElement('div');
+        arrow.className = 'dex-evo-arrow';
+        arrow.innerHTML = '▶';
+        const levelEl = document.createElement('div');
+        levelEl.className = 'dex-evo-level';
+        levelEl.textContent = node.evolvesInto[0].level ? `Lv.${node.evolvesInto[0].level}` : '';
+        const arrowWrap = document.createElement('div');
+        arrowWrap.className = 'dex-evo-arrow-wrap';
+        arrowWrap.appendChild(levelEl);
+        arrowWrap.appendChild(arrow);
+        wrap.appendChild(arrowWrap);
+
+        const childrenEl = document.createElement('div');
+        childrenEl.className = 'dex-evo-children' + (node.evolvesInto.length > 1 ? ' dex-evo-branch' : '');
+
+        const childNodes = await Promise.all(node.evolvesInto.map(child => renderEvoNode(child)));
+        if (!document.getElementById('dex-detail-evo')) return null;
+        for (const childEl of childNodes) {
+          if (childEl) childrenEl.appendChild(childEl);
+        }
+        wrap.appendChild(childrenEl);
+      }
+
+      return wrap;
+    }
+
+    const evoEl = document.getElementById('dex-detail-evo');
+    if (!evoEl) return;
+    const chainEl = await renderEvoNode(chain);
+    const evoContainer = document.getElementById('dex-detail-evo');
+    if (evoContainer && chainEl) {
+      evoContainer.innerHTML = '';
+      evoContainer.appendChild(chainEl);
+    } else if (evoContainer) {
+      evoContainer.textContent = '—';
+    }
+  })();
+}
+
+// ---- Patch Notes Modal ----
+
+const PATCH_NOTES = [
+  {
+    version: '1.6',
+    title: 'Achievements, Sync & Tower Patch',
+    date: '2026-05-20',
+    sections: [
+      {
+        heading: 'Cloud Sync',
+        entries: [
+          'Multi-device sync rewrite — every save now pulls from the cloud, merges, then pushes, so progress made on a second device can no longer be overwritten by a stale snapshot from another device',
+          'Tab focus triggers a fresh pull — switch back to the game after playing elsewhere and your progress is up to date immediately, no reload required',
+          'Concurrent sync calls collapse to a single round-trip; the in-progress run is never touched by a sync',
+        ],
+      },
+      {
+        heading: 'New Achievements',
+        entries: [
+          '23 new achievements grouped into Gen 1 Nuzlocke, Gen 1 Challenges, Gen 2 Normal, Gen 2 Nuzlocke, and Gen 2 Challenges',
+          'Per-starter Gen 2 wins (Chikorita / Cyndaquil / Totodile) and Nuzlocke variants for every starter in both gens',
+          'Challenge achievements: Type Master (mono-type team), Shiny Squad, Purist (all single-stage Pokémon), Johto Ironman (no Pokémon Center), Lone Survivor (never defeat Silver), Time Traveler (beat the Gen 2 Elite Four with no Gen 2 Pokémon)',
+          'Achievement icons now use PokeAPI item sprites instead of emoji — every achievement gets a thematic item; element-named starter achievements show their matching evolution stone (Leaf / Fire / Water)',
+        ],
+      },
+      {
+        heading: 'Battle Tower',
+        entries: [
+          'Mawile, Sableye, Chatot and Carnivine are obtainable again — they were stuck in a bucket the Tower\'s level curve mostly skipped at the stage where their generation unlocks',
+          'Tower encounter pools now widen into the neighbouring level band on every tier, eliminating dead zones and making evolved forms like Probopass, Floatzel, and Skuntank directly catchable at appropriate levels',
+          'Reroll pool now also excludes evolution lines already on your team, not just the three currently-displayed slots',
+        ],
+      },
+      {
+        heading: 'Changes',
+        entries: [
+          'Map screen mode indicator — the START node tints subtly blue for Normal runs and red for Nuzlocke, replacing the old text chip in the right HUD',
+          'Gym badge sprites are now hosted locally with their light-gray outer ring cleaned up, fixing the faint halo on dark backgrounds in the achievements modal and the map HUD',
+          'minLevelForSpecies accounts for branching evolutions — Eeveelutions, Politoed, Slowking, Gallade and friends no longer spawn raw below their evolution level',
+        ],
+      },
+      {
+        heading: 'Bug Fixes',
+        entries: [
+          'Escape Rope no longer appears in item drops during Nuzlocke runs, and a leftover rope cannot be used to undo a Nuzlocke loss',
+          'A Pokémon that fainted during a winning Nuzlocke battle no longer plays its evolution animation on the way out',
+          'Pressing R to restart from a non-map screen (battle, catch, item, modals…) now cleanly tears down the active screen before re-initialising; previously could leave the game in a broken state',
+        ],
+      },
+    ],
+  },
+  {
+    version: '1.5.2',
+    title: 'Nuzlocke & Balance Patch',
+    date: '2026-05-16',
+    sections: [
+      {
+        heading: 'Nuzlocke',
+        entries: [
+          'Rival (Silver) battles are no longer permanent-death — win the fight and any Pokémon that fainted are kept and fully healed afterward, just like in Normal mode',
+          'Hovering the Rival node in Nuzlocke now shows a "No Perma-Death" note, and the Nuzlocke mode button has a tooltip explaining the rule',
+        ],
+      },
+      {
+        heading: 'Balance',
+        entries: [
+          'Flying trait dodge chance reduced: 15% / 30% / 50% → 10% / 15% / 20%',
+          'Gen 2 Elite Four (Will, Koga, Bruno, Karen, Lance) levels lowered by 1 across every team member',
+        ],
+      },
+      {
+        heading: 'Changes',
+        entries: [
+          'Pokédex: a Pokémon\'s card tooltip and detail view now list the exact Battle Tower floors it can be found on, using R#M# notation (e.g. R1M2 = Region 1, Map 2), replacing the vague Early/Middle/Late labels',
+        ],
+      },
+      {
+        heading: 'Bug Fixes',
+        entries: [
+          'Gen 2 map: Lance now uses the bundled local sprite instead of loading an external Showdown image',
+          'Elite Four prep screen: equipping or swapping an item now refreshes the display immediately, instead of only updating after you reorder your team',
+          'Gen 2 Schoolboy trainer node tooltip now reads "Baby Pokemon" instead of "Normal Pokemon" to match his actual roster',
+          'Mr. Mime is obtainable again — it was stuck in a catch-pool tier whose maps never reach its minimum level (18), so it could never spawn; moved to the correct tier (Nugget Bridge / Rock Tunnel)',
+        ],
+      },
+    ],
+  },
+  {
+    version: '1.5.1',
+    title: 'Quality of Life Patch',
+    date: '2026-05-15',
+    sections: [
+      {
+        heading: 'Changes',
+        entries: [
+          'Battle Tower: Pokémon you\'ve previously levelled can now appear in catch nodes regardless of the stage\'s generation cap, at the same per-slot rate they had in v1.4.5 (before gen anchoring)',
+          'R key now resets the current run from any screen',
+          'Resetting by accident is recoverable — refresh the page and the run you reset is restored',
+        ],
+      },
+    ],
+  },
+  {
+    version: '1.5',
+    title: 'Gen 2: Johto Mode',
+    date: '2026-05-15',
+    sections: [
+      {
+        heading: 'New Mode — Gen 2 (Johto)',
+        entries: [
+          'Title screen now has a Gen I / Gen II toggle — pick your region before starting a run. The choice persists across reloads.',
+          '9-map Johto run with Falkner, Bugsy, Whitney, Morty, Chuck, Jasmine, Pryce and Clair as gym leaders, and the Johto Elite Four (Will / Koga / Bruno / Karen / Lance)',
+          'Silver rival: 4 canonical encounters during the run. He always picks the starter that counters yours and rewards Double XP',
+          'HGSS-accurate gym teams and trainer rosters throughout',
+          'Per-route map backgrounds (routes 1–9) plus new trainer sprites and themed encounter pools (Firebreather, Bird Keeper, Super Nerd, Bug Catcher, Hiker, Fisherman, Biker, Old Man, and more)',
+        ],
+      },
+      {
+        heading: 'New Items',
+        entries: [
+          'Loaded Dice (Gen 2 only) — at the start of each battle, 37% chance for +2 to ATK / DEF / Sp.Atk / Sp.Def / Speed, otherwise −1. The roll is announced in the battle log.',
+          'Adrenaline Orb — when YOU land a super-effective hit (×2+), +1 ATK / +1 Sp.Atk for the rest of the battle',
+          'Red Card — take 50% less damage from super-effective hits',
+          'Quick Claw — chance to strike first regardless of Speed',
+          'Lagging Tail — always moves last, +100% move damage',
+          'King\'s Rock, Steel / Dark / Fairy type-boost items, TM, and Escape Rope',
+        ],
+      },
+      {
+        heading: 'Changes',
+        entries: [
+          'Player level is now capped at 100 in all modes except Battle Tower',
+          'Reset run no longer shows a confirmation popup — restarts immediately',
+          'Battle Tower encounters are now anchored to the gen they came from',
+          'Stat-buff math correctly handles negative stages (matters for Loaded Dice and similar items)',
+          'Gen 2 trainer class names updated to canon (Burglar → Firebreather, Bird Catcher → Bird Keeper, Super Nerd uses the proper Showdown sprite)',
+          'Static Pokédex bundled with the client — catch screens no longer need a PokeAPI round-trip',
+        ],
+      },
+      {
+        heading: 'Bug Fixes',
+        entries: [
+          '22-bug issue sweep across battle, map, and UI',
+          'Reverse-evolution through branching chains (Eevee, Tyrogue, Burmy, etc.) now resolves the correct prevo for level checks',
+          'Gen 2 Elite Four levels rebalanced and Lance now fields three Dragonites as in canon',
+          'Tyrogue evolution table no longer has a redundant entry',
+        ],
+      },
+    ],
+  },
+  {
+    version: '1.4.5',
+    title: 'Bug Fix Patch',
+    date: '2026-05-03',
+    sections: [
+      {
+        heading: 'New',
+        entries: [
+          'Long battles now auto-speed up to 5× after 30 seconds',
+          'OVERTIME: if a battle reaches 100 rounds (≈ 2 minutes), all attacks deal 3× damage and a banner is shown — no more infinite stall fights',
+        ],
+      },
+      {
+        heading: 'Bug Fixes',
+        entries: [
+          'Bug trait now correctly triggers evolution after levelling up Pokémon mid-run',
+          'Pokédex completion achievement now requires catching legendary Pokémon as well — they were previously excluded from the check',
+          'Shiny dex count (for shiny achievements) now includes legendary shinies',
+          'Battle Tower blank screen after a specific reload sequence (pick → swap prompt → reload → new run → reload → continue) is fixed',
+          'Shiny node now correctly shows the Great Ball badge if the Pokémon\'s evo line was on any previous team, not just explicitly chosen starters',
+          'EV upgrades are now visible on catch and shiny screens before catching',
+          'Magneton now correctly evolves into Magnezone at level 40',
+          'Burmy now correctly appears in the Hall of Fame PC instead of Mothim or Wormadam',
+          'EV buffs stored under Mothim, Wormadam, Ambipom, Vespiquen, or Roselia are now migrated to the correct prevolution root (Burmy, Aipom, Combee, Budew)',
+          'Stat labels in Pokémon cards are now left-aligned',
+          'Bulbasaur, Charmander, and Squirtle no longer appear as wild encounters in regular and Nuzlocke mode',
+        ],
+      },
+    ],
+  },
+  {
+    version: '1.4.4',
+    title: 'Bug Fix Patch',
+    date: '2026-04-30',
+    sections: [
+      {
+        heading: 'Bug Fixes',
+        entries: [
+          'Catching a shiny from the dedicated shiny node now correctly marks the Pokémon in both the regular Pokédex and the Shiny Dex — previously, taking a shiny with a full team skipped the regular Pokédex entry',
+          'Great Ball badge now correctly appears on the shiny node screen for Pokémon whose evo line matches a used starter',
+          'Great Ball badge on catch nodes now checks used starters instead of Hall of Fame entries when the encounter is shiny',
+          'Gen 1 legendary Pokémon (Articuno, Zapdos, Moltres, Mewtwo, Mew) now show correct locations in the Pokédex detail view instead of "Not found"',
+          'Pokédex location data now uses the actual encounter bucket data for all Pokémon, not raw BST thresholds — locations shown are accurate to what the game actually spawns',
+          'Battle Tower location labels in the Pokédex are now shown as approximate ranges (Early, Early-Middle, Middle, Middle-Late, Late) instead of specific floor numbers that could be misleading',
+          'Shiny Dex completion achievement now requires catching all 5 Gen 1 legendary shinies — they were previously excluded from the check',
+          'Pansage, Pansear, and Panpour now correctly evolve into Simisage, Simisear, and Simipour',
+        ],
+      },
+      {
+        heading: 'New',
+        entries: [
+          'Privacy Policy page added (linked from the title screen)',
+        ],
+      },
+    ],
+  },
+  {
+    version: '1.4.3',
+    title: 'Pokédex Update',
+    date: '2026-04-30',
+    sections: [
+      {
+        heading: 'New Features',
+        entries: [
+          'Pokédex detail view — click any Pokémon in the Pokédex (caught or not) to see its sprite, types, Pokédex flavor text, full evolution chain with levels, and where to find it in regular mode and Battle Tower',
+          'Shiny toggle in the detail view — press ★ to preview the shiny sprite',
+        ],
+      },
+      {
+        heading: 'Bug Fixes',
+        entries: [
+          'Rerolled Pokémon in catch nodes can now be shiny',
+          'Catch nodes in Battle Tower now always show 3 options — when the team-duplicate filter reduced the pool below 3, the game now pulls from a lower-tier pool to fill the remaining slots',
+          'Starting a new run no longer shows a stale "Continue Battle Tower" button when a previous Battle Tower save existed',
+        ],
+      },
+    ],
+  },
+  {
+    version: '1.4.2',
+    title: 'Quality of Life Patch',
+    date: '2026-04-28',
+    sections: [
+      {
+        heading: 'New Features',
+        entries: [
+          'Share button on the win screen and Battle Tower stage clear screen — share your team to X/Twitter or via native share sheet',
+          'Catch screen now shows a Great Ball badge on Pokémon whose evo line is already in your Hall of Fame PC, replacing the Poké Ball badge when applicable',
+          'Professor Challenges: Battle Tower starter achievements renamed after each region\'s professor (Oak\'s, Elm\'s, Birch\'s, Rowan\'s, Juniper\'s Challenge) and now unlock by beating a stage with any one of the three regional starters',
+        ],
+      },
+      {
+        heading: 'Changes',
+        entries: [
+          'Eevee and all its evolutions now evolve at level 20',
+          'Stat labels updated: Speed → SPD, Special Attack → SP.A, Special Defense → SP.D',
+          'Shiny Poké Ball badge in the catch screen now only appears when you own the shiny form specifically',
+        ],
+      },
+      {
+        heading: 'Bug Fixes',
+        entries: [
+          'Shiny Pokémon no longer lose their shiny status after evolving',
+        ],
+      },
+    ],
+  },
+  {
+    version: '1.4.1',
+    title: 'Bug Fix Patch',
+    date: '2026-04-28',
+    sections: [
+      {
+        heading: 'Bug Fixes',
+        entries: [
+          'Catch nodes now show the same Pokémon after a page refresh — choices are saved when the node is first entered and restored on reload',
+          'Ghost trait now correctly triggers on damage from all sources, not just direct attacks',
+          'Shiny filter in the Hall of Fame PC now works correctly',
+        ],
+      },
+    ],
+  },
+  {
+    version: '1.4.0',
+    title: 'Battle Tower Update',
+    date: '2026-04-25',
+    sections: [
+      {
+        heading: 'Battle Tower',
+        entries: [
+          'New endless mode — the Battle Tower challenges you with 5 stages across all regions',
+          'Each stage unlocks after clearing the previous one and is named after its region: Kanto, Johto, Hoenn, Sinnoh, Unova',
+          'Each stage has 3 regions, each with 3 battles ending in a named boss trainer',
+          'Stage select shows region artwork as button backgrounds',
+          'Requires at least one Hall of Fame entry to unlock',
+          'Stage progress is now derived from your Hall of Fame history — cannot be spoofed by local storage',
+        ],
+      },
+      {
+        heading: 'Stage 5: Unova',
+        entries: [
+          'New stage featuring Gen 1–5 Pokémon',
+          'Boss trainers: N, Ghetsis, Iris, and Benga',
+          'Ghetsis brings a Dragon-only team with Dragon trait at T10',
+          'Iris and Benga have unique hand-crafted teams with no duplicates',
+          'Dragon trait extended to Tier 10',
+        ],
+      },
+      {
+        heading: 'Trait System',
+        entries: [
+          'Collect type traits by fielding Pokémon of matching types — traits level up as you progress',
+          'Each trait tier unlocks a passive effect that applies in every battle',
+          'Trait progress panel shown on the map screen and as a preview under each catch choice',
+          'Bug trait: your Pokémon gain a level after every battle — shown with a level-up banner',
+          'Dark trait: enemies have a chance to hurt themselves in confusion each turn',
+          'Stat buffs persist across evolutions and are shared by the full evo line',
+          'Stat stage cap set at ±10 stages; +10 = 4× multiplier',
+          'Boss trainers have their own trait loadouts that appear in battle',
+          'Trait type badges show your current progress on hover',
+        ],
+      },
+      {
+        heading: 'Metaprogression',
+        entries: [
+          'Stat buffs persist between runs — each buff adds +10% to a stat permanently for that Pokémon\'s evo line',
+          'After clearing a stage you allocate buff points across HP, ATK, DEF, SPD, SP.ATK, and SP.DEF',
+          'Each stat can be buffed up to 10 points (+100%); total points available scales with stage number (up to 50)',
+          'Buffs are shared across the full evolution line — buff Charmander, Charizard gets it too',
+          'Stars on the starter select screen show how many stats have been buffed on each Pokémon',
+        ],
+      },
+      {
+        heading: 'New Achievements',
+        entries: [
+          '🌀 Kanto Champion — clear Stage 1 (defeat Ash)',
+          '🌊 Johto Champion — clear Stage 2 (defeat Lance)',
+          '⚔️ Hoenn Champion — clear Stage 3 (defeat Steven Stone)',
+          '💎 Sinnoh Champion — clear Stage 4 (defeat Cynthia)',
+          '🏅 Unova Champion — clear Stage 5 (defeat N)',
+          '🌿 Kanto Trio — win a Stage 1 run starting with each of the three Kanto starters',
+          '🍃 Johto Trio — win a Stage 2 run starting with each of the three Johto starters',
+          '🌊 Hoenn Trio — win a Stage 3 run starting with each of the three Hoenn starters',
+          '⛰️ Sinnoh Trio — win a Stage 4 run starting with each of the three Sinnoh starters',
+          '🌀 Unova Trio — win a Stage 5 run starting with each of the three Unova starters',
+          '📈 First Peak — max out 1 stat on a single Pokémon',
+          '📊 Double Peak — max out 2 stats on a single Pokémon',
+          '🔝 Triple Peak — max out 3 stats',
+          '💪 Quad Peak — max out 4 stats',
+          '🏅 Perfect Specimen — max out all 6 stats on a single Pokémon',
+        ],
+      },
+      {
+        heading: 'Hall of Fame',
+        entries: [
+          'Battle Tower wins are now labelled "Battle Tower: Kanto" etc. instead of "Endless Mode"',
+          'HoF PC shows unique base Pokémon count out of all catchable species',
+        ],
+      },
+      {
+        heading: 'Mobile Improvements',
+        entries: [
+          'Map screen now uses the correct viewport height on iOS Safari — no more content cut off by the address bar',
+          'Team cards on the map screen are more compact (smaller sprites, less padding)',
+          'Item bar shows icons only in a horizontal strip — no text labels',
+          'Catch and item screens always show all 3 choices in a single row',
+          'TEAM label removed from the map screen panel',
+        ],
+      },
+      {
+        heading: 'Desktop Improvements',
+        entries: [
+          'Map screen panels scale up with viewport width — larger screens show proportionally bigger UI',
+        ],
+      },
+      {
+        heading: 'Bug Fixes',
+        entries: [
+          'Catch node could show only 2 choices when evo-line deduplication was too aggressive — fixed by fetching a larger candidate pool',
+          'Saving and reloading mid-run in the Battle Tower no longer lets you revisit past nodes and make different choices',
+          'Steel trait now correctly reduces damage before applying it instead of healing it back afterward',
+          'Pokémon forced to use Struggle now show a Struggle! popup on their sprite',
+          'Air Balloon and Sneasel evolution edge cases fixed',
+        ],
+      },
+    ],
+  },
+  {
+    version: '1.3.1',
+    title: 'Cloud Saves & QoL Update',
+    date: '2026-04-18',
+    sections: [
+      {
+        heading: 'Cloud Saves',
+        entries: [
+          'Sign in with Google to sync your save across devices — button on the title screen',
+          'Progress is automatically pushed to the cloud after each run and on wins',
+          'On a new device, cloud save loads automatically if it is newer than local',
+        ],
+      },
+      {
+        heading: 'Run Persistence',
+        entries: [
+          'Your run is now saved to local storage — closing the tab mid-run no longer loses progress',
+          'Continue Run button appears on the title screen when a saved run exists',
+          'Reloading during a fight brings you back to the same fight with the same encounter',
+        ],
+      },
+      {
+        heading: 'Seeded Randomness',
+        entries: [
+          'Each run now has a seed — encounters, map layout, and battle outcomes are fully deterministic',
+          'Reloading during a fight produces identical crits, damage rolls, and Pokémon choices',
+        ],
+      },
+      {
+        heading: 'Map & Mobile',
+        entries: [
+          'Visited nodes are now greyed out — your last visited node shows a ✓',
+          'Edges you have already travelled are visually darker than available paths',
+          'Long press a node on mobile to see what it is before committing',
+          'Node tooltips now correctly disappear when entering a battle on mobile',
+          'Hovering over Pokémon or nodes no longer triggers accidentally after a screen transition',
+          'Team bar on mobile now uses a 3-column grid layout',
+          'Team panel takes 2/3 width, item panel takes 1/3 on mobile',
+          'Map header no longer shows the map name — badges display in a single row',
+          'Random Pokémon Center nodes removed — only the guaranteed one remains',
+        ],
+      },
+      {
+        heading: 'Pokémon Reordering',
+        entries: [
+          'Team drag and drop now uses pointer events — feels smooth and precise on both desktop and mobile',
+        ],
+      },
+      {
+        heading: 'Bug Fixes',
+        entries: [
+          'You can no longer encounter a legendary already on your team',
+          'Starters now correctly benefit from the Shiny Charm',
+          'Traded Pokémon can now be shiny',
+          'Lucky Egg description corrected — it boosts XP after every battle, not just wild ones',
+        ],
+      },
+    ],
+  },
+  {
+    version: '1.3',
+    title: 'Visual Rework & Achievements Update',
+    date: '2026-04-17',
+    sections: [
+      {
+        heading: 'Visual Rework',
+        entries: [
+          'New retro GBA-style light panel aesthetic across all cards, HUD boxes, and modals',
+          'Pixel-art hard shadows on cards, HP bars, battle divs, and buttons',
+          'Battle Pokémon cells are taller with bigger sprites and a larger base platform',
+          'All primary buttons redesigned to match the retro panel style',
+          'Normal Mode button highlighted in blue, Nuzlocke in red',
+          'Removed redundant "Defeated [Leader]" line from the badge screen',
+          'Battle background now fills the full cell on mobile',
+          'Gender selection is saved — you only need to pick once across all runs',
+          'Settings button is now accessible from the main menu',
+        ],
+      },
+      {
+        heading: 'Dark Mode',
+        entries: [
+          'Dark mode toggle added to Settings — switches to a warm dark palette and a separate background',
+          'Preference is saved and restored across sessions',
+          'All panels, modals, buttons, Pokédex, and achievements support dark mode',
+        ],
+      },
+      {
+        heading: 'Attack Animations',
+        entries: [
+          'Fire: overhauled to a glowing fireball traveling to the target with an ember trail and impact explosion',
+          'Fighting: red impact orb now travels from attacker to target before the burst',
+          'Steel: silver metallic orb travels to the target before sparks fly on impact',
+          'Hit flash brightness reduced across all types — less obnoxious on bright panels',
+        ],
+      },
+      {
+        heading: 'New Achievements',
+        entries: [
+          '🦅 Bird Keeper — beat the game with all 3 legendary birds on your team',
+          '🏃 No Rest for the Wicked — beat the game without using a Pokémon Center',
+          '🎒 Minimalist — beat the game without picking up any items',
+          '🔣 Type Supremacy — beat the game with 4 of 6 Pokémon sharing a type',
+          '💫 Shiny Squad — beat the game with a full team of shiny Pokémon',
+          '🔁 On a Roll — beat the game two runs in a row',
+        ],
+      },
+      {
+        heading: 'Bug Fixes',
+        entries: [
+          'Pokémon no longer skip evolution entirely when "Skip Evolutions" is on — only the animation is skipped',
+          'Pokémon obtained by trading are now correctly registered in the Pokédex',
+        ],
+      },
+    ],
+  },
+  {
+    version: '1.2',
+    title: 'Combat & Maps Update',
+    date: '2026-04-02',
+    sections: [
+      {
+        heading: 'Combat Pacing',
+        entries: [
+          'Skipping battle animations now speeds them up instead of jumping straight to the end',
+          'Skip button greys out after pressing instead of disappearing',
+          'Auto-skip setting hides the skip button entirely — no more greyed-out clutter',
+          'Continue button is now available as soon as the level-up animation starts — click to fast-forward and auto-proceed',
+          'All Pokémon level up simultaneously instead of one at a time',
+        ],
+      },
+      {
+        heading: 'Difficulty',
+        entries: [
+          'Gym leaders Lt. Surge, Erika, and Koga now give their Pokémon held items',
+          'Lt. Surge: Pikachu → Eviolite, Voltorb → Magnet, Raichu → Life Orb',
+          'Erika: Tangela → Leftovers, Victreebel → Poison Barb, Vileplume → Miracle Seed',
+          'Koga: Koffing × 2 → Rocky Helmet, Muk → Poison Barb, Weezing → Leftovers',
+        ],
+      },
+      {
+        heading: 'Branching Paths',
+        entries: [
+          'Tons of overall improvements to branching paths',
+          'The last content layer before each boss is now guaranteed to have a Pokémon Center',
+          'Added proper icons for nodes',
+        ],
+      },
+      {
+        heading: 'Misc',
+        entries: [
+          'Removed the map legend from the bottom of the screen',
+        ],
+      },
+    ],
+  },
+  {
+    version: '1.1',
+    title: 'Items & Structure Update',
+    date: '2026-03-11',
+    sections: [
+      {
+        heading: 'New: Usable Items',
+        entries: [
+          '💊 Max Revive — fully revives a fainted Pokémon (only offered when someone is fainted)',
+          '🍬 Rare Candy — gives a Pokémon +3 levels; triggers evolution if the threshold is reached',
+          '🌟 Evolution Stone — force evolves any Pokémon regardless of level (Eevee gets the choice picker)',
+          'Usable items stack in the bag and are consumed on use',
+        ],
+      },
+      {
+        heading: 'New: Hall of Fame',
+        entries: [
+          'Every championship win now saves your winning team to the Hall of Fame',
+          'View past winning teams from the title screen — sprites, levels, and nicknames preserved',
+          'Hard mode wins are marked with 💀',
+        ],
+      },
+      {
+        heading: 'Enemy Items Rework',
+        entries: [
+          'Elite Four and Champion now use per-Pokémon held items instead of shared trainer items',
+          'Gary gives each of his Pokémon the type-boosting item matching their primary type',
+          'Gym leaders Sabrina, Blaine, and Giovanni also reworked to per-Pokémon items',
+          'Enemy held items now interact with all item effects the same way the player\'s do',
+        ],
+      },
+      {
+        heading: 'Map Generation',
+        entries: [
+          'Layer 1 of every map is now guaranteed to have at least one Catch node',
+          'Layers 1, 3, and 5 are now guaranteed to have at least one Battle node',
+          'The first Catch node on Map 1 always includes a Grass or Water type Pokémon',
+        ],
+      },
+    ],
+  },
+];
+
+function openPatchNotesModal() {
+  const existing = document.getElementById('patch-notes-modal');
+  if (existing) { existing.remove(); return; }
+
+  const notesHtml = PATCH_NOTES.map(patch => {
+    const sectionsHtml = patch.sections.map(s => `
+      <div style="margin-bottom:12px;">
+        <div style="font-size:9px;color:#4af;margin-bottom:6px;">${s.heading}</div>
+        <ul style="margin:0;padding-left:16px;list-style:disc;">
+          ${s.entries.map(e => `<li style="font-size:9px;color:var(--text-dim);margin-bottom:4px;line-height:1.6;">${e}</li>`).join('')}
+        </ul>
+      </div>`).join('');
+    return `
+      <div style="margin-bottom:20px;">
+        <div style="display:flex;align-items:baseline;gap:12px;margin-bottom:10px;border-bottom:1px solid var(--border);padding-bottom:8px;">
+          <span style="font-size:12px;color:gold;">v${patch.version}</span>
+          <span style="font-size:10px;color:#fff;">${patch.title}</span>
+          <span style="font-size:9px;color:var(--text-dim);margin-left:auto;">${patch.date}</span>
+        </div>
+        ${sectionsHtml}
+      </div>`;
+  }).join('');
+
+  const modal = document.createElement('div');
+  modal.id = 'patch-notes-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;';
+  modal.innerHTML = `
+    <div style="background:var(--bg-main);border:2px solid var(--border);border-radius:12px;width:90%;max-width:500px;max-height:80vh;display:flex;flex-direction:column;font-family:'Press Start 2P',monospace;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);">
+        <span style="font-size:10px;color:gold;">Patch Notes</span>
+        <button style="background:none;border:none;color:var(--text-main);font-size:16px;cursor:pointer;line-height:1;" onclick="document.getElementById('patch-notes-modal').remove()">✕</button>
+      </div>
+      <div style="overflow-y:auto;padding:16px;">${notesHtml}</div>
+    </div>`;
+
+  document.body.appendChild(modal);
+}
+
+// ---- Hall of Fame Modal ----
+
+async function openHallOfFameModal() {
+  const existing = document.getElementById('hof-modal');
+  if (existing) { existing.remove(); return; }
+
+  // Slim HoF entries don't carry Pokemon names — look them up from the bundled
+  // static pokedex at render time. Await the load to avoid the first paint
+  // showing "#1, #4, #7" instead of names.
+  if (typeof loadStaticPokedex === 'function') {
+    try { await loadStaticPokedex(); } catch {}
+  }
+
+  const entries = getHallOfFame();
+
+  const modal = document.createElement('div');
+  modal.id = 'hof-modal';
+  modal.style.cssText = 'position:fixed;inset:0;z-index:300;background:rgba(0,0,0,0.85);display:flex;align-items:center;justify-content:center;';
+
+  // Legacy entries lack `gen` — derive it from the gen2Mode boolean.
+  const entryGen = e => e.gen || (e.gen2Mode ? '2' : '1');
+  function entryMatchesFilter(e, filter) {
+    if (filter === 'all')      return true;
+    if (filter === 'normal')   return !e.endless && !e.hardMode && entryGen(e) === '1';
+    if (filter === 'nuzlocke') return !e.endless && !!e.hardMode;
+    if (filter === 'tower')    return !!e.endless;
+    if (filter === 'gen2')     return !e.endless && entryGen(e) === '2';
+    if (filter === 'gen3')     return !e.endless && entryGen(e) === '3';
+    if (filter === 'gen4')     return !e.endless && entryGen(e) === '4';
+    if (filter === 'gen5')     return !e.endless && entryGen(e) === '5';
+    return true;
+  }
+
+  const renderEntries = (filter) => entries.length === 0
+    ? '<div style="color:var(--text-dim);text-align:center;padding:24px;font-size:11px;">No championships yet.<br>Defeat the Elite Four to be remembered!</div>'
+    : (() => {
+        const filtered = [...entries].reverse().filter(e => entryMatchesFilter(e, filter));
+        if (filtered.length === 0) {
+          return '<div style="color:var(--text-dim);text-align:center;padding:24px;font-size:11px;">No runs match this filter.</div>';
+        }
+        return filtered.map(renderEntryHtml).join('');
+      })();
+
+  function renderEntryHtml(e) {
+    const SPRITE_BASE = 'sprites/pokemon/';
+    const pokemonHtml = e.team.map(p => {
+      // Slim entries store only speciesId — look up display fields at render
+      // time. Legacy entries may still carry p.name / p.spriteUrl; prefer
+      // them when present so a mid-migration render still works.
+      const name   = p.nickname || p.name || getSpeciesName(p.speciesId);
+      const sprite = p.spriteUrl
+        || `${SPRITE_BASE}${p.isShiny ? 'shiny/' : ''}${p.speciesId}.png`;
+      const itemHtml = p.heldItem
+        ? `<div style="display:flex;align-items:center;gap:2px;font-size:7px;color:var(--text-dim);">${itemIconHtml(p.heldItem, 12)}</div>`
+        : '';
+      return `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:2px;">
+        <img src="${sprite}" style="width:48px;height:48px;image-rendering:pixelated;${p.isShiny ? 'filter:drop-shadow(0 0 4px gold);' : ''}" title="${name}">
+        <div style="font-size:7px;color:${p.isShiny ? 'gold' : 'var(--text-dim)'};">${name}</div>
+        <div style="font-size:7px;color:var(--text-dim);">Lv.${p.level}</div>
+        ${itemHtml}
+      </div>`;
+    }).join('');
+    return `
+      <div style="background:var(--bg-card);border:1px solid var(--border);border-radius:8px;padding:12px;margin-bottom:10px;">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;">
+          <span style="font-size:10px;color:gold;font-weight:bold;">${e.endless ? `Battle Tower: ${getStageName(e.stageNumber)}` : `Championship #${e.runNumber}`}${e.hardMode ? ' ☠️' : ''}${entryGen(e) === '5' ? ' Ⅴ' : entryGen(e) === '4' ? ' ⅠⅤ' : entryGen(e) === '3' ? ' ⅠⅠⅠ' : entryGen(e) === 'all' ? ' Tot' : entryGen(e) === '2' ? ' ⅠⅠ' : ''}</span>
+          <span style="font-size:9px;color:var(--text-dim);">${e.date}</span>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap;">${pokemonHtml}</div>
+      </div>`;
+  }
+
+  const filterChipsHtml = entries.length > 0 ? `
+    <div id="hof-filter-bar" style="display:flex;gap:4px;flex-wrap:wrap;padding:8px 14px;border-bottom:1px solid var(--border);">
+      ${['all','normal','nuzlocke','tower','gen2','gen3','gen4','gen5'].map(f =>
+        `<button class="hof-filter-chip${f === 'all' ? ' active' : ''}" data-filter="${f}" style="font-family:'Press Start 2P',monospace;font-size:7px;padding:4px 6px;background:var(--bg-card);border:1px solid var(--border);color:var(--text-dim);cursor:pointer;border-radius:4px;">${f === 'all' ? 'All' : f === 'normal' ? 'Normal' : f === 'nuzlocke' ? 'Nuzlocke' : f === 'tower' ? 'Battle Tower' : f === 'gen5' ? 'Gen 5' : f === 'gen4' ? 'Gen 4' : f === 'gen3' ? 'Gen 3' : 'Gen 2'}</button>`
+      ).join('')}
+    </div>` : '';
+
+  modal.innerHTML = `
+    <div style="background:var(--bg-main);border:2px solid var(--border);border-radius:12px;width:90%;max-width:480px;max-height:80vh;display:flex;flex-direction:column;">
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:14px 16px;border-bottom:1px solid var(--border);">
+        <span style="font-family:'Press Start 2P',monospace;font-size:10px;color:gold;">Hall of Fame</span>
+        <button style="background:none;border:none;color:var(--text-main);font-size:16px;cursor:pointer;line-height:1;" onclick="document.getElementById('hof-modal').remove()">✕</button>
+      </div>
+      ${filterChipsHtml}
+      <div id="hof-entries" style="overflow-y:auto;padding:14px;font-family:'Press Start 2P',monospace;flex:1;">${renderEntries('all')}</div>
+    </div>`;
+
+  document.body.appendChild(modal);
+
+  modal.querySelectorAll('.hof-filter-chip').forEach(btn => {
+    btn.addEventListener('click', () => {
+      modal.querySelectorAll('.hof-filter-chip').forEach(b => {
+        b.classList.remove('active');
+        b.style.background = 'var(--bg-card)';
+        b.style.color = 'var(--text-dim)';
+      });
+      btn.classList.add('active');
+      btn.style.background = 'var(--accent)';
+      btn.style.color = '#181410';
+      document.getElementById('hof-entries').innerHTML = renderEntries(btn.dataset.filter);
+    });
+  });
+  // Highlight default 'all' chip
+  const defaultChip = modal.querySelector('.hof-filter-chip.active');
+  if (defaultChip) {
+    defaultChip.style.background = 'var(--accent)';
+    defaultChip.style.color = '#181410';
+  }
+}

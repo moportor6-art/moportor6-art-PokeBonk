@@ -1,0 +1,403 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pokemon Roguelike</title>
+  <link href="fonts/press-start-2p.css" rel="stylesheet">
+  <link rel="icon" type="image/svg+xml" href="favicon.svg">
+  <script>window.__cacheBust = Date.now();</script>
+  <script>document.write('<link rel="stylesheet" href="css/style.css?v=' + window.__cacheBust + '">');</script>
+  <script>window.PB_VOLVER_TOP = 1;</script>
+  <script src="volver-pokebonk.js"></script>
+</head>
+<body>
+
+<!-- Team hover card popup -->
+<div id="team-hover-card"></div>
+
+<!-- ===== TITLE SCREEN (GBA / Emerald style) ===== -->
+<div id="title-screen" class="screen">
+  <div class="gba-title-col">
+
+    <header class="gba-logo-block">
+      <div class="game-logo">POKELIKE</div>
+      <div class="game-subtitle">Pokémon Roguelike</div>
+      <button class="gba-version-line" onclick="openPatchNotesModal()">v1.6 — patch notes</button>
+    </header>
+
+    <div class="gba-continue-slots">
+      <button id="btn-continue-run" class="gba-save-slot" style="display:none;"><span class="gba-slot-cursor">▶</span>Continue Run</button>
+      <button id="btn-continue-endless" class="gba-save-slot" style="display:none;"><span class="gba-slot-cursor">▶</span>Continue Battle Tower</button>
+    </div>
+
+    <div class="gen-toggle-wrap">
+      <span class="gen-toggle-label">Region</span>
+      <div id="gen-toggle" class="gen-toggle" title="Choose generation">
+        <button class="gen-btn region-card gen-btn--active" data-gen="1" aria-label="Gen 1 (Kanto)">
+          <span class="region-card-art" style="background-image:url('ui/regions/HGSS_Kanto.jpg');"></span>
+          <span class="region-card-plate">KANTO<b>I</b></span>
+        </button>
+        <button class="gen-btn region-card" data-gen="2" aria-label="Gen 2 (Johto)">
+          <span class="region-card-art" style="background-image:url('ui/regions/Johtoart.jpg');"></span>
+          <span class="region-card-plate">JOHTO<b>II</b></span>
+        </button>
+        <button class="gen-btn region-card" data-gen="3" aria-label="Gen 3 (Hoenn)">
+          <span class="region-card-art" style="background-image:url('ui/regions/ORAS_Hoenn_Map.jpg');"></span>
+          <span class="region-card-plate">HOENN<b>III</b></span>
+        </button>
+        <button class="gen-btn region-card" data-gen="4" aria-label="Gen 4 (Sinnoh) — unlocked by winning Hoenn">
+          <span class="region-card-art" style="background-image:url('ui/regions/Pt_Artwork_Sinnoh-Karte_%28mit_Zerrwelt%29.jpg');"></span>
+          <span class="region-card-plate">SINNOH<b>IV</b></span>
+          <span class="region-card-lock">🔒</span>
+        </button>
+        <button class="gen-btn region-card" data-gen="5" aria-label="Gen 5 (Unova) — unlocked by winning Sinnoh">
+          <span class="region-card-art" style="background-image:url('ui/regions/Einall_S2W2.jpg');"></span>
+          <span class="region-card-plate">UNOVA<b>V</b></span>
+          <span class="region-card-lock">🔒</span>
+        </button>
+        <button class="gen-btn region-card" data-gen="both" aria-label="All generations mixed — unlocked by winning every campaign">
+          <span class="region-card-art region-card-art--stack">
+            <i style="background-image:url('ui/regions/HGSS_Kanto.jpg');"></i>
+            <i style="background-image:url('ui/regions/Pt_Artwork_Sinnoh-Karte_%28mit_Zerrwelt%29.jpg');"></i>
+            <i style="background-image:url('ui/regions/Einall_S2W2.jpg');"></i>
+          </span>
+          <span class="region-card-plate">TOT<b>I–V</b></span>
+          <span class="region-card-lock">🔒</span>
+        </button>
+      </div>
+    </div>
+
+    <nav class="gba-panel gba-menu" aria-label="Game modes">
+      <button id="btn-new-run" class="gba-menu-item" title="Start a run — you'll pick Normal or Nuzlocke on the way">New Adventure</button>
+      <button id="btn-endless-run" class="gba-menu-item">Battle Tower</button>
+    </nav>
+
+    <div class="gba-panel gba-chip-panel">
+      <div class="gba-chip-grid">
+        <button onclick="openPokedexModal()" class="gba-chip">📖 Pokédex</button>
+        <button onclick="openAchievementsModal()" class="gba-chip">🏆 Achievements</button>
+        <button onclick="openHallOfFameModal()" class="gba-chip">🏛️ Hall of Fame</button>
+        <button onclick="openPatchNotesModal()" class="gba-chip">📋 Patch Notes</button>
+        <button onclick="openSettingsModal()" class="gba-chip">⚙️ Settings</button>
+        <button onclick="openRulesModal()" class="gba-chip">📖 How to Play</button>
+        <button onclick="openMegaModal()" class="gba-chip">💠 Mega Stones</button>
+        <button id="btn-cloud-sync" class="gba-chip">☁ Save Code</button>
+      </div>
+      <div id="cloud-sync-info" style="display:none;"></div>
+
+      <footer class="gba-credits">
+        Fork of <a href="https://pokelike.xyz/" target="_blank" rel="noopener">pokelike.xyz</a>.
+        Fan-made project — not affiliated with, endorsed by, or sponsored by Nintendo, Game Freak, or The Pokémon Company.
+        All Pokémon names and sprites are property of their respective owners.
+      </footer>
+    </div>
+
+  </div>
+</div>
+
+<!-- ===== TRAINER SELECT ===== -->
+<div id="trainer-screen" class="screen">
+  <h2>Who are you?</h2>
+  <div id="trainer-choices">
+    <div class="trainer-card" id="trainer-boy" role="button" tabindex="0">
+      <div class="trainer-icon-wrap"></div>
+      <div class="trainer-label" style="color:#cc1111">BOY</div>
+    </div>
+    <div class="trainer-card" id="trainer-girl" role="button" tabindex="0">
+      <div class="trainer-icon-wrap"></div>
+      <div class="trainer-label" style="color:#33aa33">GIRL</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STARTER SELECT ===== -->
+<div id="starter-screen" class="screen">
+  <h2>Choose Your Starter!</h2>
+  <div id="starter-layout">
+    <div id="starter-choices"></div>
+    <div id="starter-region-panel" style="display:none;"></div>
+  </div>
+</div>
+
+<!-- Map node tooltip -->
+<div id="map-node-tooltip"></div>
+<!-- Item tooltip -->
+<div id="item-tooltip"></div>
+<!-- Trait tooltip (tap on mobile) -->
+<div id="trait-tooltip"></div>
+
+<!-- ===== MAP SCREEN ===== -->
+<div id="map-screen" class="screen">
+  <!-- Mobile-only header -->
+  <div class="map-header">
+    <div id="map-info"></div>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <button onclick="openPokedexModal()" class="btn-icon-sm" title="Pokédex"><img src="ui/pokedex.png" alt="Pokédex"></button>
+      <button onclick="openAchievementsModal()" class="btn-icon-sm" title="Achievements"><img src="ui/achievements.png" alt="Achievements"></button>
+      <button onclick="openSettingsModal()" class="btn-icon-sm" title="Settings"><img src="ui/settings.png" alt="Settings"></button>
+    </div>
+  </div>
+
+  <!-- Desktop-only top-right buttons -->
+  <div class="map-actions">
+    <button onclick="openPokedexModal()" class="btn-icon-sm" title="Pokédex"><img src="ui/pokedex.png" alt="Pokédex"></button>
+    <button onclick="openAchievementsModal()" class="btn-icon-sm" title="Achievements"><img src="ui/achievements.png" alt="Achievements"></button>
+    <button onclick="openSettingsModal()" class="btn-icon-sm" title="Settings"><img src="ui/settings.png" alt="Settings"></button>
+  </div>
+
+  <div class="map-panels">
+    <div id="endless-trait-panel" class="hud-box map-panel-traits" style="display:none;"></div>
+    <div class="hud-box map-panel-left">
+      <div class="hud-label">TEAM</div>
+      <div id="team-bar"></div>
+    </div>
+    <div class="hud-box map-panel-right">
+      <div class="hud-label">ITEMS</div>
+      <div id="item-bar"></div>
+    </div>
+    <div id="endless-region-panel" class="hud-box map-panel-region" style="display:none;"></div>
+  </div>
+
+  <!-- Badge progress: floating strip pinned to the bottom (all screen sizes).
+       Direct child of the screen so panel zoom can't offset the fixed box. -->
+  <div id="badge-count-panel"></div>
+
+  <div id="map-container"></div>
+</div>
+
+<!-- ===== BATTLE SCREEN ===== -->
+<div id="battle-screen" class="screen">
+  <div class="battle-header">
+    <h2 id="battle-title">Wild Battle!</h2>
+    <p id="battle-subtitle"></p>
+  </div>
+
+  <div class="battle-controls">
+    <button id="btn-auto-battle" class="btn-primary">Skip</button>
+    <button id="btn-continue-battle" class="btn-primary" style="display:none">Continue</button>
+  </div>
+
+  <div class="battle-field">
+    <div class="battle-side">
+      <div class="battle-trainer" id="player-trainer-icon"></div>
+      <div class="battle-side-label">Your Team</div>
+      <div id="player-battle-traits" class="battle-trait-bar"></div>
+      <div id="player-side"></div>
+    </div>
+    <div class="battle-side">
+      <div class="battle-trainer" id="enemy-trainer-icon"></div>
+      <div class="battle-side-label" id="enemy-side-label">Enemy</div>
+      <div id="enemy-battle-traits" class="battle-trait-bar battle-trait-bar-right"></div>
+      <div id="enemy-side"></div>
+    </div>
+  </div>
+
+  <!-- Interactive battle command bar (turn-based, normal mode) -->
+  <div id="battle-command" class="battle-command" style="display:none;">
+    <div id="battle-move-buttons" class="battle-move-buttons"></div>
+    <div class="battle-command-actions">
+      <button id="btn-battle-switch" class="btn-primary">↔ Switch</button>
+      <button id="btn-battle-auto" class="btn-secondary">▶ Auto</button>
+    </div>
+  </div>
+
+  <!-- Party selector overlay (voluntary switch / forced KO replacement) -->
+  <div id="battle-party-select" class="battle-party-select" style="display:none;">
+    <div class="battle-party-box">
+      <div class="battle-party-title" id="battle-party-title">Choose a Pokémon</div>
+      <div id="battle-party-list" class="battle-party-list"></div>
+      <button id="btn-party-cancel" class="btn-secondary">Cancel</button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CATCH SCREEN ===== -->
+<div id="catch-screen" class="screen">
+  <h2>⬟ Wild Pokemon Appeared!</h2>
+  <p style="text-align:center;color:var(--text-dim);font-size:12px;">Choose one Pokemon to add to your team</p>
+  <div id="catch-choices"></div>
+  <div style="text-align:center;margin-top:12px;">
+    <button id="btn-skip-catch" class="btn-secondary">Skip (flee)</button>
+  </div>
+  <div id="catch-team-bar" class="screen-team-bar"></div>
+</div>
+
+<!-- ===== ITEM SCREEN ===== -->
+<div id="item-screen" class="screen">
+  <h2>✦ Item Found!</h2>
+  <p style="text-align:center;color:var(--text-dim);font-size:12px;">Choose one item to keep</p>
+  <div id="item-choices"></div>
+  <div style="text-align:center;margin-top:12px;">
+    <button id="btn-skip-item" class="btn-secondary">Skip</button>
+  </div>
+  <div id="item-team-bar" class="screen-team-bar"></div>
+</div>
+
+<!-- ===== SWAP SCREEN ===== -->
+<div id="swap-screen" class="screen">
+  <h2>Team Full!</h2>
+  <p id="swap-prompt" class="swap-prompt"></p>
+  <div id="swap-choices"></div>
+  <div id="swap-incoming"></div>
+  <div style="text-align:center;margin-top:12px;">
+    <button id="btn-cancel-swap" class="btn-secondary">Keep team as-is</button>
+  </div>
+</div>
+
+<!-- ===== TRADE SCREEN ===== -->
+<div id="trade-screen" class="screen">
+  <h2>⇄ Trade Offer</h2>
+  <p id="trade-desc"></p>
+  <ul id="trade-team-list"></ul>
+  <div class="trade-footer">
+    <button id="btn-skip-trade" class="btn-secondary">Decline</button>
+  </div>
+</div>
+
+<!-- ===== SHINY SCREEN ===== -->
+<div id="shiny-screen" class="screen">
+  <div id="shiny-content"></div>
+</div>
+
+<!-- ===== BADGE SCREEN ===== -->
+<div id="badge-screen" class="screen">
+  <img id="badge-icon-img" class="badge-icon" src="" alt="Badge">
+  <div id="badge-msg">Badge Earned!</div>
+  <div id="badge-leader"></div>
+  <div id="badge-count-display">Badges: 0/8</div>
+  <button id="btn-next-map" class="btn-primary">Next Map →</button>
+</div>
+
+<!-- ===== TRANSITION SCREEN ===== -->
+<div id="transition-screen" class="screen">
+  <div id="transition-msg"></div>
+  <div id="transition-sub"></div>
+</div>
+
+<!-- ===== ELITE PREP SCREEN ===== -->
+<div id="elite-prep-screen" class="screen">
+  <div id="elite-prep-title"></div>
+  <div id="elite-prep-sub"></div>
+
+  <div class="elite-prep-section">
+    <div class="elite-prep-section-label">Next Opponent's Team</div>
+    <div id="elite-prep-enemy-team"></div>
+  </div>
+
+  <div class="elite-prep-section">
+    <div class="elite-prep-section-label">Your Team — drag to reorder</div>
+    <div id="elite-prep-player-team"></div>
+  </div>
+
+  <div class="elite-prep-section">
+    <div class="elite-prep-section-label">Items — click to use</div>
+    <div id="elite-prep-items"></div>
+  </div>
+
+  <button id="btn-elite-prep-continue" class="btn-primary">Continue →</button>
+</div>
+
+<!-- ===== LEVEL RETRY (blacked out) ===== -->
+<div id="gameover-screen" class="screen">
+  <div class="gameover-panel">
+    <div class="gameover-title">GAME OVER</div>
+    <div id="gameover-badges"></div>
+    <div id="gameover-team"></div>
+    <button id="btn-retry" class="btn-primary gameover-cta">Try Again</button>
+    <div class="gameover-hint" id="gameover-hint"></div>
+  </div>
+</div>
+
+<!-- ===== WIN SCREEN ===== -->
+<div id="win-screen" class="screen">
+  <div class="win-title">YOU ARE THE<br>CHAMPION!</div>
+  <p style="color:var(--text-dim);">Congratulations! You defeated the Elite Four!</p>
+  <div id="win-run-count" style="color:gold;font-size:13px;font-weight:bold;margin-bottom:8px;"></div>
+  <div id="win-team"></div>
+  <div style="display:flex;gap:8px;justify-content:center;margin-top:8px;flex-wrap:wrap;">
+    <button id="btn-play-again" class="btn-primary">Play Again</button>
+    <button onclick="shareRun()" class="btn-secondary" style="border-color:#c8a0ff;color:#c8a0ff;">📤 Share</button>
+    <button onclick="showEndlessStageSelect()" class="btn-secondary" style="border-color:#ffd700;color:#ffd700;">🗼 Climb the Tower</button>
+  </div>
+  <div style="display:flex;gap:8px;justify-content:center;margin-top:6px;">
+    <button onclick="openHallOfFameModal()" class="btn-secondary">🏛️ Hall of Fame</button>
+  </div>
+</div>
+
+<!-- ===== STAT BUFF SCREEN ===== -->
+<div id="stat-buff-screen" class="screen">
+  <h2 id="stat-buff-title"></h2>
+  <p id="stat-buff-subtitle" style="text-align:center;color:var(--text-dim);font-size:10px;margin-bottom:16px;"></p>
+  <div id="stat-buff-choices"></div>
+</div>
+
+<!-- ===== ENDLESS STAGE SELECT ===== -->
+<div id="endless-stage-select" class="screen">
+  <div style="font-family:'Press Start 2P',monospace;font-size:13px;color:#c8a0ff;text-align:center;margin-bottom:6px;">⚔ Battle Tower</div>
+  <div style="font-size:8px;color:var(--text-dim);text-align:center;margin-bottom:18px;">Choose a stage to begin</div>
+  <div id="stage-select-list" style="display:flex;flex-direction:column;gap:8px;align-items:center;"></div>
+  <div style="text-align:center;margin-top:16px;">
+    <button onclick="showScreen('title-screen')" class="btn-secondary">← Back</button>
+  </div>
+</div>
+
+<!-- ===== ENDLESS STAGE COMPLETE ===== -->
+<div id="endless-stage-complete" class="screen">
+  <div id="stage-complete-msg" class="win-title" style="font-size:14px;"></div>
+  <div id="stage-complete-unlock" style="font-size:8px;color:#c8a0ff;text-align:center;margin:6px 0;"></div>
+  <div id="stage-complete-team" style="display:flex;flex-wrap:wrap;justify-content:center;gap:8px;margin:12px 0;"></div>
+  <div style="display:flex;gap:8px;justify-content:center;">
+    <button id="btn-stage-continue" class="btn-primary">Stage Select →</button>
+    <button id="btn-stage-share" class="btn-secondary" style="border-color:#c8a0ff;color:#c8a0ff;">📤 Share</button>
+  </div>
+</div>
+
+<!-- ===== EVOLUTION OVERLAY ===== -->
+<div id="evo-overlay" style="display:none;position:fixed;inset:0;z-index:200;background:#000;
+     align-items:center;justify-content:center;flex-direction:column;gap:20px;">
+  <div id="evo-msg" style="font-family:'Press Start 2P',monospace;font-size:11px;color:#fff;
+       text-align:center;line-height:1.8;max-width:280px;padding:0 16px;"></div>
+  <img id="evo-sprite" style="width:96px;height:96px;image-rendering:pixelated;">
+</div>
+
+<!-- ===== EEVEE CHOICE OVERLAY ===== -->
+<div id="eevee-choice-overlay" style="display:none;position:fixed;inset:0;z-index:201;background:rgba(0,0,0,0.88);
+     align-items:center;justify-content:center;flex-direction:column;gap:18px;">
+  <div id="evo-choice-title" style="font-family:'Press Start 2P',monospace;font-size:10px;color:#fff;text-align:center;line-height:1.8;">
+    Choose its evolution:
+  </div>
+  <div id="eevee-choices" style="display:flex;flex-wrap:wrap;justify-content:center;gap:16px;max-width:min(90vw,700px);"></div>
+</div>
+
+<!-- ===== RULES MODAL ===== -->
+<div id="rules-modal" class="rules-modal-overlay" style="display:none;" onclick="if(event.target===this)closeRulesModal()">
+  <div class="rules-modal">
+    <button class="rules-modal-close" onclick="closeRulesModal()" aria-label="Close">✕</button>
+    <div class="rules-modal-head">
+      <div class="rules-modal-title">📖 How to Play</div>
+      <div class="rules-tabs">
+        <button id="rules-tab-human" class="rules-tab rules-tab--active" onclick="setRulesView('human')">🧑 Si ets humà</button>
+        <button id="rules-tab-robot" class="rules-tab" onclick="setRulesView('robot')">🤖 Si ets robot (LLM)</button>
+      </div>
+    </div>
+    <div id="rules-modal-body" class="rules-modal-body"></div>
+  </div>
+</div>
+
+<!-- Machine-readable spec for LLMs (populated by js/rules.js). An LLM can read
+     window.POKELIKE_RULES or this element to understand and drive the game. -->
+<script type="application/json" id="pokelike-llm-spec"></script>
+
+<!-- Attack animation canvas (fixed over viewport) -->
+<canvas id="battle-anim-canvas" style="position:fixed;inset:0;pointer-events:none;z-index:150;display:none;"></canvas>
+
+<!-- Scripts (order matters). Loaded with an auto cache-buster so edits always
+     take effect on reload (no stale cached JS). -->
+<script>
+  ['data', 'map', 'battle', 'endless', 'ui', 'game', 'rules', 'cloud-save'].forEach(function (n) {
+    document.write('<script src="js/' + n + '.js?v=' + window.__cacheBust + '"><\/script>');
+  });
+</script>
+</body>
+</html>
