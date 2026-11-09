@@ -27,6 +27,10 @@
         `- **Si la app se había cerrado**, al abrirla sale el aviso **Tienes una partida guardada** con **Continuar**, **Finalizar** (te quedas con lo conseguido) o **Más tarde**.`,
         `- No se guarda en Duelos ni en Cooperativo, ni en los momentos en que el juego no deja guardar (por ejemplo, en algunas peleas). En esos casos pasa lo de siempre.`,
         ``,
+        `# Arreglos del menú principal`,
+        `- Los textos que no cabían ahora se ajustan solos a su botón: **Continuar**, **Supervivencia**, los eventos con fechas largas, Encargos y la barra lateral.`,
+        `- La barra lateral ya muestra todos los accesos (también **Guía**): se quitó «Inicio», que no hacía nada porque ya estás en el inicio, y los botones se reparten el alto.`,
+        ``,
         PIE
       ].join('\n')
     },
@@ -309,7 +313,8 @@
       date: '2026-11-09',
       title: 'Guardado automático al salir de la app.',
       notes: [
-        ['new', '**Guardado automático**: si sales de la app en mitad de una partida, se guarda sola y al volver puedes continuarla o finalizarla.']
+        ['new', '**Guardado automático**: si sales de la app en mitad de una partida, se guarda sola y al volver puedes continuarla o finalizarla.'],
+        ['fix', 'Menú principal: los textos largos (Continuar, Supervivencia, eventos) ya caben en sus botones y la barra lateral muestra todos los accesos.']
       ]
     },
     {

@@ -9,6 +9,9 @@
 
 Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros).
 
+## Textos que caben (Subversión 0.11)
+- `site/ajuste-textos.js`: encoge la letra de los textos del menú principal del port (botón grande, modos, eventos, Encargos, barra lateral, compañero) hasta que caben. En horizontal, la barra lateral oculta «Inicio» y reparte el alto entre los botones.
+
 ## Guardado automático (Subversión 0.11)
 - `site/autoguardado.js`: al ocultarse la app (`visibilitychange`/`pagehide`) en mitad de una partida, hace lo mismo que «Guardar y salir» (`run.$9sojcp()` y `run.ui.onSuspend()`). Si la app sigue abierta al volver, pulsa «Continuar» en el aviso de partida guardada. No actúa en Duelos, Cooperativo ni cuando el juego no deja guardar.
 
