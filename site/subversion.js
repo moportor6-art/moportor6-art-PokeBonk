@@ -4,11 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.14';
+  const SUB = '0.15';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.15',
+      date: Date.UTC(2026, 10, 9, 9),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.15`,
+      summary: 'PokéPlunder, el roguelike por turnos de Khydra, en Más juegos.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# PokéPlunder`,
+        `- Nuevo juego en **Más juegos**: **PokéPlunder 1.1.6**, un roguelike por turnos del autor de PokéPath TD. Eliges entre 12 Pokémon y avanzas por 9 zonas con salas, tiendas, objetos, movimientos nuevos y jefes. Tres ranuras de guardado y mejoras permanentes. Está en inglés.`,
+        `- Funciona **sin internet** y sin cuenta. Tu partida se guarda en este dispositivo.`,
+        `- En itch.io solo se puede jugar en el navegador: se guardó una copia completa (también en el repositorio, rama respaldo-pokeplunder-web) por si un día deja de estar.`,
+        `- Para volver, toca **Volver a PokéBonk** (abajo a la izquierda) dos veces.`,
+        ``,
+        `> PokéPlunder: juego de Khydra (khydra98.itch.io/pokeplunder).`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.14',
       date: Date.UTC(2026, 10, 9, 8),
@@ -411,6 +433,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.15',
+      date: '2026-11-09',
+      title: 'PokéPlunder en Más juegos.',
+      notes: [
+        ['new', '**PokéPlunder** (de Khydra) en Más juegos: roguelike por turnos sin internet y sin cuenta.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.14',

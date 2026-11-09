@@ -21,3 +21,6 @@ Juego "Pokelike" de pokelike.xyz (proyecto de fans no oficial). Copia de partida
 
 ## PokéPath TD
 Juego "PokéPath TD" de Khydra (khydra98.itch.io/pokepath, github.com/Khydra). Incluido desde su versión de escritorio, sin cambios en el juego (solo la música recomprimida y el botón para volver). Sprites del PMD Sprite Repository y demás autores que el juego acredita en sus créditos.
+
+## PokéPlunder
+Juego "PokéPlunder" de Khydra (khydra98.itch.io/pokeplunder). Incluido tal cual desde su versión web (solo la música recomprimida y el botón para volver). Sprites del PMD Sprite Repository y demás autores que el juego acredita.

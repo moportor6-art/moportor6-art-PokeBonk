@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## PokéPlunder (Subversión 0.15)
+- `site/pokeplunder/`: PokéPlunder 1.1.6 de Khydra. En itch.io solo se juega en el navegador: el flujo "Copia de un juego web" (`.github/workflows/revisar-juego.yml`) busca en la página de itch.io el juego de `html-classic.itch.zone` y lo copia entero en la rama `respaldo-pokeplunder-web` (los 603 archivos de su `assets/assets.json` están). Se quitó el script de itch.io, se bajó la música a 96 kbps y se añadió el botón Volver (abajo a la izquierda).
+
 ## PokéPath TD (Subversión 0.14)
 - `site/pokepath/`: PokéPath TD 1.7 de Khydra, sacado de su instalador de Windows (electron-builder: 7z dentro del instalador NSIS y `resources/app.asar`). Es un juego web sin servidor que guarda en `localStorage`. `tools/preparar_pokepath.py` copia la parte web, añade `pb-pokepath.js` (pantalla completa sin Electron) y el botón Volver, y baja la música a 96 kbps.
 - Su instalador busca actualizaciones en Khydra/PokePath-TD-Electron, pero ese repositorio no es público: para actualizar, se saca `app.asar` del instalador nuevo y se pasa por `tools/preparar_pokepath.py`.
