@@ -553,8 +553,30 @@ public class MainActivity extends Activity {
         }
     }
 
-    static boolean isaacNet(String h) {
-        return h != null && (h.equals("bfwnvevcyrwwukokooty.supabase.co") || h.endsWith(".up.railway.app"));
+    // Servidores de PokéIsaac: los de siempre más los que lista site/pokeisaac/hosts.txt (se genera al compilar
+    // con la versión más nueva del juego).
+    private java.util.Set<String> isaacHosts;
+
+    boolean isaacNet(String h) {
+        if (h == null) {
+            return false;
+        }
+        if (h.equals("bfwnvevcyrwwukokooty.supabase.co") || h.endsWith(".up.railway.app") || h.endsWith(".pages.dev")) {
+            return true;
+        }
+        if (isaacHosts == null) {
+            java.util.Set<String> s = new java.util.HashSet<>();
+            byte[] b = load("pokeisaac/hosts.txt");
+            if (b != null) {
+                for (String line : new String(b, java.nio.charset.StandardCharsets.UTF_8).split("\n")) {
+                    if (!line.trim().isEmpty()) {
+                        s.add(line.trim());
+                    }
+                }
+            }
+            isaacHosts = s;
+        }
+        return isaacHosts.contains(h);
     }
 
     private byte[] load(String path) {
