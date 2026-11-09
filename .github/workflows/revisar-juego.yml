@@ -31,7 +31,7 @@ jobs:
           echo "D=$D" >> "$GITHUB_ENV"
           # Juegos de itch.io que se juegan en el navegador: la página del juego de verdad está en html-classic.itch.zone.
           if echo "$URL" | grep -q 'itch.io'; then
-            P=$(curl -fsSL -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130.0" "$URL" | sed 's/&quot;/"/g; s#\\/#/#g')
+            P=$(curl -fsSL --retry 6 --retry-delay 20 --retry-all-errors -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130.0" "$URL" | sed 's/&quot;/"/g; s#\\/#/#g')
             J=$(echo "$P" | grep -oE 'https://html-classic\.itch\.zone/html/[0-9]+/[^"<> ]*' | head -n1)
             echo "Juego en itch.io: $J"
             if [ -z "$J" ]; then
