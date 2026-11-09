@@ -5,8 +5,10 @@
   if (window.__pbIsaac) return;
   window.__pbIsaac = true;
   const JUEGOS = [
-    { id: 'pokeisaac', name: 'PokéIsaac', icon: 'pokeisaac/favicon.svg', url: 'pokeisaac/index.html',
-      desc: 'Mazmorras al estilo The Binding of Isaac. De @SrBatai.', pix: true },
+    { id: 'pokeisaac', name: 'PokéIsaac', icon: 'pokeisaac/favicon.svg', url: 'pokeisaac/index.html?mockauth=1&mockdelay=0',
+      desc: 'Mazmorras al estilo The Binding of Isaac. Sin cuenta: Gacha y fichas en este dispositivo. De @SrBatai.', pix: true },
+    { id: 'pokeisaac-online', name: 'PokéIsaac online', icon: 'pokeisaac/favicon.svg', url: 'pokeisaac/index.html',
+      desc: 'Con tu cuenta de pokeisaac.com: Ranking, cooperativo, clan y chat. Necesita internet.', pix: true },
     { id: 'pokesurvivor', name: 'PokéSurvivor', icon: 'pokesurvivor-icono.png', url: 'pokesurvivor/index.html',
       desc: 'Sobrevive a oleadas de enemigos. De JPTER78 y JayElDragon.' },
     { id: 'pokelike', name: 'Pokelike', icon: 'pokelike/favicon.svg', url: 'pokelike/index.html',

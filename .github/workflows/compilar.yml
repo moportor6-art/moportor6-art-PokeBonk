@@ -62,7 +62,14 @@ jobs:
       # PokéIsaac: se baja la versión más nueva de pokeisaac.com. Si falla, se usa la copia del repo.
       - name: PokéIsaac actualizado
         continue-on-error: true
-        run: python3 tools/actualizar_pokeisaac.py site/pokeisaac
+        run: |
+          cp -r site/pokeisaac /tmp/pokeisaac-repo
+          python3 tools/actualizar_pokeisaac.py site/pokeisaac
+          # PokéIsaac sin cuenta: si la versión nueva ya no admite el parche, se vuelve a la copia del repo.
+          if ! python3 tools/parche_pokeisaac.py site/pokeisaac; then
+            echo "::warning::PokéIsaac nuevo sin el modo sin cuenta: se usa la copia del repo"
+            rm -rf site/pokeisaac && cp -r /tmp/pokeisaac-repo site/pokeisaac
+          fi
 
       # Copia de respaldo de cada versión nueva de PokéIsaac en la rama respaldo-pokeisaac (por si la web desaparece).
       - name: Respaldo de PokéIsaac

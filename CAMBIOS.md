@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Juegos sin cuenta (Subversión 0.13)
+- PokéIsaac trae dentro una simulación completa de su servidor (Supabase), "mockauth", que guarda cuentas, Gacha, fichas, Tickets, misiones, huevos y tienda en `localStorage` (`pokeisaac.mock.db`). La versión publicada borra los parámetros de la dirección, así que `tools/parche_pokeisaac.py` deja pasar `mockauth`/`mockdelay`/`mockanon`, llama a `window.PB_ISAAC_LOCAL(cuenta, juego)` y carga `site/pokeisaac/pb-local.js`, que entra solo como invitado local y cierra la ventana de cuenta. El parche se aplica en cada compilación tras bajar PokéIsaac; si ya no encaja, se usa la copia del repo.
+- Más juegos abre `pokeisaac/index.html?mockauth=1&mockdelay=0` (sin cuenta) y, aparte, "PokéIsaac online" sin parámetros.
+- Revisados: PokéBonk (backend local PBLocal), PokéSurvivor (cuenta local en `save_data.gd`; solo consulta GitHub para avisar de versiones) y Pokelike 2.0 (cuenta solo para clasificatorias y nube).
+
 ## Pokelike y Más juegos (Subversión 0.12)
 - La app trae **Pokelike 2.0** de pokelike.xyz (versión del juego 3.6.3). Su código viene ofuscado, pero la lista de textos está en claro: `tools/actualizar_pokelike.py web` baja la página, el `js/bundle.<hash>.js`, los estilos, la música y todos los archivos que el código nombra (unos 1,800, más los nombres sueltos probados en cada carpeta conocida). Quita la publicidad (Publift/Fuse, Google) y las estadísticas, pone las fuentes de Google en local y el botón Volver (abajo a la izquierda, `window.PB_VOLVER_BL`).
 - En GitHub Actions se baja solo cuando cambia el nombre del bundle (caché `pokelike-v1-<bundle>`) y cada versión se respalda en la rama `respaldo-pokelike` (etiqueta `pokelike-<versión>-<hash>`; la 1.6 queda en `pokelike-1.6-72ca3c0e`).

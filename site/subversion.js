@@ -4,11 +4,38 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.12';
+  const SUB = '0.13';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.13',
+      date: Date.UTC(2026, 10, 9, 7),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.13`,
+      summary: 'Ningún juego pide iniciar sesión: el Gacha de PokéIsaac funciona sin cuenta.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# PokéIsaac sin cuenta`,
+        `- Antes, el **Gacha**, las fichas, los Tickets, las misiones y los huevos pedían iniciar sesión o entrar como invitado en sus servidores. Ahora **PokéIsaac** entra solo con una cuenta local, sin pedir nada y sin internet.`,
+        `- Empiezas con **300 fichas** y ganas más al terminar cada partida (según lo lejos que llegues), con las misiones y con los huevos. Las tiradas desbloquean los Pokémon para tus partidas.`,
+        `- Todo se guarda en este dispositivo. Usa la simulación del servidor que el propio PokéIsaac trae dentro.`,
+        `- Si quieres tu cuenta de pokeisaac.com, el Ranking, el cooperativo online, el clan o el chat, abre **PokéIsaac online** en Más juegos (necesita internet).`,
+        ``,
+        `# Los demás juegos`,
+        `- **PokéBonk**: no pide cuenta para nada.`,
+        `- **PokéSurvivor**: su cuenta es local y su Gachapon usa monedas y tickets que ganas jugando.`,
+        `- **Pokelike**: Historia, Torre Batalla, Desafíos, tienda y sobres funcionan sin cuenta. Solo las clasificatorias (contra equipos de otros jugadores) y el guardado en la nube son de su servidor y piden registrarse.`,
+        ``,
+        `> PokéIsaac: juego de @SrBatai (pokeisaac.com).`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.12',
       date: Date.UTC(2026, 10, 9, 5),
@@ -363,6 +390,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.13',
+      date: '2026-11-09',
+      title: 'Ningún juego pide iniciar sesión.',
+      notes: [
+        ['new', '**PokéIsaac sin cuenta**: Gacha, fichas, Tickets, misiones y huevos funcionan sin iniciar sesión y sin internet, guardados en el dispositivo.'],
+        ['new', '**PokéIsaac online** en Más juegos, para usar tu cuenta de pokeisaac.com (Ranking, cooperativo, clan y chat).'],
+        ['better', 'Revisados PokéBonk, PokéSurvivor y Pokelike: no piden cuenta (solo las clasificatorias y la nube de Pokelike).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.12',
