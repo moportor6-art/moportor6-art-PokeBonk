@@ -274,12 +274,24 @@ jobs:
           if [ -z "$NUM" ]; then NUM=0; fi
           echo "num=$NUM" >> "$GITHUB_OUTPUT"
 
+      # Caché de Electron: si su servidor de descargas falla (error 504), se usa la copia guardada.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/AppData/Local/electron/Cache
+            ~/AppData/Local/electron-builder/Cache
+          key: electron-${{ hashFiles('desktop/package.json') }}
+
       - name: Preparar y compilar
         shell: bash
         working-directory: desktop
         run: |
           rm -rf site && cp -r ../site site
-          npm install --no-audit --no-fund
+          for i in 1 2 3 4; do
+            npm install --no-audit --no-fund && break
+            echo "npm install falló (intento $i); reintento en 30 s"; sleep 30
+            [ "$i" = 4 ] && exit 1
+          done
           npx electron-builder --win --publish never -c.extraMetadata.version=0.9.${{ steps.ver.outputs.num }}
           ls dist
 
