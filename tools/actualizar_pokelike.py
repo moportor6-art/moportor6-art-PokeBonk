@@ -208,30 +208,37 @@ def web(dest):
 
 
 def crudo(out):
-    """Copia tal cual de lo que sirve pokelike.xyz ahora (para respaldo y para revisar cambios)."""
+    """Copia tal cual de un juego web (por defecto pokelike.xyz; otro con PL_ORIGIN), para respaldo y para revisarlo."""
+    import posixpath
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
     html = fetch(ORIGIN).decode('utf-8')
     (out / 'index.html').write_text(html, encoding='utf-8')
-    todo = set(re.findall(r'(?:src|href)="(?!https?:|//|#|data:)([^"?#]+)', html))
+    ext = r'(?:js|mjs|css|json|png|gif|jpg|jpeg|webp|svg|mp3|ogg|wav|m4a|woff2?|ttf|wasm|atlas|txt|tmj|tsj|xml)'
+    todo = set((m, '') for m in re.findall(r'(?:src|href)="(?!https?:|//|#|data:|mailto:)([^"?#]+)', html))
     hecho = set()
     while todo:
-        rel = todo.pop().lstrip('./')
-        if rel in hecho or not rel or rel.endswith('/'):
+        raw, base = todo.pop()
+        rel = posixpath.normpath(posixpath.join(base, raw)) if raw.startswith(('./', '../')) else raw.lstrip('/')
+        if rel.startswith('..') or rel in hecho or not rel or rel.endswith('/') or rel == '.':
             continue
         hecho.add(rel)
         try:
-            data = fetch(ORIGIN + rel.replace(' ', '%20'))
+            data = fetch(ORIGIN + '/'.join(quote(x) for x in rel.split('/')))
         except Exception as e:  # noqa
             print('  no se pudo bajar', rel, str(e)[:60]); continue
+        if not rel.endswith('.html') and data[:200].lstrip().lower().startswith((b'<!doctype', b'<html')):
+            continue
         (out / rel).parent.mkdir(parents=True, exist_ok=True)
         (out / rel).write_bytes(data)
-        if rel.endswith(('.js', '.css', '.json')):
+        if rel.endswith(('.js', '.mjs', '.css', '.json')):
             txt = data.decode('utf-8', errors='ignore')
-            for m in re.findall(r"""['"`(]((?:\./)?(?:js|css|data|sprites|ui|fonts|assets|audio|music|sfx)/[^'"`)?$\s]+\.(?:js|css|json|png|gif|jpg|webp|svg|mp3|ogg|wav|woff2?))""", txt):
-                if '%' not in m:
-                    todo.add(m)
-    print('Copia tal cual de pokelike.xyz: %d archivos' % len(hecho))
-
+            d = posixpath.dirname(rel)
+            for m in re.findall(r"""['"`(]((?:\.{1,2}/|/)?[\w@.-]+(?:/[\w@.%-]+)*\.""" + ext + r""")['"`)?#]""", txt):
+                if m.startswith(('./', '../')):
+                    todo.add((m, d))
+                elif '/' in m:
+                    todo.add((m, ''))
+    print('Copia tal cual de %s: %d archivos' % (ORIGIN, len(hecho)))
 
 if __name__ == '__main__':
     if len(sys.argv) >= 4 and sys.argv[1] == 'preparar':

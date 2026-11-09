@@ -1,0 +1,44 @@
+# Copia tal cual de un juego web (para revisarlo y como respaldo). Se lanza a mano, o al cambiar este archivo.
+name: Copia de un juego web
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: Dirección del juego
+        default: https://pokedive.com/
+      rama:
+        description: Rama donde se guarda
+        default: respaldo-pokedive-web
+  push:
+    branches: [main]
+    paths: ['.github/workflows/revisar-juego.yml']
+
+permissions:
+  contents: write
+
+jobs:
+  copia:
+    runs-on: ubuntu-latest
+    env:
+      URL: ${{ github.event.inputs.url || 'https://pokedive.com/' }}
+      RAMA: ${{ github.event.inputs.rama || 'respaldo-pokedive-web' }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bajar el juego
+        run: |
+          D=$(mktemp -d)
+          echo "D=$D" >> "$GITHUB_ENV"
+          PL_ORIGIN="$URL" python3 tools/actualizar_pokelike.py crudo "$D"
+          curl -fsSL -A "Mozilla/5.0 (Linux; Android 14) Chrome/130.0 Mobile" -D "$D/_cabeceras.txt" -o /dev/null "$URL" || true
+          find "$D" -type f | sed "s|$D/||" | sort > "$D/_archivos.txt"
+          wc -l "$D/_archivos.txt"; du -sh "$D"
+      - name: Guardar en la rama
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          cd "$D"
+          git init -q -b "$RAMA"
+          git add -A
+          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com commit -qm "Copia tal cual de $URL"
+          git push -q -f "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}" "$RAMA"
