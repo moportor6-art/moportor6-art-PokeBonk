@@ -221,6 +221,17 @@ def crudo(out):
     (out / 'index.html').write_text(html, encoding='utf-8')
     ext = r'(?:js|mjs|css|json|png|gif|jpg|jpeg|webp|svg|mp3|ogg|wav|m4a|woff2?|ttf|wasm|atlas|txt|tmj|tsj|xml)'
     todo = set((m, '') for m in re.findall(r'(?:src|href)="(?!https?:|//|#|data:|mailto:)([^"?#]+)', html))
+    # Juegos de Godot (web): sus archivos van en GODOT_CONFIG, no en etiquetas.
+    g = re.search(r'GODOT_CONFIG\s*=\s*(\{.*?\});', html, re.S)
+    if g:
+        try:
+            cfg = json.loads(g.group(1))
+            ex = cfg.get('executable', 'index')
+            for f in list((cfg.get('fileSizes') or {}).keys()) + [ex + '.js', ex + '.wasm', ex + '.pck',
+                     ex + '.audio.worklet.js', ex + '.audio.position.worklet.js', ex + '.worker.js']:
+                todo.add((f, ''))
+        except Exception as e:  # noqa
+            print('  GODOT_CONFIG no se pudo leer:', e)
     hecho = set()
     while todo:
         raw, base = todo.pop()
