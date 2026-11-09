@@ -1,0 +1,17 @@
+HTTP/2 200 
+date: Mon, 09 Nov 2026 05:45:12 GMT
+content-type: text/html
+server: cloudflare
+last-modified: Sun, 08 Nov 2026 18:11:16 GMT
+vary: Accept-Encoding
+nel: {"report_to":"cf-nel","success_fraction":0.0,"max_age":604800}
+cache-control: no-cache
+content-security-policy: default-src 'self'; script-src 'self' https://challenges.cloudflare.com; frame-src https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline' https://fonts.googleapis.com; font-src 'self' https://fonts.gstatic.com; img-src 'self' data: blob:; media-src 'self' data: blob:; connect-src 'self' wss://pokedive.com wss://*.pokedive.com https://*.pokedive.com https://*.sentry.io; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'; frame-ancestors 'none'
+reporting-endpoints: default="https://pokedive.com/crash-report"
+x-content-type-options: nosniff
+referrer-policy: same-origin
+report-to: {"group":"cf-nel","max_age":604800,"endpoints":[{"url":"https://a.nel.cloudflare.com/report/v4?s=4rUvxw2uExIeXVgA%2Bh70GLCr9TmF5R3LrhmL44xqAKvUgs48b%2FTSCVYh3sQLDIX6%2BiU7Zm%2FJqkpLthn%2FOiaXqrpOnepSaHiIorKjv%2F%2FRGOsHze6WxJ4oIvACCAIi5sM%3D"}]}
+cf-cache-status: DYNAMIC
+cf-ray: a57a828ccd04a2a1-ORD
+alt-svc: h3=":443"; ma=86400
+
