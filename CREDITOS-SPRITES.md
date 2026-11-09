@@ -24,3 +24,6 @@ Juego "PokéPath TD" de Khydra (khydra98.itch.io/pokepath, github.com/Khydra). I
 
 ## PokéPlunder
 Juego "PokéPlunder" de Khydra (khydra98.itch.io/pokeplunder). Incluido tal cual desde su versión web (solo la música recomprimida y el botón para volver). Sprites del PMD Sprite Repository y demás autores que el juego acredita.
+
+## Pokémon Overlord
+Juego "Pokémon Overlord" de jab_lao (jab-lao.itch.io/pokemon-overlord). Incluido tal cual desde su versión web (solo se añadió el botón para volver).

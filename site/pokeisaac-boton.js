@@ -15,6 +15,8 @@
       desc: 'Tower defense: construye el camino y defiende 9 rutas. De Khydra.', pix: true },
     { id: 'pokeplunder', name: 'PokéPlunder', icon: 'pokeplunder-icono.png', url: 'pokeplunder/index.html',
       desc: 'Roguelike por turnos: 12 Pokémon, 9 zonas, objetos y jefes. De Khydra.', pix: true },
+    { id: 'pokeoverlord', name: 'Pokémon Overlord', icon: 'pokeoverlord-icono.png', url: 'pokeoverlord/index.html',
+      desc: 'Roguelike de combates por equipos: coloca tu equipo y lucha. Battle Frontier y Versus. De jab_lao.', pix: true },
     { id: 'pokelike', name: 'Pokelike', icon: 'pokelike/favicon.svg', url: 'pokelike/index.html',
       desc: 'Roguelike por turnos: Historia, Torre Batalla y Desafíos. De pokelike.xyz.' }
   ];

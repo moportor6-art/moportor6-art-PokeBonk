@@ -4,11 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.16';
+  const SUB = '0.17';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.17',
+      date: Date.UTC(2026, 10, 9, 11),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.17`,
+      summary: 'Pokémon Overlord, el roguelike de combates por equipos de jab_lao, en Más juegos.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Pokémon Overlord`,
+        `- Nuevo juego en **Más juegos**: **Pokémon Overlord**, un roguelike de combates por equipos. Antes de cada pelea colocas a tus Pokémon (delante aguantan los golpes, detrás están protegidos) y luego luchan solos o como tú elijas. Cada partida es distinta.`,
+        `- Modos: **Play** (partida normal o Liga), **Advanced Mode**, **Battle Frontier**, **Versus Mode** y **Collection**. Está en inglés.`,
+        `- Trae sus propios botones en pantalla para móvil (flechas, Z para aceptar, X para cancelar, C para ver la información).`,
+        `- Funciona **sin internet** y sin cuenta. Tu partida se guarda en este dispositivo.`,
+        `- En itch.io solo se juega en el navegador: se guardó una copia completa (también en el repositorio, rama respaldo-pokemon-overlord-web).`,
+        `- Para volver, toca **Volver a PokéBonk** (arriba a la izquierda) dos veces.`,
+        ``,
+        `> Pokémon Overlord: juego de jab_lao (jab-lao.itch.io/pokemon-overlord).`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.16',
       date: Date.UTC(2026, 10, 9, 10),
@@ -460,6 +484,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.17',
+      date: '2026-11-09',
+      title: 'Pokémon Overlord en Más juegos.',
+      notes: [
+        ['new', '**Pokémon Overlord** (de jab_lao) en Más juegos: roguelike de combates por equipos, sin internet y sin cuenta.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.16',

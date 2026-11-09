@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Pokémon Overlord (Subversión 0.17)
+- `site/pokeoverlord/`: Pokémon Overlord de jab_lao, juego de Godot 4 (sin hilos) que en itch.io solo se juega en el navegador. Copiado con el flujo "Copia de un juego web", que ahora lee `GODOT_CONFIG` para bajar `index.pck` (64 MB) e `index.wasm` (38 MB), y reintenta si itch.io responde 429. En el APK, esos dos archivos se sirven a trozos (`serveBig`) y van sin comprimir. Se quitó el script de itch.io y se añadió el botón Volver (arriba a la izquierda).
+
 ## PokéIsaac: disparo automático (Subversión 0.16)
 - `tools/parche_pokeisaac.py` (función `auto_siempre`) añade el ajuste `touchAutoAlways` ("Modo AUTO": AL MANTENER / SIEMPRE). En el cálculo del disparo táctil con "Disparar con: AUTO", si no se mantiene el botón y el ajuste está en SIEMPRE, se usa la dirección al enemigo vivo más cercano (la misma función que usa el juego para el AUTO al mantener). Si una versión nueva no encaja, solo se avisa: el resto del parche sigue.
 
