@@ -407,6 +407,22 @@ jobs:
           npx electron-builder --win --publish never -c.extraMetadata.version=0.9.${{ steps.ver.outputs.num }}
           ls dist
 
+      # Prueba: abre la app 45 s y deja en el registro de la compilación los errores y una captura (base64).
+      - name: Probar la app de Windows
+        shell: bash
+        working-directory: desktop
+        continue-on-error: true
+        run: |
+          mkdir -p diag
+          export PB_DIAG_DIR="$(cygpath -w "$PWD/diag")"
+          timeout 120 ./dist/win-unpacked/PokeBonk.exe || echo "salida: $?"
+          echo "===== REGISTRO ====="
+          cat diag/registro.txt || echo "sin registro"
+          echo "===== CAPTURA ====="
+          base64 -w0 diag/captura.jpg 2>/dev/null || echo "sin captura"
+          echo
+          echo "===== FIN ====="
+
       - name: Publicar en la release
         if: startsWith(github.ref, 'refs/tags/')
         uses: softprops/action-gh-release@v2

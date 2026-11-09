@@ -133,11 +133,42 @@ function createWindow() {
   win.on('leave-full-screen', () => { if (cfg.mode !== 'window') { cfg.mode = 'window'; writeCfg(); } });
   win.loadURL('app://pokebonk/index.html');
 
+  // Registro de errores: %APPDATA%\PokeBonk\registro.txt (se reinicia en cada arranque).
+  const fs = require('fs');
+  const logFile = path.join(app.getPath('userData'), 'registro.txt');
+  try { fs.writeFileSync(logFile, `PokéBonk ${app.getVersion()} - Electron ${process.versions.electron} - ${new Date().toISOString()}\n`); } catch {}
+  const log = (s) => { try { fs.appendFileSync(logFile, s + '\n'); } catch {} };
+  global.pbLog = log;
+  win.webContents.on('console-message', (e, level, message, line, sourceId) => {
+    if (level >= 1 || process.env.PB_DIAG) log(`[${['info', 'aviso', 'ERROR'][Math.min(level, 2)] || level}] ${message} (${sourceId}:${line})`);
+  });
+  win.webContents.on('did-fail-load', (e, code, desc, url) => log(`[carga] ${code} ${desc} ${url}`));
+  win.webContents.on('render-process-gone', (e, d) => log(`[proceso] ${d.reason} ${d.exitCode}`));
+  win.webContents.on('preload-error', (e, p2, err) => log(`[preload] ${err}`));
+  win.webContents.on('unresponsive', () => log('[proceso] la página no responde'));
+  app.on('child-process-gone', (e, d) => log(`[hijo] ${d.type} ${d.reason} ${d.exitCode}`));
+
+  // Diagnóstico en GitHub Actions: PB_DIAG_DIR guarda el registro y una captura y cierra la app.
+  if (process.env.PB_DIAG_DIR) {
+    setTimeout(async () => {
+      try {
+        const info = await win.webContents.executeJavaScript(`JSON.stringify({host: location.hostname, meta: !!window.__pbMeta, app: !!window.__pbApp, body: document.body ? document.body.innerText.slice(0, 400) : '', gl: (() => { try { const c = document.createElement('canvas'); const g = c.getContext('webgl2'); return g ? g.getParameter(g.VERSION) : 'sin webgl2'; } catch (e) { return String(e); } })()})`, true);
+        log('[diag] ' + info);
+      } catch (e) { log('[diag] ' + e); }
+      try {
+        const img = await win.webContents.capturePage();
+        fs.writeFileSync(path.join(process.env.PB_DIAG_DIR, 'captura.jpg'), img.resize({ width: 640 }).toJPEG(60));
+      } catch (e) { log('[diag] captura ' + e); }
+      try { fs.copyFileSync(logFile, path.join(process.env.PB_DIAG_DIR, 'registro.txt')); } catch {}
+      app.exit(0);
+    }, 45000);
+  }
+
   // F11: pantalla completa. F12: herramientas de desarrollo (por si hay que mirar un error).
   win.webContents.on('before-input-event', (e, input) => {
     if (input.type !== 'keyDown') return;
     if (input.key === 'F11') { win.setFullScreen(!win.isFullScreen()); e.preventDefault(); }
-    if (input.key === 'F12') { win.webContents.toggleDevTools(); e.preventDefault(); }
+    if (input.key === 'F12' || (input.control && input.shift && (input.key === 'I' || input.key === 'i'))) { win.webContents.toggleDevTools(); e.preventDefault(); }
   });
 
   // Enlaces a otras webs (Discord, Ko-fi...) se abren en el navegador.
@@ -189,6 +220,7 @@ app.whenReady().then(() => {
     if (p.endsWith('/')) p += 'index.html';
     const file = path.normalize(path.join(ROOT, p));
     if (!file.startsWith(ROOT)) return new Response('', { status: 404 });
+    if (!p.startsWith('/pokelike/') && !require('fs').existsSync(file)) global.pbLog?.(`[404] ${p}`);
     if (p.startsWith('/pokelike/') && !require('fs').existsSync(file)) return pokelikeOnline(p.slice('/pokelike/'.length));
     return net.fetch(pathToFileURL(file).toString());
   });
