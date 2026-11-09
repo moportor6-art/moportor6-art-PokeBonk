@@ -6,10 +6,10 @@ on:
     inputs:
       url:
         description: Dirección del juego
-        default: https://pokedive.com/
+        default: https://khydra98.itch.io/pokeplunder
       rama:
         description: Rama donde se guarda
-        default: respaldo-pokedive-web
+        default: respaldo-pokeplunder-web
   push:
     branches: [main]
     paths: ['.github/workflows/revisar-juego.yml']
@@ -21,14 +21,24 @@ jobs:
   copia:
     runs-on: ubuntu-latest
     env:
-      URL: ${{ github.event.inputs.url || 'https://pokedive.com/' }}
-      RAMA: ${{ github.event.inputs.rama || 'respaldo-pokedive-web' }}
+      URL: ${{ github.event.inputs.url || 'https://khydra98.itch.io/pokeplunder' }}
+      RAMA: ${{ github.event.inputs.rama || 'respaldo-pokeplunder-web' }}
     steps:
       - uses: actions/checkout@v4
       - name: Bajar el juego
         run: |
           D=$(mktemp -d)
           echo "D=$D" >> "$GITHUB_ENV"
+          # Juegos de itch.io que se juegan en el navegador: la página del juego de verdad está en html-classic.itch.zone.
+          if echo "$URL" | grep -q 'itch.io'; then
+            P=$(curl -fsSL -A "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/130.0" "$URL" | sed 's/&quot;/"/g; s#\\/#/#g')
+            J=$(echo "$P" | grep -oE 'https://html-classic\.itch\.zone/html/[0-9]+/[^"<> ]*' | head -n1)
+            echo "Juego en itch.io: $J"
+            [ -n "$J" ] || { echo "No se encontró el juego web en la página de itch.io"; exit 1; }
+            echo "$J" > "$D/_origen.txt"
+            URL="${J%index.html}"
+            case "$URL" in */) ;; *) URL="${URL%/*}/";; esac
+          fi
           PL_ORIGIN="$URL" python3 tools/actualizar_pokelike.py crudo "$D"
           curl -fsSL -A "Mozilla/5.0 (Linux; Android 14) Chrome/130.0 Mobile" -D "$D/_cabeceras.txt" -o /dev/null "$URL" || true
           find "$D" -type f | sed "s|$D/||" | sort > "$D/_archivos.txt"
