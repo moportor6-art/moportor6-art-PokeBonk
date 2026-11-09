@@ -44,6 +44,8 @@ def main():
     h = (dest / 'index.html').read_text(encoding='utf-8')
     if 'pb-pokepath.js' not in h:
         h = h.replace('</head>', '    <script src="pb-pokepath.js"></script>\n    <script src="volver-pokebonk.js"></script>\n</head>', 1)
+    if 'pb-mando.js' not in h:
+        h = re.sub(r'(<head[^>]*>)', r'\1\n    <script src="/pb-mando.js"></script>', h, count=1)
     (dest / 'index.html').write_text(h, encoding='utf-8')
     if not ver:
         try:

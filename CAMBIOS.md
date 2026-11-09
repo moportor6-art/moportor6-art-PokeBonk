@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Soporte extendido: mando y PC (Subversión 0.19)
+- `desktop/preload.js` expone `window.pokebonkDesktop` (`display`, `setDisplay`, `relaunch`), el puente que el juego espera de su versión de escritorio oficial: así aparece la pestaña **Pantalla** de Ajustes. `desktop/main.js` guarda los ajustes en `pantalla.json` (carpeta de datos de la app), aplica modo, tamaño y monitor al momento, y al arrancar pone `use-angle` (d3d11/gl/vulkan) y, con "FPS sin tope", `disable-gpu-vsync` y `disable-frame-rate-limit`. Siempre: `force_high_performance_gpu`, `ignore-gpu-blocklist`, `enable-gpu-rasterization` y `enable-zero-copy`. Se responde `vsyncNext: true` porque el juego reactiva el V-Sync al arrancar si no; "FPS sin tope" va con sus propias claves (`fpsFree`, `fpsFreeNext`).
+- Parches del juego: resolución "Súper 1,5×/2×" (`fixedRes` -3 y -2: `pixelRatio` = `devicePixelRatio` × 1,5 o × 2, en `resize()` de `main-*.js`), fila "FPS sin tope" en la pestaña Pantalla y Límite de FPS con 165 y 240 (`menus-*.js`).
+- `site/pb-mando.js`: mando con cursor para juegos de ratón (Pokelike, PokéPath TD, PokéPlunder) y la ventana Más juegos (con `window.PB_MANDO_SOLO`). Va lo primero del `<head>`: apunta qué elementos escuchan clics para que la cruceta salte entre ellos. Lo añaden también `tools/actualizar_pokelike.py` y `tools/preparar_pokepath.py`.
+
 ## Pokémon Survivors (Subversión 0.18)
 - `site/pokemonsurvivors/`: Pokémon Survivors de pedrobarretto (código MIT, github.com/pedrobarretto/pokemon-survivors). En GitHub Actions se clona su último commit, se compila con Node 24 (`npx vite build --base /pokemonsurvivors/`, sin claves de sus servicios: modo invitado, sin cuentas, ranking ni cooperativo) y se prepara con `tools/preparar_pokemonsurvivors.py` (botón Volver, que vuelve a `/index.html` con `window.PB_VOLVER_URL`). Caché por commit y respaldo en la rama `respaldo-pokemon-survivors` (etiqueta `pokemonsurvivors-<commit>`). La copia del repo es la compilación del commit 30e56a906fa1.
 

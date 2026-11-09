@@ -4,11 +4,45 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.18';
+  const SUB = '0.19';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.19',
+      date: Date.UTC(2026, 10, 9, 21),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.19`,
+      summary: 'Soporte extendido: mando en todos los juegos y opciones de PC (Súper resolución, motor gráfico, FPS sin tope).',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Versión de Windows`,
+        `- Nueva pestaña **Ajustes > Pantalla** (la que trae PokéBonk para su versión de escritorio): modo de pantalla, tamaño de la ventana, resolución, monitor y **motor gráfico** (Direct3D 11, OpenGL o Vulkan).`,
+        `- **Resolución Súper 1,5× y Súper 2×**: el juego se dibuja con más píxeles que tu pantalla y luego se reduce. Bordes mucho más finos, para gráficas potentes.`,
+        `- **FPS sin tope**: quita el V-Sync para pasar de los hercios de tu pantalla. Es lo que necesitan la generación de fotogramas de AMD (**AFMF 2**) y Lossless Scaling. Se aplica al reiniciar.`,
+        `- **Límite de FPS** con 165 y 240.`,
+        `- El juego usa siempre la gráfica potente y dibuja todo por GPU.`,
+        ``,
+        `# Generación de fotogramas (AMD)`,
+        `- En **Pantalla**: Motor gráfico **Direct3D 11**, **FPS sin tope: Sí** y reiniciar. En Gráficos, Límite de FPS en **Sin límite**.`,
+        `- Juega en **pantalla completa** (F11).`,
+        `- En **AMD Software: Adrenalin**, activa **AMD Fluid Motion Frames 2** (en Juegos, para PokeBonk o para todo). La capa de Adrenalin (Alt+R) muestra si está funcionando.`,
+        ``,
+        `# Mando en todos los juegos`,
+        `- **PokéBonk**, **PokéIsaac**, **PokéSurvivor**, **Pokémon Survivors** y **Pokémon Overlord** ya traían mando.`,
+        `- **Pokelike**, **PokéPath TD** y **PokéPlunder** se juegan con ratón: ahora el mando mueve un **cursor**. Stick: mover. Cruceta: saltar al botón más cercano. **A**: clic (mantén para arrastrar). **X**: clic derecho. **B**: atrás. **LB/RB**: subir y bajar listas. **Start**: Enter. **Select** dos veces: Volver a PokéBonk.`,
+        `- La ventana **Más juegos** también se maneja con el mando.`,
+        ``,
+        `# Corrección`,
+        `- **PokéPlunder** sí tiene español: cámbialo en su menú de ajustes (el engranaje), en LANGUAGE.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.18',
       date: Date.UTC(2026, 10, 9, 14),
@@ -506,6 +540,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.19',
+      date: '2026-11-09',
+      title: 'Soporte extendido: mando y PC.',
+      notes: [
+        ['new', 'Windows: pestaña **Pantalla** con resolución **Súper 1,5×/2×**, motor gráfico (Direct3D 11, OpenGL, Vulkan) y **FPS sin tope** (para AFMF 2).'],
+        ['new', 'Límite de FPS con 165 y 240.'],
+        ['new', 'Mando con cursor en Pokelike, PokéPath TD, PokéPlunder y en Más juegos.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.18',

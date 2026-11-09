@@ -40,6 +40,13 @@ def fetch(url):
     raise last
 
 
+def mando_primero(html):
+    """El mando (pb-mando.js) va lo primero del <head>, antes que el juego."""
+    if 'pb-mando.js' in html:
+        return html
+    return re.sub(r'(<head[^>]*>)', r'\1\n    <script src="/pb-mando.js"></script>', html, count=1)
+
+
 def preparar(src, dest, sprites_dir=None, sprite_fetch=None):
     """src y dest pueden ser la misma carpeta."""
     src, dest = Path(src), Path(dest)
@@ -64,7 +71,7 @@ def preparar(src, dest, sprites_dir=None, sprite_fetch=None):
     if css.is_file():
         css.write_text(re.sub(r"@import url\(['\"]?https://fonts\.googleapis\.com[^)]*\);?", '', css.read_text(encoding='utf-8')), encoding='utf-8')
     (dest / 'privacy.html').unlink(missing_ok=True)
-    p.write_text(html, encoding='utf-8')
+    p.write_text(mando_primero(html), encoding='utf-8')
     shutil.copy2(REPO / 'site/pokeisaac/volver-pokebonk.js', dest / 'volver-pokebonk.js')
     (dest / 'fonts').mkdir(exist_ok=True)
     for f in (REPO / 'site/pokeisaac/fonts').iterdir():
@@ -199,7 +206,7 @@ def web(dest):
                 t = f.read_text(encoding='utf-8', errors='ignore')
                 f.write_text(re.sub(r"@import url\(['\"]?https://fonts\.googleapis\.com[^)]*\);?", '', t), encoding='utf-8')
     html = html.replace('</head>', '  <script>window.PB_VOLVER_BL = 1;</script>\n  <script src="volver-pokebonk.js"></script>\n</head>', 1)
-    (tmp / 'index.html').write_text(html, encoding='utf-8')
+    (tmp / 'index.html').write_text(mando_primero(html), encoding='utf-8')
     shutil.copy2(REPO / 'site/pokeisaac/volver-pokebonk.js', tmp / 'volver-pokebonk.js')
     vers = re.findall(r"'(\d+)\.(\d+)\.(\d+)'", bundle[0].read_text(encoding='utf-8', errors='ignore'))
     ver = '.'.join(max(vers, key=lambda v: tuple(map(int, v)))) if vers else '2'

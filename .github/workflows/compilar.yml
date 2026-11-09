@@ -107,7 +107,7 @@ jobs:
         if: steps.plv.outputs.b != ''
         with:
           path: pokelike-web
-          key: pokelike-v1-${{ steps.plv.outputs.b }}
+          key: pokelike-v2-${{ steps.plv.outputs.b }}
 
       - name: Pokelike actualizado
         if: steps.plv.outputs.b != ''
