@@ -4,11 +4,28 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.20';
+  const SUB = '0.21';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.21',
+      date: Date.UTC(2026, 10, 9, 23),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.21`,
+      summary: 'Arreglado: en Windows salía el aviso de copia no oficial y no se podía jugar.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Corrección`,
+        `- **Windows**: al abrir el juego salía "Esta copia de PokéBonk no es la oficial" y no dejaba jugar. El juego solo se abría desde ciertas direcciones y la de la app de Windows no estaba entre ellas. Ya está añadida.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.20',
       date: Date.UTC(2026, 10, 10, 2),
@@ -575,6 +592,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.21',
+      date: '2026-11-09',
+      title: 'Windows arreglado.',
+      notes: [
+        ['fix', 'Windows: ya no sale el aviso de copia no oficial al abrir el juego.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.20',

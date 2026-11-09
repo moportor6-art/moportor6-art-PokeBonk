@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Windows: aviso de copia no oficial (Subversión 0.21)
+- `main-DfdwqtE9-*.js` comprueba `location.hostname` y, si no es una dirección conocida (pokebonk.com, `appassets.androidplatform.net` del APK, localhost o red local), tapa el juego con "Esta copia de PokéBonk no es la oficial". La app de Windows carga `app://pokebonk/`, cuyo hostname es `pokebonk`: se añade a esa lista. No se cambia la dirección para no cambiar el origen (y perder lo guardado).
+
 ## PokéBonk Remaster (Subversión 0.20)
 - `site/remaster.js`: marca "REMASTER" bajo el logo (oculta `.com`) y en el título, botón **Remaster** en la barra del menú con tres pestañas, y tour de bienvenida la primera vez (`localStorage` `pb-remaster`, campo `tour`).
 - Pasaporte de entrenador: lee `pokeisaac.save.v1`, `ps:save` (Pokémon Survivors), `poke_*` (Pokelike), `pokepath:data`, `pokeplunder:data` (o la clave antigua `data`, según su contenido) y el `save.json` de PokéSurvivor en IndexedDB (`/userfs`, almacén `FILE_DATA`). Cada insignia da Polvo Estelar una vez (`meta.profile.stardust`, `meta.save()`), nunca durante una partida.
