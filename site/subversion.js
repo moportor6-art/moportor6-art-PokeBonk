@@ -4,11 +4,38 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.15';
+  const SUB = '0.16';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.16',
+      date: Date.UTC(2026, 10, 9, 10),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.16`,
+      summary: 'PokéIsaac: disparo automático de verdad, sin mantener ningún botón.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# PokéIsaac: disparo manual o automático`,
+        `- Nuevo ajuste **Modo AUTO** en **Opciones > Táctil**, debajo de **Disparar con**: **AL MANTENER** (como siempre) o **SIEMPRE**.`,
+        `- Con **Disparar con: AUTO** y **Modo AUTO: SIEMPRE**, tu Pokémon apunta y dispara solo al enemigo más cercano en cuanto aparece, sin tocar nada. Tú solo te mueves y esquivas.`,
+        `- Si arrastras desde el botón AUTO, apuntas tú a mano en ese momento; al soltar, vuelve a apuntar solo.`,
+        `- Para disparar siempre a mano, elige **Disparar con: STICK** o **4 FLECHAS**.`,
+        `- PokéIsaac ya trae su propio editor de controles: **Opciones > Táctil > Colocar los botones** (mover, agrandar, aclarar o esconder cada joystick y botón).`,
+        ``,
+        `# Los demás juegos`,
+        `- **PokéSurvivor** ya apunta solo, y en **Ajustes > Controles** tiene **Apuntado manual** (segundo dedo, ratón o stick derecho), tamaño del joystick y joystick fijo.`,
+        `- **PokéPath TD**, **PokéPlunder** y **Pokelike** no tienen controles en pantalla que tapen el juego.`,
+        ``,
+        `> PokéIsaac: juego de @SrBatai (pokeisaac.com).`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.15',
       date: Date.UTC(2026, 10, 9, 9),
@@ -433,6 +460,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.16',
+      date: '2026-11-09',
+      title: 'PokéIsaac: disparo automático sin mantener.',
+      notes: [
+        ['new', 'PokéIsaac: **Modo AUTO: SIEMPRE** en Opciones > Táctil. Con Disparar con AUTO, apunta y dispara solo al enemigo más cercano.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.15',

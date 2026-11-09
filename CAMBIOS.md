@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## PokéIsaac: disparo automático (Subversión 0.16)
+- `tools/parche_pokeisaac.py` (función `auto_siempre`) añade el ajuste `touchAutoAlways` ("Modo AUTO": AL MANTENER / SIEMPRE). En el cálculo del disparo táctil con "Disparar con: AUTO", si no se mantiene el botón y el ajuste está en SIEMPRE, se usa la dirección al enemigo vivo más cercano (la misma función que usa el juego para el AUTO al mantener). Si una versión nueva no encaja, solo se avisa: el resto del parche sigue.
+
 ## PokéPlunder (Subversión 0.15)
 - `site/pokeplunder/`: PokéPlunder 1.1.6 de Khydra. En itch.io solo se juega en el navegador: el flujo "Copia de un juego web" (`.github/workflows/revisar-juego.yml`) busca en la página de itch.io el juego de `html-classic.itch.zone` y lo copia entero en la rama `respaldo-pokeplunder-web` (los 603 archivos de su `assets/assets.json` están). Se quitó el script de itch.io, se bajó la música a 96 kbps y se añadió el botón Volver (abajo a la izquierda).
 

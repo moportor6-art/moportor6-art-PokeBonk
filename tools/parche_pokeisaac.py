@@ -31,6 +31,9 @@ def parchear(dest):
         if not n:
             fallos.append('no se encontró la cuenta')
     t = t.replace('Modo simulado (mockauth)', 'Modo sin cuenta: tu progreso se guarda en este dispositivo')
+    t, avisos = auto_siempre(t)
+    for a in avisos:
+        print('Aviso (disparo automático):', a)
     js.write_text(t, encoding='utf-8')
     idx = dest / 'index.html'
     h = idx.read_text(encoding='utf-8')
@@ -40,6 +43,32 @@ def parchear(dest):
             fallos.append('no se pudo añadir pb-local.js')
         idx.write_text(h, encoding='utf-8')
     return fallos
+
+
+def auto_siempre(t):
+    """Disparo AUTO "SIEMPRE": con "Disparar con: AUTO", dispara solo al enemigo más cercano sin mantener el botón.
+    Si la versión del juego cambió y algo no encaja, se deja como venía (no es imprescindible)."""
+    if 'touchAutoAlways' in t:
+        return t, []
+    avisos = []
+    m = re.search(r'const (\w+)=(\w+)\(\)\.touchAim\|\|"stick";if\("auto"===\1\)\{(.{0,400}?)return (\w+)=(\w+),\5\}\}'
+                  r'if\(null==(\w+)\)return null;const (\w+)=(\w+)\((\w+),null\)\|\|', t, re.S)
+    if not m:
+        return t, ['no se encontró el código del AUTO táctil']
+    cfg, last, held, near, game = m.group(2), m.group(4), m.group(6), m.group(8), m.group(9)
+    viejo = 'if(null==%s)return null;' % held
+    nuevo = ('if(null==%s){if(!%s().touchAutoAlways)return null;const pbA=%s(%s,null);return pbA&&(%s=pbA),pbA}'
+             % (held, cfg, near, game, last))
+    a, b = m.start(), m.end()
+    t = t[:a] + t[a:b].replace(viejo, nuevo, 1) + t[b:]
+    t, n1 = re.subn(r'touchAssist:!0,', 'touchAssist:!0,touchAutoAlways:!1,', t, count=1)
+    t, n2 = re.subn(r'(\{key:"touchAim",label:"[^"]*",kind:"sw",values:\[[^\]]*\],names:\[[^\]]*\],desc:"[^"]*"\})',
+                    r'\1,{key:"touchAutoAlways",label:"Modo AUTO",kind:"sw",values:[!1,!0],names:["AL MANTENER","SIEMPRE"],'
+                    r'desc:"SIEMPRE: con Disparar con AUTO, disparas solo al enemigo más cercano en cuanto aparece, sin tocar nada."}', t, count=1)
+    t, n3 = re.subn(r'keys:\["touchAim",', 'keys:["touchAim","touchAutoAlways",', t, count=1)
+    if not (n1 and n2 and n3):
+        avisos.append('el ajuste no se pudo añadir al menú (%d%d%d)' % (n1, n2, n3))
+    return t, avisos
 
 
 if __name__ == '__main__':
