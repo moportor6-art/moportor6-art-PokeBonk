@@ -64,6 +64,25 @@ jobs:
         continue-on-error: true
         run: python3 tools/actualizar_pokeisaac.py site/pokeisaac
 
+      # Copia de respaldo de cada versión nueva de PokéIsaac en la rama respaldo-pokeisaac (por si la web desaparece).
+      - name: Respaldo de PokéIsaac
+        continue-on-error: true
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          V=$(tr -d '\r\n' < site/pokeisaac/version.txt)
+          URL="https://x-access-token:${TOKEN}@github.com/${{ github.repository }}"
+          if git ls-remote --exit-code "$URL" "refs/tags/pokeisaac-$V" > /dev/null; then echo "Ya respaldada: $V"; exit 0; fi
+          D=$(mktemp -d); cp -r site/pokeisaac/. "$D"/
+          cd "$D"
+          printf 'Respaldo de PokéIsaac %s (de @SrBatai, pokeisaac.com). Bajado al compilar PokeBonk.\n' "$V" > LEEME.txt
+          git init -q -b respaldo-pokeisaac
+          git add -A
+          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com commit -qm "PokéIsaac $V"
+          git tag "pokeisaac-$V"
+          git push -q -f "$URL" respaldo-pokeisaac "pokeisaac-$V"
+          echo "Respaldada: $V"
+
       - uses: actions/upload-artifact@v4
         with:
           name: pokeisaac-web
