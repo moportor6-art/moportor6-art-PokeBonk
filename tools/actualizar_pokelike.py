@@ -241,7 +241,10 @@ def crudo(out):
             d = posixpath.dirname(rel)
             for m in re.findall(r"""['"`(]((?:\.{1,2}/|/)?[\w@.-]+(?:/[\w@.%-]+)*\.""" + ext + r""")['"`)?#]""", txt):
                 if m.startswith(('./', '../')):
+                    # En un .js, una ruta puede ser de import (relativa al archivo) o de imagen/sonido (relativa a la página).
                     todo.add((m, d))
+                    if rel.endswith(('.js', '.mjs')):
+                        todo.add((m, ''))
                 elif '/' in m:
                     todo.add((m, ''))
     print('Copia tal cual de %s: %d archivos' % (ORIGIN, len(hecho)))
