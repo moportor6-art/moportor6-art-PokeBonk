@@ -27,3 +27,6 @@ Juego "PokéPlunder" de Khydra (khydra98.itch.io/pokeplunder). Incluido tal cual
 
 ## Pokémon Overlord
 Juego "Pokémon Overlord" de jab_lao (jab-lao.itch.io/pokemon-overlord). Incluido tal cual desde su versión web (solo se añadió el botón para volver).
+
+## Pokémon Survivors
+Juego "Pokémon Survivors" de pedrobarretto (github.com/pedrobarretto/pokemon-survivors, pokemonsurvivors.com), código con licencia MIT. Compilado desde su código sin cambios (solo se añadió el botón para volver). Sus sprites y demás recursos tienen los créditos que el propio juego indica en su CREDITS.md.

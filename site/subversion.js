@@ -4,11 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.17';
+  const SUB = '0.18';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.18',
+      date: Date.UTC(2026, 10, 9, 14),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.18`,
+      summary: 'Pokémon Survivors de pedrobarretto en Más juegos, sin internet y sin cuenta.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Pokémon Survivors`,
+        `- Nuevo juego en **Más juegos**: **Pokémon Survivors**, un survivors con 27 iniciales de todas las regiones (82 Pokémon con los huevos). Aguantas 15 minutos de hordas, aprendes movimientos, evolucionas y te enfrentas a Mewtwo. Biomas, cuevas, Megaevoluciones, Poké Mart y modo infinito. Está en español.`,
+        `- Funciona **sin internet** y **sin cuenta**: juegas como invitado y tu progreso se guarda en este dispositivo. El ranking, el cooperativo y su pueblo online necesitan su servidor y una cuenta, así que aquí no aparecen.`,
+        `- Su código es abierto: cada versión de la app compila su versión más nueva, y cada versión se guarda en el repositorio (rama respaldo-pokemon-survivors).`,
+        `- Para volver, toca **Volver a PokéBonk** dos veces.`,
+        ``,
+        `> Pokémon Survivors: juego de pedrobarretto (github.com/pedrobarretto/pokemon-survivors, pokemonsurvivors.com). Código con licencia MIT.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.17',
       date: Date.UTC(2026, 10, 9, 11),
@@ -484,6 +506,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.18',
+      date: '2026-11-09',
+      title: 'Pokémon Survivors en Más juegos.',
+      notes: [
+        ['new', '**Pokémon Survivors** (de pedrobarretto) en Más juegos: survivors con 82 Pokémon, en español, sin internet y sin cuenta. Se actualiza solo en cada versión.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.17',

@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Pokémon Survivors (Subversión 0.18)
+- `site/pokemonsurvivors/`: Pokémon Survivors de pedrobarretto (código MIT, github.com/pedrobarretto/pokemon-survivors). En GitHub Actions se clona su último commit, se compila con Node 24 (`npx vite build --base /pokemonsurvivors/`, sin claves de sus servicios: modo invitado, sin cuentas, ranking ni cooperativo) y se prepara con `tools/preparar_pokemonsurvivors.py` (botón Volver, que vuelve a `/index.html` con `window.PB_VOLVER_URL`). Caché por commit y respaldo en la rama `respaldo-pokemon-survivors` (etiqueta `pokemonsurvivors-<commit>`). La copia del repo es la compilación del commit 30e56a906fa1.
+
 ## Pokémon Overlord (Subversión 0.17)
 - `site/pokeoverlord/`: Pokémon Overlord de jab_lao, juego de Godot 4 (sin hilos) que en itch.io solo se juega en el navegador. Copiado con el flujo "Copia de un juego web", que ahora lee `GODOT_CONFIG` para bajar `index.pck` (64 MB) e `index.wasm` (38 MB), y reintenta si itch.io responde 429. En el APK, esos dos archivos se sirven a trozos (`serveBig`) y van sin comprimir. Se quitó el script de itch.io y se añadió el botón Volver (arriba a la izquierda).
 

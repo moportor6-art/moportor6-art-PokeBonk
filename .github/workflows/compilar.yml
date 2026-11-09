@@ -169,7 +169,7 @@ jobs:
         if: steps.psv.outputs.sha != ''
         with:
           path: pokemonsurvivors-web
-          key: pokemonsurvivors-v1-${{ steps.psv.outputs.sha }}
+          key: pokemonsurvivors-v2-${{ steps.psv.outputs.sha }}
 
       - uses: actions/setup-node@v4
         if: steps.psv.outputs.sha != '' && steps.pscache.outputs.cache-hit != 'true'
