@@ -12,3 +12,6 @@ Sprites del **PMD Sprite Repository** (PMDCollab/SpriteCollab, https://sprites.p
 - Mega Skarmory: Johanne2
 - Mega Houndoom: Top_Kec
 - Mega Tyranitar: JFain
+
+## PokéSurvivor
+Juego "Pokémon Survivors" de JPTER78, port Android/Godot de JayElDragon (github.com/JayElDragon/poke-survivor). Código con licencia MIT y sprites con licencia CC BY-NC, según su repositorio. Incluido sin cambios en `juegos/poke-survivor/` (solo se añadió el preset de exportación Web).

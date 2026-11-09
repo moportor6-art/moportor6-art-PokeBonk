@@ -13,12 +13,64 @@ permissions:
   contents: write
 
 jobs:
+  # PokéSurvivor (juego de Godot en juegos/poke-survivor) exportado a web para meterlo dentro de la app.
+  survivor:
+    runs-on: ubuntu-latest
+    env:
+      GODOT: 4.7.2-stable
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Godot y plantillas web (en caché)
+        id: cache
+        uses: actions/cache@v4
+        with:
+          path: ~/godot
+          key: godot-${{ env.GODOT }}-web
+
+      - name: Descargar Godot
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          mkdir -p ~/godot/templates && cd ~/godot
+          curl -sSL -o g.zip "https://github.com/godotengine/godot-builds/releases/download/$GODOT/Godot_v${GODOT}_linux.x86_64.zip"
+          unzip -q g.zip && rm g.zip && mv Godot_v${GODOT}_linux.x86_64 godot
+          curl -sSL -o t.tpz "https://github.com/godotengine/godot-builds/releases/download/$GODOT/Godot_v${GODOT}_export_templates.tpz"
+          unzip -qj t.tpz 'templates/web_nothreads_release.zip' 'templates/web_nothreads_debug.zip' 'templates/version.txt' -d templates && rm t.tpz
+
+      - name: Exportar a web
+        run: |
+          V=$(cat ~/godot/templates/version.txt)
+          mkdir -p ~/.local/share/godot/export_templates/$V
+          cp ~/godot/templates/* ~/.local/share/godot/export_templates/$V/
+          mkdir -p site/pokesurvivor
+          cd juegos/poke-survivor
+          ~/godot/godot --headless --import > ../../import.log 2>&1 || true
+          ~/godot/godot --headless --export-release "Web" ../../site/pokesurvivor/index.html 2>&1 | tail -n 5
+          cd ../..
+          cp site/pokeisaac/volver-pokebonk.js site/pokesurvivor/
+          ls -la site/pokesurvivor
+          test -s site/pokesurvivor/index.pck
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pokesurvivor-web
+          path: site/pokesurvivor
+          retention-days: 3
+
   apk:
+    needs: survivor
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
         with:
           lfs: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: pokesurvivor-web
+          path: site/pokesurvivor
 
       - uses: actions/setup-java@v4
         with:
@@ -79,12 +131,18 @@ jobs:
 
   # Versión de Windows: el mismo juego dentro de Electron. Solo al publicar una etiqueta o a mano.
   windows:
+    needs: survivor
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[windows]')
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
         with:
           lfs: true
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: pokesurvivor-web
+          path: site/pokesurvivor
 
       - uses: actions/setup-node@v4
         with:

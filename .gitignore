@@ -3,3 +3,6 @@ dist/
 android/*.keystore
 android/keystore.properties
 *.tmp
+
+# Se genera en GitHub Actions desde juegos/poke-survivor
+site/pokesurvivor/

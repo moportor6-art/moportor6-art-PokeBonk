@@ -80,7 +80,7 @@ dist = ROOT / 'dist'; dist.mkdir(exist_ok=True)
 run([bt / ('aapt2' + EXE), 'compile', '--dir', ROOT / 'android/res', '-o', build / 'res.zip'])
 run([bt / ('aapt2' + EXE), 'link', '-o', build / 'resources.apk', '-I', aj, '--manifest', build / 'AndroidManifest.xml', '-A', assets, build / 'res.zip',
      '--min-sdk-version', '26', '--target-sdk-version', '35', '--version-code', version_code, '--version-name', version_name,
-     '-0', 'png', '-0', 'jpg', '-0', 'ogg', '-0', 'mp3', '-0', 'glb', '-0', 'woff2', '-0', 'woff'])
+     '-0', 'png', '-0', 'jpg', '-0', 'ogg', '-0', 'mp3', '-0', 'glb', '-0', 'woff2', '-0', 'woff', '-0', 'pck', '-0', 'wasm'])
 run([javac, '-nowarn', '-source', '11', '-target', '11', '-encoding', 'UTF-8', '-cp', aj, '-d', classes, *src.glob('*.java')])
 run([java, '-cp', bt / 'lib/d8.jar', 'com.android.tools.r8.D8', '--release', '--min-api', '26', '--lib', aj, '--output', build, *classes.rglob('*.class')])
 with zipfile.ZipFile(build / 'resources.apk') as zi, zipfile.ZipFile(build / 'unsigned.apk', 'w') as zo:

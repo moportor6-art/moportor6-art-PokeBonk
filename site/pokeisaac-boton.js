@@ -1,5 +1,5 @@
-/* Subversión propia: botón «PokéIsaac» en la barra del menú principal, bajo Donaciones.
-   Abre el minijuego PokéIsaac (carpeta pokeisaac/), que tiene su propio botón para volver. */
+/* Subversión propia: botones «PokéIsaac» y «PokéSurvivor» en la barra del menú principal, bajo Donaciones.
+   Abren esos juegos (carpetas pokeisaac/ y pokesurvivor/), que tienen su propio botón para volver. */
 (() => {
   if (window.__pbIsaac) return;
   window.__pbIsaac = true;
@@ -13,6 +13,12 @@
     b.addEventListener('click', () => { location.href = 'pokeisaac/index.html'; });
     const after = small.querySelector('.jay-donate') || small.querySelector('.mm-item:not(.bug)');
     if (after) after.after(b); else small.append(b);
+    const s = document.createElement('button');
+    s.type = 'button';
+    s.className = 'mm-item mini pb-survivor';
+    s.innerHTML = '<span class="mm-ic"><img src="pokesurvivor-icono.png" alt="" style="width:28px;height:28px;border-radius:6px"></span><span class="mm-tx"><b>PokéSurvivor</b></span>';
+    s.addEventListener('click', () => { location.href = 'pokesurvivor/index.html'; });
+    b.after(s);
   };
   setInterval(place, 500);
   place();

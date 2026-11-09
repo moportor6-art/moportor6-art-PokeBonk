@@ -456,15 +456,21 @@ public class MainActivity extends Activity {
         if (path.contains("..")) {
             return notFound();
         }
-        byte[] data = load(path);
-        if (data == null) {
-            return notFound();
-        }
         String range = null;
         for (Map.Entry<String, String> h : req.getRequestHeaders().entrySet()) {
             if ("range".equalsIgnoreCase(h.getKey())) {
                 range = h.getValue();
             }
+        }
+        // Subversión propia: los archivos muy grandes (el juego de PokéSurvivor) se sirven a trozos desde el APK,
+        // sin cargarlos enteros en memoria.
+        WebResourceResponse big = serveBig(path, range);
+        if (big != null) {
+            return big;
+        }
+        byte[] data = load(path);
+        if (data == null) {
+            return notFound();
         }
         return respond(path, data, range);
     }
@@ -475,6 +481,76 @@ public class MainActivity extends Activity {
         else if ("auto".equals(m)) o = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_USER;
         else o = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE;
         if (getRequestedOrientation() != o) setRequestedOrientation(o);
+    }
+
+    private WebResourceResponse serveBig(String path, String range) {
+        android.content.res.AssetFileDescriptor fd;
+        try {
+            fd = getAssets().openFd("site/" + path);
+        } catch (IOException e) {
+            return null;   // comprimido o no existe: se sirve como siempre
+        }
+        long total = fd.getLength();
+        if (total < 16L * 1024 * 1024) {
+            try { fd.close(); } catch (IOException ignored) { }
+            return null;
+        }
+        long start = 0, end = total - 1;
+        int status = 200;
+        String reason = "OK";
+        Map<String, String> h = new HashMap<>();
+        h.put("Access-Control-Allow-Origin", "*");
+        h.put("Cache-Control", "no-cache");
+        h.put("Accept-Ranges", "bytes");
+        if (range != null && range.startsWith("bytes=")) {
+            String[] p = range.substring(6).split("-", 2);
+            try {
+                if (!p[0].trim().isEmpty()) {
+                    start = Long.parseLong(p[0].trim());
+                    if (p.length > 1 && !p[1].trim().isEmpty()) end = Math.min(end, Long.parseLong(p[1].trim()));
+                } else if (p.length > 1 && !p[1].trim().isEmpty()) {
+                    start = Math.max(0, total - Long.parseLong(p[1].trim()));
+                }
+                if (start <= end && start < total) {
+                    status = 206;
+                    reason = "Partial Content";
+                    h.put("Content-Range", "bytes " + start + "-" + end + "/" + total);
+                } else {
+                    start = 0;
+                    end = total - 1;
+                }
+            } catch (NumberFormatException ignored) {
+            }
+        }
+        final long len = end - start + 1;
+        h.put("Content-Length", String.valueOf(len));
+        try {
+            InputStream raw = fd.createInputStream();
+            long skipped = 0;
+            while (skipped < start) {
+                long n = raw.skip(start - skipped);
+                if (n <= 0) break;
+                skipped += n;
+            }
+            InputStream limited = new java.io.FilterInputStream(raw) {
+                long left = len;
+                @Override public int read() throws IOException {
+                    if (left <= 0) return -1;
+                    int b = super.read();
+                    if (b >= 0) left--;
+                    return b;
+                }
+                @Override public int read(byte[] b, int off, int n) throws IOException {
+                    if (left <= 0) return -1;
+                    int r = super.read(b, off, (int) Math.min(n, left));
+                    if (r > 0) left -= r;
+                    return r;
+                }
+            };
+            return new WebResourceResponse(mime(path), null, status, reason, h, limited);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     static boolean isaacNet(String h) {

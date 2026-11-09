@@ -4,11 +4,37 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.11';
+  const SUB = '0.12';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.12',
+      date: Date.UTC(2026, 10, 9, 5),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `Versión ${OFICIAL} oficial - Subversión 0.12`,
+      summary: 'PokéSurvivor incluido como tercer juego, con su botón en el menú.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# PokéSurvivor`,
+        `- **Pokémon Survivors 6.2** viene dentro de la app como tercer juego: botón **PokéSurvivor** en la barra del menú principal, debajo de PokéIsaac.`,
+        `- Funciona **sin internet**: el juego entero va dentro del APK y de la versión de Windows.`,
+        `- Para volver, toca **Volver a PokéBonk** (abajo a la izquierda) dos veces.`,
+        `- Sus partidas y su progreso se guardan aparte de los de PokéBonk.`,
+        `- Copia de seguridad: el código fuente completo está guardado en el repositorio (carpeta juegos/poke-survivor) por si el original desaparece.`,
+        ``,
+        `# Menú principal`,
+        `- La barra de accesos en vertical va en dos filas de 5, con el icono encima del nombre para que se lean enteros.`,
+        ``,
+        `> PokéSurvivor: juego original de JPTER78, port Android de JayElDragon. Código con licencia MIT; sprites con licencia CC BY-NC.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.11',
       date: Date.UTC(2026, 10, 9, 4),
@@ -22,18 +48,18 @@
         `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
         ``,
         `# Reanudar donde te quedaste`,
-        `- Si sales de la app en mitad de una partida (botón de inicio, cambiar de app, apagar la pantalla o cerrarla), la partida se **guarda sola**, igual que con «Guardar y salir».`,
+        `- Si sales de la app en mitad de una partida (botón de inicio, cambiar de app, apagar la pantalla o cerrarla), la partida se **guarda sola**, igual que con "Guardar y salir".`,
         `- **Si vuelves y la app seguía abierta**, la partida se reanuda sola en pausa: pulsa Continuar y sigues.`,
         `- **Si la app se había cerrado**, al abrirla sale el aviso **Tienes una partida guardada** con **Continuar**, **Finalizar** (te quedas con lo conseguido) o **Más tarde**.`,
         `- No se guarda en Duelos ni en Cooperativo, ni en los momentos en que el juego no deja guardar (por ejemplo, en algunas peleas). En esos casos pasa lo de siempre.`,
         ``,
         `# Arreglos del menú principal`,
         `- Los textos que no cabían ahora se ajustan solos a su botón: **Continuar**, **Supervivencia**, los eventos con fechas largas, Encargos y la barra lateral.`,
-        `- La barra lateral ya muestra todos los accesos (también **Guía**): se quitó «Inicio», que no hacía nada porque ya estás en el inicio, y los botones se reparten el alto.`,
+        `- La barra lateral ya muestra todos los accesos (también **Guía**): se quitó "Inicio", que no hacía nada porque ya estás en el inicio, y los botones se reparten el alto.`,
         ``,
         `# Vertical, menos apretado`,
         `- Nueva disposición de la partida en vertical: minimapa más pequeño junto a Pausa, tiempo y dinero debajo, **ataques y vitaminas a la izquierda, encima del joystick** (ya no tapan el incienso ni la Ultimate) y **MEGA/DMAX a la derecha**.`,
-        `- **Editor del HUD** también en **Ajustes > Gráficos**, debajo de Orientación. Se usa durante una partida (Pausa > Ajustes), y sigue estando la etiqueta «HUD y guía» de la pausa.`,
+        `- **Editor del HUD** también en **Ajustes > Gráficos**, debajo de Orientación. Se usa durante una partida (Pausa > Ajustes), y sigue estando la etiqueta "HUD y guía" de la pausa.`,
         ``,
         `# Editor del HUD: girar y ocultar`,
         `- Al tocar un elemento en el editor, además del tamaño ahora puedes **girarlo** (de -180° a 180°) y **ocultarlo**.`,
@@ -321,6 +347,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.12',
+      date: '2026-11-09',
+      title: 'PokéSurvivor como tercer juego.',
+      notes: [
+        ['new', '**PokéSurvivor** (Pokémon Survivors 6.2, de JPTER78 y JayElDragon) dentro de la app, sin internet. Botón en el menú principal.'],
+        ['better', 'Barra de accesos en vertical: icono encima del nombre para que se lean enteros.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.11',

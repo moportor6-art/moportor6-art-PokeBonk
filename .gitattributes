@@ -7,3 +7,8 @@
 *.woff2 binary
 *.webp binary
 *.jpg binary
+*.ogv binary
+*.ttf binary
+*.otf binary
+*.wav binary
+*.ico binary
