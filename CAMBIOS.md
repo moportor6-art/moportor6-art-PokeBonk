@@ -6,6 +6,7 @@
 - Botón PokéSurvivor en la barra del menú (`site/pokeisaac-boton.js`, icono `site/pokesurvivor-icono.png`). Botón "Volver a PokéBonk" (dos toques), igual que en PokéIsaac.
 - Android: `MainActivity.serveBig()` sirve los archivos grandes (.pck, .wasm) por streaming, sin cargarlos en memoria; `build.py` los guarda sin comprimir en el APK.
 - PokéIsaac: quitado un `if(this === o.player) return;` añadido en `hurt()` del jugador (`site/pokeisaac/js/pokeisaac.js`) que lo hacía invencible.
+- PokéIsaac al día: `tools/actualizar_pokeisaac.py` baja el núcleo de pokeisaac.com en cada compilación (trabajo `survivor`), conserva `volver-pokebonk.js` y la fuente local, genera `hosts.txt` (servidores que la app de Android deja salir) y se niega a usar una copia con la trampa de invencibilidad. Cada versión nueva se respalda en la rama `respaldo-pokeisaac` (etiqueta `pokeisaac-<versión>`). Basado en el script de prometheus-lumen/pokeisaac-ios (MIT).
 - Créditos: juego original de JPTER78, port de JayElDragon. Código MIT, sprites CC BY-NC.
 
 ## Compañeros (Alfas de apoyo) con más libertad

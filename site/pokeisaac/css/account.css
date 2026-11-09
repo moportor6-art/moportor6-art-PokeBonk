@@ -294,12 +294,12 @@
 #account-ui .ap-facts dd.is-warn { color: #ff9a60; }
 
 /* Avatar */
-#account-ui .ap-avpn { left: 328px; top: 56px; width: 680px; height: 214px; }
+#account-ui .ap-avpn { left: 328px; top: 56px; width: 680px; height: 170px; }
 #account-ui .ap-search { margin-left: auto; width: 250px; height: 26px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; background: #1a1528; border: 1.5px solid var(--line); border-radius: 6px; padding: 0 10px; }
 #account-ui .ap-search:focus-within { border-color: var(--gold); }
 #account-ui .ap-search svg { width: 12px; height: 12px; flex: none; }
 #account-ui .ap-search .acc-av-search { height: 22px; margin: 0; padding: 0; border: 0; background: none; font-size: 6px; box-shadow: none; }
-#account-ui .acc-avatars.ap-avs { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 6px; max-height: 150px; padding: 2px; overflow-y: auto; }
+#account-ui .acc-avatars.ap-avs { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 6px; max-height: 104px; padding: 2px; overflow-y: auto; }
 #account-ui .acc-avatars.ap-avs .ap-av { width: auto; height: 44px; border-radius: 8px; border: 2px solid color-mix(in srgb, var(--tc) 55%, transparent); background: radial-gradient(ellipse at 50% 120%, color-mix(in srgb, var(--tc) 40%, transparent) 0%, #1a1528 70%); opacity: 1; display: flex; align-items: center; justify-content: center; }
 #account-ui .acc-avatars.ap-avs .ap-av img { width: 36px; height: 36px; border-radius: 5px; }
 #account-ui .acc-avatars.ap-avs .ap-av:hover { border-color: rgba(255, 210, 60, .7); }
@@ -308,9 +308,15 @@
 #account-ui .ap-av .acc-av-shiny { left: 3px; right: auto; top: 1px; font-size: 7px; color: var(--gold); }
 
 /* Nombre, seguridad y sesión */
-#account-ui .ap-namepn { left: 328px; top: 280px; width: 680px; height: 100px; }
-#account-ui .ap-secpn { left: 328px; top: 390px; width: 404px; height: 126px; gap: 9px; }
-#account-ui .ap-sespn { left: 742px; top: 390px; width: 266px; height: 126px; gap: 9px; }
+#account-ui .ap-namepn { left: 328px; top: 234px; width: 680px; height: 92px; padding-top: 10px; padding-bottom: 8px; gap: 7px; }
+#account-ui .ap-secpn { left: 328px; top: 334px; width: 404px; height: 122px; gap: 9px; }
+#account-ui .ap-sespn { left: 742px; top: 334px; width: 266px; height: 122px; gap: 9px; }
+#account-ui .ap-dcpn { left: 328px; top: 464px; width: 680px; height: 56px; flex-direction: row; align-items: center; gap: 10px; padding-top: 0; padding-bottom: 0; border-color: #5865f2; }
+#account-ui .ap-dcgrow { flex: 1; min-width: 0; }
+#account-ui .ap-dcok { font-size: 6px; color: #7fe07f; flex: none; }
+#account-ui .ap-dccode { flex: none; font-size: 13px; letter-spacing: 2px; color: #fff; background: #1a1528; border: 1.5px dashed #5865f2; border-radius: 6px; padding: 7px 12px; cursor: pointer; }
+#account-ui .ap-dcpn .ap-txt b { color: #fff; font-weight: normal; }
+#account-ui .ap-b.ap-dcun { border-color: #ff6b6b; background: #3a1020; color: #ff8a8a; }
 #account-ui .ap-page input.ap-in { flex: 1; width: auto; min-width: 0; height: 30px; padding: 0 10px; font-size: 7px; background: #1a1528; border: 1.5px solid var(--line); }
 #account-ui .ap-page input.ap-in:focus { border-color: var(--gold); }
 #account-ui .ap-b { flex: none; height: 30px; display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; border: 1px solid var(--gold); background: linear-gradient(180deg, #3a2a12, #241808); color: var(--gold); font: inherit; font-size: 6px; cursor: pointer; padding: 0 12px; }
@@ -328,6 +334,12 @@
 #account-ui .ap-val i { font-style: normal; font-size: 5px; color: var(--gold); }
 #account-ui .ap-sec .ap-b { height: 26px; }
 #account-ui .ap-sec.is-warn .ap-val { border-color: rgba(255, 210, 60, .6); }
+/* Seguridad con la fila GOOGLE (vincular la cuenta): tres filas más bajas para que quepan en el mismo panel. */
+#account-ui .ap-secpn.is-3 { gap: 6px; }
+#account-ui .ap-secpn.is-3 .ap-val, #account-ui .ap-secpn.is-3 .ap-sec .ap-b { height: 22px; }
+#account-ui .ap-gsec .ap-val .au-g { width: 12px; height: 12px; flex: none; }
+#account-ui .ap-gsec.is-on .ap-val { border-color: rgba(127, 224, 127, .55); color: #e8e8f0; }
+#account-ui .ap-gsec .ap-val i.ap-off { color: var(--dim); }
 #account-ui .ap-back { position: absolute; left: 447px; top: 528px; width: 130px; height: 36px; border-radius: 10px; border: 1px solid var(--gold); background: linear-gradient(180deg, #3a2a12, #241808); color: var(--gold); font: inherit; font-size: 9px; cursor: pointer; }
 #account-ui .ap-back:hover, #account-ui .ap-back:focus-visible { background: linear-gradient(180deg, #4c3818, #30200a); outline: none; }
 #account-ui .ap-mock { position: absolute; left: 16px; bottom: 22px; font-size: 6px; color: #ff9a60; }
@@ -363,6 +375,20 @@
 #account-ui .au-or { display: flex; align-items: center; gap: 12px; margin: 16px 0 12px; font-size: 8px; color: #6a6a80; }
 #account-ui .au-or::before, #account-ui .au-or::after { content: ""; flex: 1; height: 1px; background: rgba(255, 255, 255, .12); }
 #account-ui .au-offnote { margin-top: 8px; text-align: center; }
+/* Continuar con Google (28/10/2026): botón blanco con el logotipo oficial, como pide la guía de marca de Google. */
+#account-ui .au-google { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 44px; margin: 10px 0 0; padding: 0 16px; font: 500 15px/1 Roboto, 'Segoe UI', system-ui, -apple-system, sans-serif; letter-spacing: .1px; color: #1f1f1f; background: #fff; border: 1px solid #747775; border-radius: 6px; cursor: pointer; transition: background .12s, box-shadow .12s, transform .06s; }
+#account-ui .au-google:hover:not(:disabled), #account-ui .au-google:focus-visible { background: #f2f2f2; box-shadow: 0 0 0 2px var(--gold); outline: none; }
+#account-ui .au-google:active:not(:disabled) { transform: translateY(1px); }
+#account-ui .au-google:disabled { opacity: .5; cursor: default; }
+#account-ui .au-google .au-g { width: 20px; height: 20px; flex: none; }
+#account-ui .au-google + .au-or, #account-ui .au-discord + .au-or { margin: 12px 0 4px; }
+/* Continuar con Discord (03/11/2026): azul de Discord con la mascota en blanco (nada del estilo de Google). */
+#account-ui .au-discord { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 44px; margin: 10px 0 0; padding: 0 16px; font: 500 15px/1 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; letter-spacing: .1px; color: #fff; background: #5865f2; border: 1px solid #4752c4; border-radius: 6px; cursor: pointer; transition: background .12s, box-shadow .12s, transform .06s; }
+#account-ui .au-discord:hover:not(:disabled), #account-ui .au-discord:focus-visible { background: #4752c4; box-shadow: 0 0 0 2px var(--gold); outline: none; }
+#account-ui .au-discord:active:not(:disabled) { transform: translateY(1px); }
+#account-ui .au-discord:disabled { opacity: .5; cursor: default; }
+#account-ui .au-discord .au-d { width: 22px; height: 22px; flex: none; }
+#account-ui .ap-dcpn .ap-dcone { flex: none; }
 #account-ui .is-auth .acc-grid { grid-template-columns: 1fr 1fr; }
 #account-ui .is-auth .acc-field-wrap { margin-bottom: 8px; }
 #account-ui .is-auth .acc-hint { font-size: 8px; min-height: 12px; }
@@ -382,3 +408,43 @@
   #account-ui .au-offnote { display: none; }
 }
 #account-ui .is-auth .acc-mock { grid-column: 1 / -1; margin: 0; padding: 4px 0 6px; background: rgba(0, 0, 0, .35); }
+
+/* ---- Flujos de cuenta (26/10/2026): requisitos de la contraseña, «Revisa tu correo», salidas bajo el error y Borrar cuenta ---- */
+#account-ui input.is-bad { border-color: var(--err); box-shadow: 0 0 0 2px rgba(255, 107, 107, .22); }
+#account-ui .au-static { cursor: default; }
+#account-ui .au-wide { grid-column: 1 / -1; }
+#account-ui .au-reqs { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+#account-ui .au-reqs li { position: relative; padding-left: 14px; font-size: 8px; line-height: 1.5; color: var(--muted); }
+#account-ui .au-reqs li::before { content: ""; position: absolute; left: 0; top: 1px; width: 8px; height: 8px; border-radius: 2px; border: 1.5px solid rgba(255, 255, 255, .28); box-sizing: border-box; }
+#account-ui .au-reqs[data-typed="1"] li:not(.is-ok) { color: #ffb0b0; }
+#account-ui .au-reqs[data-typed="1"] li:not(.is-ok)::before { border-color: var(--err); }
+#account-ui .au-reqs li.is-ok { color: var(--ok); }
+#account-ui .au-reqs li.is-ok::before { background: var(--ok); border-color: var(--ok); }
+#account-ui .au-fix { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
+#account-ui .au-fix:empty { display: none; }
+#account-ui .au-fix .acc-btn { width: auto; min-height: 36px; padding: 8px 12px; font-size: 8px; border-color: var(--gold-dim); color: var(--gold); }
+#account-ui .au-terms { margin: 10px 0 0; text-align: center; }
+#account-ui .au-terms .acc-link { font-size: 7px; padding: 0; }
+#account-ui .au-mailbig { display: flex; align-items: center; gap: 14px; margin: 0 0 16px; padding: 14px 16px; border-radius: 8px; background: rgba(255, 210, 60, .07); border: 1px dashed var(--gold-dim); }
+#account-ui .au-mailbig svg { flex: none; width: 48px; height: 36px; image-rendering: pixelated; filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, .5)); }
+#account-ui .au-mailbig b { min-width: 0; font-weight: normal; font-size: 11px; line-height: 1.6; color: #fff; word-break: break-all; }
+#account-ui .au-steps { margin: 0 0 12px; padding: 0 0 0 22px; display: flex; flex-direction: column; gap: 9px; font-size: 9px; line-height: 1.7; color: #dcdcec; }
+#account-ui .au-steps li::marker { color: var(--gold); }
+#account-ui .au-tip { margin: 0 0 14px; font-size: 8px; line-height: 1.8; color: var(--muted); }
+#account-ui a.acc-btn { display: flex; align-items: center; justify-content: center; box-sizing: border-box; text-align: center; text-decoration: none; }
+#account-ui .de-warn { color: #ffb0b0; }
+#account-ui .de-box { margin: 0 0 12px; padding: 12px 14px; border-radius: 8px; background: rgba(255, 107, 107, .07); border: 1px solid rgba(255, 107, 107, .4); }
+#account-ui .de-list { margin: 4px 0 0; padding: 0 0 0 16px; display: flex; flex-direction: column; gap: 7px; font-size: 8px; line-height: 1.7; color: #dcdcec; }
+#account-ui .de-list li::marker { color: var(--err); }
+#account-ui .de-alt { margin: 0 0 14px; }
+#account-ui .de-alt .acc-link { font-size: 8px; padding: 0; }
+#account-ui .acc-btn.is-danger:disabled { opacity: .35; }
+#account-ui .ap-sesbtns { display: flex; gap: 8px; margin-top: auto; }
+#account-ui .ap-sesbtns .ap-b { flex: 1; margin-top: 0; justify-content: center; }
+#account-ui .ap-b.ap-del { height: 32px; border: 1.5px dashed rgba(255, 107, 107, .55); background: transparent; color: #ff8a8a; font-size: 6px; }
+#account-ui .ap-b.ap-del:hover:not(:disabled), #account-ui .ap-b.ap-del:focus-visible { border-style: solid; background: #3a1020; color: #fff; }
+@media (max-width: 760px) { #account-ui .au-wide { grid-column: auto; } }
+
+/* APK de Android: «Entrar desde el navegador» (Google bloquea el WebView y el teclado/gestor de contraseñas van mejor en el navegador del sistema) */
+.au-web { display: block; width: 100%; margin: 0 0 10px; padding: 11px 14px; border-radius: 10px; border: 1.5px solid #3a3450; background: #1f1836; color: #ece9f7; font: 600 13px/1.2 system-ui, sans-serif; cursor: pointer; }
+.au-web:hover { border-color: #ffd23c; }

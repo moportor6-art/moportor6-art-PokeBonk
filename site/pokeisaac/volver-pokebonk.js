@@ -4,7 +4,7 @@
   const add = () => {
     if (document.querySelector('.pb-volver')) return;
     const st = document.createElement('style');
-    st.textContent = `.pb-volver{position:fixed;left:max(8px,env(safe-area-inset-left));bottom:max(8px,env(safe-area-inset-bottom));z-index:99999;padding:6px 10px;border-radius:10px;border:2px solid #fff;background:rgba(40,30,70,.75);color:#fff;font:700 11px system-ui,sans-serif;opacity:.7}
+    st.textContent = `.pb-volver{position:fixed;left:25%;bottom:max(4px,env(safe-area-inset-bottom));z-index:99999;padding:4px 8px;border-radius:8px;border:2px solid #fff;background:rgba(40,30,70,.75);color:#fff;font:700 10px system-ui,sans-serif;opacity:.7}
 .pb-volver.armed{background:#c0392b;opacity:1}`;
     document.head.append(st);
     const b = document.createElement('button');

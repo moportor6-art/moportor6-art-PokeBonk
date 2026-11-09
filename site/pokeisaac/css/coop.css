@@ -223,7 +223,7 @@
 :is(#coop-ui, #friends-ui) .coop-btn.fr-danger { border-color: var(--err); color: var(--err); }
 
 /* Aviso de invitación (abajo, en los menús) */
-#invite-pop { position: fixed; left: 50%; bottom: max(16px, env(safe-area-inset-bottom)); transform: translateX(-50%); z-index: 35; font-family: 'Press Start 2P', 'Courier New', monospace; }
+#invite-pop { position: fixed; left: 50%; top: max(16px, env(safe-area-inset-top)); transform: translateX(-50%); z-index: 70; /* arriba en el centro, sobre el logo (friends.js pone top): abajo tapaba «Volver» y JUGAR */ font-family: 'Press Start 2P', 'Courier New', monospace; }
 #invite-pop[hidden] { display: none; }
 #invite-pop .ip-card {
   display: flex; align-items: center; gap: 12px; padding: 10px 12px; max-width: calc(100vw - 32px); box-sizing: border-box;
@@ -388,6 +388,14 @@
 #coop-ui .cp-role { padding: 2px 5px; border-radius: 4px; font-size: 5px; color: #dfe2f0; background: #2a2440; }
 #coop-ui .cp-role.is-gold { color: #2a1a06; background: #ffd23c; }
 #coop-ui .cp-role.is-dim { color: #5a5a6e; background: #1a1528; }
+/* «Reportar» bajo cada jugador (27/10/2026): etiqueta pequeña en la letra del juego, como «JUGADOR n», en rojo apagado; antes heredaba
+   el botón grande de la sala (y otra letra). */
+#coop-ui .cp-rep { margin-top: 2px; display: inline-flex; align-items: center; gap: 5px; padding: 4px 8px 4px 5px; border-radius: 5px;
+  border: 1px solid #5a2430; background: rgba(36, 12, 20, .85); color: #ff8a8a; font-family: 'Press Start 2P', 'Courier New', monospace;
+  font-size: 5px; letter-spacing: .5px; line-height: 1; cursor: pointer; }
+#coop-ui .cp-rep i { display: inline-grid; place-items: center; width: 9px; height: 9px; border-radius: 2px; background: #ff5a64; color: #2a0a12;
+  font-style: normal; font-size: 6px; }
+#coop-ui .cp-rep:hover, #coop-ui .cp-rep:focus-visible { outline: none; border-color: #ff5a64; background: rgba(72, 18, 30, .95); color: #fff; }
 #coop-ui .cp-status { left: 16px; right: 16px; top: 345px; margin: 0; text-align: center; font-size: 6px; color: #b8b8c8; }
 #coop-ui .cp-status.is-err { color: #ff8080; }
 
@@ -425,65 +433,55 @@
 #coop-ui .cp-go { left: 812px; width: 196px; font-size: 10px; }
 #coop-ui .cp-btn.is-sm { position: static; flex: none; width: 70px; height: 24px; border-radius: 7px; border-width: 1.5px; font-size: 6px; }
 
-/* Amigos con el diseño del lienzo (js/net/friends.js): página de 1024x576 que se escala y coloca como el canvas. */
-#friends-ui .fp-wrap { position: absolute; inset: 0; overflow: hidden; background: transparent; animation: coop-fade .16s ease-out; }
-#friends-ui .fp-page { position: absolute; left: 0; top: 0; width: 1024px; height: 576px; transform-origin: 0 0; overflow: hidden; background: none; } /* el fondo (estrellas) lo pinta el canvas debajo */
-#friends-ui .fp-page > * { position: absolute; }
-#friends-ui .fp-title { left: 16px; top: 14px; font-size: 20px; color: #ffd23c; text-shadow: 3px 3px 0 #2a1030; }
-#friends-ui .fp-tabs { left: 338px; top: 16px; display: flex; gap: 4px; }
-#friends-ui .fp-tab { position: relative; height: 24px; padding: 0 10px; border: 0; border-radius: 5px; font: inherit; font-size: 6px; color: #dfe2f0; background: #2a2440; cursor: pointer; }
-#friends-ui .fp-tab:hover, #friends-ui .fp-tab:focus-visible { outline: none; background: #3a3458; }
-#friends-ui .fp-tab.is-on { color: #2a1a06; background: #ffd23c; }
-#friends-ui .fp-dot { position: absolute; right: -4px; top: -4px; width: 10px; height: 10px; box-sizing: border-box; border-radius: 50%; background: #e8323e; border: 2px solid #120b1c; }
-#friends-ui .fp-add { left: 600px; top: 13px; width: 300px; height: 30px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; padding: 0 10px; border-radius: 5px; background: #1a1528; border: 1.5px solid #3a3450; }
-#friends-ui .fp-add:focus-within { border-color: #ffd23c; }
-#friends-ui .fp-add svg { flex: none; width: 13px; height: 13px; }
-#friends-ui .fp-add input { flex: 1; min-width: 0; padding: 0; background: transparent; border: 0; outline: 0; color: #fff; font: inherit; font-size: 7px; }
-#friends-ui .fp-add input::placeholder { color: #7a7a8e; }
-#friends-ui .fp-add-btn { left: 908px; top: 13px; width: 100px; height: 30px; border-radius: 8px; font-size: 7px; }
-
-#friends-ui .fp-strip { left: 16px; top: 54px; width: 992px; height: 44px; box-sizing: border-box; display: flex; align-items: center; gap: 10px; padding: 0 12px; border-radius: 10px; background: #1a1528; border: 1.5px solid #3a3450; font-size: 7px; color: #fff; }
-#friends-ui .fp-strip.is-hot { background: linear-gradient(90deg, rgba(232, 50, 62, .25), #1a1528 40%); border-color: #e8323e; }
-#friends-ui .fp-strip b { font-weight: normal; color: #ffd23c; }
-#friends-ui .fp-strip span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-#friends-ui .fp-strip canvas { flex: none; width: 30px; height: 30px; border-radius: 6px; image-rendering: pixelated; }
-#friends-ui .fp-strip .fp-btn { position: static; width: 90px; height: 28px; font-size: 6px; }
-#friends-ui .fp-line { left: 16px; right: 16px; top: 100px; margin: 0; text-align: center; font-size: 6px; }
-#friends-ui .fp-err { color: #ff8080; }
-#friends-ui .fp-ok { color: #8ef0a0; }
-
-#friends-ui .fp-grid { left: 16px; top: 108px; width: 992px; height: 412px; overflow-y: auto; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); grid-auto-rows: 200px; gap: 10px; align-content: start; scrollbar-width: thin; scrollbar-color: #ffd23c #0f0b18; }
-#friends-ui .fp-empty { grid-column: 1 / -1; margin: 60px 0 0; text-align: center; font-size: 8px; color: #9a9aae; }
-#friends-ui .fp-card { position: relative; box-sizing: border-box; height: 200px; border-radius: 12px; overflow: hidden; background: #0f0b18; border: 2px solid var(--tc); display: flex; flex-direction: column; align-items: center; }
-#friends-ui .fp-card.is-off { opacity: .75; border-color: #2a2440; }
-#friends-ui .fp-stage { position: relative; width: 100%; height: 104px; flex: none;
-  background: radial-gradient(ellipse at 50% 120%, color-mix(in srgb, var(--tc) 50%, #fff) 0%, var(--tc) 35%, color-mix(in srgb, var(--tc) 25%, #101010) 75%, #0f0b18 100%); }
-#friends-ui .fp-stage::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 34px; background: linear-gradient(180deg, rgba(15, 11, 24, 0), #0f0b18); }
-#friends-ui .fp-stage > * { position: absolute; z-index: 1; }
-#friends-ui .fp-chip { left: 8px; top: 8px; padding: 3px 5px; border-radius: 4px; font-size: 5px; color: #9a9aae; background: #2a2440; white-space: nowrap; }
-#friends-ui .fp-chip i { display: inline-block; width: 4px; height: 4px; margin-right: 3px; border-radius: 50%; background: currentColor; vertical-align: 0; }
-#friends-ui .fp-chip.is-on { color: #0a2a12; background: #7fe07f; }
-#friends-ui .fp-chip.is-gold { color: #2a1a06; background: #ffd23c; }
-#friends-ui .fp-best { left: auto; right: 8px; }
-#friends-ui .fp-altar { left: 50%; bottom: 4px; width: 60px; height: 36px; margin-left: -30px; image-rendering: pixelated; z-index: 2; filter: drop-shadow(0 3px 3px rgba(0, 0, 0, .45)); }
-#friends-ui .fp-pt { left: 50%; bottom: 29px; width: 58px; height: 58px; margin-left: -29px; border-radius: 8px; image-rendering: pixelated; z-index: 3; }
-#friends-ui .fp-name { margin-top: 4px; max-width: 90%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 8px; color: #fff; }
-#friends-ui .fp-sub { margin-top: 7px; font-size: 5px; color: #b8b8c8; }
-#friends-ui .fp-btns { position: absolute; left: 10px; right: 10px; bottom: 10px; display: flex; gap: 6px; }
-#friends-ui .fp-btns .fp-btn { position: static; flex: 1; height: 28px; border-radius: 8px; font-size: 6px; }
-#friends-ui .fp-btns .fp-btn.is-more { flex: none; width: 32px; font-size: 7px; }
-
-#friends-ui .fp-btn { height: 36px; border-radius: 10px; border: 1px solid #ffd23c; background: linear-gradient(180deg, #3a2a12, #241808); color: #ffd23c; font: inherit; font-size: 9px; cursor: pointer; }
-#friends-ui .fp-btn:hover:not([disabled]), #friends-ui .fp-btn:focus-visible { outline: none; background: linear-gradient(180deg, #4c3818, #30200a); }
-#friends-ui .fp-btn.is-hot { border-width: 2px; }
-#friends-ui .fp-btn.is-gold { border: 2px solid #ffd23c; background: linear-gradient(180deg, #ffd23c, #c8962a); color: #2a1a06; }
-#friends-ui .fp-btn.is-gold:hover:not([disabled]), #friends-ui .fp-btn.is-gold:focus-visible { background: linear-gradient(180deg, #ffe070, #d8a43a); }
-#friends-ui .fp-btn.is-flat { border-color: #3a3450; background: #1a1528; color: #dfe2f0; }
-#friends-ui .fp-btn.is-flat:hover:not([disabled]), #friends-ui .fp-btn.is-flat:focus-visible { border-color: rgba(255, 210, 60, .5); background: #221c34; }
-#friends-ui .fp-btn.is-danger { border-color: #ff6b6b; background: #3a1020; color: #ff8a8a; }
-#friends-ui .fp-btn[disabled] { cursor: not-allowed; opacity: .5; }
-#friends-ui .fp-back { left: 447px; top: 528px; width: 130px; }
-#friends-ui .fp-alone { left: 212px; top: 180px; width: 600px; display: flex; flex-direction: column; align-items: center; gap: 16px; text-align: center; font-size: 9px; line-height: 1.8; color: #d8d8e4; }
-#friends-ui .fp-alone p { margin: 0; }
-#friends-ui .fp-dim { font-size: 7px; color: #9a9aae; }
-#friends-ui .fp-login { position: static; width: 220px; height: 40px; font-size: 9px; }
+/* MÓVIL (05/11/2026): sala con maqueta propia (clase cp-m en #coop-ui, solo en la sala): rejilla a pantalla completa con la cabecera (Salir, chips, Volver),
+   la arena con los 4 jugadores a la izquierda, las pestañas TU EQUIPO / INVITAR AMIGOS a la derecha y el estado con el botón de Empezar o Listo abajo.
+   Lo que va con estilos en línea en roomHtml (huecos del equipo, buscador, FAV) se ajusta con !important. */
+#coop-ui .cp-seg { display: none; }
+#coop-ui.cp-m .cp-wrap { overflow: hidden; }
+#coop-ui.cp-m .cp-page { position: absolute; left: 0; top: 0; right: 0; bottom: 0; width: auto; height: auto; transform: none !important; display: grid; box-sizing: border-box; gap: 6px 10px;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr); grid-template-rows: auto auto minmax(0, 1fr) auto; background: rgba(10, 7, 18, .5);
+  padding: max(6px, env(safe-area-inset-top, 0px)) max(10px, env(safe-area-inset-right, 0px)) max(6px, env(safe-area-inset-bottom, 0px)) max(10px, env(safe-area-inset-left, 0px)); }
+#coop-ui.cp-m .cp-page > * { position: relative; left: auto; top: auto; right: auto; }
+#coop-ui.cp-m .cp-title { display: none; }
+#coop-ui.cp-m .cp-btn { height: 38px; padding: 0 14px; font-size: 9px; }
+#coop-ui.cp-m .cp-leave { grid-column: 1; grid-row: 1; justify-self: start; width: auto; }
+#coop-ui.cp-m .cp-top { grid-column: 1; grid-row: 1; justify-self: end; align-self: center; gap: 6px; }
+#coop-ui.cp-m .cp-chip { padding: 6px 9px; font-size: 7px; }
+#coop-ui.cp-m .cp-back { grid-column: 2; grid-row: 1; justify-self: end; width: auto; }
+#coop-ui.cp-m .cp-arena { grid-column: 1; grid-row: 2 / 4; width: auto; height: auto; min-height: 0; border-radius: 12px; }
+#coop-ui.cp-m .cp-slots { bottom: 8px; padding: 0 4px; gap: 4px; justify-content: space-between; }
+#coop-ui.cp-m .cp-slot { flex: 1 1 0; width: auto; min-width: 0; gap: 5px; }
+#coop-ui.cp-m .cp-slot .cp-chip { padding: 4px 6px; font-size: 7px; }
+#coop-ui.cp-m .cp-stand, #coop-ui.cp-m .cp-sp { width: 94px; height: 133px; }
+#coop-ui.cp-m .cp-stand::before { height: 32px; }
+#coop-ui.cp-m .cp-q { bottom: 48px; font-size: 20px; }
+#coop-ui.cp-m .cp-name { max-width: 100%; font-size: 9px; }
+#coop-ui.cp-m .cp-role { padding: 3px 6px; font-size: 7px; }
+#coop-ui.cp-m .cp-rep { padding: 5px 7px 5px 5px; font-size: 7px; }
+#coop-ui.cp-m .cp-rep i { width: 11px; height: 11px; font-size: 8px; }
+#coop-ui.cp-m .cp-seg { grid-column: 2; grid-row: 2; display: flex; gap: 6px; }
+#coop-ui.cp-m .cp-tab { flex: 1; height: 36px; padding: 0 8px; border: 0; border-radius: 18px; font: inherit; font-size: 8px; color: #dfe2f0; background: #2a2440; cursor: pointer; white-space: nowrap; }
+#coop-ui.cp-m .cp-tab.is-on { color: #2a1a06; background: #ffd23c; }
+#coop-ui.cp-m .cp-box { grid-column: 2; grid-row: 3; left: auto; top: auto; width: auto; height: auto; min-height: 0; padding: 8px 10px; gap: 8px; }
+#coop-ui.cp-m .cp-page[data-mt="team"] .cp-inv, #coop-ui.cp-m .cp-page[data-mt="friends"] .cp-mine { display: none; }
+#coop-ui.cp-m .cp-box-h { flex-wrap: wrap; gap: 6px; font-size: 8px; }
+#coop-ui.cp-m .cp-box-h > span:first-child { display: none; }
+#coop-ui.cp-m .cp-box-h > span[style*="inline-flex"] { margin-left: 0 !important; gap: 6px !important; }
+#coop-ui.cp-m [data-act="tslot"] { width: 44px !important; height: 40px !important; border-radius: 9px !important; font-size: 13px !important; }
+#coop-ui.cp-m [data-act="tslot"] canvas { width: 32px !important; height: 32px !important; }
+#coop-ui.cp-m [data-act="tslot"] i { width: 14px !important; height: 14px !important; font: 7px/14px 'Press Start 2P', monospace !important; }
+#coop-ui.cp-m [data-act="tdel"] { width: 20px !important; height: 20px !important; right: -6px !important; top: -6px !important; font: 9px/16px 'Press Start 2P', monospace !important; }
+#coop-ui.cp-m #cp-q { flex: 1 1 110px !important; max-width: none !important; height: 36px !important; margin: 0 !important; padding: 0 12px !important; border-radius: 18px !important; font: 13px system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif !important; }
+#coop-ui.cp-m [data-act="fav"] { height: 36px !important; margin: 0 !important; padding: 0 12px !important; border-radius: 18px !important; font-size: 8px !important; }
+#coop-ui.cp-m .cp-dim { font-size: 8px; line-height: 1.6; }
+#coop-ui.cp-m .cp-chars { grid-template-columns: repeat(auto-fill, minmax(52px, 1fr)); grid-auto-rows: 52px; gap: 7px; }
+#coop-ui.cp-m .cp-char { height: 52px; }
+#coop-ui.cp-m .cp-char canvas { width: 42px; height: 42px; }
+#coop-ui.cp-m .cp-none { font-size: 8px !important; }
+#coop-ui.cp-m .cp-fr { height: 46px; gap: 10px; font-size: 11px; }
+#coop-ui.cp-m .cp-fr canvas { width: 38px; height: 38px; }
+#coop-ui.cp-m .cp-on, #coop-ui.cp-m .cp-off { font-size: 8px; }
+#coop-ui.cp-m .cp-btn.is-sm { width: 86px; height: 34px; font-size: 8px; }
+#coop-ui.cp-m .cp-empty { font-size: 9px; line-height: 1.9; }
+#coop-ui.cp-m .cp-status { grid-column: 1; grid-row: 4; align-self: center; margin: 0; text-align: left; font-size: 8px; line-height: 1.6; }
+#coop-ui.cp-m .cp-go { grid-column: 2; grid-row: 4; width: auto; height: 46px; font-size: 11px; }

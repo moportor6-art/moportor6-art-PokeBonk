@@ -17,7 +17,7 @@
       sub: true,
       author: AUTOR,
       title: `Versión ${OFICIAL} oficial - Subversión 0.12`,
-      summary: 'PokéSurvivor incluido como tercer juego, y en PokéIsaac los enemigos ya pueden derrotarte.',
+      summary: 'PokéSurvivor como tercer juego y PokéIsaac 1.1.1, igual que la web.',
       body: [
         `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
         ``,
@@ -28,8 +28,12 @@
         `- Sus partidas y su progreso se guardan aparte de los de PokéBonk.`,
         `- Copia de seguridad: el código fuente completo está guardado en el repositorio (carpeta juegos/poke-survivor) por si el original desaparece.`,
         ``,
-        `# Arreglo en PokéIsaac`,
-        `- **Los enemigos ya pueden hacerte daño y derrotarte.** La copia de PokéIsaac que venía en la app traía una línea añadida que hacía invencible a tu Pokémon (por eso Pikachu no moría). Se quitó y el juego vuelve a funcionar como el original.`,
+        `# PokéIsaac al día`,
+        `- PokéIsaac pasa de la 1.0.11 a la **1.1.1**, la misma que en pokeisaac.com: menú nuevo con **Clan** y **Chat**, compañeros en **Mi equipo**, modo Clásico por capítulos, entrenamiento con el Profesor Alakazam, barra de vida de jefes nueva, tienda de 6 huecos, salas, objetos y auras nuevos, y el juego en francés.`,
+        `- A partir de ahora, **cada versión de la app trae el PokéIsaac más nuevo** de la web: se descarga solo al compilar.`,
+        `- Cada versión nueva de PokéIsaac se guarda también en el repositorio (rama respaldo-pokeisaac) por si la web desaparece.`,
+        `- **Los enemigos ya pueden hacerte daño y derrotarte.** La copia que venía en la app traía una línea añadida que hacía invencible a tu Pokémon (por eso Pikachu no moría). La versión nueva viene limpia, y al compilar se comprueba que no traiga esa trampa.`,
+        `- El botón **Volver a PokéBonk** es más pequeño y está abajo, entre las noticias y Jugar, para no tapar nada.`,
         ``,
         `# Menú principal`,
         `- La barra de accesos en vertical va en dos filas de 5, con el icono encima del nombre para que se lean enteros.`,
@@ -354,10 +358,11 @@
       oficial: OFICIAL,
       sub: '0.12',
       date: '2026-11-09',
-      title: 'PokéSurvivor como tercer juego.',
+      title: 'PokéSurvivor y PokéIsaac 1.1.1.',
       notes: [
         ['new', '**PokéSurvivor** (Pokémon Survivors 6.2, de JPTER78 y JayElDragon) dentro de la app, sin internet. Botón en el menú principal.'],
-        ['fix', 'PokéIsaac: los enemigos ya pueden hacerte daño y derrotarte (la copia de la app te hacía invencible).'],
+        ['new', '**PokéIsaac 1.1.1**, igual que la web (Clan, Chat, Mi equipo, Clásico por capítulos, entrenamiento...). Se actualiza solo en cada versión de la app.'],
+        ['fix', 'PokéIsaac: los enemigos ya pueden hacerte daño y derrotarte (la copia anterior te hacía invencible).'],
         ['better', 'Barra de accesos en vertical: icono encima del nombre para que se lean enteros.']
       ]
     },

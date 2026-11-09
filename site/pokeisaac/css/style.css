@@ -6,6 +6,7 @@ html, body {
   font-family: 'Press Start 2P', 'Courier New', monospace;
   color: #e8e8f0;
   overscroll-behavior: none;
+  -webkit-text-size-adjust: 100%; text-size-adjust: 100%; /* sin esto, Chrome de Android agranda la letra de las ventanas DOM («font boosting») y se salen de la pantalla */
 }
 
 #wrap {
@@ -71,15 +72,34 @@ html, body {
 @keyframes cf-fade { from { opacity: 0; } to { opacity: 1; } }
 @keyframes cf-pop { from { transform: translateY(8px) scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
 @media (max-width: 420px) { #confirm-ui .cf-actions { flex-direction: column-reverse; } }
+/* Que quepa en cualquier pantalla (26/10/2026: en un móvil en horizontal el aviso era más alto que la pantalla y los botones quedaban fuera):
+   la caja nunca pasa del alto disponible (zonas seguras incluidas), el texto se desplaza por dentro y título y botones se ven siempre. */
+#confirm-ui { padding: max(12px, env(safe-area-inset-top, 0px)) max(12px, env(safe-area-inset-right, 0px)) max(12px, env(safe-area-inset-bottom, 0px)) max(12px, env(safe-area-inset-left, 0px)); }
+#confirm-ui .cf-box { display: flex; flex-direction: column; max-height: 100%; }
+#confirm-ui .cf-head, #confirm-ui .cf-actions { flex: none; }
+#confirm-ui .cf-body { flex: 1 1 auto; min-height: 0; overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; scrollbar-color: #3a3458 transparent; padding-right: 4px; }
+#confirm-ui .cf-body p:last-child { margin-bottom: 0; }
+@media (max-height: 560px) {
+  #confirm-ui .cf-box { width: min(620px, 100%); padding: 12px 16px; } /* en horizontal, más ancha y más baja */
+  #confirm-ui .cf-head { margin-bottom: 8px; }
+  #confirm-ui .cf-ico { width: 22px; height: 22px; font-size: 12px; }
+  #confirm-ui h2 { font-size: 10px; }
+  #confirm-ui .cf-body p { font-size: 8px; line-height: 1.7; margin-bottom: 6px; }
+  #confirm-ui .cf-actions { margin-top: 10px; flex-direction: row; }
+  #confirm-ui .cf-btn { min-height: 36px; font-size: 8px; }
+}
 
 /* Buscadores de la Pokédex (js/menu.js) y de la Wiki (js/wiki.js) */
-#dex-search, #wiki-search { position: fixed; z-index: 30; box-sizing: border-box; margin: 0; padding: 0 10px 0 30px; font-family: 'Press Start 2P', 'Courier New', monospace; color: #fff;
+#dex-search, #wiki-search, #build-search { position: fixed; z-index: 30; box-sizing: border-box; margin: 0; padding: 0 10px 0 30px; font-family: 'Press Start 2P', 'Courier New', monospace; color: #fff;
   background: #1a1528 url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3E%3Cpath d='M1.5 8a6.5 6.5 0 0 1 13 0z' fill='%23e8413c'/%3E%3Cpath d='M1.5 8a6.5 6.5 0 0 0 13 0z' fill='%23f4f4f4'/%3E%3Ccircle cx='8' cy='8' r='6.5' fill='none' stroke='%2324242e' stroke-width='1.6'/%3E%3Cpath d='M1.5 8h13' stroke='%2324242e' stroke-width='1.6'/%3E%3Ccircle cx='8' cy='8' r='2.1' fill='%23f4f4f4' stroke='%2324242e' stroke-width='1.4'/%3E%3C/svg%3E") no-repeat 10px center / 13px 13px;
   border: 1.5px solid #3a3450; outline: none; }
-#dex-search::placeholder, #wiki-search::placeholder { color: #7a7a8e; }
-#dex-search:focus, #wiki-search:focus { border-color: #ffd23c; background-color: rgba(255, 210, 60, .06); box-shadow: 0 0 0 2px rgba(255, 210, 60, .18); }
+#dex-search::placeholder, #wiki-search::placeholder, #build-search::placeholder { color: #7a7a8e; }
+#dex-search:focus, #wiki-search:focus, #build-search:focus { border-color: #ffd23c; background-color: rgba(255, 210, 60, .06); box-shadow: 0 0 0 2px rgba(255, 210, 60, .18); }
 /* El de la Pokédex, como sus filtros (etiqueta #2a2440, sin borde; dorado al escribir) */
 #dex-search { background-color: #2a2440; border-color: transparent; color: #dfe2f0; }
 #dex-search::placeholder { color: #9a9aae; }
 #dex-search:hover { background-color: #3a3458; }
 #dex-search:focus { background-color: #2a2440; border-color: #ffd23c; box-shadow: 0 0 0 2px rgba(255, 210, 60, .18); }
+
+/* Los campos de texto siempre se pueden escribir (un -webkit-user-select: none heredado impide teclear en algunos WebView de Android) */
+input, textarea, [contenteditable] { -webkit-user-select: text !important; user-select: text !important; }
