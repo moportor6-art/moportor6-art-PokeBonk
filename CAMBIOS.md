@@ -1,5 +1,13 @@
 # Cambios respecto al port original
 
+## PokéBonk Remaster (Subversión 0.20)
+- `site/remaster.js`: marca "REMASTER" bajo el logo (oculta `.com`) y en el título, botón **Remaster** en la barra del menú con tres pestañas, y tour de bienvenida la primera vez (`localStorage` `pb-remaster`, campo `tour`).
+- Pasaporte de entrenador: lee `pokeisaac.save.v1`, `ps:save` (Pokémon Survivors), `poke_*` (Pokelike), `pokepath:data`, `pokeplunder:data` (o la clave antigua `data`, según su contenido) y el `save.json` de PokéSurvivor en IndexedDB (`/userfs`, almacén `FILE_DATA`). Cada insignia da Polvo Estelar una vez (`meta.profile.stardust`, `meta.save()`), nunca durante una partida.
+- Desafío del Alfa: semana desde el lunes 5 de enero de 2026 (UTC); Pokémon de la Liga, mapa desbloqueado y dificultad sacados con una semilla de la semana. Se empieza con `App.startRun({species, biome, tier, boosts: [], mode: 'standard'})`; el resultado se lee envolviendo `run.result` de la partida (solo cuando `state` es `over` y las reglas coinciden).
+- Parche en `main-*.js`: `applySettings()` deja `window.__pbMeta` y `window.__pbApp` para estos módulos.
+- Nombre de la app: `android:label` "PokéBonk Remaster" y título de la ventana de Windows. `productName` sigue siendo "PokeBonk" para no cambiar la carpeta de datos (y no perder partidas).
+- `site/pb-guardado.js`: PokéPath TD y PokéPlunder usaban la misma clave `data` de `localStorage`. Ahora cada juego pone un prefijo a sus claves (`window.PB_GUARDADO`) y la clave antigua se pasa al juego que corresponde por su contenido. Lo añade también `tools/preparar_pokepath.py`.
+
 ## Soporte extendido: mando y PC (Subversión 0.19)
 - `desktop/preload.js` expone `window.pokebonkDesktop` (`display`, `setDisplay`, `relaunch`), el puente que el juego espera de su versión de escritorio oficial: así aparece la pestaña **Pantalla** de Ajustes. `desktop/main.js` guarda los ajustes en `pantalla.json` (carpeta de datos de la app), aplica modo, tamaño y monitor al momento, y al arrancar pone `use-angle` (d3d11/gl/vulkan) y, con "FPS sin tope", `disable-gpu-vsync` y `disable-frame-rate-limit`. Siempre: `force_high_performance_gpu`, `ignore-gpu-blocklist`, `enable-gpu-rasterization` y `enable-zero-copy`. Se responde `vsyncNext: true` porque el juego reactiva el V-Sync al arrancar si no; "FPS sin tope" va con sus propias claves (`fpsFree`, `fpsFreeNext`).
 - Parches del juego: resolución "Súper 1,5×/2×" (`fixedRes` -3 y -2: `pixelRatio` = `devicePixelRatio` × 1,5 o × 2, en `resize()` de `main-*.js`), fila "FPS sin tope" en la pestaña Pantalla y Límite de FPS con 165 y 240 (`menus-*.js`).

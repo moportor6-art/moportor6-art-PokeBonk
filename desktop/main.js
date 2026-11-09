@@ -121,7 +121,7 @@ function createWindow() {
     minWidth: 800,
     minHeight: 450,
     backgroundColor: '#1a1630',
-    title: 'PokéBonk',
+    title: 'PokéBonk Remaster',
     icon: path.join(__dirname, 'build', 'icon.png'),
     autoHideMenuBar: true,
     webPreferences: { contextIsolation: true, sandbox: true, backgroundThrottling: false, preload: path.join(__dirname, 'preload.js') }

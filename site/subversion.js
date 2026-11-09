@@ -4,11 +4,46 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.19';
+  const SUB = '0.20';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.20',
+      date: Date.UTC(2026, 10, 10, 2),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.20`,
+      summary: 'Nace PokéBonk Remaster: Pasaporte de entrenador, Desafío del Alfa semanal y tour de bienvenida.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# PokéBonk Remaster`,
+        `- Nuevo nombre para esta versión: **PokéBonk Remaster**. Lo verás bajo el logo, en el nombre de la app y en la ventana de Windows.`,
+        `- Nuevo botón **Remaster** en la barra del menú, bajo Más juegos.`,
+        ``,
+        `# Pasaporte de entrenador`,
+        `- Lee tu progreso en **PokéIsaac**, **Pokémon Survivors**, **PokéSurvivor**, **Pokelike**, **PokéPath TD** y **PokéPlunder** y te da **insignias**.`,
+        `- Cada insignia da **Polvo Estelar** en PokéBonk **una sola vez** (de 150 a 500). Con insignias en 5 juegos distintos ganas la gran insignia: **+1.500**.`,
+        `- Se revisa al abrir el Pasaporte y al volver al menú. Si estás en partida, se cobra al terminarla.`,
+        ``,
+        `# Desafío del Alfa`,
+        `- Cada semana (de lunes a lunes) hay reglas fijas: un **Pokémon** de tu Liga, un **mapa** y una **dificultad**. Sin objetos de la Mochila.`,
+        `- Puntos: cada baja y cada segundo **1**, cada Alfa **250**, cada guardián **500** y ganar **3.000**. Se guarda tu récord de la semana.`,
+        `- Premios de la semana: terminar una partida (+150), 5.000 puntos (+300), 3 Alfas en una partida (+300) y ganar (+600).`,
+        `- Pulsa **Jugar el desafío** y la partida empieza con esas reglas. Reintentar desde la pausa también cuenta.`,
+        ``,
+        `# Tour de bienvenida`,
+        `- La primera vez que abres el juego, un tour corto te enseña Mega y Dynamax, el Laboratorio individual, Más juegos, el Pasaporte, el Desafío y el editor del HUD. Se puede repetir desde **Remaster**.`,
+        ``,
+        `# Corrección`,
+        `- **PokéPath TD** y **PokéPlunder** guardaban en el mismo sitio y se pisaban la partida. Ahora cada uno tiene su guardado; lo que tenías se pasa solo al juego que toca.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.19',
       date: Date.UTC(2026, 10, 9, 21),
@@ -540,6 +575,19 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.20',
+      date: '2026-11-10',
+      title: 'PokéBonk Remaster.',
+      notes: [
+        ['new', 'Nuevo nombre: **PokéBonk Remaster**, con botón **Remaster** en el menú.'],
+        ['new', '**Pasaporte de entrenador**: insignias por tu progreso en los otros juegos, con Polvo Estelar.'],
+        ['new', '**Desafío del Alfa** semanal con reglas fijas, récord y premios.'],
+        ['new', 'Tour de bienvenida la primera vez.'],
+        ['fix', 'PokéPath TD y PokéPlunder ya no comparten guardado.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.19',

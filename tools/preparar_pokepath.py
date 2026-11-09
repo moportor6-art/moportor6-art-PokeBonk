@@ -46,6 +46,9 @@ def main():
         h = h.replace('</head>', '    <script src="pb-pokepath.js"></script>\n    <script src="volver-pokebonk.js"></script>\n</head>', 1)
     if 'pb-mando.js' not in h:
         h = re.sub(r'(<head[^>]*>)', r'\1\n    <script src="/pb-mando.js"></script>', h, count=1)
+    if 'pb-guardado.js' not in h:
+        # PokéPath y PokéPlunder guardan con la misma clave ("data"): cada uno con su prefijo.
+        h = re.sub(r'(<head[^>]*>)', r'\1\n    <script>window.PB_GUARDADO = "pokepath";</script>\n    <script src="/pb-guardado.js"></script>', h, count=1)
     (dest / 'index.html').write_text(h, encoding='utf-8')
     if not ver:
         try:
