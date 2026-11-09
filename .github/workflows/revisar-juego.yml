@@ -37,6 +37,8 @@ jobs:
             if [ -z "$J" ]; then
               echo "No se encontró el juego web en esa página de itch.io. Juegos enlazados en ella:"
               echo "$P" | grep -oE 'https://[a-z0-9-]+\.itch\.io/[a-z0-9-]+' | sort -u | head -n 40
+              echo "Pistas del juego en la página:"
+              echo "$P" | grep -oE '.{0,120}(itch\.zone|embed-upload|iframe|game_frame|load_game|html5).{0,160}' | head -n 12
               exit 1
             fi
             echo "$J" > "$D/_origen.txt"
