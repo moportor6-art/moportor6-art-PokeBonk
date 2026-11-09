@@ -27,7 +27,10 @@ def fetch(url):
     last = None
     for _ in range(3):
         try:
-            with urlopen(Request(url, headers={'User-Agent': UA}), timeout=30) as r:
+            h = {'User-Agent': UA}
+            if os.environ.get('PL_REFERER'):
+                h['Referer'] = os.environ['PL_REFERER']
+            with urlopen(Request(url, headers=h), timeout=30) as r:
                 return r.read()
         except Exception as e:  # noqa
             last = e
@@ -211,7 +214,10 @@ def crudo(out):
     """Copia tal cual de un juego web (por defecto pokelike.xyz; otro con PL_ORIGIN), para respaldo y para revisarlo."""
     import posixpath
     out = Path(out); out.mkdir(parents=True, exist_ok=True)
-    html = fetch(ORIGIN).decode('utf-8')
+    try:
+        html = fetch(ORIGIN).decode('utf-8')
+    except Exception:  # noqa
+        html = fetch(ORIGIN + 'index.html').decode('utf-8')
     (out / 'index.html').write_text(html, encoding='utf-8')
     ext = r'(?:js|mjs|css|json|png|gif|jpg|jpeg|webp|svg|mp3|ogg|wav|m4a|woff2?|ttf|wasm|atlas|txt|tmj|tsj|xml)'
     todo = set((m, '') for m in re.findall(r'(?:src|href)="(?!https?:|//|#|data:|mailto:)([^"?#]+)', html))

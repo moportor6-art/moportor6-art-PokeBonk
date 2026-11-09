@@ -39,7 +39,7 @@ jobs:
             URL="${J%index.html}"
             case "$URL" in */) ;; *) URL="${URL%/*}/";; esac
           fi
-          PL_ORIGIN="$URL" python3 tools/actualizar_pokelike.py crudo "$D"
+          PL_REFERER="https://itch.io/" PL_ORIGIN="$URL" python3 tools/actualizar_pokelike.py crudo "$D"
           curl -fsSL -A "Mozilla/5.0 (Linux; Android 14) Chrome/130.0 Mobile" -D "$D/_cabeceras.txt" -o /dev/null "$URL" || true
           find "$D" -type f | sed "s|$D/||" | sort > "$D/_archivos.txt"
           wc -l "$D/_archivos.txt"; du -sh "$D"
