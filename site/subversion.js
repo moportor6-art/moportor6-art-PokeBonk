@@ -17,7 +17,7 @@
       sub: true,
       author: AUTOR,
       title: `Versión ${OFICIAL} oficial - Subversión 0.12`,
-      summary: 'PokéSurvivor incluido como tercer juego, con su botón en el menú.',
+      summary: 'PokéSurvivor incluido como tercer juego, y en PokéIsaac los enemigos ya pueden derrotarte.',
       body: [
         `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
         ``,
@@ -27,6 +27,9 @@
         `- Para volver, toca **Volver a PokéBonk** (abajo a la izquierda) dos veces.`,
         `- Sus partidas y su progreso se guardan aparte de los de PokéBonk.`,
         `- Copia de seguridad: el código fuente completo está guardado en el repositorio (carpeta juegos/poke-survivor) por si el original desaparece.`,
+        ``,
+        `# Arreglo en PokéIsaac`,
+        `- **Los enemigos ya pueden hacerte daño y derrotarte.** La copia de PokéIsaac que venía en la app traía una línea añadida que hacía invencible a tu Pokémon (por eso Pikachu no moría). Se quitó y el juego vuelve a funcionar como el original.`,
         ``,
         `# Menú principal`,
         `- La barra de accesos en vertical va en dos filas de 5, con el icono encima del nombre para que se lean enteros.`,
@@ -354,6 +357,7 @@
       title: 'PokéSurvivor como tercer juego.',
       notes: [
         ['new', '**PokéSurvivor** (Pokémon Survivors 6.2, de JPTER78 y JayElDragon) dentro de la app, sin internet. Botón en el menú principal.'],
+        ['fix', 'PokéIsaac: los enemigos ya pueden hacerte daño y derrotarte (la copia de la app te hacía invencible).'],
         ['better', 'Barra de accesos en vertical: icono encima del nombre para que se lean enteros.']
       ]
     },

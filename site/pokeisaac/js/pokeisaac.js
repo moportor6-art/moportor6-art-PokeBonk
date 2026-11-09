@@ -40290,9 +40290,6 @@
                     }
                 }
                 hurt(a, t, o, s) {
-					if(this === o.player){
-						return;
-					}
                     if (this.invuln > 0 || this.dead || this.holdT > 0)
                         return !1;
                     if (this.flags.smoke > 0)

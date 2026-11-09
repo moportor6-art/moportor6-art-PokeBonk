@@ -5,6 +5,7 @@
 - En GitHub Actions, el trabajo `survivor` descarga Godot 4.7.2, exporta el juego a `site/pokesurvivor/` y lo pasa a los trabajos del APK y de Windows. No se sube al repo (el .pck pesa unos 148 MB).
 - Botón PokéSurvivor en la barra del menú (`site/pokeisaac-boton.js`, icono `site/pokesurvivor-icono.png`). Botón "Volver a PokéBonk" (dos toques), igual que en PokéIsaac.
 - Android: `MainActivity.serveBig()` sirve los archivos grandes (.pck, .wasm) por streaming, sin cargarlos en memoria; `build.py` los guarda sin comprimir en el APK.
+- PokéIsaac: quitado un `if(this === o.player) return;` añadido en `hurt()` del jugador (`site/pokeisaac/js/pokeisaac.js`) que lo hacía invencible.
 - Créditos: juego original de JPTER78, port de JayElDragon. Código MIT, sprites CC BY-NC.
 
 ## Compañeros (Alfas de apoyo) con más libertad
