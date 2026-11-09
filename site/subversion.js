@@ -38,7 +38,7 @@
         `# Pokelike`,
         `- Nuevo juego en **Más juegos**: **Pokelike 1.6** (pokelike.xyz), un roguelike por turnos con gimnasios, Alto Mando, Torre Batalla y modo Nuzlocke, de la 1.ª a la 5.ª generación. Está en inglés, como el original.`,
         `- Funciona **sin internet**: los sprites de los 649 Pokémon van dentro de la app. Sin publicidad.`,
-        `- Cada versión de la app trae el Pokelike más nuevo de la web, y cada versión nueva se guarda en el repositorio (rama respaldo-pokelike).`,
+        `- La web ya va por la 2.0, que viene cifrada y no se puede meter entera sin internet. Aun así, en cada compilación se guarda una copia tal cual de la web en el repositorio (rama respaldo-pokelike-web).`,
         `- Para volver, toca **Volver a PokéBonk** (arriba a la izquierda) dos veces.`,
         ``,
         `# Menú principal`,
@@ -370,7 +370,7 @@
         ['new', '**PokéSurvivor** (Pokémon Survivors 6.2, de JPTER78 y JayElDragon) dentro de la app, sin internet. En Más juegos.'],
         ['new', '**PokéIsaac 1.1.1**, igual que la web (Clan, Chat, Mi equipo, Clásico por capítulos, entrenamiento...). Se actualiza solo en cada versión de la app.'],
         ['fix', 'PokéIsaac: los enemigos ya pueden hacerte daño y derrotarte (la copia anterior te hacía invencible).'],
-        ['new', '**Pokelike** dentro de la app, sin internet y sin publicidad. Se actualiza solo en cada versión.'],
+        ['new', '**Pokelike 1.6** dentro de la app, sin internet y sin publicidad.'],
         ['better', 'Botón **Más juegos** con PokéIsaac, PokéSurvivor y Pokelike.'],
         ['better', 'Barra de accesos en vertical: icono encima del nombre para que se lean enteros.']
       ]

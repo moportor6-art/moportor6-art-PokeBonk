@@ -2,7 +2,7 @@
 
 ## Pokelike y Más juegos (Subversión 0.12)
 - `site/pokelike/`: Pokelike 1.6 (de la copia pcasaspere/pokelike_v2 de pokelike.xyz), preparado con `tools/actualizar_pokelike.py preparar`: sin anuncios ni Google Analytics, fuente local, botón Volver arriba a la izquierda (`window.PB_VOLVER_TOP`) y los sprites de PokeAPI (649 Pokémon, normales y shiny) dentro de la app (`data/pokedex.json` apunta a `sprites/pokemon/`).
-- En GitHub Actions, `actualizar_pokelike.py web` baja la última versión de pokelike.xyz y los sprites; cada versión nueva se respalda en la rama `respaldo-pokelike` (etiqueta `pokelike-<versión>-<hash>`). Si falla, se usa la copia del repo.
+- pokelike.xyz ya va por la 2.0: un solo `js/bundle.<hash>.js` ofuscado, con sprites en `img/sprites/`. No se puede preparar automáticamente, así que la app usa la 1.6 del repo. En cada compilación, `actualizar_pokelike.py crudo` guarda una copia tal cual de la web en la rama `respaldo-pokelike-web` (sin todos los sprites, que el código ofuscado pide por nombre). La rama `respaldo-pokelike` tiene la 1.6 preparada.
 - `site/pokeisaac-boton.js`: un solo botón "Más juegos" que abre una ventana con PokéIsaac, PokéSurvivor y Pokelike.
 
 ## PokéSurvivor (Subversión 0.12)
