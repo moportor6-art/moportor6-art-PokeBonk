@@ -94,7 +94,7 @@ jobs:
         id: ver
         shell: bash
         run: |
-          NUM=$(echo "${GITHUB_REF_NAME}" | grep -oE '[0-9]+' | tail -n1)
+          NUM=$(echo "${GITHUB_REF_NAME}" | grep -oE '[0-9]+' | tail -n1 || true)
           if [ -z "$NUM" ]; then NUM=0; fi
           echo "num=$NUM" >> "$GITHUB_OUTPUT"
 
