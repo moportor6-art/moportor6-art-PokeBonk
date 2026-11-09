@@ -90,6 +90,20 @@ jobs:
           retention-days: 3
 
       # Pokelike: se baja la versión más nueva de pokelike.xyz (con sus sprites). Si falla, se usa la copia del repo.
+      # Copia tal cual de pokelike.xyz en la rama respaldo-pokelike-web (respaldo y para revisar sus cambios).
+      - name: Pokelike tal cual de la web
+        continue-on-error: true
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          D=$(mktemp -d)
+          python3 tools/actualizar_pokelike.py crudo "$D"
+          cd "$D"
+          git init -q -b respaldo-pokelike-web
+          git add -A
+          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com commit -qm "Pokelike tal cual de pokelike.xyz"
+          git push -q -f "https://x-access-token:${TOKEN}@github.com/${{ github.repository }}" respaldo-pokelike-web
+
       - name: Pokelike actualizado
         continue-on-error: true
         run: python3 tools/actualizar_pokelike.py web site/pokelike

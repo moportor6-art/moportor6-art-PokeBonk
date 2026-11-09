@@ -158,9 +158,37 @@ def web(dest):
     print('Listo: Pokelike %s de la web (%d archivos de código, %d imágenes nuevas)' % (ver.group(1) if ver else '?', len(files), nuevas))
 
 
+def crudo(out):
+    """Copia tal cual de lo que sirve pokelike.xyz ahora (para respaldo y para revisar cambios)."""
+    out = Path(out); out.mkdir(parents=True, exist_ok=True)
+    html = fetch(ORIGIN).decode('utf-8')
+    (out / 'index.html').write_text(html, encoding='utf-8')
+    todo = set(re.findall(r'(?:src|href)="(?!https?:|//|#|data:)([^"?#]+)', html))
+    hecho = set()
+    while todo:
+        rel = todo.pop().lstrip('./')
+        if rel in hecho or not rel or rel.endswith('/'):
+            continue
+        hecho.add(rel)
+        try:
+            data = fetch(ORIGIN + rel.replace(' ', '%20'))
+        except Exception as e:  # noqa
+            print('  no se pudo bajar', rel, str(e)[:60]); continue
+        (out / rel).parent.mkdir(parents=True, exist_ok=True)
+        (out / rel).write_bytes(data)
+        if rel.endswith(('.js', '.css', '.json')):
+            txt = data.decode('utf-8', errors='ignore')
+            for m in re.findall(r"""['"`(]((?:\./)?(?:js|css|data|sprites|ui|fonts|assets|audio|music|sfx)/[^'"`)?$\s]+\.(?:js|css|json|png|gif|jpg|webp|svg|mp3|ogg|wav|woff2?))""", txt):
+                if '%' not in m:
+                    todo.add(m)
+    print('Copia tal cual de pokelike.xyz: %d archivos' % len(hecho))
+
+
 if __name__ == '__main__':
     if len(sys.argv) >= 4 and sys.argv[1] == 'preparar':
         preparar(sys.argv[2], sys.argv[3], sys.argv[4] if len(sys.argv) > 4 else None)
+    elif len(sys.argv) == 3 and sys.argv[1] == 'crudo':
+        crudo(sys.argv[2])
     elif len(sys.argv) == 3 and sys.argv[1] == 'web':
         web(sys.argv[2])
     else:
