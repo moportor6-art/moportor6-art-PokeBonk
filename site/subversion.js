@@ -35,6 +35,16 @@
         `- Nueva disposición de la partida en vertical: minimapa más pequeño junto a Pausa, tiempo y dinero debajo, **ataques y vitaminas a la izquierda, encima del joystick** (ya no tapan el incienso ni la Ultimate) y **MEGA/DMAX a la derecha**.`,
         `- **Editor del HUD** también en **Ajustes > Gráficos**, debajo de Orientación. Se usa durante una partida (Pausa > Ajustes), y sigue estando la etiqueta «HUD y guía» de la pausa.`,
         ``,
+        `# Editor del HUD: girar y ocultar`,
+        `- Al tocar un elemento en el editor, además del tamaño ahora puedes **girarlo** (de -180° a 180°) y **ocultarlo**.`,
+        `- Lo oculto no se ve ni se puede tocar en la partida. En el editor sale medio transparente para poder volver a mostrarlo.`,
+        `- Cuidado con ocultar el joystick (no podrías moverte con el dedo) o Pausa (usa el botón Atrás del móvil).`,
+        ``,
+        `# Versión para Windows`,
+        `- Cada versión trae también **PokeBonk para Windows**: instalador (**PokeBonk-Windows-Instalador.exe**) y versión sin instalar (**.zip**), en la misma release de GitHub que el APK.`,
+        `- Es el mismo juego con todas estas mejoras. Se juega con teclado y ratón o con mando. **F11** para pantalla completa.`,
+        `- Las partidas del PC y las del móvil van por separado.`,
+        ``,
         PIE
       ].join('\n')
     },
@@ -319,7 +329,9 @@
       notes: [
         ['new', '**Guardado automático**: si sales de la app en mitad de una partida, se guarda sola y al volver puedes continuarla o finalizarla.'],
         ['fix', 'Menú principal: los textos largos (Continuar, Supervivencia, eventos) ya caben en sus botones y la barra lateral muestra todos los accesos.'],
-        ['better', 'Partida en vertical menos apretada, y Editor del HUD también en Ajustes > Gráficos.']
+        ['better', 'Partida en vertical menos apretada, y Editor del HUD también en Ajustes > Gráficos.'],
+        ['new', 'Editor del HUD: ahora puedes girar y ocultar cada elemento.'],
+        ['new', 'Versión para Windows en cada release (instalador y .zip).']
       ]
     },
     {

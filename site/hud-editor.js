@@ -68,8 +68,10 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
       for (const it of ITEMS) {
         const v = H.layout[it.sel];
         if (!v) continue;
-        const x = +v.x || 0, y = +v.y || 0, s = +v.s || 1;
-        css += `${it.css}{translate:${x.toFixed(2)}vw ${y.toFixed(2)}vh!important;scale:${s.toFixed(2)}!important}\n`;
+        const x = +v.x || 0, y = +v.y || 0, s = +v.s || 1, r = +v.r || 0;
+        css += `${it.css}{translate:${x.toFixed(2)}vw ${y.toFixed(2)}vh!important;scale:${s.toFixed(2)}!important${r ? `;rotate:${r}deg!important` : ''}}\n`;
+        // Oculto: no se ve ni se puede tocar. En el editor se ve medio transparente para poder volver a mostrarlo.
+        if (v.h) css += `${it.css}{opacity:0!important;pointer-events:none!important}\nbody.pb-hud-editing ${it.css.split(',').join(',body.pb-hud-editing ')}{opacity:.3!important}\n`;
       }
       style.textContent = css;
     },
@@ -169,7 +171,7 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
       const it = ITEMS.find(i => i.sel === H.sel);
       const h = document.createElement('h3'); h.textContent = it ? it.name : 'Editar HUD';
       const sm = document.createElement('small');
-      sm.textContent = it ? 'Arrástralo para moverlo y usa la barra para cambiar su tamaño.' : 'Toca y arrastra cualquier elemento para moverlo. Toca uno para cambiar su tamaño.';
+      sm.textContent = it ? 'Arrástralo para moverlo. Abajo puedes cambiar su tamaño, girarlo u ocultarlo.' : 'Toca y arrastra cualquier elemento para moverlo. Toca uno para cambiar su tamaño, girarlo u ocultarlo.';
       p.append(h, sm);
       if (it) {
         const v = H.layout[it.sel] ??= { x: 0, y: 0, s: 1 };
@@ -177,11 +179,25 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
         const rg = document.createElement('input'); rg.type = 'range'; rg.min = '50'; rg.max = '200'; rg.step = '5'; rg.value = String(Math.round(v.s * 100));
         rg.addEventListener('input', () => { v.s = +rg.value / 100; lab.textContent = `Tamaño: ${rg.value}%`; H.apply(); const el = document.querySelector(it.sel); if (el) H.clamp(el, v); });
         rg.addEventListener('change', save);
+        const labR = document.createElement('div'); labR.textContent = `Giro: ${Math.round(+v.r || 0)}°`;
+        const rr = document.createElement('input'); rr.type = 'range'; rr.min = '-180'; rr.max = '180'; rr.step = '15'; rr.value = String(Math.round(+v.r || 0));
+        rr.addEventListener('input', () => { v.r = +rr.value; labR.textContent = `Giro: ${rr.value}°`; H.apply(); });
+        rr.addEventListener('change', save);
         const row = document.createElement('div'); row.className = 'row';
+        const hd = document.createElement('button');
+        const hdTxt = () => { hd.textContent = v.h ? 'Mostrar' : 'Ocultar'; hd.className = v.h ? 'go' : ''; };
+        hdTxt();
+        hd.addEventListener('click', () => { v.h = !v.h; H.apply(); save(); hdTxt(); });
         const rs = document.createElement('button'); rs.textContent = 'Restablecer este';
         rs.addEventListener('click', () => { delete H.layout[it.sel]; H.apply(); save(); H.renderPanel(); });
-        row.append(rs);
-        p.append(lab, rg, row);
+        row.append(hd, rs);
+        p.append(lab, rg, labR, rr, row);
+        if (it.sel === '.tc-stick' || it.sel === '.tc-pause') {
+          const warn = document.createElement('small');
+          warn.style.cssText = 'margin-top:6px;color:#b0392b';
+          warn.textContent = it.sel === '.tc-stick' ? 'Si ocultas el joystick no podrás moverte con el dedo.' : 'Si ocultas Pausa, usa el botón Atrás del móvil para pausar.';
+          p.append(warn);
+        }
       }
       const row = document.createElement('div'); row.className = 'row';
       const all = document.createElement('button'); all.className = 'warn'; all.textContent = 'Restablecer todo';
@@ -255,6 +271,6 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
     const orient = body.querySelector('.pb-orient-row');
     if (orient) orient.after(r); else body.prepend(r);
   };
-  setInterval(() => { try { if (document.querySelector('.tc.on')) document.body.classList.add('pb-hud-touch'); H.inject(); settingsRow(); } catch {} }, 400);
+  setInterval(() => { try { if (document.querySelector('.tc.on') || matchMedia('(pointer:coarse)').matches) document.body.classList.add('pb-hud-touch'); H.inject(); settingsRow(); } catch {} }, 400);
   window.PB_HUD = H;
 })();

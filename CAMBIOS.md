@@ -9,6 +9,10 @@
 
 Todo está en `site/assets/menus-1ZFEe0vd-mw3e1u3x.js` (clase de los compañeros).
 
+## Windows y editor del HUD (Subversión 0.11)
+- `desktop/`: versión de Windows con Electron. `main.js` sirve `site/` por el protocolo `app://` (para que los módulos funcionen), F11 pantalla completa, enlaces externos al navegador y guardado automático al cerrar la ventana. El trabajo `windows` de `.github/workflows/compilar.yml` copia `site/`, compila con electron-builder (instalador NSIS y .zip) y lo sube a la release de cada etiqueta. También se compila si el mensaje del commit lleva `[windows]`.
+- `site/hud-editor.js`: cada elemento se puede girar (`rotate`) y ocultar (opacidad 0 y sin toques; medio visible en el editor).
+
 ## Textos que caben (Subversión 0.11)
 - `site/ajuste-textos.js`: encoge la letra de los textos del menú principal del port (botón grande, modos, eventos, Encargos, barra lateral, compañero) hasta que caben. En horizontal, la barra lateral oculta «Inicio» y reparte el alto entre los botones.
 
