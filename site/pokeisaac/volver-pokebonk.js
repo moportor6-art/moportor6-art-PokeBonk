@@ -18,7 +18,7 @@
         clearTimeout(t); t = setTimeout(() => { b.classList.remove('armed'); b.textContent = 'Volver a PokéBonk'; }, 3000);
         return;
       }
-      location.href = '../index.html';
+      location.href = window.PB_VOLVER_URL || '../index.html';
     });
     for (const ev of ['pointerdown', 'touchstart', 'mousedown']) b.addEventListener(ev, e => e.stopPropagation(), { passive: true });
     document.body.append(b);

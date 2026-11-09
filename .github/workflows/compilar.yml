@@ -156,6 +156,73 @@ jobs:
           path: site/pokepath
           retention-days: 3
 
+      # Pokémon Survivors (pedrobarretto/pokemon-survivors, código MIT): se compila su última versión con Node 24.
+      # Solo cuando hay cambios en su repositorio (caché por commit). Cada versión se respalda en la rama
+      # respaldo-pokemon-survivors. Si algo falla, se usa la copia del repo (site/pokemonsurvivors).
+      - name: Pokémon Survivors versión
+        id: psv
+        continue-on-error: true
+        run: echo "sha=$(git ls-remote https://github.com/pedrobarretto/pokemon-survivors HEAD | cut -c1-12)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        id: pscache
+        if: steps.psv.outputs.sha != ''
+        with:
+          path: pokemonsurvivors-web
+          key: pokemonsurvivors-v1-${{ steps.psv.outputs.sha }}
+
+      - uses: actions/setup-node@v4
+        if: steps.psv.outputs.sha != '' && steps.pscache.outputs.cache-hit != 'true'
+        with:
+          node-version: 24
+
+      - name: Pokémon Survivors compilado
+        if: steps.psv.outputs.sha != ''
+        continue-on-error: true
+        env:
+          SHA: ${{ steps.psv.outputs.sha }}
+        run: |
+          if [ ! -f pokemonsurvivors-web/index.html ]; then
+            set -e
+            D=$(mktemp -d)
+            git clone -q --depth 1 https://github.com/pedrobarretto/pokemon-survivors "$D/src"
+            cd "$D/src"
+            npm ci --no-audit --no-fund
+            npx vite build --base /pokemonsurvivors/
+            cd "$GITHUB_WORKSPACE"
+            python3 tools/preparar_pokemonsurvivors.py "$D/src/dist" pokemonsurvivors-web "$SHA"
+          fi
+          test -f pokemonsurvivors-web/index.html
+          rm -rf site/pokemonsurvivors
+          cp -r pokemonsurvivors-web site/pokemonsurvivors
+          echo "Pokémon Survivors en la app: $(cat site/pokemonsurvivors/version.txt)"
+
+      - name: Respaldo de Pokémon Survivors
+        continue-on-error: true
+        env:
+          TOKEN: ${{ github.token }}
+        run: |
+          test -f site/pokemonsurvivors/version.txt
+          V=$(tr -d '\r\n' < site/pokemonsurvivors/version.txt)
+          URL="https://x-access-token:${TOKEN}@github.com/${{ github.repository }}"
+          if git ls-remote --exit-code "$URL" "refs/tags/pokemonsurvivors-$V" > /dev/null; then echo "Ya respaldada: $V"; exit 0; fi
+          D=$(mktemp -d); cp -r site/pokemonsurvivors/. "$D"/
+          cd "$D"
+          printf 'Respaldo de Pokémon Survivors (github.com/pedrobarretto/pokemon-survivors, commit %s), compilado para PokeBonk.\n' "$V" > LEEME.txt
+          git init -q -b respaldo-pokemon-survivors
+          git add -A
+          git -c user.name=github-actions -c user.email=github-actions@users.noreply.github.com commit -qm "Pokémon Survivors $V"
+          git tag "pokemonsurvivors-$V"
+          git push -q -f "$URL" respaldo-pokemon-survivors "pokemonsurvivors-$V"
+          echo "Respaldada: $V"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pokemonsurvivors-web
+          path: site/pokemonsurvivors
+          retention-days: 3
+          if-no-files-found: ignore
+
   apk:
     needs: survivor
     runs-on: ubuntu-latest
@@ -195,6 +262,12 @@ jobs:
         with:
           name: pokepath-web
           path: site/pokepath
+
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: pokemonsurvivors-web
+          path: site/pokemonsurvivors
 
       - uses: actions/setup-java@v4
         with:
@@ -294,6 +367,12 @@ jobs:
         with:
           name: pokepath-web
           path: site/pokepath
+
+      - uses: actions/download-artifact@v4
+        continue-on-error: true
+        with:
+          name: pokemonsurvivors-web
+          path: site/pokemonsurvivors
 
       - uses: actions/setup-node@v4
         with:

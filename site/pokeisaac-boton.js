@@ -9,6 +9,8 @@
       desc: 'Mazmorras al estilo The Binding of Isaac. Sin cuenta: Gacha y fichas en este dispositivo. De @SrBatai.', pix: true },
     { id: 'pokeisaac-online', name: 'PokéIsaac online', icon: 'pokeisaac/favicon.svg', url: 'pokeisaac/index.html',
       desc: 'Con tu cuenta de pokeisaac.com: Ranking, cooperativo, clan y chat. Necesita internet.', pix: true },
+    { id: 'pokemonsurvivors', name: 'Pokémon Survivors', icon: 'pokemonsurvivors-icono.png', url: 'pokemonsurvivors/index.html',
+      desc: 'Survivors con 82 Pokémon: aguanta 15 minutos de hordas, evoluciona y vence a Mewtwo. De pedrobarretto.', pix: true },
     { id: 'pokesurvivor', name: 'PokéSurvivor', icon: 'pokesurvivor-icono.png', url: 'pokesurvivor/index.html',
       desc: 'Sobrevive a oleadas de enemigos. De JPTER78 y JayElDragon.' },
     { id: 'pokepath', name: 'PokéPath TD', icon: 'pokepath-icono.png', url: 'pokepath/index.html',
