@@ -148,6 +148,55 @@ jobs:
           path: site/pokelike
           retention-days: 3
 
+      # PokéPath TD: su autor publica la versión de escritorio en GitHub (Khydra/PokePath-TD-Electron). Se baja la
+      # última, se saca el juego web del instalador y se prepara. Solo cuando sale una versión nueva (caché).
+      # Si algo falla, se usa la copia del repo.
+      - name: PokéPath versión
+        id: ppv
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: echo "tag=$(gh api repos/Khydra/PokePath-TD-Electron/releases/latest --jq .tag_name)" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/cache@v4
+        if: steps.ppv.outputs.tag != ''
+        with:
+          path: pokepath-web
+          key: pokepath-v1-${{ steps.ppv.outputs.tag }}
+
+      - name: PokéPath actualizado
+        if: steps.ppv.outputs.tag != ''
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ github.token }}
+          TAG: ${{ steps.ppv.outputs.tag }}
+        run: |
+          if [ -f pokepath-web/index.html ]; then
+            echo "PokéPath ya bajado antes (caché)"
+          else
+            set -e
+            D=$(mktemp -d)
+            gh release download "$TAG" -R Khydra/PokePath-TD-Electron -p '*.exe' -D "$D"
+            ls -la "$D"
+            EXE=$(ls "$D"/*.exe | grep -iv blockmap | head -n1)
+            7z x -y "$EXE" -o"$D/inst" > /dev/null
+            PKG=$(find "$D/inst" -name 'app-64.7z' | head -n1)
+            7z x -y "$PKG" -o"$D/app" > /dev/null
+            npx --yes @electron/asar extract "$D/app/resources/app.asar" "$D/asar"
+            command -v ffmpeg > /dev/null || (sudo apt-get update -qq && sudo apt-get install -y -qq ffmpeg > /dev/null) || true
+            python3 tools/preparar_pokepath.py "$D/asar" pokepath-web "${TAG#v}"
+          fi
+          test -f pokepath-web/index.html
+          rm -rf site/pokepath
+          cp -r pokepath-web site/pokepath
+          echo "PokéPath en la app: $(cat site/pokepath/version.txt)"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: pokepath-web
+          path: site/pokepath
+          retention-days: 3
+
   apk:
     needs: survivor
     runs-on: ubuntu-latest
@@ -178,6 +227,15 @@ jobs:
         with:
           name: pokelike-web
           path: site/pokelike
+
+      - name: Quitar la copia vieja de PokéPath
+        shell: bash
+        run: rm -rf site/pokepath
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: pokepath-web
+          path: site/pokepath
 
       - uses: actions/setup-java@v4
         with:
@@ -268,6 +326,15 @@ jobs:
         with:
           name: pokelike-web
           path: site/pokelike
+
+      - name: Quitar la copia vieja de PokéPath
+        shell: bash
+        run: rm -rf site/pokepath
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: pokepath-web
+          path: site/pokepath
 
       - uses: actions/setup-node@v4
         with:

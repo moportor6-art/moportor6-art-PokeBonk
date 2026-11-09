@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## PokéPath TD (Subversión 0.14)
+- `site/pokepath/`: PokéPath TD 1.7 de Khydra, sacado de su instalador de Windows (electron-builder: 7z dentro del instalador NSIS y `resources/app.asar`). Es un juego web sin servidor que guarda en `localStorage`. `tools/preparar_pokepath.py` copia la parte web, añade `pb-pokepath.js` (pantalla completa sin Electron) y el botón Volver, y baja la música a 96 kbps.
+- En GitHub Actions se baja la última release de Khydra/PokePath-TD-Electron (caché por etiqueta) y se prepara igual; si falla, se usa la copia del repo.
+
 ## Juegos sin cuenta (Subversión 0.13)
 - PokéIsaac trae dentro una simulación completa de su servidor (Supabase), "mockauth", que guarda cuentas, Gacha, fichas, Tickets, misiones, huevos y tienda en `localStorage` (`pokeisaac.mock.db`). La versión publicada borra los parámetros de la dirección, así que `tools/parche_pokeisaac.py` deja pasar `mockauth`/`mockdelay`/`mockanon`, llama a `window.PB_ISAAC_LOCAL(cuenta, juego)` y carga `site/pokeisaac/pb-local.js`, que entra solo como invitado local y cierra la ventana de cuenta. El parche se aplica en cada compilación tras bajar PokéIsaac; si ya no encaja, se usa la copia del repo.
 - Más juegos abre `pokeisaac/index.html?mockauth=1&mockdelay=0` (sin cuenta) y, aparte, "PokéIsaac online" sin parámetros.

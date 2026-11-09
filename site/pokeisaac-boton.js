@@ -1,5 +1,5 @@
 /* Subversión propia: botón "Más juegos" en la barra del menú principal, bajo Donaciones.
-   Abre una ventana con PokéIsaac, PokéSurvivor y Pokelike (carpetas pokeisaac/, pokesurvivor/ y pokelike/).
+   Abre una ventana con PokéIsaac, PokéSurvivor, PokéPath TD y Pokelike (carpetas pokeisaac/, pokesurvivor/ y pokelike/).
    Cada juego tiene su propio botón "Volver a PokéBonk". */
 (() => {
   if (window.__pbIsaac) return;
@@ -11,6 +11,8 @@
       desc: 'Con tu cuenta de pokeisaac.com: Ranking, cooperativo, clan y chat. Necesita internet.', pix: true },
     { id: 'pokesurvivor', name: 'PokéSurvivor', icon: 'pokesurvivor-icono.png', url: 'pokesurvivor/index.html',
       desc: 'Sobrevive a oleadas de enemigos. De JPTER78 y JayElDragon.' },
+    { id: 'pokepath', name: 'PokéPath TD', icon: 'pokepath-icono.png', url: 'pokepath/index.html',
+      desc: 'Tower defense: construye el camino y defiende 9 rutas. De Khydra.', pix: true },
     { id: 'pokelike', name: 'Pokelike', icon: 'pokelike/favicon.svg', url: 'pokelike/index.html',
       desc: 'Roguelike por turnos: Historia, Torre Batalla y Desafíos. De pokelike.xyz.' }
   ];

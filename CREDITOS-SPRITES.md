@@ -18,3 +18,6 @@ Juego "Pokémon Survivors" de JPTER78, port Android/Godot de JayElDragon (github
 
 ## Pokelike
 Juego "Pokelike" de pokelike.xyz (proyecto de fans no oficial). Copia de partida: github.com/pcasaspere/pokelike_v2. Sprites de los Pokémon del repositorio PokeAPI/sprites. Pokémon y sus personajes pertenecen a Nintendo / Creatures / GAME FREAK.
+
+## PokéPath TD
+Juego "PokéPath TD" de Khydra (khydra98.itch.io/pokepath, github.com/Khydra). Incluido desde su versión de escritorio, sin cambios en el juego (solo la música recomprimida y el botón para volver). Sprites del PMD Sprite Repository y demás autores que el juego acredita en sus créditos.
