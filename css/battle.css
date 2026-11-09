@@ -1,0 +1,466 @@
+.battle-container {
+	position: absolute;
+	right: 0px;
+	top: 172px;
+	bottom: 161px;
+	width: 60%;
+	
+	background-size: cover;
+	z-index: 3;
+}
+
+.battle-info-container {
+	position: absolute;
+	width: 250px;
+	height: 62px;
+	background: var(--white);
+	background-image: url('../assets/images/textures/texture2.png');
+	outline: 2px solid black;
+	filter: drop-shadow(3px 3px);
+	border-radius: 5px;
+}
+
+.battle-info-container-enemy {
+	top: 10px;
+	left: 10px;
+}
+
+.battle-info-container-player {
+	bottom: 16px;
+	right: 13px;
+}
+
+.battle-name {
+	position: absolute;
+	top: 3px;
+	left: 25px;
+	color: #111;
+	text-transform: uppercase;
+	font-size: 12px;
+	line-height: 22px;
+}
+
+.battle-health-bar-container {
+	position: absolute;
+	top: 24px;
+	left: 12px;
+	right: 12px;
+	height: 11px;
+	outline: 1px solid black;
+	background-color: #C03B3B;
+	border-radius: 4px;
+	overflow: hidden;
+}
+
+.battle-health-bar {
+	position: relative;
+	height: 100%;
+	width: 100%;
+	background: linear-gradient(306deg,rgba(112, 172, 76, 1) 33%, rgba(109, 184, 66, 1) 100%);
+	outline: 1px solid black;
+	box-shadow: inset 0 3px 5px #8ec46f;
+	overflow: hidden;
+	transition: .4s;
+}
+
+.battle-health-bar::before {
+	content: "";
+	position: absolute;
+	top: 0;
+	left: -50%;
+	width: 100px;
+	height: 100%;
+	background: linear-gradient(
+		120deg,
+		transparent,
+		rgba(255, 255, 255, 0.1),
+		transparent
+	);
+	animation: shine 8s linear infinite;
+	pointer-events: none;
+}
+
+.battle-status-container {
+	position: absolute;
+	bottom: 2px;
+	right: 6px;
+	left: 6px;
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.battle-status {
+	position: relative;
+	width: 20px;
+	height: 20px;
+	background-size: 20px;
+	background-position: center;
+	background-repeat: no-repeat;
+	font-family: "Silkscreen", sans-serif;
+	font-size: 10px;
+	color: var(--white);
+	text-align: right;
+	line-height: 30px;
+}
+
+.battle-player-sprite, .battle-enemy-sprite {
+	position: absolute;
+	width: 80px;
+	height: 80px;
+}
+
+.battle-player-sprite {
+	bottom: 0px;
+	left: 77px;
+	z-index: 1;
+}
+
+.battle-enemy-sprite {
+	top: 30px;
+	right: 90px;
+	z-index: 1;
+}
+
+@keyframes shine {
+	0% { left: -100%; }
+	100% { left: 100%; }
+}
+
+/* MOVES */
+.damage-text {
+	position: absolute;
+	top: 0;
+	left: 50%;
+	transform: translateX(-50%) scale(0.8);
+	font-size: 16px;
+	font-weight: bold;
+	color: var(--crt);
+	opacity: 0;
+	pointer-events: none;
+	white-space: nowrap;
+	animation: floatUp 1.8s linear forwards;
+}
+
+@keyframes floatUp {
+	0% {
+		opacity: 1;
+		transform: translateX(-50%) translateY(0) scale(1.1);
+	}
+	50% {
+		opacity: 1;
+		transform: translateX(-50%) translateY(-25px) scale(1);
+	}
+	100% {
+		opacity: 0;
+		transform: translateX(-50%) translateY(-50px) scale(0.9);
+	}
+}
+
+.damage-text.heal {
+	color: var(--green);
+}
+
+.damage-text.ap {
+	color: var(--ap);
+	text-transform: uppercase;
+	font-size: 10px;
+}
+
+.damage-text.mp {
+	color: var(--mp);
+	text-transform: uppercase;
+	font-size: 10px;
+}
+
+.damage-text.charge {
+	color: var(--cha);
+	text-transform: uppercase;
+	font-size: 10px;
+}
+
+.damage-text.wet {
+	color: var(--wet);
+	text-transform: uppercase;
+	font-size: 10px;
+}
+
+.damage-text.elusion, .damage-text.dodge {
+	color: var(--elu);
+	text-transform: uppercase;
+	font-size: 10px;
+}
+
+.damage-text.poison {
+	color: var(--poi);
+	text-transform: uppercase;
+	font-size: 10px;
+}
+
+.damage-text.burn {
+	color: var(--bur);
+	text-transform: uppercase;
+	font-size: 10px;
+}
+
+.damage-text.erosion {
+	color: var(--ero);
+	text-transform: uppercase;
+	font-size: 10px;
+}
+
+.damage-text.restoration {
+	color: var(--hea);
+	text-transform: uppercase;
+	font-size: 10px;
+}
+
+.damage-text.fear {
+	color: var(--fea);
+	text-transform: uppercase;
+	font-size: 10px;
+}
+
+.damage-text.frailty {
+	color: var(--fra);
+	text-transform: uppercase;
+	font-size: 10px;
+}
+
+.boost-icon {
+  position: absolute;
+  width: 32px;
+  height: 32px;
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0;
+  transform: scale(0.8);
+  pointer-events: none;
+}
+
+/* Todas usan la misma subida, solo cambia el lateral */
+.boost-icon.show.wave1 { animation: boostFloat1 1.9s linear forwards; }
+.boost-icon.show.wave2 { animation: boostFloat2 1.9s linear forwards; }
+.boost-icon.show.wave3 { animation: boostFloat3 1.9s linear forwards; }
+.boost-icon.show.wave4 { animation: boostFloat4 1.9s linear forwards; }
+
+/* wave1: ±6px */
+@keyframes boostFloat1 {
+  0% { opacity:1; transform: translate(0px,0) scale(0.6); }
+  15% { transform: translate(3px,-20px) scale(1); }
+  30% { transform: translate(-3px,-40px) scale(1); }
+  45% { transform: translate(3px,-60px) scale(1); }
+  60% { transform: translate(-3px,-80px) scale(1); }
+  75% { transform: translate(3px,-100px) scale(0.95); }
+  100% { opacity:0; transform: translate(0px,-120px) scale(0.9); }
+}
+
+/* wave2: ±8px */
+@keyframes boostFloat2 {
+  0% { opacity:1; transform: translate(0px,0) scale(0.9); }
+  15% { transform: translate(-3px,-20px) scale(1); }
+  30% { transform: translate(3px,-40px) scale(1); }
+  45% { transform: translate(-3px,-60px) scale(1); }
+  60% { transform: translate(3px,-80px) scale(1); }
+  75% { transform: translate(-3px,-100px) scale(0.95); }
+  100% { opacity:0; transform: translate(0px,-120px) scale(0.9); }
+}
+
+/* wave3: ±10px */
+@keyframes boostFloat3 {
+ 0% { opacity:1; transform: translate(0px,0) scale(0.9); }
+  15% { transform: translate(10px,-20px) scale(1); }
+  30% { transform: translate(-10px,-40px) scale(1); }
+  45% { transform: translate(10px,-60px) scale(1); }
+  60% { transform: translate(-10px,-80px) scale(1); }
+  75% { transform: translate(10px,-100px) scale(0.95); }
+  100% { opacity:0; transform: translate(0px,-120px) scale(0.9); }
+}
+
+/* wave4: ±5px */
+@keyframes boostFloat4 {
+  0% { opacity:1; transform: translate(0px,0) scale(0.9); }
+  15% { transform: translate(-10px,-20px) scale(1); }
+  30% { transform: translate(10px,-40px) scale(1); }
+  45% { transform: translate(-10px,-60px) scale(1); }
+  60% { transform: translate(10px,-80px) scale(1); }
+  75% { transform: translate(-10px,-100px) scale(0.95); }
+  100% { opacity:0; transform: translate(0px,-120px) scale(0.9); }
+}
+
+.debuff-icon {
+    position: absolute;
+    width: 32px;
+    height: 32px;
+    opacity: 0;
+    pointer-events: none;
+    background-repeat: no-repeat;
+}
+
+.shake {
+    animation: debuffShake 1.8s linear forwards;
+}
+
+.show { opacity: 1; }
+
+@keyframes debuffShake {
+  0%   { transform: translate(0px,0) scale(0.9); opacity:1; }
+  10%  { opacity: 0; }
+  15%  { transform: translate(-3px,-10px) scale(1); opacity:1; }
+  25%  { opacity: 0; }
+  30%  { transform: translate(3px,-20px) scale(1); opacity:1; }
+  40%  { opacity: 0; }
+  45%  { transform: translate(-3px,-30px) scale(1); opacity:1; }
+  55%  { opacity: 0; }
+  60%  { transform: translate(3px,-40px) scale(1); opacity:1; }
+  70%  { opacity: 0; }
+  75%  { transform: translate(-3px,-50px) scale(0.95); opacity:1; }
+  85%  { opacity: 0; }
+  100% { transform: translate(0px,-60px) scale(0.9); opacity:0; }
+}
+
+@keyframes enemyDeath {
+   0%   { opacity: 1; transform: scale(1) translateY(0); }
+  15%  { transform: scale(1.1) translateY(-8px); } /* pequeño rebote arriba */
+
+  100% { opacity: 0; transform: scale(0.7) translateY(60px); }
+}
+
+.enemy-death {
+  animation: enemyDeath 0.9s ease-in forwards;
+}
+
+@keyframes hitEffectPlayer {
+  0% {transform: scale(1) rotate(0deg) translate(0, 10px);}
+  30% {transform: scale(0.8, 0.7) rotate(-3deg) translate(0, 10px);}
+  60% {transform: scale(1.05, 0.9) rotate(3deg) translate(0, 10px);}
+  80% { transform: scale(0.95, 1.1) rotate(-2deg) translate(0, 10px); }
+  100% { transform: scale(1) rotate(0deg);  }
+}
+
+@keyframes hitEffectEnemy {
+  0% { transform: scale(1) rotate(0deg); }
+  30% { transform: scale(0.8, 0.7) rotate(-3deg); }
+  60% { transform: scale(1.05, 0.9) rotate(3deg); }
+  80% { transform: scale(0.95, 1.1) rotate(-2deg); }
+  100% { transform: scale(1) rotate(0deg);  }
+}
+
+.hit-enemy {
+  animation: hitEffectEnemy 0.3s ease;
+}
+
+.hit-player {
+  animation: hitEffectPlayer 0.3s ease;
+}
+
+@keyframes buffEffect {
+  0%, 100% { transform: scale(1); filter: brightness(1); }
+  50% { transform: scale(1.15); filter: brightness(1.5) drop-shadow(0 0 5px gold); }
+}
+
+.buff {
+  animation: buffEffect 0.5s ease-in-out;
+}
+
+@keyframes debuffEffect {
+  0%, 100% { transform: scale(1) rotate(0deg); filter: brightness(1); }
+  25% { transform: scale(0.9) rotate(-3deg); filter: hue-rotate(90deg) brightness(0.8); }
+  50% { transform: scale(1.05) rotate(3deg); filter: hue-rotate(60deg) brightness(0.9); }
+  75% { transform: scale(0.95) rotate(-2deg); filter: hue-rotate(30deg) brightness(0.85); }
+}
+
+.debuff {
+  animation: debuffEffect 0.5s ease-in-out;
+}
+
+@keyframes dodgeEffect {
+  0%   { transform: translateX(0); }
+  25%  { transform: translateX(-15px); }
+  50%  { transform: translateX(15px); }
+  75%  { transform: translateX(-10px); }
+  100% { transform: translateX(0); }
+}
+
+.dodge {
+  animation: dodgeEffect 0.4s ease-in-out;
+}
+
+@keyframes poisonEffect {
+  0%, 100% { filter: hue-rotate(0deg); }
+  50% { filter: hue-rotate(90deg) saturate(2); }
+}
+
+.poison-enemy {
+  animation: hitEffectEnemy 0.3s ease, poisonEffect 0.6s ease-in-out;
+}
+
+.poison-player {
+  animation: hitEffectPlayer 0.3s ease, poisonEffect 0.6s ease-in-out;
+}
+
+@keyframes healEffect {
+  50% {
+    transform: translateY(10px);
+    filter: brightness(2);
+  }
+}
+
+.healing {
+  animation: healEffect 0.5s ease-in-out 1; 
+}
+
+
+@keyframes chargeEffect {
+  0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 5px var(--cha));
+  }
+  25% {
+    transform: scale(1.01);
+    filter: drop-shadow(0 0 30px var(--cha));
+  }
+  50% {
+    transform: scale(1.02);
+    filter: drop-shadow(0 0 30px var(--cha));
+  }
+  75% {
+    transform: scale(1.01);
+    filter: drop-shadow(0 0 30px var(--cha));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 5px var(--cha));
+  }
+}
+
+.charge-anim {
+  animation: chargeEffect 0.5s ease-in-out 1;
+}
+
+@keyframes wetEffect {
+   0% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 5px var(--wet));
+  }
+  25% {
+    transform: scale(1.01);
+    filter: drop-shadow(0 0 30px var(--wet));
+  }
+  50% {
+    transform: scale(1.02);
+    filter: drop-shadow(0 0 30px var(--wet));
+  }
+  75% {
+    transform: scale(1.01);
+    filter: drop-shadow(0 0 30px var(--wet));
+  }
+  100% {
+    transform: scale(1);
+    filter: drop-shadow(0 0 5px var(--wet));
+  }
+}
+
+.wet-anim {
+  animation: wetEffect 0.5s ease-in-out 1;
+}

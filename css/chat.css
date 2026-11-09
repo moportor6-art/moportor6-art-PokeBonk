@@ -1,0 +1,26 @@
+.chat-container {
+	position: absolute;
+	right: 0px;
+	top: 37px;
+	height: 133px;
+	width: 60%;
+	background-color: #14161a;
+	background-image: url('../assets/images/textures/texture8.png');
+	z-index: 2;
+}
+
+.chat-box {
+	position: absolute;
+	inset: 10px 8px;
+	color: var(--white);
+	font-size: 8px;
+	line-height: 14px;
+	overflow-y: auto;
+}
+
+.chat-box::-webkit-scrollbar { width: 16px; }
+.chat-box::-webkit-scrollbar-track { background: transparent; }
+.chat-box::-webkit-scrollbar-thumb { 
+    background: var(--red); 
+    border-radius: 2px;
+}

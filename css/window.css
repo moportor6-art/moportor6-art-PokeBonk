@@ -1,0 +1,52 @@
+.window {
+    position: absolute; /* antes: fixed */
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background-color: var(--white);
+    border-radius: 4px;
+    box-shadow: 0 0 20px black;
+    overflow: hidden;
+    outline: 2px solid black;
+    z-index: 99;
+}
+
+.window-content {
+    position: absolute;
+    top: 34px;
+    left: 5px;
+    right: 5px;
+    bottom: 5px;
+    border-radius: 2px;
+    outline: 2px solid var(--black);
+}
+
+.window-header {
+    height: 28px;
+    background: var(--white); 
+    color: var(--black);
+    line-height: 40px;
+    padding-left: 10px;
+    text-transform: uppercase;
+}
+
+.window-close {
+    position: absolute;
+    top: 4px;
+    right: 5px;
+    width: 24px;
+    height: 24px;
+    line-height: 14px;
+    font-size: 26px;
+    color: var(--white);
+    background-color: var(--red);
+    text-align: center;
+    border-radius: 4px;
+    outline: 1px solid var(--black);
+    cursor: url('../assets/images/misc/cursor-pointer.png') 0 0, pointer;
+}
+
+.window-close:hover {
+   filter: brightness(1.2);
+}
+
