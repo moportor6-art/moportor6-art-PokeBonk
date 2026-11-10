@@ -52,8 +52,8 @@
   const esPath = (d) => d && JSON.stringify(d).includes('"teamManager"');
   const esPlunder = (d) => d && d.profile && d.profile.upgrades && d.profile.achievements;
 
-  let survivorDb = null; // PokéSurvivor (Godot) guarda en IndexedDB
-  const leerSurvivor = () => new Promise((res) => {
+  // Partidas de Godot (PokéSurvivor y Pokémon Overlord): IndexedDB "/userfs", almacén FILE_DATA.
+  const leerGodot = (ruta) => new Promise((res) => {
     try {
       const rq = indexedDB.open('/userfs');
       rq.onerror = () => res(null);
@@ -61,20 +61,44 @@
       rq.onsuccess = () => {
         const db = rq.result;
         try {
-          const tx = db.transaction('FILE_DATA', 'readonly');
-          const g = tx.objectStore('FILE_DATA').get('/userfs/godot/app_userdata/Pokémon Survivors/save.json');
-          g.onsuccess = () => {
-            const v = g.result;
-            let out = null;
-            try { if (v && v.contents) out = JSON.parse(new TextDecoder().decode(v.contents)); } catch {}
-            db.close();
-            res(out);
-          };
+          const g = db.transaction('FILE_DATA', 'readonly').objectStore('FILE_DATA').get('/userfs/godot/app_userdata/' + ruta);
+          g.onsuccess = () => { const v = g.result; db.close(); res(v && v.contents ? new Uint8Array(v.contents.buffer, v.contents.byteOffset, v.contents.byteLength) : null); };
           g.onerror = () => { db.close(); res(null); };
         } catch { db.close(); res(null); }
       };
     } catch { res(null); }
   });
+  // Lee JSON o el formato binario de Godot 4 (FileAccess.store_var): diccionarios, listas, textos y números.
+  const godotVar = (u8) => {
+    const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+    let o = 0;
+    const str = () => { const n = dv.getUint32(o, true); o += 4; const s = new TextDecoder().decode(u8.subarray(o, o + n)); o += n + ((4 - n % 4) % 4); return s; };
+    const val = () => {
+      const h = dv.getUint32(o, true); o += 4;
+      const type = h & 0xff, wide = h & (1 << 16);
+      switch (type) {
+        case 0: return null;
+        case 1: { const v = dv.getUint32(o, true); o += 4; return !!v; }
+        case 2: { if (wide) { const v = Number(dv.getBigInt64(o, true)); o += 8; return v; } const v = dv.getInt32(o, true); o += 4; return v; }
+        case 3: { if (wide) { const v = dv.getFloat64(o, true); o += 8; return v; } const v = dv.getFloat32(o, true); o += 4; return v; }
+        case 4: case 21: case 22: return str(); // String, StringName, NodePath (aprox.)
+        case 27: { const n = dv.getUint32(o, true) & 0x7fffffff; o += 4; const r = {}; for (let i = 0; i < n; i++) { const k = val(); r[String(k)] = val(); } return r; }
+        case 28: { const n = dv.getUint32(o, true) & 0x7fffffff; o += 4; const r = []; for (let i = 0; i < n; i++) r.push(val()); return r; }
+        case 30: case 31: case 32: case 33: case 34: { // arrays empaquetados de números: se cuentan
+          const n = dv.getUint32(o, true); o += 4; const sz = { 30: 4, 31: 8, 32: 4, 33: 8 }[type] || 1; o += n * sz; o += (4 - (n * sz) % 4) % 4; return new Array(n).fill(0);
+        }
+        case 35: { const n = dv.getUint32(o, true); o += 4; const r = []; for (let i = 0; i < n; i++) r.push(str()); return r; }
+        default: throw new Error('tipo ' + type);
+      }
+    };
+    return val();
+  };
+  const leerPartida = (u8) => {
+    if (!u8 || !u8.length) return null;
+    try { return JSON.parse(new TextDecoder().decode(u8)); } catch {}
+    for (const ini of [4, 0]) { try { const dv = new DataView(u8.buffer, u8.byteOffset + ini); const v = godotVar(new Uint8Array(u8.buffer, u8.byteOffset + ini, u8.byteLength - ini)); if (v && typeof v === 'object') return v; void dv; } catch {} }
+    return null;
+  };
 
   const leer = async () => {
     const isaac = json('pokeisaac.save.v1') || {};
@@ -84,15 +108,21 @@
     const pathPl = path.save?.player || {};
     const plunder = json('pokeplunder:data') || (esPlunder(viejo) ? viejo : {});
     const plSt = plunder.profile?.stats || {};
-    if (!survivorDb) survivorDb = (await leerSurvivor()) || {};
-    const sv = survivorDb.stats || survivorDb;
+    const svDb = leerPartida(await leerGodot('Pokémon Survivors/save.json')) || {};
+    const sv = svDb.stats || svDb;
+    const ovBytes = await leerGodot('PokemonOverlord/pokemon_overlord.save');
+    const ov = leerPartida(ovBytes);
+    const busca = (obj, k) => { if (!obj || typeof obj !== 'object') return undefined; if (k in obj) return obj[k]; for (const v of Object.values(obj)) { const r = busca(v, k); if (r !== undefined) return r; } return undefined; };
+    const decks = busca(ov, 'decks_cleared');
+    const cuenta = (v) => v == null ? 0 : typeof v === 'object' ? Object.values(v).filter(x => x && x !== 0).length : num(v);
     return {
       isaac: { runs: num(isaac.runs), wins: num(isaac.wins), floor: num(isaac.bestFloor) },
       survivors: { runs: num(life.runs), wins: num(life.wins), time: num(life.bestTime), level: num(life.bestLevel) },
       survivor: { runs: num(sv.runs), kills: num(sv.kills), bosses: num(sv.bosses), level: num(sv.best_level) },
       pokelike: { elite: num(json('poke_elite_wins') ?? raw('poke_elite_wins')), dex: num(json('poke_dex')), hall: num(json('poke_hall_of_fame')) },
       pokepath: { waves: num(pathPl.stats?.wavesCompleted), defeated: num(pathPl.stats?.defeatedEnemies), stars: num(pathPl.stars), owned: num(pathPl.stats?.pokemonOwned) },
-      plunder: { wins: num(plSt[0]), battles: num(plSt[1]), points: num(plunder.profile?.points) }
+      plunder: { wins: num(plSt[0]), battles: num(plSt[1]), points: num(plunder.profile?.points) },
+      overlord: { hay: !!ovBytes, legible: !!ov, lideres: cuenta(decks), mewtwo: !!busca(ov, 'mewtwo_cleared') }
     };
   };
 
@@ -112,6 +142,9 @@
     ['PokéPath TD', 'pp10', 'Defensor', (d) => d.pokepath.waves >= 10, 'Supera 10 oleadas', 150],
     ['PokéPath TD', 'pp100', 'Muralla', (d) => d.pokepath.waves >= 100, 'Supera 100 oleadas', 400],
     ['PokéPath TD', 'pp20', 'Entrenador de torres', (d) => d.pokepath.owned >= 20, 'Consigue 20 Pokémon', 250],
+    ['Pokémon Overlord', 'ov1', 'Primer líder', (d) => d.overlord.lideres >= 1, 'Vence a 1 líder o rival', 150],
+    ['Pokémon Overlord', 'ov8', 'Ocho medallas', (d) => d.overlord.lideres >= 8, 'Vence a 8 líderes o rivales', 300],
+    ['Pokémon Overlord', 'ovm', 'Cara a cara con Mewtwo', (d) => d.overlord.mewtwo, 'Vence a Mewtwo', 500],
     ['PokéPlunder', 'pd10', 'Saqueador', (d) => d.plunder.battles >= 10, 'Gana 10 combates', 150],
     ['PokéPlunder', 'pdw', 'Botín completo', (d) => d.plunder.wins >= 1, 'Gana 1 partida', 500]
   ];
@@ -211,9 +244,27 @@
       w.claimed[id] = 1;
       dados.push([txt, dust]);
     }
+    // Rachas: semanas seguidas con al menos una partida del desafío. Cada meta se cobra una vez.
+    st.rachas = st.rachas || {};
+    const r = racha();
+    for (const [n, dust] of RACHAS) {
+      if (st.rachas[n] || r < n) continue;
+      if (!giveDust(dust)) break;
+      st.rachas[n] = Date.now();
+      dados.push([`Racha de ${n} semanas`, dust]);
+    }
     if (dados.length) save();
     return dados;
   };
+  const RACHAS = [[3, 400], [5, 800], [10, 2000]];
+  const racha = () => {
+    let k = semana();
+    if (!st.weeks[k]?.runs) k--; // la semana actual aún no cuenta si no has jugado
+    let n = 0;
+    while (st.weeks[k]?.runs) { n++; k--; }
+    return n;
+  };
+  const mejorSemana = () => Object.values(st.weeks).reduce((m, w) => Math.max(m, w.best || 0), 0);
 
   // ---------- Interfaz ----------
   const css = `
@@ -224,7 +275,7 @@
 .pb-rm .rm-top b{font-size:20px}
 .pb-rm .rm-x{width:36px;height:36px;flex:none;border-radius:10px;border:2px solid #fff;background:rgba(255,255,255,.12);color:#fff;font-size:18px;font-weight:800}
 .pb-rm .rm-tabs{display:flex;gap:6px;margin-bottom:12px;flex-wrap:wrap}
-.pb-rm .rm-tab{flex:1;min-width:120px;padding:8px;border-radius:10px;border:2px solid rgba(255,255,255,.6);background:rgba(255,255,255,.08);color:#fff;font-weight:800;font-family:inherit}
+.pb-rm .rm-tab{flex:1;min-width:100px;padding:8px;border-radius:10px;border:2px solid rgba(255,255,255,.6);background:rgba(255,255,255,.08);color:#fff;font-weight:800;font-family:inherit}
 .pb-rm .rm-tab.on{background:#ffcb05;color:#2c1a4e;border-color:#fff}
 .pb-rm .rm-game{margin:10px 0 4px;font-weight:800;opacity:.9}
 .pb-rm .rm-b{display:flex;align-items:center;gap:10px;padding:8px 10px;margin:4px 0;border-radius:10px;background:rgba(255,255,255,.08);border:2px solid rgba(255,255,255,.25)}
@@ -240,6 +291,10 @@
 .pb-rm .rm-btn.alt{background:rgba(255,255,255,.14);font-size:15px}
 .pb-rm .rm-btn:disabled{opacity:.5}
 .pb-rm .rm-muted{opacity:.8;font-size:13px}
+.pb-rm .rm-tab-rec{width:100%;border-collapse:collapse;font-size:13px;margin:4px 0 6px}
+.pb-rm .rm-tab-rec th,.pb-rm .rm-tab-rec td{padding:6px 4px;text-align:center;border-bottom:1px solid rgba(255,255,255,.18)}
+.pb-rm .rm-tab-rec th{opacity:.8;font-weight:800}
+.pb-rm .rm-tab-rec tr.hoy td{background:rgba(255,203,5,.14)}
 .pb-rm-tag{display:inline-block;margin:2px 0 0 4px;padding:2px 10px;border-radius:999px;background:linear-gradient(#ffe43b,#ffb800);color:#2c1a4e;font-weight:900;font-size:clamp(11px,1.6vw,18px);letter-spacing:.12em;border:2px solid #2c1a4e;box-shadow:0 3px 0 #2c1a4e;transform:rotate(-3deg);vertical-align:middle}
 .logo.hero .logo-com{display:none!important}
 .pb-tour .rm-box{text-align:center}
@@ -266,7 +321,7 @@
   let tab = 'pasaporte';
   const pintarPasaporte = async (cuerpo) => {
     cuerpo.innerHTML = '<p class="rm-muted">Leyendo tus partidas...</p>';
-    const { nuevas } = await revisar();
+    const { nuevas, d: ultimo } = await revisar();
     const total = INSIGNIAS.length + 1;
     const tengo = Object.keys(st.badges).length;
     let h = `<div class="rm-card"><p><b>${tengo}/${total} insignias</b></p><p class="rm-muted">Juega a los juegos de Más juegos: cada insignia da Polvo Estelar en PokéBonk una sola vez. Se revisa cada vez que abres el Pasaporte.</p>`;
@@ -283,7 +338,7 @@
     }
     const okM = !!st.badges[MAESTRO.id];
     h += `<div class="rm-game">Gran insignia</div><div class="rm-b${okM ? ' ok' : ''}"><i>${okM ? '★' : '?'}</i><span>${MAESTRO.name}<small>Consigue insignias en ${MAESTRO.need} juegos distintos (${juegosConInsignia()}/${MAESTRO.need})</small></span><em>+${fmt(MAESTRO.dust)}</em></div>`;
-    h += '<p class="rm-muted">Pokémon Overlord todavía no se puede leer.</p>';
+    if (ultimo?.overlord?.hay && !ultimo.overlord.legible) h += '<p class="rm-muted">La partida de Pokémon Overlord no se pudo leer.</p>';
     cuerpo.innerHTML = h;
   };
 
@@ -307,8 +362,19 @@
       const ok = !!w.claimed[id];
       h += `<div class="rm-b${ok ? ' ok' : ''}"><i>${ok ? '★' : '?'}</i><span>${txt}</span><em>+${fmt(dust)}</em></div>`;
     }
-    const hist = Object.entries(st.weeks).filter(([k]) => +k !== semana() && st.weeks[k].runs).sort((a, b) => b[0] - a[0]).slice(0, 4);
-    if (hist.length) h += `<div class="rm-game">Semanas anteriores</div>` + hist.map(([k, v]) => `<div class="rm-b"><span>Semana ${+k + 1}</span><em>${fmt(v.best)} puntos</em></div>`).join('');
+    st.rachas = st.rachas || {};
+    const r = racha();
+    h += `<div class="rm-game">Racha: ${r} ${r === 1 ? 'semana' : 'semanas'} seguidas</div>`;
+    for (const [n, dust] of RACHAS) {
+      const ok = !!st.rachas[n];
+      h += `<div class="rm-b${ok ? ' ok' : ''}"><i>${ok ? '★' : '?'}</i><span>Juega el desafío ${n} semanas seguidas<small>${Math.min(r, n)}/${n}</small></span><em>+${fmt(dust)}</em></div>`;
+    }
+    const hist = Object.entries(st.weeks).filter(([k]) => st.weeks[k].runs).sort((a, b) => b[0] - a[0]);
+    if (hist.length) {
+      const top = mejorSemana();
+      h += `<div class="rm-game">Tus récords (mejor: ${fmt(top)} puntos)</div><table class="rm-tab-rec"><tr><th>Semana</th><th>Puntos</th><th>Partidas</th><th>Alfas</th><th>Premios</th></tr>` +
+        hist.map(([k, v]) => `<tr${+k === semana() ? ' class="hoy"' : ''}><td>${+k + 1}${+k === semana() ? ' (esta)' : ''}${v.best && v.best === top ? ' ★' : ''}</td><td>${fmt(v.best)}</td><td>${v.runs}</td><td>${v.bestAlphas}</td><td>${Object.keys(v.claimed || {}).length}/${PREMIOS.length}${v.won ? ' - Ganada' : ''}</td></tr>`).join('') + '</table>';
+    }
     h += `<button type="button" class="rm-btn rm-go"${inRun() ? ' disabled' : ''}>Jugar el desafío</button>`;
     cuerpo.innerHTML = h;
     cuerpo.querySelector('.rm-go')?.addEventListener('click', () => {
@@ -319,11 +385,46 @@
     });
   };
 
+  const pintarTraspaso = (cuerpo) => {
+    const T = window.PB_TRASPASO;
+    const fecha = (s) => { try { return new Date(s).toLocaleString('es-ES', { dateStyle: 'medium', timeStyle: 'short' }); } catch { return s; } };
+    cuerpo.innerHTML = `<div class="rm-card"><p><b>Pasa tu partida entre el móvil y el PC</b></p><p class="rm-muted">Se guarda todo: PokéBonk, el Pasaporte, el Desafío y los juegos de Más juegos. Los ajustes de gráficos, controles y HUD de cada equipo no se tocan.</p></div>
+      <div class="rm-card"><p><b>1. En el equipo donde está tu partida</b></p><p class="rm-muted">${window.AndroidMenu ? 'Se guarda en Descargas, carpeta PokeBonk.' : 'Elige dónde guardar el archivo.'} Luego pásalo al otro equipo (cable, Drive, WhatsApp, Telegram...).</p><button type="button" class="rm-btn rm-exp"${inRun() ? ' disabled' : ''}>Exportar partida</button></div>
+      <div class="rm-card"><p><b>2. En el otro equipo</b></p><p class="rm-muted">Reemplaza la partida de este equipo por la del archivo. Si quieres conservar la de aquí, expórtala antes.</p><button type="button" class="rm-btn alt rm-imp"${inRun() ? ' disabled' : ''}>Importar partida</button></div>
+      <div class="rm-out"></div>`;
+    const out = cuerpo.querySelector('.rm-out');
+    const msg = (h) => { out.innerHTML = `<div class="rm-card">${h}</div>`; out.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); };
+    const exp = cuerpo.querySelector('.rm-exp');
+    exp.addEventListener('click', async () => {
+      exp.disabled = true;
+      msg('<p>Preparando el archivo...</p>');
+      try { const r = await T.exportar(); msg(`<p><b>Listo:</b> ${r.nombre} (${fmt(r.kb)} KB)</p><p class="rm-muted">Guardado en: ${r.donde}</p>`); }
+      catch (err) { msg(`<p>${err.message || err}</p>`); }
+      exp.disabled = false;
+    });
+    cuerpo.querySelector('.rm-imp').addEventListener('click', async () => {
+      try {
+        const r = await T.leerArchivo();
+        if (!r) return;
+        const s = r.resumen;
+        msg(`<p><b>Partida encontrada</b></p><p>Entrenador: <b>${s.entrenador || 'sin nombre'}</b></p><p class="rm-muted">Exportada el ${fecha(s.fecha)} desde ${s.origen}.</p><p><b>Se reemplazará la partida de este equipo.</b></p><button type="button" class="rm-btn rm-ok">Sí, cargar esta partida</button><button type="button" class="rm-btn alt rm-no">Cancelar</button>`);
+        out.querySelector('.rm-no').addEventListener('click', () => { out.innerHTML = ''; });
+        const okb = out.querySelector('.rm-ok');
+        okb.addEventListener('click', async () => {
+          okb.disabled = true;
+          msg('<p>Cargando la partida, el juego se reinicia...</p>');
+          try { await T.aplicar(r.datos); } catch (err) { msg(`<p>${err.message || err}</p>`); }
+        });
+      } catch (err) { msg(`<p>${err.message || err}</p>`); }
+    });
+  };
+
   const pintar = () => {
     hub.querySelectorAll('.rm-tab').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
     const cuerpo = hub.querySelector('.rm-body');
     if (tab === 'pasaporte') pintarPasaporte(cuerpo);
     else if (tab === 'desafio') pintarDesafio(cuerpo);
+    else if (tab === 'traspaso') pintarTraspaso(cuerpo);
     else {
       cuerpo.innerHTML = `<div class="rm-card"><p><b>PokéBonk Remaster</b> es PokéBonk ${window.PB_SUB ? window.PB_SUB.oficial : ''} (el juego oficial de Charcher) con la subversión ${window.PB_SUB ? window.PB_SUB.sub : ''} de moportor6 (no oficial).</p><p class="rm-muted">Todo lo nuevo está en Noticias, apartado Subversiones.</p></div><button type="button" class="rm-btn alt rm-tour">Ver el tour de bienvenida</button>`;
       cuerpo.querySelector('.rm-tour').addEventListener('click', () => { hub.hidden = true; tour(); });
@@ -333,7 +434,7 @@
   const abrir = (t) => {
     if (!hub) {
       hub = modal();
-      hub.innerHTML = `<div class="rm-box"><div class="rm-top"><b>PokéBonk Remaster</b><button type="button" class="rm-x" aria-label="Cerrar">X</button></div><div class="rm-tabs"><button type="button" class="rm-tab" data-t="pasaporte">Pasaporte</button><button type="button" class="rm-tab" data-t="desafio">Desafío del Alfa</button><button type="button" class="rm-tab" data-t="info">Remaster</button></div><div class="rm-body"></div></div>`;
+      hub.innerHTML = `<div class="rm-box"><div class="rm-top"><b>PokéBonk Remaster</b><button type="button" class="rm-x" aria-label="Cerrar">X</button></div><div class="rm-tabs"><button type="button" class="rm-tab" data-t="pasaporte">Pasaporte</button><button type="button" class="rm-tab" data-t="desafio">Desafío del Alfa</button><button type="button" class="rm-tab" data-t="traspaso">Traspaso</button><button type="button" class="rm-tab" data-t="info">Remaster</button></div><div class="rm-body"></div></div>`;
       hub.addEventListener('click', (e) => {
         const b = e.target.closest('.rm-tab');
         if (b) { tab = b.dataset.t; pintar(); return; }
@@ -352,7 +453,7 @@
     ['Megaevolución y Dynamax', 'En la partida, los botones MEGA y DMAX se cargan derrotando enemigos. El Dynamax sirve para cualquier Pokémon; la Mega, para los que la tienen cuando su investigación está al 100%.'],
     ['Laboratorio individual', 'Cada mejora del Laboratorio se compra para un Pokémon concreto y solo le afecta a él. Gasta tu Polvo Estelar en tus favoritos.'],
     ['Más juegos', 'En la barra del menú, Más juegos abre PokéIsaac, Pokémon Survivors, PokéSurvivor, PokéPath TD, PokéPlunder, Pokémon Overlord y Pokelike. Todos sin iniciar sesión.'],
-    ['Pasaporte y Desafío del Alfa', 'El botón Remaster tiene tu Pasaporte de entrenador (insignias de los otros juegos que dan Polvo) y un desafío nuevo cada semana con premios.'],
+    ['Pasaporte, Desafío y Traspaso', 'El botón Remaster tiene tu Pasaporte de entrenador (insignias de los otros juegos que dan Polvo), un desafío nuevo cada semana con premios y rachas, y el Traspaso para pasar tu partida entre el móvil y el PC.'],
     ['Editor del HUD y mando', 'Desde la pausa puedes mover y cambiar el tamaño de los botones. En PC y Android también puedes jugar con mando.']
   ];
   let tourM = null;

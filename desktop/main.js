@@ -116,6 +116,29 @@ ipcMain.handle('pb-set-display', (e, p) => {
   if ('mode' in p || 'size' in p || 'monitor' in p) applyWindow();
   return new Promise(r => setTimeout(() => r(displayInfo()), 250));
 });
+// Actualizaciones: se mira la última release de GitHub; si su número (tag "v54") es mayor que el de esta
+// versión (0.9.N), el juego enseña su aviso con el enlace al instalador.
+const UPDATE_REPO = 'moportor6-art/moportor6-art-PokeBonk';
+ipcMain.handle('pb-open-update', (e, url) => {
+  if (typeof url === 'string' && url.startsWith('https://github.com/' + UPDATE_REPO + '/')) shell.openExternal(url);
+});
+async function checkUpdate() {
+  try {
+    const r = await net.fetch(`https://api.github.com/repos/${UPDATE_REPO}/releases/latest`, { headers: { 'User-Agent': 'PokeBonkWindows', Accept: 'application/vnd.github+json' } });
+    if (!r.ok) return;
+    const j = await r.json();
+    const num = (s) => { const m = String(s || '').match(/(\d+)(?!.*\d)/); return m ? Number(m[1]) : -1; };
+    const cur = num(app.getVersion());
+    const tag = j.tag_name || '';
+    if (num(tag) <= cur || cur <= 0) return;
+    const exe = (j.assets || []).find(a => /Instalador\.exe$/i.test(a.name));
+    const info = { tag, name: j.name || tag, cur: String(cur), url: exe ? exe.browser_download_url : j.html_url,
+      text: 'Descarga el instalador nuevo y ábrelo: se instala encima del actual y tu progreso se conserva.' };
+    global.pbLog?.(`[actualización] hay ${tag} (tienes ${cur})`);
+    if (win && !win.isDestroyed()) win.webContents.executeJavaScript(`window.pbUpdateFound && window.pbUpdateFound(${JSON.stringify(info)})`, true).catch(() => {});
+  } catch (e) { global.pbLog?.('[actualización] ' + e); }
+}
+
 ipcMain.handle('pb-relaunch', () => {
   app.relaunch();
   if (win && !win.isDestroyed()) win.close(); else app.quit();
@@ -140,6 +163,7 @@ function createWindow() {
   win.on('enter-full-screen', () => { if (cfg.mode !== 'fullscreen') { cfg.mode = 'fullscreen'; writeCfg(); } });
   win.on('leave-full-screen', () => { if (cfg.mode !== 'window') { cfg.mode = 'window'; writeCfg(); } });
   win.loadURL('app://pokebonk/index.html');
+  win.webContents.once('did-finish-load', () => setTimeout(checkUpdate, 8000));
 
   // Registro de errores: %APPDATA%\PokeBonk\registro.txt (se reinicia en cada arranque).
   const fs = require('fs');
@@ -257,7 +281,16 @@ app.whenReady().then(() => {
     if (p.endsWith('/')) p += 'index.html';
     const file = path.normalize(path.join(ROOT, p));
     if (!file.startsWith(ROOT)) return new Response('', { status: 404 });
-    if (!p.startsWith('/pokelike/') && !require('fs').existsSync(file)) { if (p !== '/desktop.json') global.pbLog?.(`[404] ${p}`); return new Response('', { status: 404 }); }
+    if (!p.startsWith('/pokelike/') && !require('fs').existsSync(file)) {
+      // Sprite variocolor o retrato que falta: el más parecido que haya (como en Android).
+      const f = p.slice(p.lastIndexOf('/') + 1);
+      const alts = p.startsWith('/assets/pmd-shiny/') ? ['/assets/pmd/' + f]
+        : p.startsWith('/assets/portraits-shiny/') ? ['/assets/portraits/' + f, '/assets/icons/' + f]
+        : p.startsWith('/assets/portraits/') ? ['/assets/icons/' + f] : [];
+      for (const a of alts) { const af = path.join(ROOT, a); if (require('fs').existsSync(af)) return net.fetch(pathToFileURL(af).toString()); }
+      if (p !== '/desktop.json') global.pbLog?.(`[404] ${p}`);
+      return new Response('', { status: 404 });
+    }
     if (p.startsWith('/pokelike/') && !require('fs').existsSync(file)) return pokelikeOnline(p.slice('/pokelike/'.length));
     return net.fetch(pathToFileURL(file).toString());
   });

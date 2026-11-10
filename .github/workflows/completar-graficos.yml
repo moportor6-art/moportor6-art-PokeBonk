@@ -1,0 +1,24 @@
+# Subversión propia: descarga del PMD Sprite Repository los sprites variocolor y retratos que faltan
+# (tools/completar_graficos.py) y los deja en la rama "graficos-completos" para unirlos a main.
+name: Completar gráficos
+on:
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  completar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Completar
+        run: |
+          pip install pillow
+          python3 tools/completar_graficos.py site
+      - name: Subir a la rama graficos-completos
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git checkout -b graficos-completos
+          git add site/assets/pmd-shiny site/assets/portraits site/assets/portraits-shiny
+          git commit -m "Gráficos que faltaban (PMD Sprite Repository)" || echo "nada nuevo"
+          git push -f origin graficos-completos

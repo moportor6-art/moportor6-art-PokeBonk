@@ -28,7 +28,7 @@
     v.textContent = t('updVersion', { tag: info.tag, cur: info.cur });
     const p = document.createElement('div');
     p.className = 'jd-note';
-    p.textContent = t('updText');
+    p.textContent = info.text || t('updText');
     const actions = document.createElement('div');
     actions.className = 'jd-actions';
     const go = document.createElement('button');
@@ -44,7 +44,7 @@
     m.append(card);
     const close = () => { m.remove(); removeEventListener('keydown', onKey, true); };
     const onKey = e => { if (e.key === 'Escape' || e.key === 'Backspace') { e.preventDefault(); e.stopPropagation(); close(); } };
-    go.addEventListener('click', () => { window.AndroidMenu?.openUpdate?.(info.url); close(); });
+    go.addEventListener('click', () => { if (window.AndroidMenu?.openUpdate) window.AndroidMenu.openUpdate(info.url); else window.pokebonkDesktop?.openUpdate?.(info.url); close(); });
     later.addEventListener('click', close);
     m.addEventListener('click', e => { if (e.target === m) close(); });
     document.body.append(m);

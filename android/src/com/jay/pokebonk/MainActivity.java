@@ -11,6 +11,11 @@ import android.view.WindowInsets;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.EditorInfo;
 import org.json.JSONObject;
+import android.content.ContentValues;
+import android.content.Intent;
+import android.provider.MediaStore;
+import android.util.Base64;
+import java.io.OutputStream;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
@@ -77,7 +82,7 @@ public class MainActivity extends Activity {
     // Al abrir el juego pregunta a GitHub por la última release de este repositorio. Si su número de revisión
     // (tag "v19", o "...android19") es mayor que el versionCode instalado, el juego muestra un aviso para
     // descargar el APK nuevo en el navegador. Sin internet o sin release, no hace nada.
-    static final String UPDATE_REPO = "JayElDragon/Pokebonk-android";
+    static final String UPDATE_REPO = "moportor6-art/moportor6-art-PokeBonk"; // subversión de moportor6: sus releases
     private volatile String pendingUpdate = "";
 
     private long installedVersionCode() {
@@ -232,6 +237,51 @@ public class MainActivity extends Activity {
                 dialog.show();
             });
         }
+        // Subversión propia (traspaso de partida): guarda el archivo en Descargas/PokeBonk.
+        @JavascriptInterface public void saveFile(String name, String b64) {
+            new Thread(() -> {
+                String where = null;
+                try {
+                    byte[] data = Base64.decode(b64, Base64.DEFAULT);
+                    String safe = name == null ? "partida.pokebonk" : name.replaceAll("[^A-Za-z0-9._-]", "_");
+                    if (Build.VERSION.SDK_INT >= 29) {
+                        ContentValues v = new ContentValues();
+                        v.put(MediaStore.MediaColumns.DISPLAY_NAME, safe);
+                        v.put(MediaStore.MediaColumns.MIME_TYPE, "application/octet-stream");
+                        v.put(MediaStore.MediaColumns.RELATIVE_PATH, "Download/PokeBonk");
+                        Uri uri = getContentResolver().insert(MediaStore.Downloads.EXTERNAL_CONTENT_URI, v);
+                        if (uri != null) {
+                            try (OutputStream out = getContentResolver().openOutputStream(uri)) { out.write(data); }
+                            where = "Descargas/PokeBonk/" + safe;
+                        }
+                    } else {
+                        File dir = getExternalFilesDir(null);
+                        File f = new File(dir, safe);
+                        try (java.io.FileOutputStream out = new java.io.FileOutputStream(f)) { out.write(data); }
+                        where = f.getAbsolutePath();
+                    }
+                } catch (Exception e) {
+                    Log.w("PokeBonk", "saveFile", e);
+                }
+                final String w = where;
+                menuHandler.post(() -> {
+                    if (web != null) web.evaluateJavascript("window.pbTraspasoGuardado && window.pbTraspasoGuardado(" + (w == null ? "null" : JSONObject.quote(w)) + ")", null);
+                });
+            }, "pb-save-file").start();
+        }
+        // Abre el selector de archivos de Android; el contenido vuelve en window.pbTraspasoRecibido(base64).
+        @JavascriptInterface public void pickFile() {
+            menuHandler.post(() -> {
+                try {
+                    Intent i = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+                    i.addCategory(Intent.CATEGORY_OPENABLE);
+                    i.setType("*/*");
+                    startActivityForResult(i, PICK_FILE);
+                } catch (Exception e) {
+                    if (web != null) web.evaluateJavascript("window.pbTraspasoRecibido && window.pbTraspasoRecibido(null)", null);
+                }
+            });
+        }
         @JavascriptInterface public int getThermalStatus() {
             if (Build.VERSION.SDK_INT < 29) return 0;
             PowerManager power = (PowerManager) getSystemService(POWER_SERVICE);
@@ -364,6 +414,29 @@ public class MainActivity extends Activity {
 
 
 
+    static final int PICK_FILE = 4711;
+
+    @Override
+    protected void onActivityResult(int request, int result, Intent data) {
+        super.onActivityResult(request, result, data);
+        if (request != PICK_FILE) return;
+        final Uri uri = (result == RESULT_OK && data != null) ? data.getData() : null;
+        new Thread(() -> {
+            String b64 = null;
+            if (uri != null) {
+                try (InputStream in = getContentResolver().openInputStream(uri)) {
+                    b64 = Base64.encodeToString(readAll(in), Base64.NO_WRAP);
+                } catch (Exception e) {
+                    Log.w("PokeBonk", "pickFile", e);
+                }
+            }
+            final String s = b64;
+            menuHandler.post(() -> {
+                if (web != null) web.evaluateJavascript("window.pbTraspasoRecibido && window.pbTraspasoRecibido(" + (s == null ? "null" : "'" + s + "'") + ")", null);
+            });
+        }, "pb-pick-file").start();
+    }
+
     @Override
     protected void onCreate(Bundle state) {
         super.onCreate(state);
@@ -471,6 +544,16 @@ public class MainActivity extends Activity {
         byte[] data = load(path);
         if (data == null && path.startsWith("pokelike/")) {
             data = fetchPokelike(path);
+        }
+        // Subversión propia: si falta un sprite variocolor o un retrato, se sirve el más parecido que haya
+        // (sprite normal, retrato normal o icono) para que el juego no se quede pidiendo gráficos.
+        if (data == null && path.startsWith("assets/")) {
+            String alt = null;
+            String f = path.substring(path.lastIndexOf('/') + 1);
+            if (path.startsWith("assets/pmd-shiny/")) alt = "assets/pmd/" + f;
+            else if (path.startsWith("assets/portraits-shiny/")) { data = load("assets/portraits/" + f); if (data == null) alt = "assets/icons/" + f; }
+            else if (path.startsWith("assets/portraits/")) alt = "assets/icons/" + f;
+            if (data == null && alt != null) data = load(alt);
         }
         if (data == null) {
             return notFound();
