@@ -14,7 +14,7 @@ const { pathToFileURL } = require('url');
 // (Direct3D 11, OpenGL o Vulkan) y "FPS sin tope" (sin V-Sync: necesario para AFMF 2 de AMD).
 // ---------------------------------------------------------------------------------------------
 const CFG_FILE = path.join(app.getPath('userData'), 'pantalla.json');
-const DEF = { mode: 'window', size: 'max', monitor: 0, angle: 'auto', fpsFree: false };
+const DEF = { mode: 'window', size: 'max', monitor: 0, angle: 'auto', fpsFree: false, seguro: 0 };
 function readCfg() {
   try { return Object.assign({}, DEF, JSON.parse(fs.readFileSync(CFG_FILE, 'utf8'))); } catch (e) { return Object.assign({}, DEF); }
 }
@@ -24,6 +24,18 @@ function writeCfg() {
 let cfg = readCfg();
 // Lo que solo cambia al reiniciar: con qué valores arrancó esta sesión.
 const boot = { angle: cfg.angle, fpsFree: !!cfg.fpsFree };
+
+// Modo seguro: si el proceso del juego se cae en los primeros 90 s, la app se reinicia sola con el
+// nivel siguiente y se queda con el primero que aguanta. 1: sin sandbox ni Code Integrity (programas
+// que se inyectan, como capas o antivirus). 2: además OpenGL. 3: además sin GPU (WebGL por software).
+const SEGURO = Math.max(0, Math.min(3, cfg.seguro | 0));
+const REINTENTO = process.argv.includes('--pb-reintento');
+if (SEGURO >= 1) {
+  app.commandLine.appendSwitch('no-sandbox');
+  app.commandLine.appendSwitch('disable-features', 'RendererCodeIntegrity');
+}
+if (SEGURO === 2) boot.angle = 'gl';
+if (SEGURO >= 3) { app.commandLine.appendSwitch('disable-gpu'); boot.angle = 'auto'; }
 
 // La gráfica potente siempre (portátiles con dos gráficas).
 // "enable-zero-copy" y "enable-gpu-rasterization" se quitaron: con algunas gráficas AMD la ventana se
@@ -124,7 +136,7 @@ function createWindow() {
     title: 'PokéBonk Remaster',
     icon: path.join(__dirname, 'build', 'icon.png'),
     autoHideMenuBar: true,
-    webPreferences: { contextIsolation: true, sandbox: true, backgroundThrottling: false, preload: path.join(__dirname, 'preload.js') }
+    webPreferences: { contextIsolation: true, sandbox: SEGURO < 1, backgroundThrottling: false, preload: path.join(__dirname, 'preload.js') }
   });
   Menu.setApplicationMenu(null);
   applyWindow();
@@ -136,14 +148,30 @@ function createWindow() {
   // Registro de errores: %APPDATA%\PokeBonk\registro.txt (se reinicia en cada arranque).
   const fs = require('fs');
   const logFile = path.join(app.getPath('userData'), 'registro.txt');
-  try { fs.writeFileSync(logFile, `PokéBonk ${app.getVersion()} - Electron ${process.versions.electron} - ${new Date().toISOString()}\n`); } catch {}
+  try { (REINTENTO ? fs.appendFileSync : fs.writeFileSync)(logFile, `PokéBonk ${app.getVersion()} - Electron ${process.versions.electron} - ${new Date().toISOString()} - modo seguro ${SEGURO} - motor ${boot.angle}\n`); } catch {}
   const log = (s) => { try { fs.appendFileSync(logFile, s + '\n'); } catch {} };
   global.pbLog = log;
   win.webContents.on('console-message', (e, level, message, line, sourceId) => {
     if (level >= 1 || process.env.PB_DIAG) log(`[${['info', 'aviso', 'ERROR'][Math.min(level, 2)] || level}] ${message} (${sourceId}:${line})`);
   });
   win.webContents.on('did-fail-load', (e, code, desc, url) => log(`[carga] ${code} ${desc} ${url}`));
-  win.webContents.on('render-process-gone', (e, d) => log(`[proceso] ${d.reason} ${d.exitCode}`));
+  const inicio = Date.now();
+  win.webContents.on('render-process-gone', (e, d) => {
+    log(`[proceso] ${d.reason} ${d.exitCode}`);
+    if (d.reason === 'clean-exit' || d.reason === 'killed' || closing) return;
+    if (Date.now() - inicio < 90000 && SEGURO < 3) {
+      cfg.seguro = SEGURO + 1;
+      writeCfg();
+      log(`[modo seguro] se reinicia con el nivel ${cfg.seguro}`);
+      closing = true;
+      app.relaunch({ args: process.argv.slice(1).filter(a => a !== '--pb-reintento').concat('--pb-reintento') });
+      app.exit(0);
+    } else {
+      // Más tarde (o ya en el último nivel): se recarga la página una vez.
+      setTimeout(() => { if (win && !win.isDestroyed()) win.webContents.reload(); }, 500);
+    }
+  });
+  setTimeout(() => log(`[modo seguro] el juego aguanta 90 s con el nivel ${SEGURO}`), 90000);
   win.webContents.on('preload-error', (e, p2, err) => log(`[preload] ${err}`));
   win.webContents.on('unresponsive', () => log('[proceso] la página no responde'));
   app.on('child-process-gone', (e, d) => log(`[hijo] ${d.type} ${d.reason} ${d.exitCode}`));

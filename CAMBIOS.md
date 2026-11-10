@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Windows: modo seguro automático (Subversión 0.23)
+- En el PC del usuario el proceso de la página se caía al arrancar (`render-process-gone`: `crashed`, código -36861, que solo dice que no había gestor de volcados). `desktop/main.js` guarda `seguro` en `pantalla.json`: si la página se cae en los primeros 90 s, sube el nivel y reinicia con `--pb-reintento` (el registro se sigue escribiendo). Nivel 1: `no-sandbox`, `sandbox: false` y `disable-features=RendererCodeIntegrity`. Nivel 2: además `use-angle=gl`. Nivel 3: además `disable-gpu`.
+
 ## Windows: pantalla morada y registro (Subversión 0.22)
 - `desktop/main.js` ya no pone `enable-zero-copy` ni `enable-gpu-rasterization`: con una RX 7800 XT la ventana se quedaba con el color de fondo aunque el menú estaba cargado.
 - Registro en `%APPDATA%\PokeBonk\registro.txt` (avisos y errores de la consola, fallos de carga, archivos que no existen y caídas del proceso). Ctrl+Mayús+I además de F12. Los archivos que no existen responden 404 en vez de un error de red.

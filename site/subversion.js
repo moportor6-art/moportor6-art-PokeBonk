@@ -4,11 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.22';
+  const SUB = '0.23';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.23',
+      date: Date.UTC(2026, 10, 10, 1, 10),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.23`,
+      summary: 'Windows: modo seguro automático si el juego se cierra al arrancar.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Windows: modo seguro automático`,
+        `- En algunos PC Windows cerraba el proceso del juego nada más arrancar y la ventana se quedaba morada.`,
+        `- Ahora, si el juego se cierra en los primeros 90 segundos, la app **se reinicia sola** con un modo más seguro y se queda con el primero que funciona:`,
+        `- Nivel 1: sin la protección que choca con programas que se meten en otras apps (capas de grabación, antivirus).`,
+        `- Nivel 2: además, motor gráfico OpenGL.`,
+        `- Nivel 3: además, sin tarjeta gráfica (va más lento, pero abre).`,
+        `- El nivel que se usa queda apuntado en **registro.txt** (carpeta %APPDATA%\\PokeBonk).`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.22',
       date: Date.UTC(2026, 10, 10, 0, 30),
@@ -612,6 +634,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.23',
+      date: '2026-11-09',
+      title: 'Windows: modo seguro.',
+      notes: [
+        ['fix', 'Windows: si el juego se cierra al arrancar, la app se reinicia sola en modo seguro.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.22',
