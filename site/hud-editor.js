@@ -59,6 +59,26 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
 .pb-he-p button.warn{background:#f2d4d4;color:#8a1f2a}`;
   document.head.append(style, editCss);
 
+  // Hueco libre del centro de la franja de la pausa: ahí van "HUD y guía" y "Auto aprender", uno encima del otro.
+  const chipsPausa = (hero) => {
+    let c = hero.querySelector('.pb-pz-chips');
+    if (!c) {
+      if (!document.getElementById('pb-pz-css')) { const st = document.createElement('style'); st.id = 'pb-pz-css'; st.textContent = '.pb-pz-movil button{padding:1px 9px!important;font-size:10px!important;box-shadow:none!important}'; document.head.append(st); }
+      if (getComputedStyle(hero).position === 'static') hero.style.position = 'relative';
+      c = document.createElement('div');
+      c.className = 'pb-pz-chips';
+      // Los dos botones juntos, uno encima del otro, en un hueco de la franja donde no hay texto.
+      const pc = hero.clientWidth >= 700;
+      c.style.cssText = pc
+        ? 'position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);z-index:2;display:flex;flex-direction:column;gap:6px;align-items:stretch;pointer-events:none'
+        : 'position:absolute;right:8px;top:6px;z-index:2;display:flex;flex-direction:row;gap:6px;align-items:center;pointer-events:none';
+      if (!pc) c.classList.add('pb-pz-movil');
+      hero.append(c);
+    }
+    return c;
+  };
+  const CHIP = 'pointer-events:auto;padding:5px 14px;border-radius:99px;border:2px solid #fff;color:#fff;font:800 12px system-ui,sans-serif;letter-spacing:.3px;cursor:pointer;white-space:nowrap;box-shadow:0 2px 0 rgba(0,0,0,.25)';
+
   const H = {
     layout: load(),
     editing: false,
@@ -217,12 +237,13 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
     inject() {
       const hero = document.querySelector('.modal.sm-modal .panel.sm.pz > .pz-hero');
       if (!hero || hero.querySelector('.pb-he-btn')) return;
-      if (getComputedStyle(hero).position === 'static') hero.style.position = 'relative';
       const b = document.createElement('button');
       b.type = 'button'; b.className = 'pb-he-btn'; b.textContent = 'HUD y guía';
-      b.style.cssText = 'position:absolute;right:8px;top:5px;z-index:2;padding:1px 8px;border-radius:99px;border:2px solid #fff;background:#7a3fd0;color:#fff;font:800 9px system-ui,sans-serif;letter-spacing:.3px;cursor:pointer';
+      b.style.cssText = CHIP + ';background:#7a3fd0';
       b.addEventListener('click', e => { e.stopPropagation(); H.menu(); });
-      hero.append(b);
+      const ch = chipsPausa(hero);
+      if (ch.classList.contains('pb-pz-movil')) b.textContent = 'HUD';
+      ch.prepend(b);
     },
 
     menu() {

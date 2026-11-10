@@ -4,11 +4,32 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.30';
+  const SUB = '0.31';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.31',
+      date: Date.UTC(2026, 10, 10, 15, 50),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.31`,
+      summary: 'Auto aprender: al subir de nivel se elige sola la mejor mejora según la especialidad de tu Pokémon.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Auto aprender`,
+        `- En la **pausa** hay un botón **Auto aprender**. Si lo activas, al subir de nivel no sale la elección: se escoge sola la mejor opción.`,
+        `- Se basa en la **especialidad** del Pokémon que llevas: si su Ataque es mayor, movimientos **físicos** y Proteína; si su Ataque Especial es mayor, movimientos **especiales** y Calcio; si están igualados, lo que encaje con los movimientos que ya tienes.`,
+        `- También tiene en cuenta los movimientos de su tipo, tus favoritos, repartir niveles entre movimientos y vitaminas útiles para todos (velocidad de ataque, proyectiles, crítico, área...). Nunca escoge el Incienso Maldito.`,
+        `- Se queda guardado para las siguientes partidas. Si lo quitas, vuelve la elección de siempre.`,
+        `- Los botones **HUD y guía** y **Auto aprender** van juntos en la franja de arriba de la pausa, sin tapar nada.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.30',
       date: Date.UTC(2026, 10, 10, 11, 10),
@@ -787,6 +808,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.31',
+      date: '2026-11-10',
+      title: 'Auto aprender.',
+      notes: [
+        ['new', '**Auto aprender** en la pausa: elige sola la mejor mejora según si tu Pokémon es físico, especial o mixto.'],
+        ['better', 'Botones de la pausa juntos y sin tapar texto.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.30',
