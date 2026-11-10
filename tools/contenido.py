@@ -93,6 +93,7 @@ def base(site, version):
     man = {'formato': FORMATO, 'version': int(version), 'sub': sub_actual(site), 'shell': shells(), 'modulos': mods}
     (site / 'contenido.json').write_text(json.dumps(man, ensure_ascii=False, indent=1), encoding='utf-8')
     print(f'contenido.json: versión {version}, ' + ', '.join(f'{m} {v["archivos"]}' for m, v in mods.items()))
+    print('huellas: ' + ' '.join(f'{m}={v["hash"][:12]}' for m, v in mods.items()) + ' | shell ' + json.dumps(man['shell']))
 
 
 def subversion(site):
