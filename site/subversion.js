@@ -16,7 +16,7 @@
       pinned: false,
       sub: true,
       author: AUTOR,
-      title: `PokéBonk TD: versión ${OFICIAL} oficial - Subversión 0.35`,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.35`,
       summary: 'PokéBonk TD: Pokémon más grandes, zoom del mapa y datos de la próxima oleada.',
       body: [
         `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
