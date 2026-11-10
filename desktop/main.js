@@ -181,7 +181,7 @@ function createWindow() {
   if (process.env.PB_DIAG_DIR) {
     // Elige el primer compañero para llegar al menú principal (como un jugador nuevo).
     setTimeout(() => {
-      win.webContents.executeJavaScript(`(() => { const b = [...document.querySelectorAll('button')].find(x => /choose|elijo/i.test(x.textContent)); if (b) { b.click(); return 'elegido: ' + b.textContent.trim(); } return 'sin botón'; })()`, true)
+      win.webContents.executeJavaScript(`(() => { const b = [...document.querySelectorAll('button')].filter(x => x.textContent.trim().length < 40).find(x => /choose|elijo/i.test(x.textContent)); if (b) { b.click(); return 'elegido: ' + b.textContent.trim(); } return 'sin botón'; })()`, true)
         .then(r => log('[diag] ' + r)).catch(e => log('[diag] ' + e));
     }, 25000);
     setTimeout(async () => {
