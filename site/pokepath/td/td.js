@@ -104,9 +104,36 @@
     const dedos = new Map();
     let pinza = null;
     const medio = () => { const p = [...dedos.values()]; return { x: (p[0].x + p[1].x) / 2, y: (p[0].y + p[1].y) / 2, d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) }; };
+    // Con zoom, un dedo sobre una zona sin Pokémon mueve el mapa (si no estás colocando a uno).
+    let arrastre = null;
+    const hayPokemon = (x, y) => {
+      const c = pp.game.canvas.getBoundingClientRect(), k = pp.game.canvas.width / c.width;
+      const cx = (x - c.left) * k, cy = (y - c.top) * k;
+      return pp.area.placementTiles.some(t => (t.tower || t.passenger) && cx > t.position.x && cx < t.position.x + t.size && cy > t.position.y && cy < t.position.y + t.size);
+    };
+    w.addEventListener('pointerdown', e => {
+      if (!nueva() || dedos.size || Z.z <= 1 || pp.game.deployingUnit || e.button > 0) return;
+      if (pp.game.isXL || pp.game.isXLV || pp.game.isXLH) return;
+      if (hayPokemon(e.clientX, e.clientY)) return;
+      arrastre = { id: e.pointerId, x: e.clientX, y: e.clientY, cx: Z.cx, cy: Z.cy, movido: false };
+    }, true);
+    addEventListener('pointermove', e => {
+      if (!arrastre || e.pointerId !== arrastre.id || pinza) return;
+      const dx = e.clientX - arrastre.x, dy = e.clientY - arrastre.y;
+      if (!arrastre.movido && Math.hypot(dx, dy) < 6) return;
+      arrastre.movido = true;
+      const s = ultimo.map.w / MAP.w * Z.z;
+      Z.cx = arrastre.cx - dx / s; Z.cy = arrastre.cy - dy / s;
+      limitar(); colocar();
+    }, true);
+    const suelta = e => { if (arrastre && e.pointerId === arrastre.id) arrastre = null; };
+    addEventListener('pointerup', suelta, true);
+    addEventListener('pointercancel', suelta, true);
+
     w.addEventListener('pointerdown', e => {
       if (!nueva() || e.pointerType === 'mouse') return;
       dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (dedos.size === 2) arrastre = null;
       if (dedos.size === 2) {
         const m = medio();
         pinza = { d: m.d, z: Z.z, a: aMapa(m.x, m.y) };
@@ -316,8 +343,10 @@
     const w = q('.tdr-wave');
     w.disabled = !usable(ui.nextWave);
     w.classList.toggle('live', !!a.waveActive);
-    w.querySelector('span').textContent = a.waveActive ? 'Oleada en curso' : 'Siguiente oleada';
-    w.querySelector('small').textContent = (ui.waveIncome?.textContent || '').trim();
+    const colocando = !!pp.game.deployingUnit && !a.waveActive;
+    w.classList.toggle('placing', colocando);
+    w.querySelector('span').textContent = a.waveActive ? 'Oleada en curso' : colocando ? 'Elige una casilla' : 'Siguiente oleada';
+    w.querySelector('small').textContent = colocando ? 'O toca otra vez su tarjeta para cancelar' : (ui.waveIncome?.textContent || '').trim();
     hud.querySelectorAll('.tdr-m[data-k]').forEach(b => {
       const s = ui.section[b.dataset.k];
       b.classList.toggle('off', !!s && (s.style.opacity === '0.4' || getComputedStyle(s).pointerEvents === 'none'));

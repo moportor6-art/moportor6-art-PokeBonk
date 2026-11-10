@@ -4,11 +4,30 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.35';
+  const SUB = '0.36';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.36',
+      date: Date.UTC(2026, 10, 10, 23, 0),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.36`,
+      summary: 'PokéBonk TD: todas las rutas revisadas y el mapa se mueve con un dedo al hacer zoom.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# PokéBonk TD (en pruebas)`,
+        `- Revisadas las **47 rutas** (también las secretas y las de mapa grande) en la oleada 1 y en la oleada 100: se cargan, se colocan Pokémon y empiezan las oleadas igual que en PokéPath TD.`,
+        `- Con zoom, **un dedo** mueve el mapa (si tocas donde no hay un Pokémon y no estás colocando uno). En las rutas de mapa grande se sigue moviendo con un dedo como siempre.`,
+        `- Mientras colocas un Pokémon, el botón grande dice **Elige una casilla**; vuelve a tocar su tarjeta para cancelar.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.35',
       date: Date.UTC(2026, 10, 10, 22, 30),
@@ -906,6 +925,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.36',
+      date: '2026-11-10',
+      title: 'PokéBonk TD: todas las rutas.',
+      notes: [
+        ['better', 'PokéBonk TD: las 47 rutas revisadas, también las secretas y las de mapa grande.'],
+        ['better', 'PokéBonk TD: con zoom, el mapa se mueve con un dedo.'],
+        ['better', 'PokéBonk TD: el botón grande avisa cuando estás colocando un Pokémon.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.35',

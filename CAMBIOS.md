@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## PokéBonk TD: todas las rutas (Subversión 0.36)
+- Recorrido automático de las 47 rutas de `routeData` (oleada 1 y oleada 100) con `area.loadArea`: cargan sin errores, se coloca un Pokémon tocando una casilla y empieza la oleada; en la vista clásica la misma secuencia da lo mismo. Mapas grandes (6-1 `xl`, 7-2 `xlv`, 10-4 `xlh`): el arrastre con un dedo del propio juego sigue funcionando con la pantalla escalada.
+- Con zoom en mapas normales, un dedo sobre una zona sin Pokémon (y sin estar colocando uno) mueve el mapa; si hay un Pokémon, el toque es del juego (moverlo de casilla).
+- `.tdr-wave.placing`: el juego desactiva "Siguiente oleada" mientras colocas; el botón lo dice y explica cómo cancelar.
+
 ## PokéBonk TD: mapa más claro (Subversión 0.35)
 - `td.js` envuelve `drawImage` del contexto del mapa del juego: las imágenes de `/images/pokemon/` dibujadas con recorte (torres y enemigos) se agrandan ×1.65 desde su centro, solo en la vista nueva. No toca posiciones, casillas ni alcance.
 - Zoom: el `transform` de `#screen-root` lleva el zoom y el centro; `#view-port` se recorta (`clip-path`) al hueco del mapa. Dos dedos (se capturan antes que el juego), rueda y botones + / − / Ver todo. Con una ventana del juego abierta, zoom 1 mientras está abierta. El juego sigue leyendo la posición real del mapa, así que tocar casillas con zoom funciona igual (prueba: con zoom ×1.96 la torre queda en la misma casilla que en la vista clásica).

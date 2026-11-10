@@ -174,3 +174,4 @@ html.tdr-zoom .tdr-zbar .tdr-zfit{display:block}
 .tdr-team.wide .tdr-card.empty .tdr-spr{display:none}
 html.tdr-v .tdr-team.wide,html.tdr-h .tdr-team.wide{flex:none;max-height:none;grid-auto-rows:minmax(84px,auto)}
 @media (max-height:460px){html.tdr-h .tdr-team.wide{grid-auto-rows:minmax(72px,auto)}html.tdr-h .tdr-locks{display:none}}
+.tdr-wave.placing:disabled{background:linear-gradient(180deg,#ffd84a,var(--tdr-sun))!important;color:var(--tdr-ink)!important;box-shadow:0 4px 0 #a07800,inset 0 0 0 2px #ffffff88}
