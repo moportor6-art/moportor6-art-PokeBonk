@@ -72,9 +72,17 @@
 ${P} .mm.jay-home{--u:min(calc(100vw / 412),calc(100vh / 880))}
 ${P} .jay-home>.mm-top{position:absolute!important;--u:min(calc(100vw / 480),calc(100vh / 1000));right:calc(8 * var(--u))!important;top:calc(8 * var(--u))!important;max-width:calc(100vw - 16px)!important}
 ${P} .jay-home .mm-left{position:absolute!important;left:calc(16 * var(--u))!important;top:calc(58 * var(--u))!important;width:calc(380 * var(--u))!important}
-${P} .jay-home .jay-actions{position:absolute!important;left:calc(12 * var(--u))!important;top:calc(150 * var(--u))!important;width:calc(388 * var(--u))!important;height:calc(326 * var(--u))!important}
-${P} .jay-home .jay-companion{position:absolute!important;left:calc(12 * var(--u))!important;right:auto!important;top:calc(488 * var(--u))!important;width:calc(388 * var(--u))!important;height:calc(226 * var(--u))!important;bottom:auto!important}
-${P} .jay-sidebar{position:absolute!important;left:calc(12 * var(--u))!important;top:calc(724 * var(--u))!important;width:calc(388 * var(--u))!important;height:auto!important;flex-direction:row!important;flex-wrap:wrap!important;gap:calc(6 * var(--u))!important;padding:calc(8 * var(--u))!important}
+${P} .jay-home .jay-actions{position:absolute!important;left:calc(12 * var(--u))!important;top:calc(150 * var(--u))!important;width:calc(388 * var(--u))!important;height:calc(370 * var(--u))!important;grid-template-rows:calc(104 * var(--u)) calc(90 * var(--u))!important;grid-auto-rows:calc(48 * var(--u))!important;gap:calc(8 * var(--u))!important}
+/* Eventos y Encargos: uno por fila a todo el ancho, para que el nombre y la cuenta atrás quepan en una línea. */
+${P} .jay-home .jay-actions .event,${P} .jay-home .jay-actions .tasks{grid-column:1/-1!important;grid-row:auto!important}
+${P} .jay-home .jay-actions .event{padding:calc(4 * var(--u)) calc(26 * var(--u)) calc(4 * var(--u)) calc(8 * var(--u))!important}
+${P} .jay-home .jay-actions .event .mm-tx{flex-direction:row-reverse!important;align-items:center;justify-content:space-between;gap:calc(8 * var(--u));width:100%;padding-right:calc(10 * var(--u))}
+${P} .jay-home .jay-actions .event .mm-tx b{font-size:calc(14.5 * var(--u))!important;line-height:1.08!important;white-space:normal!important;display:-webkit-box!important;-webkit-box-orient:vertical;-webkit-line-clamp:2!important;overflow:hidden;min-width:0;flex:1 1 auto}
+${P} .jay-home .jay-actions .event .mm-tx small{font-size:calc(10.5 * var(--u))!important;margin:0!important;flex:none;text-align:right;white-space:normal!important;max-width:calc(120 * var(--u));line-height:1.15}
+${P} .jay-home .jay-actions .tasks{padding-right:calc(16 * var(--u))!important}
+${P} .jay-home .jay-actions .tasks .mm-tx small{font-size:calc(11 * var(--u))!important;white-space:nowrap;overflow:visible!important;text-overflow:clip!important;flex:none}
+${P} .jay-home .jay-companion{position:absolute!important;left:calc(12 * var(--u))!important;right:auto!important;top:calc(530 * var(--u))!important;width:calc(388 * var(--u))!important;height:auto!important;bottom:calc(196 * var(--u))!important}
+${P} .jay-sidebar{position:absolute!important;left:calc(12 * var(--u))!important;top:auto!important;bottom:calc(60 * var(--u))!important;width:calc(388 * var(--u))!important;height:auto!important;flex-direction:row!important;flex-wrap:wrap!important;gap:calc(6 * var(--u))!important;padding:calc(8 * var(--u))!important}
 ${P} .jay-sidebar .mm-item{width:calc((100% - 24 * var(--u)) / 5)!important;height:calc(50 * var(--u))!important;min-height:0!important;padding:calc(3 * var(--u)) calc(2 * var(--u))!important;gap:calc(2 * var(--u))!important;flex-direction:column!important;justify-content:center!important;align-items:center!important}
 ${P} .jay-sidebar .mm-item .mm-tx{min-width:0!important;max-width:100%!important;text-align:center!important}
 ${P} .jay-sidebar .mm-item .mm-tx b{font-size:calc(9.5 * var(--u))!important;white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;letter-spacing:-.02em}
@@ -82,14 +90,43 @@ ${P} .jay-sidebar .mm-item .mm-tx small{display:none!important}
 ${P} .jay-sidebar .jay-home-button,${P} .jay-sidebar .jay-watermark{display:none!important}
 ${P} .jay-home .mm-foot{position:absolute!important;left:0!important;right:0!important;bottom:calc(4 * var(--u))!important;display:flex;justify-content:center}
 
-/* Partida en vertical: minimapa más pequeño, tiempo debajo, ataques a la izquierda por encima del joystick
-   y MEGA/DMAX a la derecha. El Editor del HUD puede mover y escalar todo encima de esto. */
-${P} #hud .hud-tr{transform-origin:top right;scale:.72;right:calc(70px + env(safe-area-inset-right))!important}
-${P} #hud .hud-tl{transform-origin:top left;scale:.9}
-${P} #hud .hud-top{top:calc(148px + env(safe-area-inset-top))!important;left:0!important;right:0!important;margin:0 auto!important;width:max-content!important;max-width:96vw!important;transform:none!important}
+/* Partida en vertical. En horizontal todo cabe en una línea; en vertical no, así que se reparte:
+   - Arriba, una barra propia con fondo oscuro: zona y reloj de la partida a la izquierda, la cuenta atrás grande
+     en el centro, el dinero y los precios a la derecha (dos líneas por lado en vez de seis cosas en una fila).
+     Deja libre la esquina de la pausa.
+   - Debajo, el retrato a la izquierda y el minimapa a la derecha, a la misma altura.
+   - MEGA/DMAX debajo del botón de apuntado y las barras de jefe a lo ancho.
+   - Ataques a la izquierda por encima del joystick.
+   Los tamaños van con zoom (por eso top/right se dividen entre el zoom) para que el Editor del HUD (translate y scale) siga funcionando encima. */
+${P} #hud .hud-top{top:calc(8px + env(safe-area-inset-top))!important;left:calc(8px + env(safe-area-inset-left))!important;right:calc(66px + env(safe-area-inset-right))!important;margin:0!important;width:auto!important;max-width:none!important;transform:none!important;
+  display:grid!important;grid-template-columns:auto minmax(0,1fr) auto!important;grid-template-areas:"z t g" "c t p";align-items:center!important;gap:1px 10px!important;
+  padding:5px 12px!important;border-radius:16px!important;background:rgba(22,14,44,.62)!important;box-shadow:0 2px 0 rgba(0,0,0,.25),inset 0 0 0 1.5px rgba(255,255,255,.14)!important;-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+${P} #hud .hud-top:before{display:none!important}
+${P} #hud .hud-top .ht-c,${P} #hud .hud-top .wallet{display:contents!important}
+${P} #hud .hud-top .ht-l{grid-area:z;justify-self:start;min-width:0}
+${P} #hud .hud-top .ht-r{grid-area:c;justify-self:start}
+${P} #hud .hud-top .timer{grid-area:t;justify-self:center;font-size:34px!important;line-height:1!important;letter-spacing:1.5px!important}
+${P} #hud .hud-top .wl-gold{grid-area:g;justify-self:end}
+${P} #hud .hud-top .wl-prices{grid-area:p;justify-self:end;gap:6px!important}
+${P} #hud .hud-top .ht-zone{font-size:13px!important;letter-spacing:.3px}
+${P} #hud .hud-top .runclock b{font-size:13px!important;opacity:.8}
+${P} #hud .hud-top .wl-gold b{font-size:18px!important}
+${P} #hud .hud-top .wl-chip{font-size:13px!important}
+${P} #hud .hud-top .wallet img,${P} #hud .hud-top .wl-chip img{width:16px!important;height:16px!important}
+${P} #hud .hud-tl{top:calc((62px + env(safe-area-inset-top)) / .86)!important;left:calc((8px + env(safe-area-inset-left)) / .86)!important;transform-origin:top left;zoom:.86}
+@media (max-width:380px){${P} #hud .hud-tl{zoom:.76;top:calc((62px + env(safe-area-inset-top)) / .76)!important;left:calc((8px + env(safe-area-inset-left)) / .76)!important}}
+${P} #hud .hud-tr{top:calc((64px + env(safe-area-inset-top)) / .62)!important;right:calc((66px + env(safe-area-inset-right)) / .62)!important;transform-origin:top right;zoom:.62}
+${P} #hud .hud-tr{flex-direction:row-reverse!important;align-items:flex-end!important}
+${P} #hud .hud-tr .counters{zoom:1.4}
+${P} .tc .tc-pause{top:calc(8px + env(safe-area-inset-top))!important}
+${P} .tc .tc-aim{top:calc(64px + env(safe-area-inset-top))!important}
+${P} .pb-mx{left:auto!important;right:max(8px,env(safe-area-inset-right))!important;top:calc(136px + env(safe-area-inset-top))!important;flex-direction:column!important;gap:8px!important}
+${P} .pb-mx button{width:52px!important;height:52px!important}
+${P} #hud .bossbar{top:calc(146px + env(safe-area-inset-top))!important;left:calc(10px + env(safe-area-inset-left))!important;width:calc(100vw - 86px)!important;transform:none!important;transform-origin:top left}
+${P} #hud .minibars{top:calc(146px + env(safe-area-inset-top))!important;left:calc(10px + env(safe-area-inset-left))!important;width:calc(100vw - 86px)!important;transform:none!important}
+${P} #hud .minibars.below{top:calc(222px + env(safe-area-inset-top))!important}
+${P} .run-hint{top:calc(240px + env(safe-area-inset-top))!important}
 ${P} #hud .hud-bl{left:calc(8px + env(safe-area-inset-left))!important;right:auto!important;bottom:calc(180px + env(safe-area-inset-bottom))!important;margin:0!important;transform:none!important;transform-origin:bottom left;scale:.85}
-${P} .pb-mx{left:auto!important;right:max(10px,env(safe-area-inset-right))!important;top:calc(192px + env(safe-area-inset-top))!important}
-${P} .pb-mx button{width:56px!important;height:56px!important}
 
 /* Subir de nivel: las cartas en filas a todo el ancho (icono a la izquierda, texto a la derecha) en vez de
    tres columnas estrechas donde el texto no cabe. */

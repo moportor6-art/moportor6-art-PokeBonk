@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Vertical rediseñado (Subversión 0.33)
+- Partida: `.hud-top` pasa a ser una barra de lado a lado (deja libre la pausa) con cuadrícula de 3 columnas y 2 filas; `.ht-c` y `.wallet` con `display:contents` para repartir zona y reloj (izquierda), cuenta atrás (centro, ocupa las dos filas) y dinero y precios (derecha). `.hud-tl` y `.hud-tr` debajo, con `zoom` (top/right divididos entre el zoom) para no pisar el `scale`/`translate` del Editor del HUD; contador de capturas a la izquierda del minimapa. `.bossbar` y `.minibars` dejan de usar el centro y ancho que calcula el juego (`--hc`, `--hw`, pensados para la barra en horizontal) y van a lo ancho debajo. Pausa, apuntado y MEGA/DMAX en la columna derecha.
+- Menú: `.jay-actions` con filas automáticas; los eventos (había una regla `:has(.event + .event)` de 0.9.9 que los ponía a media anchura) y Encargos a todo el ancho. `.jay-sidebar` anclada abajo y `.jay-companion` ocupa el hueco que queda, así no se monta sobre el pie con pantallas de proporción 412x880 o más bajas.
+
 ## Modo vertical (Subversión 0.32)
 - Todo en `site/vertical.js`, con selectores bajo `html.pb-portrait` (la clase que pone el propio archivo cuando la pantalla es más alta que ancha), así que en horizontal no cambia nada.
 - Subir de nivel: `.modal .cards` en columna y cada `.card.offer` en fila (`.top` de 92 px a la izquierda con rareza arriba y tipo abajo, `.bd` a la derecha).

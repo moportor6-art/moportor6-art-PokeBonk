@@ -4,11 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.32';
+  const SUB = '0.33';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.33',
+      date: Date.UTC(2026, 10, 10, 19, 10),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.33`,
+      summary: 'Modo vertical rediseñado en la partida y en el menú: tiempos y datos con su propio espacio.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Partida en vertical`,
+        `- Arriba hay una **barra propia** con fondo oscuro: a la izquierda la zona y el reloj de la partida, en el centro la **cuenta atrás grande** y a la derecha el dinero y los precios. Antes eran seis cosas pegadas en una sola línea sobre el escenario.`,
+        `- Debajo, el retrato a la izquierda y el minimapa a la derecha, a la misma altura. El contador de capturas va junto al minimapa.`,
+        `- La **barra del jefe** va a lo ancho debajo de todo eso (antes salía encogida y cortada en la esquina).`,
+        `- MEGA/DMAX debajo del botón de apuntado. El Editor del HUD sigue pudiendo mover y escalar cada cosa.`,
+        ``,
+        `# Menú principal en vertical`,
+        `- Los **eventos** van uno por fila a todo el ancho: el nombre se lee entero y la cuenta atrás no se aprieta.`,
+        `- El tiempo de los **Encargos** ya no se corta.`,
+        `- La barra de botones de abajo ya no tapa el texto del pie en móviles más bajos.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.32',
       date: Date.UTC(2026, 10, 10, 18, 30),
@@ -837,6 +862,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.33',
+      date: '2026-11-10',
+      title: 'Vertical rediseñado.',
+      notes: [
+        ['better', 'Partida en vertical: barra de arriba con la cuenta atrás grande, zona, reloj y dinero bien separados.'],
+        ['better', 'Partida en vertical: barra del jefe a lo ancho; retrato y minimapa a la misma altura.'],
+        ['better', 'Menú en vertical: eventos uno por fila y la cuenta atrás de los Encargos entera.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.32',
