@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Windows: Electron 44 (Subversión 0.26)
+- El segundo volcado, leído entero, mostraba la caída en `StyleResolver::CreateCompositorKeyframeValueSnapshot` (al empezar una animación de `element.animate()` con `transform` y `calc()`), `StyleResolverState::UpdateLengthConversionData` y `CSSPrimitiveValue::ConvertToLength`: un fallo de Chromium 130. Se pasa a Electron ^44.7.0 (y electron-builder ^26). `console-message` acepta la firma nueva (objeto con `level`, `message`, `lineNumber`, `sourceUrl`).
+
 ## Windows: cierre al llegar al menú (Subversión 0.25)
 - El volcado (Electron 33.4.11, símbolos de breakpad) daba un acceso a memoria nula en `blink::CSSMathExpressionOperation::CreateArithmeticOperationSimplified`, llamado desde `CSSPrimitiveValue::ConvertToLength` por una llamada de JavaScript. La única lectura así era `getComputedStyle(stage, '::before')` en `site/companion.js`: la plataforma usa `calc(n * var(--u))` con `--u: min(calc(100vw / 853), calc(100vh / 480))`. Ahora `--u` se mide con un elemento oculto (`height: calc(1000 * var(--u))`) y el suelo es `alto - 2u - 13,5u`, el mismo valor que antes.
 

@@ -4,11 +4,29 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.25';
+  const SUB = '0.26';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.26',
+      date: Date.UTC(2026, 10, 10, 4, 30),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.26`,
+      summary: 'Windows: motor nuevo (Chromium actual). Arreglado el cierre al llegar al menú.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Windows`,
+        `- La app de Windows llevaba un navegador interno antiguo (Chromium 130) con un fallo: se cerraba al empezar algunas animaciones del menú. Ahora usa **Electron 44**, con un Chromium actual, como el de Chrome.`,
+        `- Por eso el juego se cerraba y reiniciaba al llegar al menú. El arreglo de la 0.25 no bastaba.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.25',
       date: Date.UTC(2026, 10, 10, 3, 10),
@@ -669,6 +687,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.26',
+      date: '2026-11-09',
+      title: 'Windows: motor nuevo.',
+      notes: [
+        ['fix', 'Windows: Electron 44 (Chromium actual). Ya no se cierra al llegar al menú.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.25',

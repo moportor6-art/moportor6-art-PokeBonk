@@ -147,7 +147,10 @@ function createWindow() {
   try { (REINTENTO ? fs.appendFileSync : fs.writeFileSync)(logFile, `PokéBonk ${app.getVersion()} - Electron ${process.versions.electron} - ${new Date().toISOString()} - modo seguro ${SEGURO} - motor ${boot.angle}\n`); } catch {}
   const log = (s) => { try { fs.appendFileSync(logFile, s + '\n'); } catch {} };
   global.pbLog = log;
-  win.webContents.on('console-message', (e, level, message, line, sourceId) => {
+  // Electron 35+ pasa un objeto (level: 'info'|'warning'|'error'); las versiones viejas, argumentos sueltos.
+  win.webContents.on('console-message', (e, lv, msg, ln, src) => {
+    const level = typeof e.level === 'string' ? ({ debug: 0, info: 0, warning: 1, error: 2 }[e.level] ?? 0) : lv;
+    const message = e.message ?? msg, line = e.lineNumber ?? ln, sourceId = e.sourceUrl ?? src;
     if (level >= 1 || process.env.PB_DIAG) log(`[${['info', 'aviso', 'ERROR'][Math.min(level, 2)] || level}] ${message} (${sourceId}:${line})`);
   });
   win.webContents.on('did-fail-load', (e, code, desc, url) => log(`[carga] ${code} ${desc} ${url}`));
@@ -181,6 +184,8 @@ function createWindow() {
     setTimeout(() => {
       win.webContents.executeJavaScript(`(() => { const b = [...document.querySelectorAll('button')].filter(x => x.textContent.trim().length < 40).find(x => /choose|elijo/i.test(x.textContent)); if (b) { b.click(); return 'elegido: ' + b.textContent.trim(); } return 'sin botón'; })()`, true)
         .then(r => log('[diag] ' + r)).catch(e => log('[diag] ' + e));
+      // El botón también responde a Enter.
+      setTimeout(() => { win.focus(); win.webContents.sendInputEvent({ type: 'keyDown', keyCode: 'Enter' }); win.webContents.sendInputEvent({ type: 'keyUp', keyCode: 'Enter' }); }, 1500);
     }, 25000);
     setTimeout(async () => {
       try {
