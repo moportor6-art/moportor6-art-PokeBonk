@@ -6,5 +6,7 @@ contextBridge.exposeInMainWorld('pokebonkDesktop', {
   setDisplay: (p) => ipcRenderer.invoke('pb-set-display', p),
   relaunch: () => ipcRenderer.invoke('pb-relaunch'),
   // Aviso de versión nueva (updater.js): abre la descarga del instalador en el navegador.
-  openUpdate: (url) => ipcRenderer.invoke('pb-open-update', url)
+  openUpdate: (url) => ipcRenderer.invoke('pb-open-update', url),
+  // Actualizador (0.28): estado, buscar, aplicar, completo, confirmar, reiniciar, restaurar.
+  actualizacion: (accion, datos) => ipcRenderer.invoke('pb-act', accion, datos)
 });

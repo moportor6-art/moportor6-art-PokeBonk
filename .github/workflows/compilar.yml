@@ -300,6 +300,10 @@ jobs:
           if [ -z "$KEYSTORE_BASE64" ]; then echo "Falta el secreto KEYSTORE_BASE64"; exit 1; fi
           echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/clave.keystore"
 
+      # Actualizador: lista de archivos (con SHA-256) de esta versión, dentro de la app.
+      - name: Manifiesto del actualizador
+        run: python3 tools/contenido.py base site --version ${{ steps.ver.outputs.code }}
+
       - name: Compilar
         env:
           KEYSTORE_FILE: ${{ runner.temp }}/clave.keystore
@@ -319,6 +323,16 @@ jobs:
           name: PokeBonk ${{ github.ref_name }}
           generate_release_notes: true
 
+      # El juego tal cual va en el APK: lo publica el trabajo "contenido" para las actualizaciones por archivos.
+      - name: Guardar el contenido para el actualizador
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: actions/upload-artifact@v4
+        with:
+          name: sitio-final
+          path: site
+          retention-days: 3
+          compression-level: 1
+
       - name: Guardar el APK (ejecución manual)
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
         uses: actions/upload-artifact@v4
@@ -332,6 +346,11 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[windows]')
     runs-on: windows-latest
     steps:
+      # Los mismos bytes que en Linux (sin CRLF): el actualizador compara archivos por su SHA-256.
+      - name: Sin conversión de saltos de línea
+        shell: bash
+        run: git config --global core.autocrlf false
+
       - uses: actions/checkout@v4
         with:
           lfs: true
@@ -394,6 +413,23 @@ jobs:
             ~/AppData/Local/electron-builder/Cache
           key: electron-${{ hashFiles('desktop/package.json') }}
 
+      - name: Manifiesto del actualizador y certificado de la firma
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          python tools/contenido.py base site --version ${{ steps.ver.outputs.num }}
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/clave.keystore"
+            KT=$(command -v keytool || echo "$JAVA_HOME/bin/keytool")
+            "$KT" -exportcert -rfc -alias pokebonk -keystore "$RUNNER_TEMP/clave.keystore" -storepass "$KEYSTORE_PASSWORD" > desktop/clave.pem
+            rm -f "$RUNNER_TEMP/clave.keystore"
+            head -1 desktop/clave.pem
+          else
+            echo "sin clave: el actualizador de Windows no podrá comprobar firmas"; : > desktop/clave.pem
+          fi
+
       - name: Preparar y compilar
         shell: bash
         working-directory: desktop
@@ -439,3 +475,66 @@ jobs:
           path: |
             desktop/dist/PokeBonk-Windows-Instalador.exe
             desktop/dist/PokeBonk-Windows-*.zip
+
+  # Actualizador: publica el contenido de esta versión archivo por archivo (rama y etiqueta contenido-vN) y su
+  # manifiesto firmado con la clave del APK, con el APK y el instalador completos para cuando cambie la app.
+  contenido:
+    needs: [apk, windows]
+    if: startsWith(github.ref, 'refs/tags/')
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: sitio-final
+          path: sitio
+
+      - name: APK e instalador de la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p completos
+          for i in 1 2 3; do gh release download "$GITHUB_REF_NAME" -D completos -p PokeBonk.apk -p PokeBonk-Windows-Instalador.exe --clobber && break; sleep 20; done
+          ls -la completos
+
+      - name: Manifiesto firmado
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          python3 tools/contenido.py publicar sitio pub --tag "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --apk completos/PokeBonk.apk --exe completos/PokeBonk-Windows-Instalador.exe
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/k.jks"
+          keytool -importkeystore -noprompt -srckeystore "$RUNNER_TEMP/k.jks" -srcstorepass "$KEYSTORE_PASSWORD" -srcalias pokebonk \
+            -destkeystore "$RUNNER_TEMP/k.p12" -deststoretype PKCS12 -deststorepass "$KEYSTORE_PASSWORD" -destkeypass "$KEYSTORE_PASSWORD"
+          openssl pkcs12 -in "$RUNNER_TEMP/k.p12" -nocerts -nodes -passin env:KEYSTORE_PASSWORD -out "$RUNNER_TEMP/k.pem" 2>/dev/null \
+            || openssl pkcs12 -legacy -in "$RUNNER_TEMP/k.p12" -nocerts -nodes -passin env:KEYSTORE_PASSWORD -out "$RUNNER_TEMP/k.pem"
+          keytool -exportcert -rfc -alias pokebonk -keystore "$RUNNER_TEMP/k.jks" -storepass "$KEYSTORE_PASSWORD" > "$RUNNER_TEMP/cert.pem"
+          openssl dgst -sha256 -sign "$RUNNER_TEMP/k.pem" -out "$RUNNER_TEMP/firma.bin" pub/contenido.json
+          openssl x509 -in "$RUNNER_TEMP/cert.pem" -pubkey -noout > "$RUNNER_TEMP/pub.pem"
+          openssl dgst -sha256 -verify "$RUNNER_TEMP/pub.pem" -signature "$RUNNER_TEMP/firma.bin" pub/contenido.json
+          base64 -w0 "$RUNNER_TEMP/firma.bin" > pub/contenido.json.sig
+          rm -f "$RUNNER_TEMP/k.pem" "$RUNNER_TEMP/k.p12" "$RUNNER_TEMP/k.jks"
+
+      - name: Publicar el contenido (rama contenido, etiqueta contenido-vN)
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git fetch --depth=1 origin contenido:refs/remotes/origin/contenido || true
+          git checkout -q --orphan contenido-nuevo
+          git rm -rf -q --cached . > /dev/null
+          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name sitio ! -name pub -exec rm -rf {} +
+          cp -a sitio/. .
+          rm -rf sitio
+          cp pub/contenido.json pub/contenido.json.sig .
+          rm -rf pub
+          printf '* -text\n' > .gitattributes
+          git add -A
+          git commit -q -m "Contenido de $GITHUB_REF_NAME para el actualizador"
+          git tag -f "contenido-$GITHUB_REF_NAME"
+          git push -f origin HEAD:refs/heads/contenido "refs/tags/contenido-$GITHUB_REF_NAME"
+
+      - name: Manifiesto en la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release upload "$GITHUB_REF_NAME" contenido.json contenido.json.sig --clobber

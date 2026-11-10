@@ -4,11 +4,37 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.27';
+  const SUB = '0.28';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.28',
+      date: Date.UTC(2026, 10, 10, 7, 0),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.28`,
+      summary: 'Actualizador propio: solo se bajan los archivos que cambian, con historial de cambios, por módulos, firmado y con vuelta atrás.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Actualizador`,
+        `- Al abrir el juego busca si hay versión nueva (sin internet no hace nada y se juega igual).`,
+        `- Antes de nada enseña **qué cambia** (el historial de cada subversión) y **qué se descarga**, por partes: el juego principal y cada juego de Más juegos, con su tamaño. Puedes actualizar todo, elegir partes, dejarlo para luego u omitir esa versión.`,
+        `- **Solo se bajan los archivos que cambian**, no la app entera. Se guardan aparte y el juego los usa en lugar de los suyos.`,
+        `- Si una versión cambia la propia app (no solo el juego), se baja completa: en **Android** se instala con el instalador de Android sin pasar por GitHub; en **Windows** se abre el instalador.`,
+        `- **Seguridad**: cada versión va firmada con la misma clave que el APK y cada archivo se comprueba antes de usarlo. Si algo llega dañado, no se instala nada.`,
+        `- **Vuelta atrás**: si el juego no arranca con lo nuevo, la app vuelve sola a lo anterior. En **Remaster > Actualizaciones** puedes buscar a mano, ver cada parte y volver a lo que trae la app.`,
+        `- Partidas, ajustes y progreso no se tocan nunca.`,
+        ``,
+        `# Importante`,
+        `- Esta versión hay que instalarla **completa una vez** (APK o instalador). A partir de aquí, las siguientes llegan solas.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.27',
       date: Date.UTC(2026, 10, 10, 6, 0),
@@ -720,6 +746,18 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.28',
+      date: '2026-11-10',
+      title: 'Actualizador propio.',
+      notes: [
+        ['new', 'Actualizaciones por archivos: solo se baja lo que cambia, por partes del juego.'],
+        ['new', 'Historial de cambios antes de actualizar, y Remaster > Actualizaciones.'],
+        ['new', 'Android instala el APK nuevo sin pasar por GitHub cuando cambia la app.'],
+        ['better', 'Actualizaciones firmadas y comprobadas, con vuelta atrás si algo falla.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.27',

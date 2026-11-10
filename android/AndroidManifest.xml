@@ -4,6 +4,8 @@
     package="com.jay.pokebonk">
 
     <uses-permission android:name="android.permission.INTERNET" />
+    <!-- Subversión propia: el actualizador instala el APK nuevo con el instalador de Android. -->
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
     <uses-feature android:glEsVersion="0x00030000" android:required="true" />
     <uses-feature android:name="android.hardware.touchscreen" android:required="false" />
     <uses-feature android:name="android.hardware.gamepad" android:required="false" />

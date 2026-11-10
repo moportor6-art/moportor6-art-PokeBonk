@@ -116,28 +116,27 @@ ipcMain.handle('pb-set-display', (e, p) => {
   if ('mode' in p || 'size' in p || 'monitor' in p) applyWindow();
   return new Promise(r => setTimeout(() => r(displayInfo()), 250));
 });
-// Actualizaciones: se mira la última release de GitHub; si su número (tag "v54") es mayor que el de esta
-// versión (0.9.N), el juego enseña su aviso con el enlace al instalador.
+// Actualizaciones (subversión 0.28): actualizador.js baja solo los archivos que cambian y los sirve antes que
+// los de la app; si cambia el programa, baja y abre el instalador. El juego habla con él por 'pb-act'.
+let act = null;
 const UPDATE_REPO = 'moportor6-art/moportor6-art-PokeBonk';
 ipcMain.handle('pb-open-update', (e, url) => {
   if (typeof url === 'string' && url.startsWith('https://github.com/' + UPDATE_REPO + '/')) shell.openExternal(url);
 });
-async function checkUpdate() {
+const emitirAct = (ev) => { if (win && !win.isDestroyed()) win.webContents.executeJavaScript(`window.pbActEvento && window.pbActEvento(${JSON.stringify(ev)})`, true).catch(() => {}); };
+ipcMain.handle('pb-act', async (e, accion, datos) => {
+  if (!act) return { error: 'El actualizador no está disponible.' };
   try {
-    const r = await net.fetch(`https://api.github.com/repos/${UPDATE_REPO}/releases/latest`, { headers: { 'User-Agent': 'PokeBonkWindows', Accept: 'application/vnd.github+json' } });
-    if (!r.ok) return;
-    const j = await r.json();
-    const num = (s) => { const m = String(s || '').match(/(\d+)(?!.*\d)/); return m ? Number(m[1]) : -1; };
-    const cur = num(app.getVersion());
-    const tag = j.tag_name || '';
-    if (num(tag) <= cur || cur <= 0) return;
-    const exe = (j.assets || []).find(a => /Instalador\.exe$/i.test(a.name));
-    const info = { tag, name: j.name || tag, cur: String(cur), url: exe ? exe.browser_download_url : j.html_url,
-      text: 'Descarga el instalador nuevo y ábrelo: se instala encima del actual y tu progreso se conserva.' };
-    global.pbLog?.(`[actualización] hay ${tag} (tienes ${cur})`);
-    if (win && !win.isDestroyed()) win.webContents.executeJavaScript(`window.pbUpdateFound && window.pbUpdateFound(${JSON.stringify(info)})`, true).catch(() => {});
-  } catch (e) { global.pbLog?.('[actualización] ' + e); }
-}
+    if (accion === 'estado') return act.estado();
+    if (accion === 'buscar') return await act.buscar();
+    if (accion === 'confirmar') return act.confirmar();
+    if (accion === 'restaurar') return act.restaurar();
+    if (accion === 'aplicar') { act.aplicar(datos).catch(err => emitirAct({ tipo: 'error', mensaje: String(err.message || err) })); return { ok: true }; }
+    if (accion === 'completo') { act.completo().catch(err => emitirAct({ tipo: 'error', mensaje: String(err.message || err) })); return { ok: true }; }
+    if (accion === 'reiniciar') { win.webContents.reloadIgnoringCache(); return { ok: true }; }
+  } catch (err) { return { error: String(err.message || err) }; }
+  return { error: 'acción desconocida' };
+});
 
 ipcMain.handle('pb-relaunch', () => {
   app.relaunch();
@@ -163,7 +162,6 @@ function createWindow() {
   win.on('enter-full-screen', () => { if (cfg.mode !== 'fullscreen') { cfg.mode = 'fullscreen'; writeCfg(); } });
   win.on('leave-full-screen', () => { if (cfg.mode !== 'window') { cfg.mode = 'window'; writeCfg(); } });
   win.loadURL('app://pokebonk/index.html');
-  win.webContents.once('did-finish-load', () => setTimeout(checkUpdate, 8000));
 
   // Registro de errores: %APPDATA%\PokeBonk\registro.txt (se reinicia en cada arranque).
   const fs = require('fs');
@@ -276,11 +274,15 @@ async function pokelikeOnline(rel) {
 }
 
 app.whenReady().then(() => {
+  try { act = require('./actualizador.js')({ siteRoot: ROOT, log: (s) => global.pbLog?.(s), emitir: emitirAct }); } catch (e) { console.error(e); }
   protocol.handle('app', req => {
     let p = decodeURIComponent(new URL(req.url).pathname);
     if (p.endsWith('/')) p += 'index.html';
     const file = path.normalize(path.join(ROOT, p));
     if (!file.startsWith(ROOT)) return new Response('', { status: 404 });
+    const nuevo = act?.resolver(p.slice(1));
+    if (nuevo?.borrado) return new Response('', { status: 404 });
+    if (nuevo?.archivo) return net.fetch(pathToFileURL(nuevo.archivo).toString());
     if (!p.startsWith('/pokelike/') && !require('fs').existsSync(file)) {
       // Sprite variocolor o retrato que falta: el más parecido que haya (como en Android).
       const f = p.slice(p.lastIndexOf('/') + 1);

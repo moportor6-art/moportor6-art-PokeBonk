@@ -6,3 +6,8 @@ android/keystore.properties
 
 # Se genera en GitHub Actions desde juegos/poke-survivor
 site/pokesurvivor/
+
+# Actualizador: se generan al compilar
+site/contenido.json
+site/contenido/
+desktop/clave.pem

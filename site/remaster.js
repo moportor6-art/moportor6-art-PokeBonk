@@ -425,6 +425,7 @@
     if (tab === 'pasaporte') pintarPasaporte(cuerpo);
     else if (tab === 'desafio') pintarDesafio(cuerpo);
     else if (tab === 'traspaso') pintarTraspaso(cuerpo);
+    else if (tab === 'act') { if (window.PB_ACT) window.PB_ACT.pintar(cuerpo); else cuerpo.innerHTML = ''; }
     else {
       cuerpo.innerHTML = `<div class="rm-card"><p><b>PokéBonk Remaster</b> es PokéBonk ${window.PB_SUB ? window.PB_SUB.oficial : ''} (el juego oficial de Charcher) con la subversión ${window.PB_SUB ? window.PB_SUB.sub : ''} de moportor6 (no oficial).</p><p class="rm-muted">Todo lo nuevo está en Noticias, apartado Subversiones.</p></div><button type="button" class="rm-btn alt rm-tour">Ver el tour de bienvenida</button>`;
       cuerpo.querySelector('.rm-tour').addEventListener('click', () => { hub.hidden = true; tour(); });
@@ -434,7 +435,7 @@
   const abrir = (t) => {
     if (!hub) {
       hub = modal();
-      hub.innerHTML = `<div class="rm-box"><div class="rm-top"><b>PokéBonk Remaster</b><button type="button" class="rm-x" aria-label="Cerrar">X</button></div><div class="rm-tabs"><button type="button" class="rm-tab" data-t="pasaporte">Pasaporte</button><button type="button" class="rm-tab" data-t="desafio">Desafío del Alfa</button><button type="button" class="rm-tab" data-t="traspaso">Traspaso</button><button type="button" class="rm-tab" data-t="info">Remaster</button></div><div class="rm-body"></div></div>`;
+      hub.innerHTML = `<div class="rm-box"><div class="rm-top"><b>PokéBonk Remaster</b><button type="button" class="rm-x" aria-label="Cerrar">X</button></div><div class="rm-tabs"><button type="button" class="rm-tab" data-t="pasaporte">Pasaporte</button><button type="button" class="rm-tab" data-t="desafio">Desafío del Alfa</button><button type="button" class="rm-tab" data-t="traspaso">Traspaso</button><button type="button" class="rm-tab" data-t="act">Actualizaciones</button><button type="button" class="rm-tab" data-t="info">Remaster</button></div><div class="rm-body"></div></div>`;
       hub.addEventListener('click', (e) => {
         const b = e.target.closest('.rm-tab');
         if (b) { tab = b.dataset.t; pintar(); return; }

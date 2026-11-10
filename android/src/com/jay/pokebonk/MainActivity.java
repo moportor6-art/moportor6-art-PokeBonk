@@ -62,6 +62,7 @@ public class MainActivity extends Activity {
     static final String ORIGIN = "https://" + HOST + "/";
 
     private WebView web;
+    private Actualizador actualizador;   // subversión propia (0.28)
     private volatile boolean menuMode = true;
     private volatile int menuConfirm = 0;
     private volatile int menuBack = 1;
@@ -282,6 +283,41 @@ public class MainActivity extends Activity {
                 }
             });
         }
+        // Subversión propia (0.28): actualizador. Las respuestas llegan a window.pbActEvento({tipo:'respuesta', id, ...}).
+        @JavascriptInterface public String actualizacionEstado() {
+            try { return actualizador == null ? "{\"puede\":false}" : actualizador.estado().toString(); }
+            catch (Exception ex) { return "{\"puede\":false}"; }
+        }
+        @JavascriptInterface public void actualizacion(String id, String accion, String datos) {
+            new Thread(() -> {
+                JSONObject ev = new JSONObject();
+                try {
+                    ev.put("tipo", "respuesta");
+                    ev.put("id", id);
+                    if (actualizador == null) throw new Exception("El actualizador no está disponible.");
+                    Object r = null;
+                    switch (accion) {
+                        case "estado": r = actualizador.estado(); break;
+                        case "buscar": r = actualizador.buscar(); break;
+                        case "confirmar": actualizador.confirmar(); break;
+                        case "restaurar": actualizador.restaurar(); break;
+                        case "aplicar": actualizador.aplicar(datos == null || datos.isEmpty() ? null : new org.json.JSONArray(datos)); break;
+                        case "completo": actualizador.completo(); break;
+                        case "reiniciar": menuHandler.post(() -> { if (web != null) { web.clearCache(false); web.reload(); } }); break;
+                        default: throw new Exception("acción desconocida");
+                    }
+                    ev.put("resultado", r == null ? JSONObject.NULL : r);
+                } catch (Exception ex) {
+                    try { ev.put("error", String.valueOf(ex.getMessage())); } catch (Exception ignored) { }
+                    if ("aplicar".equals(accion) || "completo".equals(accion)) {
+                        try { JSONObject er = new JSONObject(); er.put("tipo", "error"); er.put("mensaje", String.valueOf(ex.getMessage()));
+                            final String s = er.toString(); menuHandler.post(() -> { if (web != null) web.evaluateJavascript("window.pbActEvento && window.pbActEvento(" + s + ")", null); }); } catch (Exception ignored) { }
+                    }
+                }
+                final String s = ev.toString();
+                menuHandler.post(() -> { if (web != null) web.evaluateJavascript("window.pbActEvento && window.pbActEvento(" + s + ")", null); });
+            }, "pb-actualizador").start();
+        }
         @JavascriptInterface public int getThermalStatus() {
             if (Build.VERSION.SDK_INT < 29) return 0;
             PowerManager power = (PowerManager) getSystemService(POWER_SERVICE);
@@ -450,6 +486,11 @@ public class MainActivity extends Activity {
         applyOrientation(getSharedPreferences("pb", MODE_PRIVATE).getString("orientation", "landscape"));
         // Inspección por adb (chrome devtools protocol) para depurar en la consola.
         WebView.setWebContentsDebuggingEnabled(true);
+        try {
+            actualizador = new Actualizador(this, UPDATE_REPO, ev -> menuHandler.post(() -> {
+                if (web != null) web.evaluateJavascript("window.pbActEvento && window.pbActEvento(" + ev.toString() + ")", null);
+            }));
+        } catch (Exception e) { Log.w("PokeBonk", "actualizador", e); }
         web = new WebView(this);
         web.setBackgroundColor(0xFF1A1630);
         setContentView(web);
@@ -503,7 +544,7 @@ public class MainActivity extends Activity {
         } else {
             web.loadUrl(ORIGIN);
         }
-        checkForUpdate();
+        // El aviso viejo (solo enlazaba a GitHub) lo sustituye el actualizador (actualizaciones.js).
     }
 
     // ---------- servidor local ----------
@@ -529,6 +570,11 @@ public class MainActivity extends Activity {
         if (path.contains("..")) {
             return notFound();
         }
+        // Subversión propia: lo actualizado (files/contenido) va antes que lo del APK.
+        File nuevo = actualizador != null ? actualizador.resolver(path) : null;
+        if (nuevo == Actualizador.BORRADO) {
+            return notFound();
+        }
         String range = null;
         for (Map.Entry<String, String> h : req.getRequestHeaders().entrySet()) {
             if ("range".equalsIgnoreCase(h.getKey())) {
@@ -537,6 +583,10 @@ public class MainActivity extends Activity {
         }
         // Subversión propia: los archivos muy grandes (el juego de PokéSurvivor) se sirven a trozos desde el APK,
         // sin cargarlos enteros en memoria.
+        if (nuevo != null) {
+            WebResourceResponse r = serveFile(path, nuevo, range);
+            if (r != null) return r;
+        }
         WebResourceResponse big = serveBig(path, range);
         if (big != null) {
             return big;
@@ -612,6 +662,51 @@ public class MainActivity extends Activity {
         else if ("auto".equals(m)) o = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_FULL_USER;
         else o = android.content.pm.ActivityInfo.SCREEN_ORIENTATION_SENSOR_LANDSCAPE;
         if (getRequestedOrientation() != o) setRequestedOrientation(o);
+    }
+
+    // Archivo actualizado (files/contenido): los pequeños enteros, los grandes por trozos como serveBig.
+    private WebResourceResponse serveFile(String path, File f, String range) {
+        long total = f.length();
+        try {
+            if (total < 16L * 1024 * 1024) {
+                try (InputStream in = new FileInputStream(f)) { return respond(path, readAll(in), range); }
+            }
+            long start = 0, end = total - 1;
+            int status = 200;
+            String reason = "OK";
+            Map<String, String> h = new HashMap<>();
+            h.put("Access-Control-Allow-Origin", "*");
+            h.put("Cache-Control", "no-cache");
+            h.put("Accept-Ranges", "bytes");
+            if (range != null && range.startsWith("bytes=")) {
+                String[] p = range.substring(6).split("-", 2);
+                try {
+                    if (!p[0].trim().isEmpty()) {
+                        start = Long.parseLong(p[0].trim());
+                        if (p.length > 1 && !p[1].trim().isEmpty()) end = Math.min(end, Long.parseLong(p[1].trim()));
+                    } else if (p.length > 1 && !p[1].trim().isEmpty()) {
+                        start = Math.max(0, total - Long.parseLong(p[1].trim()));
+                    }
+                    if (start <= end && start < total) {
+                        status = 206; reason = "Partial Content";
+                        h.put("Content-Range", "bytes " + start + "-" + end + "/" + total);
+                    } else { start = 0; end = total - 1; }
+                } catch (NumberFormatException ignored) { }
+            }
+            final long len = end - start + 1;
+            h.put("Content-Length", String.valueOf(len));
+            java.io.RandomAccessFile raf = new java.io.RandomAccessFile(f, "r");
+            raf.seek(start);
+            InputStream limited = new InputStream() {
+                long left = len;
+                @Override public int read() throws IOException { if (left <= 0) return -1; int b = raf.read(); if (b >= 0) left--; return b; }
+                @Override public int read(byte[] b, int off, int n) throws IOException { if (left <= 0) return -1; int r = raf.read(b, off, (int) Math.min(n, left)); if (r > 0) left -= r; return r; }
+                @Override public void close() throws IOException { raf.close(); }
+            };
+            return new WebResourceResponse(mime(path), null, status, reason, h, limited);
+        } catch (IOException e) {
+            return null;
+        }
     }
 
     private WebResourceResponse serveBig(String path, String range) {
