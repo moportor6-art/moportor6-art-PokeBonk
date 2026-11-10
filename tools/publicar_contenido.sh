@@ -50,4 +50,6 @@ git tag -f "contenido-$TAG"
 git push -f origin HEAD:refs/heads/contenido "refs/tags/contenido-$TAG"
 cd - > /dev/null
 gh release upload "$TAG" pub/contenido.json pub/contenido.json.sig --clobber
+# Ya está todo: ahora sí es la última versión para el actualizador.
+gh release edit "$TAG" --prerelease=false --latest
 echo "Contenido de $TAG publicado"
