@@ -1,5 +1,13 @@
 # Cambios respecto al port original
 
+## Modo vertical (Subversión 0.32)
+- Todo en `site/vertical.js`, con selectores bajo `html.pb-portrait` (la clase que pone el propio archivo cuando la pantalla es más alta que ancha), así que en horizontal no cambia nada.
+- Subir de nivel: `.modal .cards` en columna y cada `.card.offer` en fila (`.top` de 92 px a la izquierda con rareza arriba y tipo abajo, `.bd` a la derecha).
+- La Liga: `.ls-hero` y `.ls-top` con `display:contents` para que sus partes sean celdas de la cuadrícula de `.ls-main` (sprite e identidad arriba, `.ls-roster` con altura máxima y su propio scroll, después `.ls-top-stats` y `.ls-body`). `.ls-cta` fijo abajo; en pantallas de menos de 400 px los botones Movimientos y Plan quedan solo con el icono.
+- Elige mapa: `.rg-main` en columna, `.rg-headrow` en columna, `.rg-route` en cuadrícula y `.rg-go` fijo abajo (sin la animación de `.rg-side`, que lo descolocaba).
+- Pausa (`.pz-tabs`), Ajustes (`.st-tabs` en dos filas), Encargos (`.tk-title` puede ocupar dos líneas) y Mutación del día (`.mu-poster`).
+- También en horizontal: el chip de tipo de las cartas (`.card.offer .row .chip`) ya no se parte en dos líneas.
+
 ## Auto aprender (Subversión 0.31)
 - PokéBonk: `site/autohab.js` puntúa las ofertas de subida de nivel según la especialidad (Ataque contra At. Esp. base de `data/pokemon.json`, o la clase de los movimientos que lleva): movimientos de esa clase y de su tipo, favoritos, repartir niveles, vitaminas por estadística (Proteína/Calcio según la clase) y nunca el Incienso Maldito. Parches: en `main-*.js`, `doLevelUp` pregunta a `PB_AUTOHAB.pick` y aplica la elegida como cuando solo hay una opción; en `menus-*.js`, `window.__pbOfferInfo` dice la clase y el tipo de cada movimiento y la estadística de cada vitamina. Botón en la pausa (localStorage `pb-autohab`), junto a "HUD y guía" en la franja de arriba.
 - PokéSurvivor (`juegos/poke-survivor`): `_auto_pick` en `main.gd` (evoluciones, lo que desbloquea una, movimientos de su tipo, estadísticas según Ataque, vida y velocidad del Pokémon; cura solo con poca vida) y botón en Pausa > Opciones (`settings.autohab`).

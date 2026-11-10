@@ -91,6 +91,79 @@ ${P} #hud .hud-bl{left:calc(8px + env(safe-area-inset-left))!important;right:aut
 ${P} .pb-mx{left:auto!important;right:max(10px,env(safe-area-inset-right))!important;top:calc(192px + env(safe-area-inset-top))!important}
 ${P} .pb-mx button{width:56px!important;height:56px!important}
 
+/* Subir de nivel: las cartas en filas a todo el ancho (icono a la izquierda, texto a la derecha) en vez de
+   tres columnas estrechas donde el texto no cabe. */
+${P} .modal .cards{flex-direction:column!important;flex-wrap:nowrap!important;align-items:stretch!important;width:min(420px,calc(100vw - 20px))!important;max-width:none!important;gap:8px!important;overflow:visible!important}
+${P} .modal .cards>.card.offer{width:auto!important;min-width:0!important;flex:none!important;min-height:0!important;flex-direction:row!important;border-radius:16px!important}
+${P} .card.offer .top{width:92px!important;height:auto!important;min-height:86px;flex:none!important}
+${P} .card.offer .top img{margin-top:0!important}
+${P} .card.offer .rar{left:50%!important;translate:-50% 0;top:6px!important;padding:1px 7px!important;font-size:10px!important;white-space:nowrap;max-width:84px;overflow:hidden;text-overflow:ellipsis}
+${P} .card.offer .kind{top:auto!important;bottom:6px!important;right:auto!important;left:50%!important;translate:-50% 0;padding:1px 7px!important;font-size:10px!important;white-space:nowrap}
+${P} .card.offer .bd{min-width:0!important;padding:8px 12px!important;gap:3px!important}
+${P} .card.offer .bd h3{margin:0;font-size:17px}
+${P} .card.offer .bd p{margin:0;font-size:12.5px;line-height:1.25}
+.card.offer .row .chip{white-space:nowrap;flex:none}
+
+/* La Liga (elegir Pokémon): arriba el elegido en pequeño, debajo la lista para elegir, y luego sus datos.
+   El botón «¡Te elijo a ti!» queda fijo abajo para no tener que bajar hasta el final. */
+${P} .screen.ls .scr-head{position:relative}
+${P} .screen.ls .scr-head .gl-btn{position:absolute!important;right:0;top:0}
+${P} .screen.ls .scr-head .grow{display:none}
+${P} .ls-main{display:grid!important;grid-template-columns:128px minmax(0,1fr)!important;grid-template-rows:none!important;grid-auto-rows:auto!important;gap:10px!important;padding-bottom:calc(150px + env(safe-area-inset-bottom))!important;position:relative}
+${P} .ls-main>.ls-hero,${P} .ls-main .ls-top{display:contents!important}
+${P} .ls-main .ls-show{order:1;grid-column:1;min-height:0!important;width:128px!important;height:128px!important;align-self:start}
+${P} .ls-main .ls-show .ls-stage{height:100%!important}
+${P} .ls-main .ls-id{order:1;grid-column:2;background:var(--w97);border-radius:var(--radius);box-shadow:var(--shadow);padding:10px 12px;gap:5px!important;align-self:stretch}
+${P} .ls-main .ls-id h1{font-size:26px!important}
+${P} .ls-main .ls-evo{display:none!important}
+${P} .ls-main .ls-roster{order:2;grid-column:1/-1;max-height:min(62vh,560px);padding:10px!important}
+${P} .ls-main .ls-grid{overflow-y:auto!important;grid-template-columns:repeat(auto-fill,minmax(68px,1fr))!important}
+${P} .ls-main .ls-top-stats{order:3;grid-column:1/-1;grid-template-columns:minmax(0,1fr)!important;gap:10px!important;background:var(--w97);border-radius:var(--radius);box-shadow:var(--shadow);padding:12px}
+${P} .ls-main .ls-body{order:4;grid-column:1/-1;grid-template-columns:minmax(0,1fr)!important;border-radius:var(--radius);box-shadow:var(--shadow);padding:10px!important}
+${P} .ls-main .ls-flash{display:none}
+${P} .ls-main .ls-stamp{position:fixed!important;left:50%!important;top:40%!important;translate:-50% 0}
+${P} .ls-main .ls-cta{position:fixed!important;z-index:20;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));flex-wrap:wrap!important;gap:6px!important;padding:8px!important;border:none!important;border-radius:20px;box-shadow:0 6px 24px #0006,var(--shadow)}
+${P} .ls-main .ls-cta>:is(.ls-rec,.ls-cta-tx){flex:1 1 100%!important;min-width:0;font-size:11px!important;line-height:1.2;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;display:block!important;margin:0 4px}
+${P} .ls-main .ls-cta>:is(.ls-rec,.ls-cta-tx) *{white-space:nowrap!important;display:inline!important}
+${P} .ls-main .ls-cta .mp-open{padding:8px 10px!important;font-size:13px!important}
+@media (max-width:400px){${P} .ls-main .ls-cta .mp-open{font-size:0!important;padding:10px 12px!important;gap:0!important}}
+${P} .ls-main .ls-cta .ls-go{flex:1 1 auto!important;width:auto!important;min-width:0;padding:10px 12px!important;font-size:18px!important}
+
+/* Elige mapa: nombre y descripción a todo el ancho, guardianes de dos en dos y «¡Empezar!» fijo abajo. */
+${P} .rg-main{display:flex!important;flex-direction:column!important;gap:12px!important;padding-bottom:calc(100px + env(safe-area-inset-bottom))}
+${P} .rg-main>*{min-width:0!important;width:auto!important}
+${P} .rg-headrow{flex-direction:column-reverse!important;align-items:stretch!important;gap:10px!important}
+${P} .rg-name h1{font-size:34px!important}
+${P} .rg-about{max-width:none!important}
+${P} .rg-window .rg-partner{align-self:flex-end}
+${P} .rg-window .rg-boss{align-self:stretch!important}
+${P} .rg-route{display:grid!important;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px!important}
+${P} .rg-route .rg-chev{display:none!important}
+${P} .rg-route .rg-stop{min-width:0}
+${P} .rg-side,${P} .rg-side-body{overflow:visible!important;animation:none!important;transform:none!important}
+${P} .rg-side .rg-go{position:fixed!important;z-index:20;left:10px;right:10px;bottom:calc(10px + env(safe-area-inset-bottom));padding:0!important;border:none!important}
+${P} .rg-side .rg-go .btn{box-shadow:0 6px 24px #0006}
+
+/* Pestañas que se salían por la derecha: Ajustes en dos filas y la pausa repartida a partes iguales. */
+${P} .st-tabs{flex-wrap:wrap!important;overflow:visible!important;gap:6px!important}
+${P} .st-tabs .st-tab{flex:1 1 calc(50% - 6px)!important;min-width:0!important;padding:4px 8px!important;height:auto!important}
+${P} .st-tabs .st-ic{width:34px!important;height:34px!important}
+${P} .pz-tabs{gap:4px!important;overflow:visible!important}
+${P} .pz-tabs .pz-tab{flex:1 1 0!important;min-width:0!important;padding:6px 6px!important;justify-content:center}
+${P} .pz-tabs .pz-tab{gap:4px!important}
+${P} .pz-tabs .pz-tab span{font-size:13px;letter-spacing:-.01em;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+
+/* Encargos: el nombre del encargo entero, sin «Poder d…». */
+${P} .tk-card{gap:10px!important;margin:0 4px!important}
+${P} .tk-ball{width:44px!important;height:44px!important}
+${P} .tk-title{flex-wrap:wrap!important;gap:2px 6px!important}
+${P} .tk-title>*{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;min-width:0}
+
+/* Mutación del día: la medalla ya no tapa la primera letra del título. */
+${P} .mu-poster{grid-template-columns:96px minmax(0,1fr)!important}
+${P} .mu-medal{scale:.85;transform-origin:top left}
+${P} .mu-name{font-size:30px!important}
+
 /* Pausa: una sola columna */
 html.pb-portrait body #ui .sm.pz{grid-template:"hero" auto "tabs" auto "body" minmax(0,1fr) "foot" auto / minmax(0,1fr)!important;gap:6px!important}
 html.pb-portrait body #ui .pz>.sm-foot{max-height:none!important}

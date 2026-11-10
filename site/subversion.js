@@ -4,11 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.31';
+  const SUB = '0.32';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.32',
+      date: Date.UTC(2026, 10, 10, 18, 30),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.32`,
+      summary: 'Modo vertical: las pantallas que no encajaban ahora se ven bien con el móvil de pie.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Modo vertical`,
+        `- **Subir de nivel**: las tres cartas van una debajo de otra a todo el ancho, con el dibujo a la izquierda. Ya no se corta el texto.`,
+        `- **La Liga** (elegir Pokémon): arriba el Pokémon elegido en pequeño, justo debajo la lista para elegir y después sus estadísticas y su kit. El botón **¡Te elijo a ti!** queda fijo abajo.`,
+        `- **Elige mapa**: el nombre y la descripción de la región a todo el ancho, los guardianes en cuadrícula y **¡Empezar!** fijo abajo.`,
+        `- **Pausa**: las pestañas Movimientos, Objetos y Estadísticas caben enteras.`,
+        `- **Ajustes**: las pestañas en dos filas en vez de salirse por la derecha.`,
+        `- **Encargos**: el nombre del encargo se ve entero.`,
+        `- **Mutación del día**: la medalla ya no tapa el título.`,
+        `- En horizontal todo sigue igual (solo se arregla que el tipo del movimiento en las cartas se partía en dos líneas).`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.31',
       date: Date.UTC(2026, 10, 10, 15, 50),
@@ -813,6 +837,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.32',
+      date: '2026-11-10',
+      title: 'Modo vertical mejorado.',
+      notes: [
+        ['better', 'En vertical, las cartas de subir de nivel van a todo el ancho y se leen enteras.'],
+        ['better', 'En vertical, La Liga y Elige mapa ordenadas para el móvil, con el botón de empezar siempre a mano.'],
+        ['fix', 'En vertical, pestañas de la pausa y de Ajustes, nombres de los Encargos y título de la Mutación del día ya no se cortan.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.31',
