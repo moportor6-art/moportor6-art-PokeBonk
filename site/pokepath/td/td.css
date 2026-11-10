@@ -1,0 +1,137 @@
+/* PokéBonk TD: vista nueva. Solo se aplica con html.tdr-on (la vista clásica queda como siempre). */
+:root{
+  --tdr-st:env(safe-area-inset-top,0px);--tdr-sb:env(safe-area-inset-bottom,0px);
+  --tdr-sl:env(safe-area-inset-left,0px);--tdr-sr:env(safe-area-inset-right,0px);
+  --tdr-ink:#2a2140;--tdr-night:#1d1336;--tdr-plum:#33235a;--tdr-paper:#fffaf3;
+  --tdr-sun:#ffcb05;--tdr-ball:#ff4a6e;--tdr-leaf:#3ec26a;--tdr-sky:#4a9dff;
+  --tdr-title:"M PLUS Rounded 1c","Nunito",system-ui,sans-serif;--tdr-font:"Nunito",system-ui,sans-serif;
+}
+.tdr,.tdr-back{display:none}
+html.tdr-on body{background:radial-gradient(120% 80% at 50% 0%,#3a2867 0%,var(--tdr-night) 60%) fixed!important}
+html.tdr-on #view-port{display:block!important}
+html.tdr-on #screen-root{left:0!important;top:0!important}
+html.tdr-on #screen{background:transparent!important;overflow:visible!important}
+html.tdr-on #canvas-wrapper{border-radius:6px;box-shadow:0 0 0 3px #ffffff26,0 10px 30px #0008}
+html.tdr-on #canvas-wrapper canvas{image-rendering:pixelated}
+/* La interfaz de escritorio sigue ahí para que funcione todo, pero no se ve. */
+html.tdr-on .ui-player-panel,html.tdr-on .ui-map-panel,html.tdr-on .ui-top-bar,html.tdr-on .ui-bottom-bar{visibility:hidden!important}
+html.tdr-on .ui-weather{visibility:visible}
+html.tdr-on .pb-volver{display:none!important}
+html:not(.tdr-on) .tdr-back{display:block;position:fixed;right:max(6px,env(safe-area-inset-right));top:max(6px,env(safe-area-inset-top));z-index:99999;padding:6px 12px;border:2px solid #fff;border-radius:99px;background:var(--tdr-ball);color:#fff;font:900 12px var(--tdr-title);box-shadow:0 3px 0 #0005}
+
+html.tdr-on .tdr{display:block;position:fixed;inset:0;z-index:10000;pointer-events:none;font-family:var(--tdr-font);color:var(--tdr-ink);-webkit-tap-highlight-color:transparent}
+.tdr>*{pointer-events:auto}
+.tdr button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+.tdr button:focus-visible{outline:3px solid var(--tdr-sun);outline-offset:2px}
+.tdr button:disabled{cursor:default}
+/* Con una ventana del juego abierta, el panel se queda atrás y oscurecido. */
+html.tdr-modal .tdr{z-index:1;filter:brightness(.45)}
+html.tdr-modal .tdr>*{pointer-events:none}
+/* Las ventanas de la barra (Caja, Tienda, Mapa…) se cierran con este botón, que queda por encima. */
+.tdr-close{display:none}
+html.tdr-sec .tdr-close{display:block;position:fixed;z-index:10001;left:50%;translate:-50% 0;bottom:calc(var(--tdr-sb) + 84px);padding:12px 34px;border-radius:99px;background:var(--tdr-paper)!important;color:var(--tdr-ink)!important;font:900 16px var(--tdr-title)!important;box-shadow:0 4px 0 #0006;pointer-events:auto!important}
+html.tdr-sec .tdr{filter:none}
+html.tdr-sec .tdr>:not(.tdr-close){filter:brightness(.45)}
+html.tdr-sec .tdr{z-index:10000}
+
+/* ---------- barra de arriba ---------- */
+.tdr-top{position:fixed;display:flex;align-items:center;gap:8px;color:#fff}
+.tdr-route{display:flex;flex-direction:column;min-width:0;flex:1 1 auto;line-height:1.05}
+.tdr-route b{font:900 17px var(--tdr-title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tdr-route span{font:800 12px var(--tdr-font);color:#d9ccff}
+.tdr-life,.tdr-gold,.tdr-stars{display:flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 8px;border-radius:99px;background:#ffffff1a;box-shadow:inset 0 0 0 1.5px #ffffff26;flex:none}
+.tdr-life b,.tdr-gold b,.tdr-stars b{font:900 16px var(--tdr-title)}
+.tdr-life i{--v:1;width:22px;height:22px;flex:none;background:url("../src/assets/images/icons/heart.png") center/contain no-repeat;filter:saturate(calc(.25 + var(--v) * .75))}
+.tdr-gold b{color:#ffe27a}
+.tdr-gold:before{content:"";width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff6c0,#f5b800 60%,#b07c00);box-shadow:0 0 0 1.5px #7a5500}
+.tdr-stars:before{content:"★";color:var(--tdr-sun);font-size:16px;line-height:1}
+
+/* ---------- panel: próxima oleada, equipo y menú ---------- */
+.tdr-side{position:fixed;display:flex;flex-direction:column;gap:8px;overflow:auto;overscroll-behavior:contain;scrollbar-width:none}
+.tdr-side::-webkit-scrollbar{display:none}
+.tdr-next{display:flex;align-items:center;gap:8px;min-height:40px;padding:4px 10px;border-radius:14px;background:#ffffff14;color:#e9e1ff;flex:none}
+.tdr-next>span{font:800 12px var(--tdr-font);white-space:nowrap}
+.tdr-next-row{display:flex;gap:2px;overflow:hidden;flex:1;min-width:0}
+.tdr-next-row i{width:32px;height:32px;flex:none;background:center/contain no-repeat;image-rendering:pixelated}
+
+.tdr-team{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;flex:none}
+.tdr-card{--pc:#8b7fb0;position:relative;display:grid;grid-template-rows:minmax(0,1fr) auto;border-radius:16px;background:var(--tdr-paper);box-shadow:0 3px 0 #0004,inset 0 0 0 2px color-mix(in srgb,var(--pc) 45%,transparent);overflow:hidden;min-width:0}
+.tdr-deploy{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:4px 4px 3px;min-height:0;background:linear-gradient(180deg,color-mix(in srgb,var(--pc) 32%,#fff),var(--tdr-paper) 70%)!important;min-height:0}
+.tdr-spr{width:100%;flex:1 1 0;min-height:18px;max-height:64px;background:center bottom/contain no-repeat;image-rendering:pixelated}
+.tdr-nm{font:900 11px var(--tdr-title);text-transform:capitalize;letter-spacing:-.02em;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.15}
+.tdr-lv{font:800 10.5px var(--tdr-font);color:#6b5f88;line-height:1.1}
+.tdr-st{position:absolute;left:4px;right:4px;top:3px;font:900 9px var(--tdr-font);font-style:normal;color:#fff;background:var(--tdr-leaf);border-radius:99px;padding:1px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tdr-st:empty{display:none}
+.tdr-card.sel{box-shadow:0 3px 0 #0004,0 0 0 3px var(--tdr-sun)}
+.tdr-card.sel .tdr-st{background:var(--tdr-ball)}
+.tdr-card.on .tdr-deploy{background:linear-gradient(180deg,color-mix(in srgb,var(--pc) 55%,#fff),var(--tdr-paper) 75%)!important}
+.tdr-acts{display:flex;border-top:1.5px solid #00000014;min-height:28px}
+.tdr-acts button{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:900 12px var(--tdr-title);line-height:1;padding:3px 0}
+.tdr-acts button+button{border-left:1.5px solid #00000014}
+.tdr-acts button[hidden]{display:none}
+.tdr-up{color:#1f8a46!important;flex:1.6 1 0!important}
+.tdr-up small{font:800 9px var(--tdr-font);color:#6b5f88}
+.tdr-up small:empty{display:none}
+.tdr-up:disabled{color:#a99fbf!important}
+.tdr-item{background:center/70% no-repeat!important;image-rendering:pixelated;color:#8a6a00!important}
+.tdr-item:disabled{opacity:.45}
+.tdr-info{color:var(--tdr-sky)!important;font-style:italic!important}
+.tdr-card.empty,.tdr-card.locked{background:#ffffff12;box-shadow:inset 0 0 0 2px #ffffff22}
+.tdr-card.empty .tdr-deploy,.tdr-card.locked .tdr-deploy{background:none!important;color:#cfc4ee;justify-content:center;min-height:72px}
+.tdr-card.empty .tdr-lv,.tdr-card.locked .tdr-lv{color:#cfc4ee}
+.tdr-card.empty .tdr-acts,.tdr-card.locked .tdr-acts{display:none}
+.tdr-card.locked .tdr-deploy{cursor:default}
+
+.tdr-menu{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;flex:none}
+.tdr-m{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border-radius:12px;background:#ffffff14!important;color:#efe9ff!important;font:800 10.5px var(--tdr-font)!important;min-width:0}
+.tdr-m img{width:22px;height:22px;image-rendering:pixelated}
+.tdr-m span{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tdr-m.off{opacity:.45}
+.tdr-m.tdr-classic,.tdr-m.tdr-exit{justify-content:center}
+.tdr-m.tdr-exit.armed{background:var(--tdr-ball)!important}
+
+/* ---------- botones de oleada ---------- */
+.tdr-dock{position:fixed;display:flex;gap:8px;align-items:stretch}
+.tdr-b{flex:none;min-width:58px;padding:0 10px;border-radius:16px;background:var(--tdr-paper)!important;color:var(--tdr-ink)!important;font:900 14px var(--tdr-title)!important;box-shadow:0 3px 0 #0005}
+.tdr-b.on{background:var(--tdr-sun)!important}
+.tdr-wave{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:18px;color:#fff!important;background:linear-gradient(180deg,#ff6d8a,var(--tdr-ball) 55%,#d82a52)!important;box-shadow:0 4px 0 #8c1733,inset 0 0 0 2px #ffffff55;min-width:0}
+.tdr-wave span{font:900 19px var(--tdr-title);white-space:nowrap}
+.tdr-wave small{font:800 11px var(--tdr-font);opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tdr-wave small:empty{display:none}
+.tdr-wave:disabled{background:linear-gradient(180deg,#8f84ad,#6f6491)!important;box-shadow:0 4px 0 #3c3358,inset 0 0 0 2px #ffffff33}
+.tdr-wave.live:disabled{background:linear-gradient(180deg,#5fd88b,#2fae5e)!important;box-shadow:0 4px 0 #1b6b3a,inset 0 0 0 2px #ffffff55}
+
+/* ---------- vertical ---------- */
+html.tdr-v .tdr-top{left:calc(var(--tdr-sl) + 10px);right:calc(var(--tdr-sr) + 10px);top:var(--tdr-st);height:58px}
+html.tdr-v .tdr-side{left:calc(var(--tdr-sl) + 8px);right:calc(var(--tdr-sr) + 8px);top:calc(var(--tdr-my) + var(--tdr-mh) + 8px);bottom:calc(var(--tdr-sb) + 80px)}
+html.tdr-v .tdr-team{flex:1 1 0;min-height:0;grid-auto-rows:minmax(0,1fr);max-height:300px}
+/* Poco alto: el menú pasa a una fila de iconos para dejar sitio al equipo. */
+html.tdr-v.tdr-low .tdr-menu{grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+html.tdr-v.tdr-low .tdr-m{padding:6px 0}
+html.tdr-v.tdr-low .tdr-m span{display:none}
+html.tdr-v.tdr-low .tdr-m.tdr-classic span,html.tdr-v.tdr-low .tdr-m.tdr-exit span{display:block;font-size:9px;white-space:normal;line-height:1}
+html.tdr-v.tdr-low .tdr-next{min-height:34px}
+html.tdr-v.tdr-low .tdr-next-row i{width:26px;height:26px}
+html.tdr-v .tdr-dock{left:calc(var(--tdr-sl) + 8px);right:calc(var(--tdr-sr) + 8px);bottom:calc(var(--tdr-sb) + 8px);height:62px}
+@media (max-width:380px){
+  html.tdr-v .tdr-gold,html.tdr-v .tdr-life,html.tdr-v .tdr-stars{padding:0 9px 0 6px;gap:4px}
+  html.tdr-v .tdr-stars{display:none}
+}
+
+/* ---------- horizontal ---------- */
+html.tdr-h .tdr-top,html.tdr-h .tdr-side,html.tdr-h .tdr-dock{left:calc(var(--tdr-mx) + var(--tdr-mw) + 12px);right:calc(var(--tdr-sr) + 10px)}
+html.tdr-h .tdr-top{top:calc(var(--tdr-st) + 6px);height:40px;flex-wrap:nowrap}
+html.tdr-h .tdr-route b{font-size:15px}
+html.tdr-h .tdr-side{top:calc(var(--tdr-st) + 52px);bottom:calc(var(--tdr-sb) + 72px)}
+html.tdr-h .tdr-dock{bottom:calc(var(--tdr-sb) + 8px);height:56px}
+html.tdr-h .tdr-life,html.tdr-h .tdr-gold,html.tdr-h .tdr-stars{height:30px;padding:0 9px 0 6px}
+html.tdr-h .tdr-team{flex:1 1 0;min-height:0;grid-auto-rows:minmax(0,1fr);max-height:400px}
+html.tdr-h .tdr-spr{max-height:72px}
+@media (max-height:460px){
+  html.tdr-h .tdr-stars{display:none}
+  html.tdr-h .tdr-next{min-height:32px}
+  html.tdr-h .tdr-next-row i{width:26px;height:26px}
+  html.tdr-h .tdr-menu{grid-template-columns:repeat(10,minmax(0,1fr))}
+  html.tdr-h .tdr-m span{display:none}
+}
+@media (prefers-reduced-motion:reduce){.tdr *{transition:none!important;animation:none!important}}

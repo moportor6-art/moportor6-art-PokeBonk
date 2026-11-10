@@ -4,11 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.33';
+  const SUB = '0.34';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.34',
+      date: Date.UTC(2026, 10, 10, 21, 30),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.34`,
+      summary: 'PokéBonk TD en pruebas: PokéPath TD con la cara de PokéBonk, pensado para el móvil.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# PokéBonk TD (en pruebas)`,
+        `- En **Más juegos** hay una entrada nueva: **PokéBonk TD**. Es PokéPath TD por dentro (mismas rutas, oleadas, estadísticas, habilidades y objetos) con una pantalla nueva al estilo PokéBonk.`,
+        `- Usa **la misma partida** que PokéPath TD: puedes jugar en uno o en otro sin perder nada.`,
+        `- El mapa se ve grande y nítido. En **vertical**: arriba la ruta, la oleada, las vidas y el dinero; el mapa a lo ancho; debajo tu equipo y abajo los botones de oleada. En **horizontal**: el mapa a toda la altura y el panel a la derecha.`,
+        `- Cada Pokémon del equipo tiene su tarjeta: tócala para colocarlo y luego toca una casilla del mapa. Debajo, **+1** para subirlo de nivel (con su precio), su objeto y su información.`,
+        `- **Siguiente oleada** grande, y al lado Pausa, velocidad y Auto. La Caja, la Mochila, la Tienda, el Mapa y el resto siguen siendo las del juego; se cierran con **Cerrar**.`,
+        `- **Vista clásica** vuelve a la pantalla de siempre de PokéPath dentro del mismo juego.`,
+        `- PokéPath TD sigue igual en Más juegos mientras PokéBonk TD está en pruebas.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.33',
       date: Date.UTC(2026, 10, 10, 19, 10),
@@ -862,6 +885,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.34',
+      date: '2026-11-10',
+      title: 'PokéBonk TD en pruebas.',
+      notes: [
+        ['new', '**PokéBonk TD** en Más juegos: PokéPath TD con pantalla nueva para el móvil, misma partida y mismos valores.'],
+        ['new', 'Tarjetas del equipo con subir de nivel y su precio, y botón grande de Siguiente oleada.'],
+        ['better', 'Vista clásica a un toque, por si prefieres la pantalla de siempre.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.33',
