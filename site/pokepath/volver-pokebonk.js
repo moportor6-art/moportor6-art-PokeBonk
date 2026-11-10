@@ -9,13 +9,13 @@
 .pb-volver.armed{background:#c0392b;opacity:1}`;
     document.head.append(st);
     const b = document.createElement('button');
-    b.type = 'button'; b.className = 'pb-volver'; b.textContent = 'Volver a PokéBonk';
+    b.type = 'button'; b.className = 'pb-volver'; b.textContent = 'Volver a PokéBonk Remaster';
     let t = 0;
     b.addEventListener('click', e => {
       e.stopPropagation();
       if (!b.classList.contains('armed')) {
         b.classList.add('armed'); b.textContent = '¿Salir? Toca otra vez';
-        clearTimeout(t); t = setTimeout(() => { b.classList.remove('armed'); b.textContent = 'Volver a PokéBonk'; }, 3000);
+        clearTimeout(t); t = setTimeout(() => { b.classList.remove('armed'); b.textContent = 'Volver a PokéBonk Remaster'; }, 3000);
         return;
       }
       location.href = window.PB_VOLVER_URL || '../index.html';

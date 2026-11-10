@@ -36,6 +36,7 @@
 .pb-games .pg-g img{width:44px;height:44px;flex:none;border-radius:8px;object-fit:contain}
 .pb-games .pg-g b{display:block;font-size:16px}
 .pb-games .pg-g small{display:block;font-size:12px;opacity:.85;margin-top:2px}
+.pb-games .pg-v{font-style:normal;font-weight:700;font-size:12px;opacity:.75;margin-left:4px}
 .pb-portrait .pb-games .pg-box{width:92vw}`;
 
   let modal = null;
@@ -47,8 +48,16 @@
       modal = document.createElement('div');
       modal.className = 'pb-games';
       modal.innerHTML = `<div class="pg-box"><div class="pg-top"><b>Más juegos</b><button type="button" class="pg-x" aria-label="Cerrar">X</button></div><div class="pg-list">${
-        JUEGOS.map(j => `<button type="button" class="pg-g" data-url="${j.url}"><img src="${j.icon}" alt=""${j.pix ? ' style="image-rendering:pixelated"' : ''}><span><b>${j.name}</b><small>${j.desc}</small></span></button>`).join('')
+        JUEGOS.map(j => `<button type="button" class="pg-g" data-url="${j.url}"><img src="${j.icon}" alt=""${j.pix ? ' style="image-rendering:pixelated"' : ''}><span><b>${j.name} <i class="pg-v" data-dir="${j.url.split('/')[0]}"></i></b><small>${j.desc}</small></span></button>`).join('')
       }</div></div>`;
+      // Versión de cada juego (su version.txt). Los que no lo traen se quedan sin número.
+      modal.querySelectorAll('.pg-v').forEach(el => {
+        fetch(el.dataset.dir + '/version.txt', { cache: 'no-cache' }).then(r => r.ok ? r.text() : '').then(v => {
+          v = String(v || '').trim().split(/\s/)[0];
+          if (!v || v.length > 40 || /</.test(v)) return;
+          el.textContent = /^[0-9a-f]{12,}$/i.test(v) ? 'rev. ' + v.slice(0, 7) : 'v' + v.replace(/-[0-9a-f]{6,}$/i, '');
+        }).catch(() => {});
+      });
       modal.addEventListener('click', e => {
         const g = e.target.closest('.pg-g');
         if (g) { location.href = g.dataset.url; return; }
