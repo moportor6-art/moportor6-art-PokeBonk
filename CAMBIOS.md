@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## PokéBonk TD: mapa más claro (Subversión 0.35)
+- `td.js` envuelve `drawImage` del contexto del mapa del juego: las imágenes de `/images/pokemon/` dibujadas con recorte (torres y enemigos) se agrandan ×1.65 desde su centro, solo en la vista nueva. No toca posiciones, casillas ni alcance.
+- Zoom: el `transform` de `#screen-root` lleva el zoom y el centro; `#view-port` se recorta (`clip-path`) al hueco del mapa. Dos dedos (se capturan antes que el juego), rueda y botones + / − / Ver todo. Con una ventana del juego abierta, zoom 1 mientras está abierta. El juego sigue leyendo la posición real del mapa, así que tocar casillas con zoom funciona igual (prueba: con zoom ×1.96 la torre queda en la misma casilla que en la vista clásica).
+- Próxima oleada: nombre, PS, armadura, velocidad, daño, oro y pasiva leídos del panel de información del juego. Huecos bloqueados en una tira; hasta 6 huecos, tarjetas anchas en 3 columnas.
+
 ## PokéBonk TD en pruebas (Subversión 0.34)
 - `site/pokepath/remaster.html`: el mismo PokéPath TD (mismos CSS y módulos de `src/`, mismo guardado `pokepath:data` con `pb-guardado.js`) arrancado por `td/arranque.js`, que solo envuelve `Main.prototype.load` para dejar el objeto principal en `window.__pp`.
 - `td/td.js` coloca la pantalla del juego (1238x674) con `translate` y `scale` para que la zona del mapa (259,25 720x624) quede donde toca y esconde (visibility) los paneles de escritorio. La interfaz nueva copia el estado (`player`, `area`, `team`, y lo que enseñan los botones originales) cada 150 ms y cada botón pulsa el botón original (`UI.pokemon[i].deploy/levelUp/item/info`, `nextWave`, `pauseWave`, `speedWave`, `autoWave`, `section[...]`), así que las reglas son las del juego. Las ventanas del juego (secciones de 720x624 y `GameScene`) caen centradas en el mapa. `textContent` en vez de `innerText` porque los paneles están ocultos.

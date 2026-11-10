@@ -51,9 +51,17 @@
     if (!nueva() || !ok) { root.classList.remove('tdr-on'); r.style.transformOrigin = ''; return; }
     root.classList.add('tdr-on');
     const { map } = rects();
-    const s = map.w / MAP.w;
+    ultimo = { map };
+    // Con una ventana del juego abierta, el mapa vuelve a verse entero (las ventanas se centran en él).
+    const z = root.classList.contains('tdr-modal') ? 1 : Z.z;
+    const cx = z === 1 ? MAP.w / 2 : Z.cx, cy = z === 1 ? MAP.h / 2 : Z.cy;
+    const s = map.w / MAP.w * z;
+    const ox = map.x + map.w / 2 - (MAP.x + cx) * s, oy = map.y + map.h / 2 - (MAP.y + cy) * s;
     r.style.transformOrigin = '0 0';
-    r.style.transform = `translate(${map.x - MAP.x * s}px, ${map.y - MAP.y * s}px) scale(${s})`;
+    r.style.transform = `translate(${ox}px, ${oy}px) scale(${s})`;
+    const vp = document.getElementById('view-port');
+    if (vp) vp.style.clipPath = z > 1 ? `inset(${map.y}px ${innerWidth - map.x - map.w}px ${innerHeight - map.y - map.h}px ${map.x}px round 6px)` : '';
+    root.classList.toggle('tdr-zoom', z > 1);
     root.style.setProperty('--tdr-mx', map.x + 'px');
     root.style.setProperty('--tdr-my', map.y + 'px');
     root.style.setProperty('--tdr-mw', map.w + 'px');
@@ -61,8 +69,71 @@
     // Hueco para el panel en vertical: si es poco, menú compacto.
     root.classList.toggle('tdr-low', innerHeight - (map.y + map.h) - 88 < 420);
   };
+  // ---------- zoom del mapa ----------
+  // Con dos dedos (o la rueda, o los botones + y -) se acerca el mapa. Solo cambia cómo se ve:
+  // el juego sigue calculando con sus coordenadas (lee la posición real del mapa en pantalla).
+  const Z = { z: 1, cx: MAP.w / 2, cy: MAP.h / 2 };
+  const ZMAX = 3;
+  const limitar = () => {
+    Z.z = Math.max(1, Math.min(ZMAX, Z.z));
+    const hw = MAP.w / 2 / Z.z, hh = MAP.h / 2 / Z.z;
+    Z.cx = Math.max(hw, Math.min(MAP.w - hw, Z.cx));
+    Z.cy = Math.max(hh, Math.min(MAP.h - hh, Z.cy));
+  };
+  // Punto de pantalla -> punto del mapa (con el zoom actual).
+  const aMapa = (px, py) => {
+    const m = ultimo.map, s = m.w / MAP.w * Z.z;
+    return { x: Z.cx + (px - (m.x + m.w / 2)) / s, y: Z.cy + (py - (m.y + m.h / 2)) / s };
+  };
+  const zoomEn = (px, py, nz) => {
+    const a = aMapa(px, py);
+    Z.z = nz; limitar();
+    const m = ultimo.map, s = m.w / MAP.w * Z.z;
+    Z.cx = a.x - (px - (m.x + m.w / 2)) / s;
+    Z.cy = a.y - (py - (m.y + m.h / 2)) / s;
+    limitar(); colocar();
+  };
+  let ultimo = { map: { x: 0, y: 0, w: MAP.w, h: MAP.h } };
+
   // Después del resize del propio juego (que solo escala la pantalla entera).
   addEventListener('resize', () => requestAnimationFrame(colocar));
+
+  const gestos = () => {
+    const w = document.getElementById('canvas-wrapper');
+    if (!w) return;
+    const dedos = new Map();
+    let pinza = null;
+    const medio = () => { const p = [...dedos.values()]; return { x: (p[0].x + p[1].x) / 2, y: (p[0].y + p[1].y) / 2, d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) }; };
+    w.addEventListener('pointerdown', e => {
+      if (!nueva() || e.pointerType === 'mouse') return;
+      dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (dedos.size === 2) {
+        const m = medio();
+        pinza = { d: m.d, z: Z.z, a: aMapa(m.x, m.y) };
+        e.stopImmediatePropagation(); e.preventDefault();
+      }
+    }, true);
+    addEventListener('pointermove', e => {
+      if (!dedos.has(e.pointerId)) return;
+      dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
+      if (!pinza || dedos.size < 2) return;
+      const m = medio();
+      Z.z = pinza.z * (m.d / Math.max(20, pinza.d)); limitar();
+      const mp = ultimo.map, s = mp.w / MAP.w * Z.z;
+      Z.cx = pinza.a.x - (m.x - (mp.x + mp.w / 2)) / s;
+      Z.cy = pinza.a.y - (m.y - (mp.y + mp.h / 2)) / s;
+      limitar(); colocar();
+      e.stopImmediatePropagation();
+    }, true);
+    const fuera = e => { dedos.delete(e.pointerId); if (dedos.size < 2) pinza = null; };
+    addEventListener('pointerup', fuera, true);
+    addEventListener('pointercancel', fuera, true);
+    w.addEventListener('wheel', e => {
+      if (!nueva()) return;
+      e.preventDefault();
+      zoomEn(e.clientX, e.clientY, Z.z * (e.deltaY < 0 ? 1.15 : 1 / 1.15));
+    }, { passive: false });
+  };
 
   // ---------- interfaz ----------
   const montar = () => {
@@ -75,8 +146,9 @@
         <div class="tdr-stars"><b></b></div>
       </header>
       <section class="tdr-side">
-        <div class="tdr-next"><span>Próxima oleada</span><div class="tdr-next-row"></div></div>
+        <div class="tdr-next"><div class="tdr-next-top"><span>Próxima oleada</span><div class="tdr-next-row"></div></div><div class="tdr-foe"></div></div>
         <div class="tdr-team"></div>
+        <div class="tdr-locks"></div>
         <nav class="tdr-menu"></nav>
       </section>
       <footer class="tdr-dock">
@@ -85,7 +157,8 @@
         <button type="button" class="tdr-b tdr-auto" aria-pressed="false">Auto</button>
         <button type="button" class="tdr-wave"><span>Siguiente oleada</span><small></small></button>
       </footer>
-      <button type="button" class="tdr-close">Cerrar</button>`;
+      <button type="button" class="tdr-close">Cerrar</button>
+      <div class="tdr-zbar"><button type="button" class="tdr-zin" aria-label="Acercar">+</button><button type="button" class="tdr-zout" aria-label="Alejar">−</button><button type="button" class="tdr-zfit">Ver todo</button></div>`;
     document.body.append(hud);
 
     const team = hud.querySelector('.tdr-team');
@@ -122,6 +195,9 @@
       else if (t.classList.contains('tdr-speed')) ui.speedWave.click();
       else if (t.classList.contains('tdr-auto')) ui.autoWave.click();
       else if (t.classList.contains('tdr-wave')) ui.nextWave.click();
+      else if (t.classList.contains('tdr-zin') || t.classList.contains('tdr-zout')) {
+        const m = ultimo.map; zoomEn(m.x + m.w / 2, m.y + m.h / 2, Z.z * (t.classList.contains('tdr-zin') ? 1.4 : 1 / 1.4));
+      } else if (t.classList.contains('tdr-zfit')) { Z.z = 1; limitar(); colocar(); }
       else if (t.classList.contains('tdr-close')) { const sc = pp.sections?.find(x => x.isOpen); sc?.close(); }
       else if (t.classList.contains('tdr-classic')) { try { localStorage.setItem(KEY, 'clasica'); } catch {} cambiar(); }
       else if (t.classList.contains('tdr-exit')) {
@@ -168,6 +244,25 @@
       for (const s of src) { const im = el('i'); im.style.backgroundImage = `url("${s}")`; row.append(im); }
     }
 
+    // Datos del primer enemigo de la oleada (los mismos que enseña el juego en su panel).
+    const val = e => e?.querySelector('.pos-right')?.textContent.trim() ?? '';
+    const foe = [
+      ['', (ui.infoName?.textContent || '').trim().toLowerCase()],
+      ['PS', val(ui.infoHealth)], ['Armadura', val(ui.infoArmor)], ['Velocidad', val(ui.infoSpeed)],
+      ['Daño', val(ui.infoPower)], ['Oro', val(ui.infoGold)]
+    ];
+    const pas = ui.infoPassive && getComputedStyle(ui.infoPassive).display !== 'none' ? (ui.infoPassive.name?.textContent || '').trim().toLowerCase() : '';
+    const fk = JSON.stringify(foe) + pas;
+    const fe = q('.tdr-foe');
+    if (fe.dataset.k !== fk) {
+      fe.dataset.k = fk; fe.textContent = '';
+      for (const [k, v] of foe) {
+        if (!v) continue;
+        const b = el('span', k ? '' : 'nm'); if (k) { b.append(el('small', null, k)); } b.append(el('b', null, v)); fe.append(b);
+      }
+      if (pas) fe.append(el('span', 'pas', pas));
+    }
+
     // Equipo
     hud.querySelectorAll('.tdr-card').forEach((c, i) => {
       const pk = pp.team.pokemon[i], u = ui.pokemon[i];
@@ -197,6 +292,20 @@
       c.querySelector('.tdr-info').hidden = !pk;
     });
 
+    // Huecos bloqueados: en una tira pequeña en vez de tarjetas.
+    const libres = Math.min(10, p.teamSlots);
+    // Hasta 6 huecos: 3 columnas con tarjetas anchas (dibujo a la izquierda). Con más: 5 columnas.
+    const ancho = libres <= 6;
+    q('.tdr-team').style.setProperty('--cols', ancho ? 3 : 5);
+    q('.tdr-team').classList.toggle('wide', ancho);
+    const lk = [];
+    for (let i = libres; i < 10; i++) lk.push((ui.pokemon[i].stars.textContent.replace(/\D+/g, ' ').trim()) + ' ★');
+    const lks = q('.tdr-locks'), lkk = lk.join('|');
+    if (lks.dataset.k !== lkk) {
+      lks.dataset.k = lkk; lks.textContent = '';
+      if (lk.length) { lks.append(el('span', null, 'Más huecos con estrellas')); for (const t of lk) lks.append(el('b', null, t)); }
+    }
+
     // Oleada y botones
     const st = pp.game.stopped;
     q('.tdr-pause').classList.toggle('on', !!st);
@@ -217,8 +326,32 @@
     // Con una ventana del juego abierta (Caja, Tienda…) el panel se aparta.
     const seccion = !!document.querySelector('#screen > .section-scene-container');
     const abierto = seccion || !!document.querySelector('.game-scene-background');
-    root.classList.toggle('tdr-modal', abierto);
+    if (root.classList.contains('tdr-modal') !== abierto) { root.classList.toggle('tdr-modal', abierto); colocar(); }
     root.classList.toggle('tdr-sec', seccion);
+  };
+
+  // ---------- Pokémon más grandes en el mapa ----------
+  // Los sprites de Pokémon (tuyos y enemigos) se dibujan escalados desde su centro. Solo cambia el dibujo:
+  // posiciones, casillas, alcance y golpes no cambian.
+  const ESCALA = 1.65;
+  const esPokemon = new WeakMap();
+  const agrandar = () => {
+    const c = pp.game?.ctx;
+    if (!c || c.__td) return;
+    c.__td = true;
+    const orig = c.drawImage;
+    c.drawImage = function (img, ...a) {
+      if (a.length === 8 && nueva() && img instanceof HTMLImageElement) {
+        let si = esPokemon.get(img);
+        if (si === undefined) { si = /\/images\/pokemon\//.test(img.src); esPokemon.set(img, si); }
+        if (si) {
+          const [sx, sy, sw, sh, dx, dy, dw, dh] = a;
+          const w = dw * ESCALA, h = dh * ESCALA;
+          return orig.call(this, img, sx, sy, sw, sh, dx - (w - dw) / 2, dy - (h - dh) / 2, w, h);
+        }
+      }
+      return orig.call(this, img, ...a);
+    };
   };
 
   const iniciar = () => {
@@ -226,9 +359,11 @@
     pp = window.__pp; ui = pp?.UI;
     if (!pp || !ui) return;
     ok = true;
+    agrandar();
     // Partida nueva: el perfil empieza en español (se puede cambiar con las banderas).
     try { if (pp.data?.new && pp.lang === 0) pp.newGameScene?.selectLanguage?.(1); } catch {}
     montar();
+    gestos();
     colocar();
     pintar();
     setInterval(pintar, 150);

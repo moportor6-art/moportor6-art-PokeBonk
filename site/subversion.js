@@ -4,11 +4,32 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.34';
+  const SUB = '0.35';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.35',
+      date: Date.UTC(2026, 10, 10, 22, 30),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk TD: versión ${OFICIAL} oficial - Subversión 0.35`,
+      summary: 'PokéBonk TD: Pokémon más grandes, zoom del mapa y datos de la próxima oleada.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# PokéBonk TD (en pruebas)`,
+        `- Tus Pokémon y los enemigos se dibujan **más grandes** en el mapa. Solo cambia el dibujo: las casillas, el alcance y los golpes son los mismos.`,
+        `- **Zoom del mapa**: con dos dedos, con la rueda del ratón o con los botones **+** y **−** de la esquina. **Ver todo** vuelve al mapa entero. Al abrir la Caja, la Tienda u otra ventana, el mapa se ve entero y vuelve a tu zoom al cerrarla.`,
+        `- **Próxima oleada** enseña los datos del enemigo: PS, armadura, velocidad, daño, oro y su habilidad si tiene.`,
+        `- Equipo con tarjetas anchas mientras tengas 6 huecos; los huecos que se desbloquean con estrellas van en una tira pequeña.`,
+        `- Arreglado: en horizontal, los botones Vista clásica y Salir salían sin texto.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.34',
       date: Date.UTC(2026, 10, 10, 21, 30),
@@ -885,6 +906,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.35',
+      date: '2026-11-10',
+      title: 'PokéBonk TD: mapa más claro.',
+      notes: [
+        ['better', 'PokéBonk TD: Pokémon más grandes en el mapa y zoom con dos dedos o con + y −.'],
+        ['new', 'PokéBonk TD: datos del enemigo de la próxima oleada.'],
+        ['fix', 'PokéBonk TD: botones Vista clásica y Salir sin texto en horizontal.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.34',
