@@ -1,5 +1,12 @@
 # Cambios respecto al port original
 
+## Traspaso, actualizaciones, Desafío, Overlord y gráficos (Subversión 0.27)
+- `site/traspaso.js`: exporta `localStorage` (sin las claves propias del equipo: HUD, resolución, orientación...) y todas las bases IndexedDB (esquema, índices y registros; fechas y arrays con tipo en base64) a un JSON comprimido con gzip (`.pokebonk`). Al importar, borra y vuelve a crear las bases, sustituye `localStorage`, deja los `settings` del perfil de este equipo y bloquea las escrituras hasta recargar. Android: `AndroidMenu.saveFile` (MediaStore, Descargas/PokeBonk) y `AndroidMenu.pickFile` (ACTION_OPEN_DOCUMENT).
+- Actualizaciones: `MainActivity.UPDATE_REPO` apunta a `moportor6-art/moportor6-art-PokeBonk` (el número del APK es el del tag). Windows: `checkUpdate()` en `desktop/main.js` compara el tag con `0.9.N` y llama a `window.pbUpdateFound`; `pokebonkDesktop.openUpdate` abre el instalador. `updater.js` acepta los dos y un texto propio.
+- Desafío del Alfa: rachas (`st.rachas`, metas 3/5/10 semanas) y tabla de récords.
+- Pasaporte: lee `user://pokemon_overlord.save` de Pokémon Overlord (IndexedDB `/userfs`, `PokemonOverlord/`) con un lector del formato de `store_var` de Godot 4 (probado con un archivo de Godot 4.5.1); usa `decks_cleared` y `mewtwo_cleared`.
+- Gráficos: `tools/completar_graficos.py` (flujo "Completar gráficos") crea los `pmd-shiny` que faltaban cambiando la paleta del atlas normal con los colores de la hoja variocolor de SpriteCollab (`sprite/NNNN/0000/0001/`), y baja los retratos que faltaban (`portrait/NNNN/Normal.png` y `0000/0001/`). Android y Windows sirven el sprite normal, el retrato normal o el icono si aún falta alguno.
+
 ## Windows: Electron 44 (Subversión 0.26)
 - El segundo volcado, leído entero, mostraba la caída en `StyleResolver::CreateCompositorKeyframeValueSnapshot` (al empezar una animación de `element.animate()` con `transform` y `calc()`), `StyleResolverState::UpdateLengthConversionData` y `CSSPrimitiveValue::ConvertToLength`: un fallo de Chromium 130. Se pasa a Electron ^44.7.0 (y electron-builder ^26). `console-message` acepta la firma nueva (objeto con `level`, `message`, `lineNumber`, `sourceUrl`).
 

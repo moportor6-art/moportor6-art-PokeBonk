@@ -4,11 +4,44 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.26';
+  const SUB = '0.27';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.27',
+      date: Date.UTC(2026, 10, 10, 6, 0),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.27`,
+      summary: 'Traspaso de partida móvil-PC, aviso de versión nueva, rachas del Desafío, Overlord en el Pasaporte y todos los gráficos dentro de la app.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Traspaso de partida`,
+        `- En **Remaster > Traspaso**: **Exportar partida** crea un archivo .pokebonk con todo (PokéBonk, Pasaporte, Desafío y los juegos de Más juegos). En el otro equipo, **Importar partida** lo carga y reinicia el juego.`,
+        `- En Android el archivo va a **Descargas/PokeBonk**. Pásalo al PC (cable, Drive, WhatsApp...) o al revés.`,
+        `- Los ajustes de cada equipo (gráficos, controles, HUD, orientación) no se tocan.`,
+        ``,
+        `# Aviso de versión nueva`,
+        `- Al abrir el juego mira la última release de GitHub. Si hay una más nueva, sale un aviso con el botón para descargarla: el **APK** en Android y el **instalador** en Windows.`,
+        ``,
+        `# Desafío del Alfa`,
+        `- **Rachas**: juega el desafío varias semanas seguidas. 3 semanas: +400, 5 semanas: +800, 10 semanas: +2.000 de Polvo.`,
+        `- Tabla con **todos tus récords**: puntos, partidas, Alfas y premios de cada semana. La mejor semana va con estrella.`,
+        ``,
+        `# Pasaporte`,
+        `- **Pokémon Overlord** ya da insignias: vencer a 1 líder (+150), a 8 líderes (+300) y a Mewtwo (+500).`,
+        ``,
+        `# Todo offline`,
+        `- Faltaban **710 sprites variocolor**, **773 retratos variocolor** y **54 retratos** de Pokémon a partir del 252. Por eso a veces salía "Faltan gráficos por cargar". Ahora van dentro de la app (del PMD Sprite Repository).`,
+        `- Si aún faltara alguno, se usa el más parecido (el sprite normal o el icono) en vez de quedarse esperando.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.26',
       date: Date.UTC(2026, 10, 10, 4, 30),
@@ -687,6 +720,19 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.27',
+      date: '2026-11-10',
+      title: 'Traspaso, avisos y gráficos completos.',
+      notes: [
+        ['new', '**Traspaso** de partida entre el móvil y el PC (Remaster > Traspaso).'],
+        ['new', 'Aviso de versión nueva en Android y Windows.'],
+        ['new', 'Desafío del Alfa: rachas con premio y tabla de récords.'],
+        ['new', 'Pokémon Overlord da insignias en el Pasaporte.'],
+        ['fix', 'Todos los sprites y retratos variocolor dentro de la app: ya no sale "Faltan gráficos".']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.26',
