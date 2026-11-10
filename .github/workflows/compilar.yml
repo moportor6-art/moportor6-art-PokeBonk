@@ -415,7 +415,7 @@ jobs:
         run: |
           mkdir -p diag
           export PB_DIAG_DIR="$(cygpath -w "$PWD/diag")"
-          timeout 120 ./dist/win-unpacked/PokeBonk.exe || echo "salida: $?"
+          timeout 150 ./dist/win-unpacked/PokeBonk.exe || echo "salida: $?"
           echo "===== REGISTRO ====="
           cat diag/registro.txt || echo "sin registro"
           echo "===== CAPTURA ====="

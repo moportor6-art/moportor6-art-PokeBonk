@@ -159,6 +159,7 @@ function createWindow() {
   win.webContents.on('render-process-gone', (e, d) => {
     log(`[proceso] ${d.reason} ${d.exitCode}`);
     if (d.reason === 'clean-exit' || d.reason === 'killed' || closing) return;
+    if (process.env.PB_DIAG_DIR) return;
     if (Date.now() - inicio < 90000 && SEGURO < 3) {
       cfg.seguro = SEGURO + 1;
       writeCfg();
@@ -168,7 +169,7 @@ function createWindow() {
       app.exit(0);
     } else {
       // Más tarde (o ya en el último nivel): se recarga la página una vez.
-      setTimeout(() => { if (win && !win.isDestroyed()) win.webContents.reload(); }, 500);
+      if ((global.pbRecargas = (global.pbRecargas || 0) + 1) <= 2) setTimeout(() => { if (win && !win.isDestroyed()) win.webContents.reload(); }, 500);
     }
   });
   setTimeout(() => log(`[modo seguro] el juego aguanta 90 s con el nivel ${SEGURO}`), 90000);
@@ -178,6 +179,11 @@ function createWindow() {
 
   // Diagnóstico en GitHub Actions: PB_DIAG_DIR guarda el registro y una captura y cierra la app.
   if (process.env.PB_DIAG_DIR) {
+    // Elige el primer compañero para llegar al menú principal (como un jugador nuevo).
+    setTimeout(() => {
+      win.webContents.executeJavaScript(`(() => { const b = [...document.querySelectorAll('button')].find(x => /choose|elijo/i.test(x.textContent)); if (b) { b.click(); return 'elegido: ' + b.textContent.trim(); } return 'sin botón'; })()`, true)
+        .then(r => log('[diag] ' + r)).catch(e => log('[diag] ' + e));
+    }, 25000);
     setTimeout(async () => {
       try {
         const info = await win.webContents.executeJavaScript(`JSON.stringify({host: location.hostname, meta: !!window.__pbMeta, app: !!window.__pbApp, body: document.body ? document.body.innerText.slice(0, 400) : '', gl: (() => { try { const c = document.createElement('canvas'); const g = c.getContext('webgl2'); return g ? g.getParameter(g.VERSION) : 'sin webgl2'; } catch (e) { return String(e); } })()})`, true);
@@ -189,7 +195,7 @@ function createWindow() {
       } catch (e) { log('[diag] captura ' + e); }
       try { fs.copyFileSync(logFile, path.join(process.env.PB_DIAG_DIR, 'registro.txt')); } catch {}
       app.exit(0);
-    }, 45000);
+    }, 80000);
   }
 
   // F11: pantalla completa. F12: herramientas de desarrollo (por si hay que mirar un error).
