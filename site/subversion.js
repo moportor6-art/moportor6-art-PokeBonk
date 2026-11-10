@@ -26,6 +26,11 @@
         `- Se basa en la **especialidad** del Pokémon que llevas: si su Ataque es mayor, movimientos **físicos** y Proteína; si su Ataque Especial es mayor, movimientos **especiales** y Calcio; si están igualados, lo que encaje con los movimientos que ya tienes.`,
         `- También tiene en cuenta los movimientos de su tipo, tus favoritos, repartir niveles entre movimientos y vitaminas útiles para todos (velocidad de ataque, proyectiles, crítico, área...). Nunca escoge el Incienso Maldito.`,
         `- Se queda guardado para las siguientes partidas. Si lo quitas, vuelve la elección de siempre.`,
+        ``,
+        `# También en otros juegos`,
+        `- **Pokémon Survivors**: botón **Auto aprender** en su pausa (es el mismo ajuste que en PokéBonk). Escoge evoluciones y fusiones primero, movimientos de su tipo, objetos útiles como Cinta Fuerte o Garra Rápida, los de su tipo, y la Baya solo si vas mal de vida.`,
+        `- **PokéSurvivor**: **Pausa > Opciones > Auto aprender**. Se fija en si tu Pokémon es fuerte, resistente o rápido para elegir Potencia, Coraza, Reflejos..., y siempre primero lo que lo hace evolucionar.`,
+        `- Si sale una elección de otra clase (fusión, vínculo, objeto del cofre...), la decides tú.`,
         `- Los botones **HUD y guía** y **Auto aprender** van juntos en la franja de arriba de la pausa, sin tapar nada.`,
         PIE
       ].join('\n')
@@ -815,6 +820,7 @@
       title: 'Auto aprender.',
       notes: [
         ['new', '**Auto aprender** en la pausa: elige sola la mejor mejora según si tu Pokémon es físico, especial o mixto.'],
+        ['new', 'Auto aprender también en Pokémon Survivors y PokéSurvivor.'],
         ['better', 'Botones de la pausa juntos y sin tapar texto.']
       ]
     },

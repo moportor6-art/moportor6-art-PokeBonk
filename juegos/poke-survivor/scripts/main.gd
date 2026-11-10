@@ -8464,6 +8464,78 @@ func _open_cards() -> void:
 	cards.rerolls = rerolls
 	cards.bans = bans
 	cards.show_cards(picks, L.t("Nivel %d - elige una mejora") % player.level)
+	# PokéBonk Remaster: "Auto aprender" (Pausa > Opciones) escoge sola la mejor carta para tu Pokémon.
+	if bool(SV.d["settings"].get("autohab", false)):
+		var ai: int = _auto_pick(cards.items)
+		if ai >= 0:
+			call_deferred("_on_card_chosen", ai)
+
+
+# Auto aprender: puntua cada carta segun lo que es tu Pokemon. Fuerte (Ataque alto): Potencia, criticos y
+# Filo Fatal; resistente (mucha vida): Coraza, Sintesis y Colmillo; rapido: Reflejos y Carrera. Siempre
+# primero las evoluciones y lo que desbloquea una, luego movimientos de tu tipo y mejorar los que llevas.
+# Si hay cartas de otra clase (vinculo, fusion, objeto...), elige el jugador (devuelve -1).
+func _auto_pick(opts: Array) -> int:
+	var fuerte: bool = player.atk >= 1.12
+	var duro: bool = player.max_hp >= 115.0
+	var rapido: bool = player.spd >= 110.0
+	var vida: float = player.hp / maxf(1.0, player.max_hp)
+	var tiros := 0
+	var estados := 0
+	for m in player.moves:
+		var k: String = String(m.get("kind", ""))
+		if k in ["projectile", "cone", "boomerang"]:
+			tiros += 1
+		if m.has("burn") or m.has("poison") or m.has("cc"):
+			estados += 1
+	var w := {"atk": 80.0, "cd": 75.0, "mult": 55.0 + tiros * 8.0, "pierce": 40.0 + tiros * 6.0, "size": 55.0,
+		"lens": 55.0, "edge": 45.0, "dstrike": 55.0, "fang": 45.0, "hp": 40.0, "def": 40.0, "rgn": 35.0,
+		"spd": 30.0, "mag": 25.0, "xp": 30.0, "amp": 25.0 + estados * 10.0, "trs": 10.0}
+	if fuerte:
+		w["atk"] += 15.0; w["edge"] += 15.0; w["lens"] += 10.0
+	if duro:
+		w["def"] += 20.0; w["rgn"] += 15.0; w["fang"] += 15.0; w["hp"] += 10.0
+	if rapido:
+		w["cd"] += 15.0; w["spd"] += 15.0; w["dstrike"] += 10.0
+	if vida < 0.45:
+		w["fang"] += 25.0; w["hp"] += 25.0; w["rgn"] += 15.0
+	var best := -1
+	var best_s := -INF
+	for i in range(opts.size()):
+		var c: Dictionary = opts[i]
+		var cat: String = String(c.get("cat", ""))
+		var id: String = String(c.get("id", ""))
+		var s := 0.0
+		match cat:
+			"evo":
+				s = 200.0
+			"new":
+				var d: Dictionary = MD.MOVES.get(id, {})
+				s = 90.0
+				if player.types.has(String(d.get("type", ""))):
+					s += 20.0
+				if String(d.get("kind", "")) == "buff":
+					s -= 30.0
+			"up":
+				s = 70.0
+				for m in player.moves:
+					if String(m["id"]) == id:
+						s -= float(m["lvl"]) * 3.0
+						if player.types.has(String(m.get("type", ""))):
+							s += 10.0
+			"stat":
+				if id == "heal":
+					s = 5.0 + (1.0 - vida) * 150.0
+				else:
+					s = float(w.get(id, 30.0))
+					if float(c.get("w", 0.0)) >= 14.0:
+						s += 60.0   # desbloquea una evolucion
+			_:
+				return -1
+		if s > best_s:
+			best_s = s
+			best = i
+	return best
 
 
 func _on_card_chosen(idx: int) -> void:

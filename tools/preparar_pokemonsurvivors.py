@@ -20,12 +20,13 @@ def main():
     shutil.rmtree(dest, ignore_errors=True)
     shutil.copytree(src, dest, ignore=shutil.ignore_patterns('*.map'))
     shutil.copy2(REPO / 'site/pokeisaac/volver-pokebonk.js', dest / 'volver-pokebonk.js')
+    shutil.copy2(REPO / 'tools/pokemonsurvivors/pb-autohab-ps.js', dest / 'pb-autohab-ps.js')
     n = 0
     for page in [dest / 'index.html'] + [dest / l / 'index.html' for l in ('en', 'es', 'fr', 'zh-tw')]:
         if page.is_file():
             h = page.read_text(encoding='utf-8')
             if 'volver-pokebonk.js' not in h:
-                h = h.replace('</head>', '<script>window.PB_VOLVER_URL = "/index.html";</script><script src="/pokemonsurvivors/volver-pokebonk.js"></script></head>', 1)
+                h = h.replace('</head>', '<script>window.PB_VOLVER_URL = "/index.html";</script><script src="/pokemonsurvivors/volver-pokebonk.js"></script><script src="/pokemonsurvivors/pb-autohab-ps.js"></script></head>', 1)
                 page.write_text(h, encoding='utf-8'); n += 1
     (dest / 'version.txt').write_text(ver + '\n')
     tam = sum(f.stat().st_size for f in dest.rglob('*') if f.is_file())

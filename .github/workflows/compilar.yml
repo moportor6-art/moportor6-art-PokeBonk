@@ -187,7 +187,7 @@ jobs:
         if: steps.psv.outputs.sha != ''
         with:
           path: pokemonsurvivors-web
-          key: pokemonsurvivors-v2-${{ steps.psv.outputs.sha }}
+          key: pokemonsurvivors-v3-${{ steps.psv.outputs.sha }}
 
       - uses: actions/setup-node@v4
         if: steps.psv.outputs.sha != '' && steps.pscache.outputs.cache-hit != 'true'
@@ -206,6 +206,7 @@ jobs:
             git clone -q --depth 1 https://github.com/pedrobarretto/pokemon-survivors "$D/src"
             cd "$D/src"
             npm ci --no-audit --no-fund
+            python3 "$GITHUB_WORKSPACE/tools/parche_pokemonsurvivors.py" .
             npx vite build --base /pokemonsurvivors/
             cd "$GITHUB_WORKSPACE"
             python3 tools/preparar_pokemonsurvivors.py "$D/src/dist" pokemonsurvivors-web "$SHA"

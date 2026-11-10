@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Auto aprender (Subversión 0.31)
+- PokéBonk: `site/autohab.js` puntúa las ofertas de subida de nivel según la especialidad (Ataque contra At. Esp. base de `data/pokemon.json`, o la clase de los movimientos que lleva): movimientos de esa clase y de su tipo, favoritos, repartir niveles, vitaminas por estadística (Proteína/Calcio según la clase) y nunca el Incienso Maldito. Parches: en `main-*.js`, `doLevelUp` pregunta a `PB_AUTOHAB.pick` y aplica la elegida como cuando solo hay una opción; en `menus-*.js`, `window.__pbOfferInfo` dice la clase y el tipo de cada movimiento y la estadística de cada vitamina. Botón en la pausa (localStorage `pb-autohab`), junto a "HUD y guía" en la franja de arriba.
+- PokéSurvivor (`juegos/poke-survivor`): `_auto_pick` en `main.gd` (evoluciones, lo que desbloquea una, movimientos de su tipo, estadísticas según Ataque, vida y velocidad del Pokémon; cura solo con poca vida) y botón en Pausa > Opciones (`settings.autohab`).
+- Pokémon Survivors: `tools/parche_pokemonsurvivors.py` añade `pbAutohab.ts` a su código antes de compilarlo y lo llama en la fase `levelup` (solo en partida individual); `pb-autohab-ps.js` pone el botón en su pausa con el mismo ajuste `pb-autohab`.
+
 ## Actualizador: archivos grandes y PokéSurvivor estable (Subversión 0.29)
 - GitHub no admite archivos de más de 100 MB en un repositorio: la publicación de la v56/v57 falló por `pokesurvivor/index.pck` (141 MB). `tools/publicar_contenido.sh` (usado por el trabajo `contenido` y por el flujo manual "Publicar contenido") parte los de más de 95 MiB en trozos de 90 MiB (`archivo.pbparte.00`, `.01`...) y los dos actualizadores los juntan y comprueban el SHA-256 del archivo entero.
 - La exportación web de Godot de PokéSurvivor cambiaba de bytes en cada compilación: ahora se guarda en caché por el hash de `juegos/poke-survivor/**`, así su módulo solo cambia cuando cambia el juego.

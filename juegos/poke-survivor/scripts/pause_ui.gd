@@ -24,6 +24,7 @@ const GOLD := Color("#ffd23f")
 var th := Theme.new()
 var cont_btn: Button
 var txt_btn: Button
+var auto_btn: Button
 var mute_btn: Button
 var hint_row: HBoxContainer
 var sum_root: Control
@@ -148,6 +149,11 @@ func build() -> void:
 	txt_btn.custom_minimum_size = Vector2(250, 58)
 	txt_btn.add_theme_font_size_override("font_size", 24)
 	mrow.add_child(txt_btn)
+	auto_btn = _btn("Auto aprender: No", false, _toggle_auto)
+	auto_btn.custom_minimum_size = Vector2(300, 58)
+	auto_btn.add_theme_font_size_override("font_size", 24)
+	auto_btn.tooltip_text = L.t("Al subir de nivel se elige sola la mejor mejora para tu Pokémon")
+	mrow.add_child(auto_btn)
 	var brow := HBoxContainer.new()
 	brow.alignment = BoxContainer.ALIGNMENT_CENTER
 	brow.add_theme_constant_override("separation", 18)
@@ -914,6 +920,17 @@ func _cycle_text() -> void:
 	TXS.scale_tree(self)
 
 
+func _toggle_auto() -> void:
+	SV.d["settings"]["autohab"] = not bool(SV.d["settings"].get("autohab", false))
+	SV.save()
+	_refresh_auto_btn()
+
+
+func _refresh_auto_btn() -> void:
+	if auto_btn != null:
+		auto_btn.text = L.t("Auto aprender") + ": " + (L.t("Sí") if bool(SV.d["settings"].get("autohab", false)) else L.t("No"))
+
+
 func _refresh_text_btn() -> void:
 	if txt_btn != null:
 		txt_btn.text = L.t("Texto") + ": " + L.t(String(TXS.NAMES[TXS.idx()]))
@@ -921,6 +938,7 @@ func _refresh_text_btn() -> void:
 
 func open() -> void:
 	_refresh_text_btn()
+	_refresh_auto_btn()
 	TXS.scale_tree(self)
 	if aim_btn != null:
 		var on: bool = bool(SV.d["settings"].get("manual_aim", false))
