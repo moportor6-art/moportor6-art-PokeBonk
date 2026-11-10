@@ -17,14 +17,18 @@
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.29`,
-      summary: 'Prueba del actualizador: dos cambios pequeños en dos partes del juego.',
+      summary: 'Actualizador: archivos grandes en trozos, PokéSurvivor estable y dos cambios pequeños de prueba.',
       body: [
         `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
         ``,
         `# Prueba del actualizador`,
         `- **Juego principal**: la etiqueta del logo enseña la subversión (**REMASTER 0.29**).`,
         `- **PokéPlunder**: su botón dice **Volver a PokéBonk Remaster**.`,
-        `- Esta versión llega por el actualizador: solo se bajan esos archivos, y se puede elegir cada parte.`,
+        ``,
+        `# Actualizador`,
+        `- Los archivos de más de 100 MB (el de PokéSurvivor) se publican en trozos y la app los junta y los comprueba. Por eso no se podía publicar la actualización de la 0.28.`,
+        `- PokéSurvivor ya no cambia en cada versión si su juego no cambia: no se vuelve a bajar entero.`,
+        `- Como cambia la propia app, desde la 0.28 esta versión se instala **completa**: en Android con el instalador de Android, en Windows con su instalador. Las siguientes ya irán solo por archivos.`,
         PIE
       ].join('\n')
     },
@@ -772,7 +776,9 @@
       title: 'Prueba del actualizador.',
       notes: [
         ['better', 'El logo enseña la subversión (REMASTER 0.29).'],
-        ['better', 'PokéPlunder: el botón dice "Volver a PokéBonk Remaster".']
+        ['better', 'PokéPlunder: el botón dice "Volver a PokéBonk Remaster".'],
+        ['fix', 'Actualizador: archivos de más de 100 MB en trozos (no se podía publicar).'],
+        ['fix', 'PokéSurvivor ya no se vuelve a bajar en cada versión.']
       ]
     },
     {

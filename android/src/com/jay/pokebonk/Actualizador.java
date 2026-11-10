@@ -62,6 +62,8 @@ import java.util.concurrent.atomic.AtomicLong;
  */
 final class Actualizador {
     static final String PLAT = "android";
+    static final long LIMITE = 95L * 1024 * 1024;   // más que esto va partido en el contenido publicado
+    static final long TROZO = 90L * 1024 * 1024;
     interface Emisor { void emitir(JSONObject ev); }
 
     private final Activity act;
@@ -412,11 +414,25 @@ final class Actualizador {
             List<Future<?>> fs = new ArrayList<>();
             for (final String[] t : tareas) fs.add(pool.submit(() -> {
                 if (roto.get()) return null;
-                byte[] b = bajar(url(raiz, t[0]));
-                if (!sha(b).equals(t[1])) throw new Exception("Un archivo llegó dañado (" + t[0] + "): no se ha instalado nada.");
                 File d = new File(tmp, t[0]);
                 d.getParentFile().mkdirs();
-                try (OutputStream o = new FileOutputStream(d)) { o.write(b); }
+                long tam = Long.parseLong(t[2]);
+                if (tam > LIMITE) {
+                    // GitHub no guarda archivos de más de 100 MB: van en trozos de 90 MB (.pbparte.00, .01...).
+                    MessageDigest md = MessageDigest.getInstance("SHA-256");
+                    try (OutputStream o = new FileOutputStream(d)) {
+                        for (int k = 0; (long) k * TROZO < tam; k++) {
+                            byte[] parte = bajar(url(raiz, t[0] + ".pbparte." + (k < 10 ? "0" : "") + k));
+                            md.update(parte);
+                            o.write(parte);
+                        }
+                    }
+                    if (!hex(md.digest()).equals(t[1])) throw new Exception("Un archivo llegó dañado (" + t[0] + "): no se ha instalado nada.");
+                } else {
+                    byte[] b = bajar(url(raiz, t[0]));
+                    if (!sha(b).equals(t[1])) throw new Exception("Un archivo llegó dañado (" + t[0] + "): no se ha instalado nada.");
+                    try (OutputStream o = new FileOutputStream(d)) { o.write(b); }
+                }
                 long h = hecho.addAndGet(Long.parseLong(t[2]));
                 int k = n.incrementAndGet();
                 if (k % 5 == 0 || k == tareas.size()) progreso(h, totalF, k, tareas.size());

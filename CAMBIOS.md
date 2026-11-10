@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Actualizador: archivos grandes y PokéSurvivor estable (Subversión 0.29)
+- GitHub no admite archivos de más de 100 MB en un repositorio: la publicación de la v56/v57 falló por `pokesurvivor/index.pck` (141 MB). `tools/publicar_contenido.sh` (usado por el trabajo `contenido` y por el flujo manual "Publicar contenido") parte los de más de 95 MiB en trozos de 90 MiB (`archivo.pbparte.00`, `.01`...) y los dos actualizadores los juntan y comprueban el SHA-256 del archivo entero.
+- La exportación web de Godot de PokéSurvivor cambiaba de bytes en cada compilación: ahora se guarda en caché por el hash de `juegos/poke-survivor/**`, así su módulo solo cambia cuando cambia el juego.
+
 ## Actualizador (Subversión 0.28)
 - Mecanismo: el juego es la web de `site/` que la app sirve desde sus archivos (Android: assets del APK; Windows: carpeta del programa, protocolo `app://`). La actualización es una capa encima: los archivos que cambian se bajan a `files/contenido/vN-*/` (Android) o `%APPDATA%\PokeBonk\contenido\vN-*\` (Windows) y el servidor de la app los sirve antes que los suyos (o 404 si la versión nueva los quita). No cambia nada del juego.
 - `tools/contenido.py base`: `site/contenido.json` (versión, subversión, huella del código nativo de cada plataforma y módulos con su hash) y `site/contenido/<módulo>.json` (tamaño y SHA-256 de cada archivo). Va dentro de la app. Módulos: `pokebonk` y una por cada juego de Más juegos.

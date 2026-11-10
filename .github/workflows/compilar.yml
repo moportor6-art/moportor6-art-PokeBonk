@@ -39,7 +39,17 @@ jobs:
           curl -sSL -o t.tpz "https://github.com/godotengine/godot-builds/releases/download/$GODOT/Godot_v${GODOT}_export_templates.tpz"
           unzip -qj t.tpz 'templates/web_nothreads_release.zip' 'templates/web_nothreads_debug.zip' 'templates/version.txt' -d templates && rm t.tpz
 
+      # Mismo PokéSurvivor = mismos bytes: la exportación de Godot cambia en cada compilación aunque el juego no
+      # cambie, y el actualizador lo volvería a bajar entero. Se reusa mientras su código no cambie.
+      - name: PokéSurvivor ya exportado (en caché)
+        id: psexp
+        uses: actions/cache@v4
+        with:
+          path: site/pokesurvivor
+          key: pokesurvivor-web-${{ env.GODOT }}-${{ hashFiles('juegos/poke-survivor/**', 'site/pokeisaac/volver-pokebonk.js') }}
+
       - name: Exportar a web
+        if: steps.psexp.outputs.cache-hit != 'true'
         run: |
           V=$(cat ~/godot/templates/version.txt)
           mkdir -p ~/.local/share/godot/export_templates/$V
@@ -498,43 +508,9 @@ jobs:
           for i in 1 2 3; do gh release download "$GITHUB_REF_NAME" -D completos -p PokeBonk.apk -p PokeBonk-Windows-Instalador.exe --clobber && break; sleep 20; done
           ls -la completos
 
-      - name: Manifiesto firmado
+      - name: Publicar (manifiesto firmado, rama contenido y etiqueta contenido-vN)
         env:
           KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
           KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
-        run: |
-          python3 tools/contenido.py publicar sitio pub --tag "$GITHUB_REF_NAME" --repo "$GITHUB_REPOSITORY" --apk completos/PokeBonk.apk --exe completos/PokeBonk-Windows-Instalador.exe
-          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/k.jks"
-          keytool -importkeystore -noprompt -srckeystore "$RUNNER_TEMP/k.jks" -srcstorepass "$KEYSTORE_PASSWORD" -srcalias pokebonk \
-            -destkeystore "$RUNNER_TEMP/k.p12" -deststoretype PKCS12 -deststorepass "$KEYSTORE_PASSWORD" -destkeypass "$KEYSTORE_PASSWORD"
-          openssl pkcs12 -in "$RUNNER_TEMP/k.p12" -nocerts -nodes -passin env:KEYSTORE_PASSWORD -out "$RUNNER_TEMP/k.pem" 2>/dev/null \
-            || openssl pkcs12 -legacy -in "$RUNNER_TEMP/k.p12" -nocerts -nodes -passin env:KEYSTORE_PASSWORD -out "$RUNNER_TEMP/k.pem"
-          keytool -exportcert -rfc -alias pokebonk -keystore "$RUNNER_TEMP/k.jks" -storepass "$KEYSTORE_PASSWORD" > "$RUNNER_TEMP/cert.pem"
-          openssl dgst -sha256 -sign "$RUNNER_TEMP/k.pem" -out "$RUNNER_TEMP/firma.bin" pub/contenido.json
-          openssl x509 -in "$RUNNER_TEMP/cert.pem" -pubkey -noout > "$RUNNER_TEMP/pub.pem"
-          openssl dgst -sha256 -verify "$RUNNER_TEMP/pub.pem" -signature "$RUNNER_TEMP/firma.bin" pub/contenido.json
-          base64 -w0 "$RUNNER_TEMP/firma.bin" > pub/contenido.json.sig
-          rm -f "$RUNNER_TEMP/k.pem" "$RUNNER_TEMP/k.p12" "$RUNNER_TEMP/k.jks"
-
-      - name: Publicar el contenido (rama contenido, etiqueta contenido-vN)
-        run: |
-          git config user.name "github-actions"
-          git config user.email "github-actions@users.noreply.github.com"
-          git fetch --depth=1 origin contenido:refs/remotes/origin/contenido || true
-          git checkout -q --orphan contenido-nuevo
-          git rm -rf -q --cached . > /dev/null
-          find . -mindepth 1 -maxdepth 1 ! -name .git ! -name sitio ! -name pub -exec rm -rf {} +
-          cp -a sitio/. .
-          rm -rf sitio
-          cp pub/contenido.json pub/contenido.json.sig .
-          rm -rf pub
-          printf '* -text\n' > .gitattributes
-          git add -A
-          git commit -q -m "Contenido de $GITHUB_REF_NAME para el actualizador"
-          git tag -f "contenido-$GITHUB_REF_NAME"
-          git push -f origin HEAD:refs/heads/contenido "refs/tags/contenido-$GITHUB_REF_NAME"
-
-      - name: Manifiesto en la release
-        env:
           GH_TOKEN: ${{ github.token }}
-        run: gh release upload "$GITHUB_REF_NAME" contenido.json contenido.json.sig --clobber
+        run: bash tools/publicar_contenido.sh "$GITHUB_REF_NAME" sitio completos

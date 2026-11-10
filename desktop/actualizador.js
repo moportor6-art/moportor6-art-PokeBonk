@@ -19,6 +19,8 @@ const crypto = require('crypto');
 
 const REPO = 'moportor6-art/moportor6-art-PokeBonk';
 const PLAT = 'windows';
+const LIMITE = 95 * 1024 * 1024; // más que esto va partido en el contenido publicado
+const TROZO = 90 * 1024 * 1024;
 
 module.exports = function crearActualizador({ siteRoot, log, emitir }) {
   const DIR = path.join(app.getPath('userData'), 'contenido');
@@ -190,7 +192,13 @@ module.exports = function crearActualizador({ siteRoot, log, emitir }) {
       const trabajador = async () => {
         while (i < tareas.length && !roto) {
           const t = tareas[i++];
-          const buf = await bajar(url(plan.raiz, t.r));
+          // GitHub no guarda archivos de más de 100 MB: esos van en trozos de 90 MB (.pbparte.00, .01...).
+          let buf;
+          if (t.tam > LIMITE) {
+            const trozos = [];
+            for (let k = 0; k * TROZO < t.tam; k++) trozos.push(await bajar(url(plan.raiz, t.r + '.pbparte.' + String(k).padStart(2, '0'))));
+            buf = Buffer.concat(trozos);
+          } else buf = await bajar(url(plan.raiz, t.r));
           if (sha(buf) !== t.h) throw new Error('Un archivo llegó dañado (' + t.r + '): no se ha instalado nada.');
           const d = path.join(tmp, t.r);
           fs.mkdirSync(path.dirname(d), { recursive: true });

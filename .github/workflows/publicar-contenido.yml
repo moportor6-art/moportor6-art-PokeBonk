@@ -1,0 +1,39 @@
+# Subversión propia: vuelve a publicar el contenido de una versión para el actualizador (si falló en la
+# compilación). Toma el juego tal cual de esa compilación (artefacto "sitio-final") y el APK/instalador de la release.
+name: Publicar contenido
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Etiqueta (vN)'
+        required: true
+      run_id:
+        description: 'Número de la compilación de esa etiqueta'
+        required: true
+permissions:
+  contents: write
+  actions: read
+jobs:
+  publicar:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          name: sitio-final
+          path: sitio
+          run-id: ${{ inputs.run_id }}
+          github-token: ${{ github.token }}
+      - name: APK e instalador de la release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          mkdir -p completos
+          gh release download "${{ inputs.tag }}" -D completos -p PokeBonk.apk -p PokeBonk-Windows-Instalador.exe --clobber
+          ls -la completos
+      - name: Publicar
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          GH_TOKEN: ${{ github.token }}
+        run: bash tools/publicar_contenido.sh "${{ inputs.tag }}" sitio completos
