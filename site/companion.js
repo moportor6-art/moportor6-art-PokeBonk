@@ -32,8 +32,14 @@
           const nextSize=stage.clientHeight+'|'+sprite.clientHeight;
           if(nextSize!==sizeKey){
             sizeKey=nextSize;
-            const platform=getComputedStyle(stage,'::before');
-            floor=stage.clientHeight-parseFloat(platform.bottom)-parseFloat(platform.height)/2;
+            // No se lee getComputedStyle(stage,'::before'): con calc(min(vw,vh)) tumba el proceso en
+            // el Chromium de la app de Windows. Se mide --u con un elemento oculto (bottom 2u, alto 27u).
+            const probe=document.createElement('div');
+            probe.style.cssText='position:absolute;visibility:hidden;pointer-events:none;width:0;height:calc(1000 * var(--u))';
+            stage.append(probe);
+            const u=probe.offsetHeight/1000;
+            probe.remove();
+            floor=stage.clientHeight-2*u-27*u/2;
           }
           const next=`translateX(-50%) translateY(${floor-(bottom+1)/sprite.height*sprite.clientHeight}px)`;
           if(next!==transform){

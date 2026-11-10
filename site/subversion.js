@@ -4,11 +4,28 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.24';
+  const SUB = '0.25';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.25',
+      date: Date.UTC(2026, 10, 10, 3, 10),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.25`,
+      summary: 'Windows: arreglado el cierre del juego al llegar al menú.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Windows`,
+        `- El juego se cerraba al llegar al menú principal. El informe del fallo lo señaló: el panel **Tu compañero** medía la plataforma bajo tu Pokémon de una forma que tumba el navegador que lleva la app de Windows. Ahora se mide de otra manera y se ve igual.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.24',
       date: Date.UTC(2026, 10, 10, 2, 10),
@@ -652,6 +669,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.25',
+      date: '2026-11-09',
+      title: 'Windows: menú arreglado.',
+      notes: [
+        ['fix', 'Windows: el juego ya no se cierra al llegar al menú (panel Tu compañero).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.24',

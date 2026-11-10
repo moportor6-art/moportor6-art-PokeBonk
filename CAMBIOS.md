@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Windows: cierre al llegar al menú (Subversión 0.25)
+- El volcado (Electron 33.4.11, símbolos de breakpad) daba un acceso a memoria nula en `blink::CSSMathExpressionOperation::CreateArithmeticOperationSimplified`, llamado desde `CSSPrimitiveValue::ConvertToLength` por una llamada de JavaScript. La única lectura así era `getComputedStyle(stage, '::before')` en `site/companion.js`: la plataforma usa `calc(n * var(--u))` con `--u: min(calc(100vw / 853), calc(100vh / 480))`. Ahora `--u` se mide con un elemento oculto (`height: calc(1000 * var(--u))`) y el suelo es `alto - 2u - 13,5u`, el mismo valor que antes.
+
 ## Windows: volcados de fallos (Subversión 0.24)
 - El modo seguro de la 0.23 no sirvió (con `disable-gpu` también se caía, justo al llegar al menú), así que se quitó y `pantalla.json` vuelve a `seguro: 0`. `crashReporter.start({ uploadToServer: false })` hace que Windows deje volcados en la carpeta Crashpad; al caerse la página, el más reciente se copia a `%APPDATA%\PokeBonk\ultimo-fallo.dmp` y se anota en `registro.txt`. Como mucho dos recargas.
 
