@@ -481,7 +481,7 @@
     if (w && !w.parentNode.querySelector('.pb-rm-tag')) {
       const tag = document.createElement('span');
       tag.className = 'pb-rm-tag';
-      tag.textContent = 'REMASTER';
+      tag.textContent = 'REMASTER' + (window.PB_SUB ? ' ' + window.PB_SUB.sub : '');
       w.after(tag);
     }
     if (document.title.includes('PokéBonk') && !document.title.includes('Remaster')) document.title = document.title.replace('PokéBonk', 'PokéBonk Remaster');

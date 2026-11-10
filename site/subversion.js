@@ -4,11 +4,30 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.28';
+  const SUB = '0.29';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.29',
+      date: Date.UTC(2026, 10, 10, 8, 0),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.29`,
+      summary: 'Prueba del actualizador: dos cambios pequeños en dos partes del juego.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Prueba del actualizador`,
+        `- **Juego principal**: la etiqueta del logo enseña la subversión (**REMASTER 0.29**).`,
+        `- **PokéPlunder**: su botón dice **Volver a PokéBonk Remaster**.`,
+        `- Esta versión llega por el actualizador: solo se bajan esos archivos, y se puede elegir cada parte.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.28',
       date: Date.UTC(2026, 10, 10, 7, 0),
@@ -746,6 +765,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.29',
+      date: '2026-11-10',
+      title: 'Prueba del actualizador.',
+      notes: [
+        ['better', 'El logo enseña la subversión (REMASTER 0.29).'],
+        ['better', 'PokéPlunder: el botón dice "Volver a PokéBonk Remaster".']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.28',
