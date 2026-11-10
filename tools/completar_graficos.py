@@ -60,7 +60,7 @@ def shiny_atlas(site, pid):
     base = f'sprite/{n:04d}/'
     m = None
     for hoja in ('Idle-Anim.png', 'Walk-Anim.png', 'Attack-Anim.png'):
-        a, b = bajar(base + hoja), bajar(base + '0001/' + hoja)
+        a, b = bajar(base + hoja), bajar(base + '0000/0001/' + hoja)  # 0000/0001: variocolor de la forma normal
         if a and b:
             m = mapa_colores(Image.open(io.BytesIO(a)), Image.open(io.BytesIO(b)))
             if m:
@@ -97,7 +97,7 @@ def retrato(site, pid, shiny):
     dst = os.path.join(site, 'assets', carpeta, f'{pid}.png')
     if os.path.exists(dst):
         return None
-    datos = bajar(f'portrait/{pid:04d}/' + ('0001/' if shiny else '') + 'Normal.png')
+    datos = bajar(f'portrait/{pid:04d}/' + ('0000/0001/' if shiny else '') + 'Normal.png')
     if not datos:
         return 'no existe'
     im = Image.open(io.BytesIO(datos)).convert('RGBA')
