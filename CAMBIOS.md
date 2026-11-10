@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Windows: volcados de fallos (Subversión 0.24)
+- El modo seguro de la 0.23 no sirvió (con `disable-gpu` también se caía, justo al llegar al menú), así que se quitó y `pantalla.json` vuelve a `seguro: 0`. `crashReporter.start({ uploadToServer: false })` hace que Windows deje volcados en la carpeta Crashpad; al caerse la página, el más reciente se copia a `%APPDATA%\PokeBonk\ultimo-fallo.dmp` y se anota en `registro.txt`. Como mucho dos recargas.
+
 ## Windows: modo seguro automático (Subversión 0.23)
 - En el PC del usuario el proceso de la página se caía al arrancar (`render-process-gone`: `crashed`, código -36861, que solo dice que no había gestor de volcados). `desktop/main.js` guarda `seguro` en `pantalla.json`: si la página se cae en los primeros 90 s, sube el nivel y reinicia con `--pb-reintento` (el registro se sigue escribiendo). Nivel 1: `no-sandbox`, `sandbox: false` y `disable-features=RendererCodeIntegrity`. Nivel 2: además `use-angle=gl`. Nivel 3: además `disable-gpu`.
 
