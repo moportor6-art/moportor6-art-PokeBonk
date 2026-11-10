@@ -25,11 +25,11 @@ let cfg = readCfg();
 // Lo que solo cambia al reiniciar: con qué valores arrancó esta sesión.
 const boot = { angle: cfg.angle, fpsFree: !!cfg.fpsFree };
 
-// La gráfica potente siempre (portátiles con dos gráficas) y todo lo que se pueda por GPU.
+// La gráfica potente siempre (portátiles con dos gráficas).
+// "enable-zero-copy" y "enable-gpu-rasterization" se quitaron: con algunas gráficas AMD la ventana se
+// quedaba solo con el color de fondo. Chromium ya decide eso solo.
 app.commandLine.appendSwitch('force_high_performance_gpu');
 app.commandLine.appendSwitch('ignore-gpu-blocklist');
-app.commandLine.appendSwitch('enable-gpu-rasterization');
-app.commandLine.appendSwitch('enable-zero-copy');
 if (['d3d11', 'gl', 'vulkan'].includes(boot.angle)) app.commandLine.appendSwitch('use-angle', boot.angle);
 if (boot.fpsFree) {
   app.commandLine.appendSwitch('disable-gpu-vsync');
@@ -220,7 +220,7 @@ app.whenReady().then(() => {
     if (p.endsWith('/')) p += 'index.html';
     const file = path.normalize(path.join(ROOT, p));
     if (!file.startsWith(ROOT)) return new Response('', { status: 404 });
-    if (!p.startsWith('/pokelike/') && !require('fs').existsSync(file)) global.pbLog?.(`[404] ${p}`);
+    if (!p.startsWith('/pokelike/') && !require('fs').existsSync(file)) { if (p !== '/desktop.json') global.pbLog?.(`[404] ${p}`); return new Response('', { status: 404 }); }
     if (p.startsWith('/pokelike/') && !require('fs').existsSync(file)) return pokelikeOnline(p.slice('/pokelike/'.length));
     return net.fetch(pathToFileURL(file).toString());
   });

@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Windows: pantalla morada y registro (Subversión 0.22)
+- `desktop/main.js` ya no pone `enable-zero-copy` ni `enable-gpu-rasterization`: con una RX 7800 XT la ventana se quedaba con el color de fondo aunque el menú estaba cargado.
+- Registro en `%APPDATA%\PokeBonk\registro.txt` (avisos y errores de la consola, fallos de carga, archivos que no existen y caídas del proceso). Ctrl+Mayús+I además de F12. Los archivos que no existen responden 404 en vez de un error de red.
+- El trabajo `windows` de `compilar.yml` abre la app 45 s con `PB_DIAG_DIR`: deja en el registro de la compilación el `registro.txt`, el estado de la página y una captura en base64.
+
 ## Windows: aviso de copia no oficial (Subversión 0.21)
 - `main-DfdwqtE9-*.js` comprueba `location.hostname` y, si no es una dirección conocida (pokebonk.com, `appassets.androidplatform.net` del APK, localhost o red local), tapa el juego con "Esta copia de PokéBonk no es la oficial". La app de Windows carga `app://pokebonk/`, cuyo hostname es `pokebonk`: se añade a esa lista. No se cambia la dirección para no cambiar el origen (y perder lo guardado).
 

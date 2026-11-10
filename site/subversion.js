@@ -4,11 +4,31 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.21';
+  const SUB = '0.22';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.22',
+      date: Date.UTC(2026, 10, 10, 0, 30),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.22`,
+      summary: 'Windows: arreglada la pantalla morada al abrir el juego y nuevo registro de errores.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Windows`,
+        `- Con algunas gráficas AMD la ventana se quedaba **morada** sin mostrar el menú. Se quitaron dos opciones de GPU que lo provocaban; Chromium ya las decide solo.`,
+        `- **Registro de errores**: la app guarda lo que falla en **registro.txt**, dentro de la carpeta **%APPDATA%\\PokeBonk** (escríbelo en la barra del Explorador). Se reinicia cada vez que abres el juego.`,
+        `- **F12** o **Ctrl + Mayús + I** abren las herramientas de desarrollo.`,
+        `- Cada compilación de Windows se abre sola en GitHub antes de publicarse para comprobar que llega al menú.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.21',
       date: Date.UTC(2026, 10, 9, 23),
@@ -592,6 +612,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.22',
+      date: '2026-11-09',
+      title: 'Windows: pantalla morada.',
+      notes: [
+        ['fix', 'Windows: ya no se queda la pantalla morada con gráficas AMD.'],
+        ['new', 'Windows: registro de errores en %APPDATA%\\PokeBonk\\registro.txt.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.21',
