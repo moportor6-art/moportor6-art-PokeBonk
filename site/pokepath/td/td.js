@@ -15,7 +15,7 @@
   ];
   const VELOCIDAD = { 0.8: '×1', 1.2: '×1.5', 1.7: '×2' };
 
-  let pp = null, ui = null, hud = null, ok = false, sonda = null;
+  let pp = null, ui = null, hud = null, ok = false, sonda = null, ultimaFirma = '';
   const nueva = () => { try { return localStorage.getItem(KEY) !== 'clasica'; } catch { return true; } };
   const root = document.documentElement;
   const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
@@ -45,29 +45,90 @@
     return { vertical, map: { x: sl, y: st + (vh - st - sb - h) / 2, w, h } };
   };
 
+  // ---------- ventanas del juego ----------
+  // Secciones (Caja, Mochila, Tienda, Mapa, Pokédex, Perfil, Desafío, Ajustes): a pantalla completa debajo
+  // de una barra con su nombre y «Cerrar». En vertical, las que tienen diseño propio para el móvil (td.css)
+  // se dibujan con un ancho lógico de ANCHO_V y su contenido se reparte en columna.
+  // Ventanas pequeñas (avisos, información del Pokémon…): centradas y tan grandes como quepan.
+  const ANCHO_V = 440;
+  const REPARTIDAS = ['box', 'inventory', 'shop', 'map', 'dex', 'profile', 'menu', 'challenge'];
+  const SCREEN = { cx: STAGE.w / 2, cy: STAGE.h / 2 };
+  const seccionAbierta = () => {
+    if (!pp) return null;
+    const m = { box: pp.boxScene, inventory: pp.inventoryScene, shop: pp.shopScene, map: pp.mapScene, dex: pp.dexScene,
+      profile: pp.profileScene, challenge: pp.challengeScene, menu: pp.menuScene, editor: pp.editorScene };
+    for (const [k, sc] of Object.entries(m)) if (sc?.isOpen && sc.container?.isConnected) return { k, sc };
+    return null;
+  };
+  const ventanaAbierta = () => {
+    const bs = [...document.querySelectorAll('#screen > .game-scene-background')];
+    const b = bs[bs.length - 1];
+    return b ? b.querySelector('.game-scene-window') : null;
+  };
+  const NOMBRES = Object.fromEntries(SECCIONES);
+  NOMBRES.editor = 'Editor';
+
   const colocar = () => {
     const r = document.getElementById('screen-root');
     if (!r) return;
-    if (!nueva() || !ok) { root.classList.remove('tdr-on'); r.style.transformOrigin = ''; return; }
+    if (!nueva() || !ok) {
+      root.classList.remove('tdr-on'); r.style.transformOrigin = '';
+      const vp = document.getElementById('view-port'); if (vp) vp.style.clipPath = '';
+      return;
+    }
     root.classList.add('tdr-on');
-    const { map } = rects();
+    const { map, vertical } = rects();
     ultimo = { map };
-    // Con una ventana del juego abierta, el mapa vuelve a verse entero (las ventanas se centran en él).
-    const z = root.classList.contains('tdr-modal') ? 1 : Z.z;
-    const cx = z === 1 ? MAP.w / 2 : Z.cx, cy = z === 1 ? MAP.h / 2 : Z.cy;
-    const s = map.w / MAP.w * z;
-    const ox = map.x + map.w / 2 - (MAP.x + cx) * s, oy = map.y + map.h / 2 - (MAP.y + cy) * s;
+    const vw = innerWidth, vh = innerHeight;
+    const sec = seccionAbierta(), win = ventanaAbierta();
+    root.classList.toggle('tdr-sec', !!sec);
+    root.classList.toggle('tdr-win', !!win);
+    for (const k of SECCIONES.map(x => x[0]).concat('editor')) root.classList.toggle('tdr-sec-' + k, sec?.k === k);
+    const reparte = !!sec && vertical && REPARTIDAS.includes(sec.k) && !win;
+    // En horizontal: la ventana se dibuja más grande (escala ESCALA_H) con un alto lógico menor que 624
+    // y el ancho que sobre, hasta 1000.
+    const repH = !!sec && !vertical && REPARTIDAS.includes(sec.k) && !win;
+    root.classList.toggle('tdr-rep', reparte);
+    root.classList.toggle('tdr-reph', repH);
+    let s, ox, oy, z = 1;
+    if (win) {
+      const W = win.offsetWidth || 640, H = win.offsetHeight || 500;
+      s = Math.min((vw - 16) / W, (vh - 16) / H, 1.6);
+      ox = vw / 2 - SCREEN.cx * s; oy = vh / 2 - SCREEN.cy * s;
+    } else if (sec) {
+      const top = parseFloat(getComputedStyle(hud.querySelector('.tdr-secbar')).height) || 56;
+      if (reparte) {
+        s = vw / ANCHO_V; ox = 0; oy = top;
+        root.style.setProperty('--tdr-lw', ANCHO_V + 'px');
+        root.style.setProperty('--tdr-lh', (vh - top) / s + 'px');
+      } else if (repH) {
+        s = Math.min(1, Math.max((vh - top) / 470, (vh - top) / 624));
+        const lw = Math.min(1000, vw / s), lh = (vh - top) / s;
+        ox = (vw - lw * s) / 2; oy = top;
+        root.style.setProperty('--tdr-lw', lw + 'px');
+        root.style.setProperty('--tdr-lh', lh + 'px');
+      } else {
+        s = Math.min(vw / 720, (vh - top) / 624);
+        ox = vw / 2 - SCREEN.cx * s; oy = top + (vh - top) / 2 - SCREEN.cy * s;
+      }
+      hud.querySelector('.tdr-secbar b').textContent = NOMBRES[sec.k] || '';
+    } else {
+      z = Z.z;
+      const cx = z === 1 ? MAP.w / 2 : Z.cx, cy = z === 1 ? MAP.h / 2 : Z.cy;
+      s = map.w / MAP.w * z;
+      ox = map.x + map.w / 2 - (MAP.x + cx) * s; oy = map.y + map.h / 2 - (MAP.y + cy) * s;
+    }
     r.style.transformOrigin = '0 0';
     r.style.transform = `translate(${ox}px, ${oy}px) scale(${s})`;
     const vp = document.getElementById('view-port');
-    if (vp) vp.style.clipPath = z > 1 ? `inset(${map.y}px ${innerWidth - map.x - map.w}px ${innerHeight - map.y - map.h}px ${map.x}px round 6px)` : '';
+    if (vp) vp.style.clipPath = z > 1 ? `inset(${map.y}px ${vw - map.x - map.w}px ${vh - map.y - map.h}px ${map.x}px round 6px)` : '';
     root.classList.toggle('tdr-zoom', z > 1);
     root.style.setProperty('--tdr-mx', map.x + 'px');
     root.style.setProperty('--tdr-my', map.y + 'px');
     root.style.setProperty('--tdr-mw', map.w + 'px');
     root.style.setProperty('--tdr-mh', map.h + 'px');
     // Hueco para el panel en vertical: si es poco, menú compacto.
-    root.classList.toggle('tdr-low', innerHeight - (map.y + map.h) - 88 < 420);
+    root.classList.toggle('tdr-low', vh - (map.y + map.h) - 88 < 420);
   };
   // ---------- zoom del mapa ----------
   // Con dos dedos (o la rueda, o los botones + y -) se acerca el mapa. Solo cambia cómo se ve:
@@ -184,7 +245,7 @@
         <button type="button" class="tdr-b tdr-auto" aria-pressed="false">Auto</button>
         <button type="button" class="tdr-wave"><span>Siguiente oleada</span><small></small></button>
       </footer>
-      <button type="button" class="tdr-close">Cerrar</button>
+      <div class="tdr-secbar"><b></b><button type="button" class="tdr-close">Cerrar</button></div>
       <div class="tdr-zbar"><button type="button" class="tdr-zin" aria-label="Acercar">+</button><button type="button" class="tdr-zout" aria-label="Alejar">−</button><button type="button" class="tdr-zfit">Ver todo</button></div>`;
     document.body.append(hud);
 
@@ -241,7 +302,15 @@
     document.body.append(volver);
   };
 
+  // Letra: en la vista nueva, la redondeada de PokéBonk con los ajustes de tamaño que el juego tiene para Lexend.
+  // La vista clásica vuelve a la letra elegida en Ajustes.
+  const fuente = () => {
+    if (nueva()) { document.body.dataset.font = 'Lexend'; }
+    else { try { pp.menuScene.applyFont(); } catch {} }
+  };
+
   const cambiar = () => {
+    fuente();
     colocar();
     if (!nueva()) { try { window.dispatchEvent(new Event('resize')); } catch {} }
     pintar();
@@ -250,6 +319,7 @@
   // ---------- pintar (copia el estado del juego) ----------
   const pintar = () => {
     if (!pp || !hud || !nueva()) return;
+    if (document.body.dataset.font !== 'Lexend') document.body.dataset.font = 'Lexend';
     const a = pp.area, p = pp.player;
     const q = s => hud.querySelector(s);
     if (a?.map) {
@@ -330,7 +400,7 @@
     const lks = q('.tdr-locks'), lkk = lk.join('|');
     if (lks.dataset.k !== lkk) {
       lks.dataset.k = lkk; lks.textContent = '';
-      if (lk.length) { lks.append(el('span', null, 'Más huecos con estrellas')); for (const t of lk) lks.append(el('b', null, t)); }
+      if (lk.length) { lks.append(el('span', null, 'Más huecos')); for (const t of lk) lks.append(el('b', null, t)); }
     }
 
     // Oleada y botones
@@ -346,17 +416,20 @@
     const colocando = !!pp.game.deployingUnit && !a.waveActive;
     w.classList.toggle('placing', colocando);
     w.querySelector('span').textContent = a.waveActive ? 'Oleada en curso' : colocando ? 'Elige una casilla' : 'Siguiente oleada';
-    w.querySelector('small').textContent = colocando ? 'O toca otra vez su tarjeta para cancelar' : (ui.waveIncome?.textContent || '').trim();
+    // «WAVE $X | $Y/min» del juego, en español.
+    const ing = (ui.waveIncome?.textContent || '').match(/WAVE \$([\d.,]+)\s*\|\s*\$(?:\/min: )?([\d.,]+)/);
+    w.querySelector('small').textContent = colocando ? 'O toca otra vez su tarjeta para cancelar'
+      : ing ? `$${ing[1]} esta oleada, $${ing[2]}/min` : '';
     hud.querySelectorAll('.tdr-m[data-k]').forEach(b => {
       const s = ui.section[b.dataset.k];
       b.classList.toggle('off', !!s && (s.style.opacity === '0.4' || getComputedStyle(s).pointerEvents === 'none'));
     });
 
-    // Con una ventana del juego abierta (Caja, Tienda…) el panel se aparta.
-    const seccion = !!document.querySelector('#screen > .section-scene-container');
-    const abierto = seccion || !!document.querySelector('.game-scene-background');
-    if (root.classList.contains('tdr-modal') !== abierto) { root.classList.toggle('tdr-modal', abierto); colocar(); }
-    root.classList.toggle('tdr-sec', seccion);
+    // Con una ventana del juego abierta el panel se aparta y la ventana ocupa la pantalla.
+    const sec = seccionAbierta(), win = ventanaAbierta();
+    const firma = (sec?.k || '') + '|' + (win ? win.offsetWidth + 'x' + win.offsetHeight : '');
+    root.classList.toggle('tdr-modal', !!(sec || win));
+    if (firma !== ultimaFirma) { ultimaFirma = firma; colocar(); }
   };
 
   // ---------- Pokémon más grandes en el mapa ----------
@@ -383,6 +456,32 @@
     };
   };
 
+  // ---------- textos que se quedan en inglés ----------
+  // Algunas ventanas ponen su título al arrancar el juego, antes de elegir idioma en una partida nueva
+  // («END OF ROUTE», «DRAFT PICK»…). Si un texto corto coincide con la versión inglesa de text.js,
+  // se cambia por la del idioma elegido.
+  let traduce = null;
+  import('../src/js/file/text.js').then(({ text }) => {
+    const idx = new Map();
+    const recorre = o => {
+      if (Array.isArray(o)) { if (typeof o[0] === 'string' && o.length >= 5 && o[0].length < 48) idx.set(o[0].trim().toLowerCase(), o); return; }
+      if (o && typeof o === 'object') for (const v of Object.values(o)) recorre(v);
+    };
+    recorre(text);
+    traduce = raiz => {
+      const l = lang();
+      if (!l || !raiz) return;
+      raiz.querySelectorAll('.game-scene-title, .game-scene-window *, .section-scene-container *').forEach(e => {
+        if (e.children.length) return;
+        const t = e.textContent.trim();
+        if (!t || t.length > 48) return;
+        const o = idx.get(t.toLowerCase());
+        if (!o || !o[l] || o[l] === o[0]) return;
+        e.textContent = t === t.toUpperCase() ? o[l].toUpperCase() : o[l];
+      });
+    };
+  }).catch(() => {});
+
   const iniciar = () => {
     if (ok) return;
     pp = window.__pp; ui = pp?.UI;
@@ -393,6 +492,10 @@
     try { if (pp.data?.new && pp.lang === 0) pp.newGameScene?.selectLanguage?.(1); } catch {}
     montar();
     gestos();
+    fuente();
+    // Abrir o cerrar ventanas recoloca al momento (sin esperar al siguiente repaso).
+    const sc = document.getElementById('screen');
+    if (sc) new MutationObserver(() => { pintar(); if (nueva()) traduce?.(sc); }).observe(sc, { childList: true });
     colocar();
     pintar();
     setInterval(pintar, 150);

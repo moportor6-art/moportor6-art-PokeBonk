@@ -4,11 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.36';
+  const SUB = '0.37';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.37',
+      date: Date.UTC(2026, 10, 11, 3, 30),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.37`,
+      summary: 'PokéBonk TD: ventanas al estilo PokéBonk y pensadas para el móvil.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# PokéBonk TD (en pruebas)`,
+        `- **Ventanas a pantalla completa**: Caja, Mochila, Tienda, Mapa, Pokédex, Perfil, Desafío y Ajustes se abren debajo de una barra con su nombre y **Cerrar**.`,
+        `- **En vertical se reparten para el móvil** y se leen a buen tamaño: la Tienda en dos columnas con el huevo a lo ancho, el Mapa entero a lo ancho (y la vista de rutas de dos en dos), el Perfil con el retrato arriba y las estadísticas debajo, y la Mochila con más sitio para los objetos.`,
+        `- **En horizontal** las ventanas se ven más grandes y aprovechan el ancho.`,
+        `- **Avisos y datos del Pokémon** (Fin de ruta, Derrota, Datos, tutorial…) centrados, tan grandes como quepan y con la letra más grande en vertical.`,
+        `- Colores y letra de PokéBonk en todas las ventanas. La **Vista clásica** vuelve a la letra y los colores que tengas en Ajustes.`,
+        `- Textos en español: el dinero de la oleada («$X esta oleada, $Y/min») y los títulos que salían en inglés en una partida nueva (Fin de ruta, Elección de Draft…).`,
+        `- El equipo aprovecha el espacio libre en vertical y el menú de abajo siempre se ve, también en móviles pequeños.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.36',
       date: Date.UTC(2026, 10, 10, 23, 0),
@@ -925,6 +948,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.37',
+      date: '2026-11-10',
+      title: 'PokéBonk TD: ventanas nuevas.',
+      notes: [
+        ['better', 'PokéBonk TD: ventanas a pantalla completa con los colores y la letra de PokéBonk.'],
+        ['better', 'PokéBonk TD: en vertical, Tienda, Mapa, Perfil y Mochila repartidas para el móvil.'],
+        ['fix', 'PokéBonk TD: textos que salían en inglés y dinero de la oleada en español.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.36',

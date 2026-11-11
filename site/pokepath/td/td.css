@@ -17,22 +17,21 @@ html.tdr-on #canvas-wrapper canvas{image-rendering:pixelated}
 html.tdr-on .ui-player-panel,html.tdr-on .ui-map-panel,html.tdr-on .ui-top-bar,html.tdr-on .ui-bottom-bar{visibility:hidden!important}
 html.tdr-on .ui-weather{visibility:visible}
 html.tdr-on .pb-volver{display:none!important}
-html:not(.tdr-on) .tdr-back{display:block;position:fixed;right:max(6px,env(safe-area-inset-right));top:max(6px,env(safe-area-inset-top));z-index:99999;padding:6px 12px;border:2px solid #fff;border-radius:99px;background:var(--tdr-ball);color:#fff;font:900 12px var(--tdr-title);box-shadow:0 3px 0 #0005}
+html:not(.tdr-on) .tdr-back{display:block;position:fixed;left:50%;translate:-50% 0;bottom:max(4px,env(safe-area-inset-bottom));padding:4px 12px!important;font-size:11px!important;z-index:99999;padding:6px 12px;border:2px solid #fff;border-radius:99px;background:var(--tdr-ball);color:#fff;font:900 12px var(--tdr-title);box-shadow:0 3px 0 #0005}
 
 html.tdr-on .tdr{display:block;position:fixed;inset:0;z-index:10000;pointer-events:none;font-family:var(--tdr-font);color:var(--tdr-ink);-webkit-tap-highlight-color:transparent}
 .tdr>*{pointer-events:auto}
 .tdr button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
 .tdr button:focus-visible{outline:3px solid var(--tdr-sun);outline-offset:2px}
 .tdr button:disabled{cursor:default}
-/* Con una ventana del juego abierta, el panel se queda atrás y oscurecido. */
-html.tdr-modal .tdr{z-index:1;filter:brightness(.45)}
-html.tdr-modal .tdr>*{pointer-events:none}
-/* Las ventanas de la barra (Caja, Tienda, Mapa…) se cierran con este botón, que queda por encima. */
-.tdr-close{display:none}
-html.tdr-sec .tdr-close{display:block;position:fixed;z-index:10001;left:50%;translate:-50% 0;bottom:calc(var(--tdr-sb) + 84px);padding:12px 34px;border-radius:99px;background:var(--tdr-paper)!important;color:var(--tdr-ink)!important;font:900 16px var(--tdr-title)!important;box-shadow:0 4px 0 #0006;pointer-events:auto!important}
-html.tdr-sec .tdr{filter:none}
-html.tdr-sec .tdr>:not(.tdr-close){filter:brightness(.45)}
-html.tdr-sec .tdr{z-index:10000}
+/* Con una ventana del juego abierta, el panel se esconde: la ventana ocupa la pantalla. */
+html.tdr-modal .tdr>:not(.tdr-secbar){visibility:hidden}
+.tdr-secbar{display:none}
+html.tdr-sec:not(.tdr-win) .tdr-secbar{display:flex;position:fixed;left:0;right:0;top:0;height:calc(var(--tdr-st) + 56px);padding:var(--tdr-st) calc(var(--tdr-sr) + 10px) 0 calc(var(--tdr-sl) + 14px);align-items:center;gap:10px;background:var(--tdr-night);box-shadow:0 2px 0 #ffffff1f;color:#fff;z-index:2}
+.tdr-secbar b{flex:1;font:900 22px var(--tdr-title)}
+.tdr-close{height:40px;padding:0 20px;border-radius:99px;background:var(--tdr-paper)!important;color:var(--tdr-ink)!important;font:900 15px var(--tdr-title)!important;box-shadow:0 3px 0 #0006}
+html.tdr-win #screen>.game-scene-background{background:#120a24d9;inset:-3000px!important}
+html.tdr-modal body{background:var(--tdr-night)!important}
 
 /* ---------- barra de arriba ---------- */
 .tdr-top{position:fixed;display:flex;align-items:center;gap:8px;color:#fff}
@@ -172,6 +171,83 @@ html.tdr-zoom .tdr-zbar .tdr-zfit{display:block}
 .tdr-team.wide .tdr-st{position:static;justify-self:start;max-width:100%;font-size:9.5px;padding:0 6px}
 .tdr-team.wide .tdr-card.empty .tdr-deploy{display:flex;justify-content:center;min-height:0}
 .tdr-team.wide .tdr-card.empty .tdr-spr{display:none}
-html.tdr-v .tdr-team.wide,html.tdr-h .tdr-team.wide{flex:none;max-height:none;grid-auto-rows:minmax(84px,auto)}
+html.tdr-v .tdr-team.wide,html.tdr-h .tdr-team.wide{flex:1 1 auto;min-height:0;max-height:280px;grid-auto-rows:minmax(66px,1fr)}
+.tdr-menu{margin-top:auto}
+/* Con sitio de sobra, el dibujo crece con la tarjeta. */
+.tdr-team.wide .tdr-deploy{grid-template-columns:clamp(36px,30%,64px) minmax(0,1fr)!important}
+.tdr-team.wide .tdr-spr{width:100%!important;height:100%!important;min-height:44px!important;max-height:80px!important}
 @media (max-height:460px){html.tdr-h .tdr-team.wide{grid-auto-rows:minmax(72px,auto)}html.tdr-h .tdr-locks{display:none}}
 .tdr-wave.placing:disabled{background:linear-gradient(180deg,#ffd84a,var(--tdr-sun))!important;color:var(--tdr-ink)!important;box-shadow:0 4px 0 #a07800,inset 0 0 0 2px #ffffff88}
+@media (max-width:380px){.tdr-team.wide .tdr-nm{font-size:11px!important;letter-spacing:-.03em}.tdr-team.wide .tdr-deploy{grid-template-columns:30px minmax(0,1fr)!important;column-gap:4px!important}}
+
+/* ---------- letra y colores de las ventanas del juego ---------- */
+html.tdr-on body{font-family:"Nunito","Lexend",system-ui,sans-serif!important}
+html.tdr-on[data-theme]{
+  --sceneBackground:#2b1f4a;--sceneHeader:#ff4a6e;
+  --uiBackground1:#2b1f4a;--uiBackground2:#33255a;--uiBackground3:#2b1f4a;--uiBackground4:#3d2d69;--uiAlterDamage:#3d2d69;
+  --barBackground:#3d2d69;--barShadow1:#57449a;--barShadow2:#22183d;
+  --menuButton1:#3d2d69;--menuButton2:#33255a;--menuButtonOff:#c8385c;--menuButtonOn:#3ec26a;--menuSection:#3d2d69;--menuReedem:#33255a;--menuTitle:#ff4a6e;--menuColorText:#ffcb05;
+  --slider:#1d1336;--sliderGrab:#ff4a6e;--link:#9f8cff;
+  --map1:#22183d;--map2:#3d2d69;
+  --dexTab1:#2b1f4a;--dexTab2:#ff4a6e;--dexTab3:#c8385c;--dexColor:#33255a;
+  --profile1:#22183d;--profile2:#3d2d69;--profile3:#33255a;--profile4:#4a3880;
+  --scrollBarColor1:#1d1336;--scrollBarColor2:#ff4a6e;
+  --descriptionBackground:rgba(29,19,54,.95);--tooltip:rgba(29,19,54,.95);
+  --nextWave:#ff4a6e;--arrowHover:#ff4a6e;--uiSection:#ff4a6e;--challengeColor1:#ff4a6e;
+}
+html.tdr-on .section-scene-container{border:0!important;border-radius:0;box-shadow:none}
+html.tdr-on .game-scene-window{border:0!important;border-radius:18px!important;overflow:hidden;box-shadow:0 12px 40px #000a!important;background:var(--sceneBackground)!important}
+html.tdr-on .game-scene-header{height:30px!important;left:0!important;right:0!important;top:0!important}
+html.tdr-on .game-scene-container{top:30px!important}
+html.tdr-on .game-scene-title{top:5px!important;left:14px!important;font:900 15px var(--tdr-title)!important;text-shadow:none!important;-webkit-text-stroke:0!important}
+html.tdr-on .game-scene-close-button{top:0!important;right:0!important;width:44px;height:30px;line-height:30px;text-align:center;font:900 16px var(--tdr-title)!important;background:#0002}
+html.tdr-on .stroke{-webkit-text-stroke:0!important;text-shadow:0 1px 0 #0006!important}
+html.tdr-on .tooltip{border-radius:12px!important}
+
+/* ---------- ventanas en vertical, repartidas para el móvil ---------- */
+html.tdr-rep #screen>.section-scene-container,html.tdr-reph #screen>.section-scene-container{left:0!important;top:0!important;transform:none!important;width:var(--tdr-lw)!important;height:var(--tdr-lh)!important}
+/* Caja */
+html.tdr-rep .box-scene-unit-selected-name{left:130px!important;right:70px!important;font-size:14px!important;clip-path:none!important;border-radius:10px}
+/* Tienda: dos columnas de tarjetas, el huevo a lo ancho, con scroll */
+html.tdr-rep .shop-scene-item-container{top:12px!important;bottom:12px!important;left:12px!important;right:12px!important;align-content:flex-start!important;overflow-y:auto;gap:12px!important;padding-bottom:20px;scrollbar-width:none}
+html.tdr-rep .shop-scene-item{width:calc(50% - 6px)!important;height:190px!important;flex:none;border-radius:16px;outline:0!important;border:2px solid #ffffff22!important;background-size:96px!important}
+html.tdr-rep .shop-scene-egg{width:100%!important;height:170px!important}
+html.tdr-rep .shop-scene-purchase,html.tdr-rep .shop-scene-purchase-egg{height:36px!important;line-height:36px!important;font-size:14px!important;border-radius:12px!important;border:0!important}
+/* Mapa: la cuadrícula de rutas entra entera a lo ancho */
+html.tdr-rep .maps-scene-route-container-global{top:70px!important;left:50%!important;transform:translateX(-50%) scale(.6)!important;transform-origin:top center}
+html.tdr-rep .maps-scene-secret-container{top:330px!important;transform:translateX(-50%) scale(.6)!important;transform-origin:top center}
+html.tdr-rep .maps-scene-route-container-routes{top:60px!important;left:0!important;transform:none!important;width:100%!important;height:calc(100% - 60px)!important}
+/* Perfil: retrato arriba, logros debajo y las estadísticas a continuación */
+html.tdr-rep .profile-player-container{left:50%!important;transform:translateX(-50%)}
+html.tdr-rep .profile-scene-achievements-container{top:140px!important;left:12px!important;right:12px!important;width:auto!important;justify-content:center}
+html.tdr-rep .profile-stats-container{top:250px!important;left:12px!important;right:12px!important}
+html.tdr-rep .profile-stat{height:28px!important;font-size:13px!important}
+html.tdr-rep .profile-stat-label,html.tdr-rep .profile-stat-value{font-size:13px!important}
+html.tdr-rep .maps-scene-route-group-maps{display:grid!important;grid-template-columns:repeat(2,auto)!important;justify-content:center!important;gap:8px!important;width:auto!important}
+/* Datos del Pokémon y otras ventanas pequeñas: en vertical se ven al 66 %, así que la letra pequeña sube. */
+html.tdr-v .pokemon-scene-data-label,html.tdr-v .pokemon-scene-data-value,html.tdr-v .pokemon-scene-data-value-at{font-size:15px!important}
+html.tdr-v .pokemon-scene-ability-name,html.tdr-v .pokemon-scene-item-name{font-size:14px!important}
+html.tdr-v .pokemon-scene-item-description,html.tdr-v .game-scene-window [class*="description"]{font-size:15px!important;line-height:1.3!important}
+html.tdr-v .pokemon-scene-evolution-level{font-size:11px!important}
+html.tdr-v .pokemon-scene-name{font-size:24px!important}
+html.tdr-v .game-scene-title{font-size:20px!important}
+html.tdr-v .pokemon-scene-level-up{font-size:12px!important;line-height:1.15!important;border-radius:10px!important}
+/* Botones del juego: esquinas redondeadas como en PokéBonk */
+html.tdr-on .box-scene-button,html.tdr-on .box-scene-tab,html.tdr-on .maps-scene-nav-button,html.tdr-on .pokemon-scene-level-up,html.tdr-on [class*="-tab"]:not(.tdr-tab){border-radius:10px}
+html.tdr-rep .box-scene-button{font-size:12px!important}
+html.tdr-rep .box-scene-tab{font-size:11px!important}
+html.tdr-rep .inventory-scene-item-container{height:auto!important;bottom:205px!important}
+html.tdr-rep .inventory-scene-item-description{font-size:13px!important;line-height:1.35!important}
+html.tdr-rep .box-scene-unit-container{border-radius:12px}
+
+/* Horizontal: barra más baja y ventanas más grandes */
+html.tdr-h.tdr-sec:not(.tdr-win) .tdr-secbar{height:calc(var(--tdr-st) + 44px)}
+html.tdr-h .tdr-secbar b{font-size:18px}
+html.tdr-h .tdr-close{height:34px}
+html.tdr-reph .shop-scene-item-container{overflow-y:auto;align-content:flex-start!important;top:12px!important;bottom:12px!important}
+html.tdr-reph .shop-scene-item{height:190px!important;flex:none}
+html.tdr-reph .profile-stats-container{bottom:auto!important}
+html.tdr-reph .maps-scene-route-container-global{top:45px!important;transform:translateX(-50%) scale(.85)!important;transform-origin:top center}
+html.tdr-reph .inventory-scene-item-container{height:auto!important;bottom:200px!important}
+html.tdr-reph .maps-scene-route-container-global{top:62px!important}
+html.tdr-reph .profile-stats-container,html.tdr-rep .profile-stats-container{bottom:10px!important;overflow-y:auto!important;height:auto!important}

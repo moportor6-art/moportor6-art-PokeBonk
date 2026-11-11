@@ -1,5 +1,13 @@
 # Cambios respecto al port original
 
+## PokéBonk TD: ventanas nuevas (Subversión 0.37)
+- `colocar()` tiene tres modos: mapa (con zoom), sección abierta (Caja, Mochila, Tienda, Mapa, Pokédex, Perfil, Desafío, Ajustes) y ventana pequeña (`GameScene`: avisos, datos del Pokémon, tutorial…). Un `MutationObserver` sobre `#screen` recoloca al abrir o cerrar.
+- Secciones: barra propia con el nombre y Cerrar (`sections.find(isOpen).close()`). En vertical (`tdr-rep`) el contenedor de la sección pasa a medir 440 de ancho lógico y el alto que quede (`--tdr-lw`, `--tdr-lh`), escalado al ancho del móvil; en horizontal (`tdr-reph`) se escala al alto con un alto lógico de unos 470 y hasta 1000 de ancho. Ajustes por ventana en `td.css` (Tienda en dos columnas, Mapa escalado y rutas de dos en dos, Perfil apilado, Mochila más alta).
+- Ventanas pequeñas: centradas y escaladas para caber (hasta ×1.6), fondo oscuro a toda la pantalla; en vertical sube la letra pequeña de la ventana de datos del Pokémon.
+- Colores: variables del tema del juego sobrescritas con `html.tdr-on[data-theme]`. Letra: `data-font="Lexend"` (para usar los ajustes de tamaño del juego) con Nunito; la vista clásica vuelve a llamar a `menuScene.applyFont()`.
+- Textos: «WAVE $X | $Y/min» se enseña en español; los textos cortos que coinciden con la versión inglesa de `text.js` se cambian por la del idioma elegido (títulos que el juego pone al arrancar, antes de elegir idioma en una partida nueva).
+- Prueba de valores repetida con la vista clásica de verdad activada (`.tdr-classic`): mismos resultados.
+
 ## PokéBonk TD: todas las rutas (Subversión 0.36)
 - Recorrido automático de las 47 rutas de `routeData` (oleada 1 y oleada 100) con `area.loadArea`: cargan sin errores, se coloca un Pokémon tocando una casilla y empieza la oleada; en la vista clásica la misma secuencia da lo mismo. Mapas grandes (6-1 `xl`, 7-2 `xlv`, 10-4 `xlh`): el arrastre con un dedo del propio juego sigue funcionando con la pantalla escalada.
 - Con zoom en mapas normales, un dedo sobre una zona sin Pokémon (y sin estar colocando uno) mueve el mapa; si hay un Pokémon, el toque es del juego (moverlo de casilla).
