@@ -4,9 +4,8 @@
      reglas (cuándo se puede subir de nivel, cuánto cuesta, qué hace cada cosa) son siempre las del juego.
    - En vertical: barra de arriba, mapa a lo ancho, equipo en 5x2 y abajo los botones de oleada.
      En horizontal: mapa a la izquierda a toda la altura y el panel a la derecha.
-   - «Vista clásica» vuelve a la pantalla de siempre. Se recuerda en este equipo (pb-td-vista). */
+   - Es la única pantalla del tower defense: la de PokéPath TD ya no se usa. */
 (() => {
-  const KEY = 'pb-td-vista';
   const OPC = 'pb-td-opciones';
   const opciones = (() => { try { return Object.assign({ zoomJefe: true, vibrar: true }, JSON.parse(localStorage.getItem(OPC) || '{}')); } catch { return { zoomJefe: true, vibrar: true }; } })();
   const guardaOpc = () => { try { localStorage.setItem(OPC, JSON.stringify(opciones)); } catch {} };
@@ -19,7 +18,7 @@
   const VELOCIDAD = { 0.8: '×1', 1.2: '×1.5', 1.7: '×2' };
 
   let pp = null, ui = null, hud = null, ok = false, sonda = null, ultimaFirma = '';
-  const nueva = () => { try { return localStorage.getItem(KEY) !== 'clasica'; } catch { return true; } };
+  try { localStorage.removeItem('pb-td-vista'); } catch {}
   const root = document.documentElement;
   const el = (tag, cls, txt) => { const e = document.createElement(tag); if (cls) e.className = cls; if (txt != null) e.textContent = txt; return e; };
   const visible = e => !!e && getComputedStyle(e).display !== 'none';
@@ -74,7 +73,7 @@
   const colocar = () => {
     const r = document.getElementById('screen-root');
     if (!r) return;
-    if (!nueva() || !ok) {
+    if (!ok) {
       root.classList.remove('tdr-on'); r.style.transformOrigin = '';
       const vp = document.getElementById('view-port'); if (vp) vp.style.clipPath = '';
       return;
@@ -182,7 +181,7 @@
       return pp.area.placementTiles.some(t => (t.tower || t.passenger) && cx > t.position.x && cx < t.position.x + t.size && cy > t.position.y && cy < t.position.y + t.size);
     };
     w.addEventListener('pointerdown', e => {
-      if (!nueva() || dedos.size || Z.z <= 1 || pp.game.deployingUnit || e.button > 0) return;
+      if (dedos.size || Z.z <= 1 || pp.game.deployingUnit || e.button > 0) return;
       if (pp.game.isXL || pp.game.isXLV || pp.game.isXLH) return;
       if (hayPokemon(e.clientX, e.clientY)) return;
       arrastre = { id: e.pointerId, x: e.clientX, y: e.clientY, cx: Z.cx, cy: Z.cy, movido: false };
@@ -209,7 +208,7 @@
       return pp.area.placementTiles.find(t => cx > t.position.x && cx < t.position.x + t.size && cy > t.position.y && cy < t.position.y + t.size);
     };
     pp.game.canvas.addEventListener('click', e => {
-      if (!nueva() || pp.game.deployingUnit || arrastreHecho) return;
+      if (pp.game.deployingUnit || arrastreHecho) return;
       if (pp.area.towers.some(t => t.awaitingBombardZone)) return;
       const t = enCasilla(e.clientX, e.clientY);
       const pk = t && (t.passenger || t.tower);
@@ -221,7 +220,7 @@
     }, true);
 
     w.addEventListener('pointerdown', e => {
-      if (!nueva() || e.pointerType === 'mouse') return;
+      if (e.pointerType === 'mouse') return;
       dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (dedos.size === 2) arrastre = null;
       if (dedos.size === 2) {
@@ -247,7 +246,6 @@
     addEventListener('pointerup', fuera, true);
     addEventListener('pointercancel', fuera, true);
     w.addEventListener('wheel', e => {
-      if (!nueva()) return;
       e.preventDefault();
       zoomEn(e.clientX, e.clientY, Z.z * (e.deltaY < 0 ? 1.15 : 1 / 1.15));
     }, { passive: false });
@@ -301,9 +299,8 @@
       b.innerHTML = `<img alt="" src="./src/assets/images/icons/${k}.png"><span>${n}</span>`;
       menu.append(b);
     }
-    const clas = el('button', 'tdr-m tdr-classic'); clas.type = 'button'; clas.innerHTML = '<span>Vista clásica</span>';
     const salir = el('button', 'tdr-m tdr-exit'); salir.type = 'button'; salir.innerHTML = '<span>Salir</span>';
-    menu.append(clas, salir);
+    menu.append(salir);
 
     // Acciones: siempre el botón original del juego.
     hud.addEventListener('click', e => {
@@ -325,41 +322,22 @@
       } else if (t.classList.contains('tdr-zfit')) { zoomManual(); Z.z = 1; limitar(); colocar(); }
       else if (t.classList.contains('tdr-opt')) { opciones[t.dataset.o] = !opciones[t.dataset.o]; guardaOpc(); if (t.dataset.o === 'vibrar' && opciones.vibrar) vibra(40); }
       else if (t.classList.contains('tdr-close')) { const sc = pp.sections?.find(x => x.isOpen); sc?.close(); }
-      else if (t.classList.contains('tdr-classic')) { try { localStorage.setItem(KEY, 'clasica'); } catch {} cambiar(); }
       else if (t.classList.contains('tdr-exit')) {
         if (!t.classList.contains('armed')) { t.classList.add('armed'); t.querySelector('span').textContent = 'Toca otra vez'; setTimeout(() => { t.classList.remove('armed'); t.querySelector('span').textContent = 'Salir'; }, 3000); return; }
         location.href = '../index.html#sala';
       } else if (t.dataset.k) ui.section[t.dataset.k]?.click();
       pintar();
     });
-
-    // Botón para volver a la vista nueva desde la clásica.
-    const volver = el('button', 'tdr-back', 'Vista nueva');
-    volver.type = 'button';
-    volver.addEventListener('click', () => { try { localStorage.removeItem(KEY); } catch {} cambiar(); });
-    document.body.append(volver);
   };
 
-  // Letra: en la vista nueva, la redondeada de PokéBonk con los ajustes de tamaño que el juego tiene para Lexend.
-  // La vista clásica vuelve a la letra elegida en Ajustes.
-  const fuente = () => {
-    if (nueva()) { document.body.dataset.font = 'Lexend'; }
-    else { try { pp.menuScene.applyFont(); } catch {} }
-  };
-
-  const cambiar = () => {
-    fuente();
-    colocar();
-    if (!nueva()) { try { window.dispatchEvent(new Event('resize')); } catch {} }
-    pintar();
-  };
+  // Letra: la redondeada de PokéBonk con los ajustes de tamaño que el juego tiene para Lexend.
+  const fuente = () => { document.body.dataset.font = 'Lexend'; };
 
   // ---------- pintar (copia el estado del juego) ----------
   const pintar = () => {
     musica();
-    sonidos();
     vigilaJefe();
-    if (!pp || !hud || !nueva()) return;
+    if (!pp || !hud) return;
     if (document.body.dataset.font !== 'Lexend') document.body.dataset.font = 'Lexend';
     const a = pp.area, p = pp.player;
     const q = s => hud.querySelector(s);
@@ -542,7 +520,7 @@
           actual = null;
           // Destello del golpe: un aro blanco que se abre y se apaga.
           const t = ahora() - (st.golpe || -1e9);
-          if (nueva() && t < 180 && !this.dying) {
+          if (t < 180 && !this.dying) {
             const x = this.position.x + this.width / 2, y = this.position.y + this.height / 2, k = t / 180;
             c.save();
             c.globalAlpha = (1 - k) * .9;
@@ -556,7 +534,6 @@
       // Números de daño: más grandes, con la letra de PokéBonk y un pequeño salto al aparecer.
       const textos = K.Enemy.prototype.drawFloatingTexts;
       K.Enemy.prototype.drawFloatingTexts = function (...a) {
-        if (!nueva()) return textos.apply(this, a);
         const c = this.ctx, x = this.position.x + this.width / 2;
         for (const ft of this.floatingTexts) {
           const al = ft.alpha ?? 1;
@@ -583,7 +560,7 @@
     }
     const orig = c.drawImage;
     c.drawImage = function (img, ...a) {
-      if (a.length === 8 && nueva() && img instanceof HTMLImageElement) {
+      if (a.length === 8 && img instanceof HTMLImageElement) {
         const nm = nombreDe(img);
         if (nm) {
           const [sx, sy, sw, sh, dx, dy, dw, dh] = a;
@@ -619,86 +596,39 @@
     };
   };
 
-  // ---------- música de PokéSurvivor ----------
-  // En la vista nueva, cada canción de PokéPath se cambia por una pista de PokéSurvivor (de JPTER78, MIT)
-  // según el mundo de la primera ruta que la usa; mientras hay un jefe en el mapa suena la del jefe.
-  // Se cambia el archivo de la propia pista del juego, así que el volumen, las pausas y los fundidos
-  // siguen siendo los suyos. La vista clásica recupera la música original.
-  const PISTA_MUNDO = { 1: 'village', 2: 'forest', 3: 'cave', 4: 'rift', 5: 'forest', 6: 'cave', 7: 'volcano', 8: 'judgment', 9: 'rift', 10: 'volcano' };
-  const pistaDe = {};
-  let musicaPuesta = null, jefeSonando = null;
-  const prepararMusica = () => {
-    const M = window.__tdMusica;
-    if (!M) return;
-    for (const r of Object.values(M.routeData)) {
-      const song = r.music?.song;
-      if (!song || pistaDe[song]) continue;
-      const w = +(String(r.name?.[0] || '').match(/(\d+)-\d+/) || [])[1];
-      pistaDe[song] = song === 'halloween' ? 'halloween' : r.isSecret ? 'judgment' : (PISTA_MUNDO[w] || 'village');
-    }
-    pistaDe.intro = 'village';
-    for (const [k, a] of Object.entries(M.soundMusic)) if (!a.dataset.orig) a.dataset.orig = a.getAttribute('src') || a.src;
-  };
+  // ---------- música y sonidos de PokéSurvivor ----------
+  // La música (de JPTER78) y los sonidos de los menús y de algunos efectos ya vienen puestos en
+  // src/js/file/audio.js (los cambia tools/preparar_pokepath.py): cada mundo tiene su pista y los disparos
+  // genéricos del juego no están, porque aquí suenan según el tipo del Pokémon. Lo único que se cambia
+  // en marcha es la música de jefe: mientras hay un jefe en el mapa, su pista pasa a boss.ogg.
+  let jefeSonando = null;
   const cambiaSrc = (a, src) => {
-    if (a.getAttribute('src') === src) return;
+    if (!src || a.getAttribute('src') === src) return;
     const sonaba = !a.paused, vol = a.volume;
     a.src = src; a.loop = true;
     if (sonaba) { a.volume = vol; a.play().catch(() => {}); }
   };
   const musica = () => {
     const M = window.__tdMusica;
-    if (!M) return;
-    const n = nueva();
-    if (musicaPuesta !== n) {
-      musicaPuesta = n;
-      for (const [k, a] of Object.entries(M.soundMusic)) cambiaSrc(a, n && pistaDe[k] ? `./td/musica/${pistaDe[k]}.ogg` : a.dataset.orig);
-      jefeSonando = null;
-    }
-    if (!n || !pp?.area?.music) return;
+    if (!M || !pp?.area?.music) return;
     const pista = M.soundMusic[pp.area.music.song];
     if (!pista) return;
+    if (!pista.dataset.orig) pista.dataset.orig = pista.getAttribute('src');
     const jefe = pp.area.enemies?.some(e => e.enemy?.isBoss && !e.dying);
-    if (jefe && jefeSonando !== pista) { jefeSonando = pista; cambiaSrc(pista, './td/musica/boss.ogg'); }
-    else if (!jefe && jefeSonando) { cambiaSrc(jefeSonando, `./td/musica/${pistaDe[pp.area.music.song] || 'village'}.ogg`); jefeSonando = null; }
+    if (jefe && jefeSonando !== pista) {
+      if (jefeSonando) cambiaSrc(jefeSonando, jefeSonando.dataset.orig);
+      jefeSonando = pista; cambiaSrc(pista, './td/musica/boss.ogg');
+    } else if (!jefe && jefeSonando) { cambiaSrc(jefeSonando, jefeSonando.dataset.orig); jefeSonando = null; }
   };
 
-  // ---------- efectos de sonido de PokéSurvivor ----------
-  // En la vista nueva: los disparos de tus Pokémon suenan según su tipo (fuego, agua, eléctrico…), los golpes
-  // y las caídas con los sonidos de PokéSurvivor, y los sonidos de los menús también. Los disparos genéricos
-  // del juego se silencian en la vista nueva para no sonar dos veces; los sonidos propios de un Pokémon
-  // (Chatot, Kyogre…) y los de habilidades especiales se quedan como están. Usa el volumen de efectos y de
-  // interfaz de Ajustes y respeta sus silencios.
   const SON = './td/sonidos/';
-  const UI_SON = { close: 'back', open: 'select', hover1: 'hover', hover2: 'hover', hover3: 'hover', option: 'click', button1: 'click', button2: 'click',
-    key0: 'click', key1: 'click', click0: 'click', click1: 'click', select: 'select', obtain: 'chest', equip: 'confirm', unequip: 'back', pop0: 'error',
-    purchase: 'buy', start: 'confirm', results: 'levelup' };
-  const EF_SON = { shiny: 'shiny', explosion: 'burst1', earthquake: 'quake', teleport: 'rift', bell: 'toll', regenerator: 'heal', ding: 'xp' };
-  const SILENCIO = /^(projectile\d|area\d|beam\d|hit4|sword|ice|rockThrow|thunder|chain|fire)$/;
-  let sonidosPuestos = null;
   const volumen = tipo => {
     try { const a = JSON.parse(localStorage.getItem('data')).config.audio; return Math.min(1, a.master * .05 * a[tipo] * .05); } catch { return .3; }
-  };
-  const sonidos = () => {
-    const M = window.__tdMusica;
-    if (!M?.soundEffect) return;
-    const n = nueva();
-    if (sonidosPuestos === n) return;
-    sonidosPuestos = n;
-    const pon = (bank, mapa) => {
-      for (const [k, a] of Object.entries(bank)) {
-        if (!a.dataset.orig) a.dataset.orig = a.getAttribute('src') || a.src;
-        const nuevo = n && mapa[k] ? SON + mapa[k] + '.ogg' : a.dataset.orig;
-        if (a.getAttribute('src') !== nuevo) a.src = nuevo;
-        if (bank === M.soundEffect) a.muted = n && SILENCIO.test(k);
-      }
-    };
-    pon(M.soundUi, UI_SON);
-    pon(M.soundEffect, EF_SON);
   };
   // Varios reproductores por sonido para que se puedan solapar; como mucho uno cada `cada` ms.
   const reproductores = new Map(), ultimoSon = new Map();
   const suena = (nombre, tipo = 'effects', cada = 70) => {
-    if (!nueva() || document.hidden) return;
+    if (document.hidden) return;
     const t = performance.now();
     if (t - (ultimoSon.get(nombre) || 0) < cada) return;
     ultimoSon.set(nombre, t);
@@ -723,12 +653,12 @@
   // vuelve al mapa entero. Si tocas el zoom tú, manda el tuyo. Vibra al perder una vida y al llegar el jefe
   // (Android). Las dos cosas se apagan en Ajustes.
   const auto = { on: false, jefe: null };
-  const vibra = p => { if (opciones.vibrar && nueva()) try { navigator.vibrate?.(p); } catch {} };
+  const vibra = p => { if (opciones.vibrar) try { navigator.vibrate?.(p); } catch {} };
   let vidasAntes = null;
   const sigueJefe = () => {
     if (!auto.on) return;
     const j = auto.jefe;
-    if (!j || j.dying || j.hp <= 0 || !pp.area.enemies.includes(j) || !nueva()) {
+    if (!j || j.dying || j.hp <= 0 || !pp.area.enemies.includes(j)) {
       auto.on = false; auto.jefe = null;
       Z.z = 1; limitar(); colocar();
       return;
@@ -742,7 +672,7 @@
     requestAnimationFrame(sigueJefe);
   };
   const vigilaJefe = () => {
-    if (!pp?.area || !nueva()) return;
+    if (!pp?.area) return;
     const hp = pp.player.health?.[pp.area.map?.id];
     if (vidasAntes != null && hp < vidasAntes) vibra(60);
     vidasAntes = hp;
@@ -793,13 +723,12 @@
     agrandar();
     // Partida nueva: el perfil empieza en español (se puede cambiar con las banderas).
     try { if (pp.data?.new && pp.lang === 0) pp.newGameScene?.selectLanguage?.(1); } catch {}
-    prepararMusica();
     montar();
     gestos();
     fuente();
     // Abrir o cerrar ventanas recoloca al momento (sin esperar al siguiente repaso).
     const sc = document.getElementById('screen');
-    if (sc) new MutationObserver(() => { pintar(); if (nueva()) traduce?.(sc); }).observe(sc, { childList: true });
+    if (sc) new MutationObserver(() => { pintar(); traduce?.(sc); }).observe(sc, { childList: true });
     colocar();
     pintar();
     setInterval(pintar, 150);

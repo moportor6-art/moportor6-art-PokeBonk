@@ -30,7 +30,7 @@ MODULOS = {
     'pokeisaac': 'PokéIsaac',
     'pokemonsurvivors': 'Pokémon Survivors',
     'pokesurvivor': 'PokéSurvivor',
-    'pokepath': 'PokéPath TD',
+    'pokepath': 'PokéBonk TD',
     'pokeplunder': 'PokéPlunder',
     'pokeoverlord': 'Pokémon Overlord',
     'pokelike': 'Pokelike',

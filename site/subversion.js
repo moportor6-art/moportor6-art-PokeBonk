@@ -4,11 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.41';
+  const SUB = '0.42';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.42',
+      date: Date.UTC(2026, 10, 11, 12, 0),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.42`,
+      summary: 'Fuera PokéPath TD antiguo y el Remaster pesa unos 89 MB menos.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Un solo tower defense`,
+        `- **PokéBonk TD** es ya el único tower defense: se quitan PokéPath TD original (el segundo botón de su tarjeta en la Sala) y la **Vista clásica**. Tu partida sigue igual, es la misma.`,
+        `- El menú del TD tiene un botón menos y **Salir** ocupa su sitio.`,
+        ``,
+        `# Más ligero`,
+        `- La música y los sonidos de PokéSurvivor vienen ya puestos en el juego en vez de cambiarse en marcha, así que se borran la música y los sonidos antiguos de PokéPath que ya no sonaban, dos letras sin usar y su arranque antiguo. La pantalla de carga del TD ya no precarga 50 MB de música.`,
+        `- Pokémon Survivors pierde las páginas de su web (Pokédex, guías, tier list, novedades… en cinco idiomas) que el juego no usa.`,
+        `- En total, unos **89 MB menos**: PokéBonk TD pasa de 98 a 39 MB y Pokémon Survivors de 86 a 57 MB.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.41',
       date: Date.UTC(2026, 10, 11, 8, 30),
@@ -1046,6 +1069,18 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.42',
+      date: '2026-11-11',
+      title: 'Un solo tower defense y unos 89 MB menos.',
+      notes: [
+        ['better', 'PokéBonk TD es el único tower defense: fuera PokéPath TD original y la vista clásica.'],
+        ['better', 'Borrados la música, sonidos y letras de PokéPath que ya no se usaban: el TD pesa 39 MB en vez de 98.'],
+        ['better', 'Pokémon Survivors sin las páginas de su web que el juego no usa: 29 MB menos.'],
+        ['fix', 'La carga del TD ya no precarga la música antigua.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.41',

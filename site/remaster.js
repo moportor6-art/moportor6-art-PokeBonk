@@ -142,7 +142,7 @@
     ['PokéSurvivor', 'svk', 'Mil bajas', (d) => d.survivor.kills >= 1000, 'Derrota 1.000 enemigos', 300],
     ['Pokelike', 'pl50', 'Investigador', (d) => d.pokelike.dex >= 50, '50 Pokémon en la Pokédex', 250],
     ['Pokelike', 'plw', 'Campeón de la Liga', (d) => d.pokelike.elite >= 1 || d.pokelike.hall >= 1, 'Gana a la Liga', 500],
-    // PokéBonk TD y PokéPath TD comparten partida, así que cuentan las dos.
+    // PokéBonk TD usa la partida de PokéPath TD (pokepath:data).
     ['PokéBonk TD', 'pp10', 'Defensor', (d) => d.pokepath.waves >= 10, 'Supera 10 oleadas', 150],
     ['PokéBonk TD', 'pp100', 'Muralla', (d) => d.pokepath.waves >= 100, 'Supera 100 oleadas', 400],
     ['PokéBonk TD', 'pp20', 'Entrenador de torres', (d) => d.pokepath.owned >= 20, 'Consigue 20 Pokémon', 250],
@@ -451,7 +451,7 @@
 
   const CREDITOS = [
     ['PokéBonk', 'Juego original de Charcher. Port para Android de JayElDragon. Subversión no oficial de moportor6.'],
-    ['PokéBonk TD y PokéPath TD', 'Juego de Khydra. Música y efectos de PokéSurvivor (ver abajo).'],
+    ['PokéBonk TD', 'PokéPath TD, juego de Khydra. Música y efectos de PokéSurvivor (ver abajo).'],
     ['PokéSurvivor', 'Juego original de JPTER78 (pokesurvivor.com), port de JayElDragon. Código y música con licencia PolyForm Noncommercial 1.0.0 desde el 14-10-2026 (antes, MIT): solo uso sin fines comerciales. Required Notice: Copyright 2026 JPTER78 (https://github.com/JPTER78/pokesurvivor). Sprites CC BY-NC 4.0.'],
     ['Pokémon Survivors', 'De pedrobarretto.'],
     ['PokéIsaac', 'De @SrBatai (pokeisaac.com).'],
@@ -489,7 +489,7 @@
     const { d, nuevas } = await revisar();
     if (tab !== 'juegos') return;
     const sem = retoSemana().g;
-    const ult = st.ult ? lista.find(j => j.id === st.ult || j.alt?.id === st.ult) : null;
+    const ult = st.ult ? lista.find(j => j.id === (st.ult === 'pokepath' ? 'pokebonk-td' : st.ult) || j.alt?.id === st.ult) : null;
     let h = fichaHTML(d);
     if (nuevas.length) h += `<div class="rm-card"><p><b>Nuevo: ${nuevas.map(n => esc(n[0]) + ' (+' + fmt(n[1]) + ' Polvo)').join(', ')}</b></p></div>`;
     h += '<div class="rm-sala">';

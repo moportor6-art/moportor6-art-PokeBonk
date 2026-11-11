@@ -1,14 +1,13 @@
-/* Subversión propia: botón "Más juegos" en la barra del menú principal, bajo Donaciones.
-   Abre una ventana con PokéIsaac, PokéSurvivor, PokéPath TD y Pokelike (carpetas pokeisaac/, pokesurvivor/ y pokelike/).
+/* Subversión propia: botón "Juegos" en la barra del menú principal.
+   Abre la Sala de juegos del Remaster (remaster.js) con los juegos de esta lista.
    Cada juego tiene su propio botón "Volver a PokéBonk". */
 (() => {
   if (window.__pbIsaac) return;
   window.__pbIsaac = true;
   // color: tono de su tarjeta en la Sala de juegos. p: nombre en el Pasaporte. alt: segundo botón de la tarjeta.
   const JUEGOS = [
-    { id: 'pokebonk-td', name: 'PokéBonk TD', icon: 'pokepath-icono.png', url: 'pokepath/remaster.html', dir: 'pokepath', color: '#3ec26a', p: 'PokéBonk TD', pix: true,
-      desc: 'Tower defense con 47 rutas y 100 oleadas por ruta. El juego de Khydra con la cara de PokéBonk.',
-      alt: { id: 'pokepath', name: 'PokéPath TD original', url: 'pokepath/index.html' } },
+    { id: 'pokebonk-td', name: 'PokéBonk TD', icon: 'pokepath-icono.png', url: 'pokepath/index.html', dir: 'pokepath', color: '#3ec26a', p: 'PokéBonk TD', pix: true,
+      desc: 'Tower defense con 47 rutas y 100 oleadas por ruta. El juego de Khydra con la cara de PokéBonk.' },
     { id: 'pokemonsurvivors', name: 'Pokémon Survivors', icon: 'pokemonsurvivors-icono.png', url: 'pokemonsurvivors/index.html', color: '#ff7a2a', p: 'Pokémon Survivors', pix: true,
       desc: 'Aguanta 15 minutos de hordas con 82 Pokémon, evoluciona y vence a Mewtwo. De pedrobarretto.' },
     { id: 'pokesurvivor', name: 'PokéSurvivor', icon: 'pokesurvivor-icono.png', url: 'pokesurvivor/index.html', color: '#ff4a6e', p: 'PokéSurvivor',

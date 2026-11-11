@@ -7,7 +7,7 @@
   if (window.__pbMarco) return;
   window.__pbMarco = true;
   const NOMBRES = { pokeisaac: 'PokéIsaac', pokelike: 'Pokelike', pokemonsurvivors: 'Pokémon Survivors', pokesurvivor: 'PokéSurvivor',
-    pokeoverlord: 'Pokémon Overlord', pokepath: /remaster\.html/.test(location.pathname) ? 'PokéBonk TD' : 'PokéPath TD', pokeplunder: 'PokéPlunder' };
+    pokeoverlord: 'Pokémon Overlord', pokepath: 'PokéBonk TD', pokeplunder: 'PokéPlunder' };
   const dir = location.pathname.split('/').filter(Boolean)[0] || '';
   const juego = NOMBRES[dir] || '';
   let ent = null;

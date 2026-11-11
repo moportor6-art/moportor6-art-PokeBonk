@@ -1,4 +1,4 @@
-/* PokéBonk TD: vista nueva. Solo se aplica con html.tdr-on (la vista clásica queda como siempre). */
+/* PokéBonk TD. Se aplica con html.tdr-on, que td.js pone en cuanto el juego ha cargado. */
 :root{
   --tdr-st:env(safe-area-inset-top,0px);--tdr-sb:env(safe-area-inset-bottom,0px);
   --tdr-sl:env(safe-area-inset-left,0px);--tdr-sr:env(safe-area-inset-right,0px);
@@ -6,7 +6,7 @@
   --tdr-sun:#ffcb05;--tdr-ball:#ff4a6e;--tdr-leaf:#3ec26a;--tdr-sky:#4a9dff;
   --tdr-title:"M PLUS Rounded 1c","Nunito",system-ui,sans-serif;--tdr-font:"Nunito",system-ui,sans-serif;
 }
-.tdr,.tdr-back{display:none}
+.tdr{display:none}
 html.tdr-on body{background:radial-gradient(120% 80% at 50% 0%,#3a2867 0%,var(--tdr-night) 60%) fixed!important}
 html.tdr-on #view-port{display:block!important}
 html.tdr-on #screen-root{left:0!important;top:0!important}
@@ -17,7 +17,6 @@ html.tdr-on #canvas-wrapper canvas{image-rendering:pixelated}
 html.tdr-on .ui-player-panel,html.tdr-on .ui-map-panel,html.tdr-on .ui-top-bar,html.tdr-on .ui-bottom-bar{visibility:hidden!important}
 html.tdr-on .ui-weather{visibility:visible}
 html.tdr-on .pb-volver{display:none!important}
-html:not(.tdr-on) .tdr-back{display:block;position:fixed;left:50%;translate:-50% 0;bottom:max(4px,env(safe-area-inset-bottom));padding:4px 12px!important;font-size:11px!important;z-index:99999;padding:6px 12px;border:2px solid #fff;border-radius:99px;background:var(--tdr-ball);color:#fff;font:900 12px var(--tdr-title);box-shadow:0 3px 0 #0005}
 
 html.tdr-on .tdr{display:block;position:fixed;inset:0;z-index:10000;pointer-events:none;font-family:var(--tdr-font);color:var(--tdr-ink);-webkit-tap-highlight-color:transparent}
 .tdr>*{pointer-events:auto}
@@ -101,7 +100,7 @@ html.tdr-modal body{background:var(--tdr-night)!important}
 .tdr-m img{width:22px;height:22px;image-rendering:pixelated}
 .tdr-m span{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tdr-m.off{opacity:.45}
-.tdr-m.tdr-classic,.tdr-m.tdr-exit{justify-content:center}
+.tdr-m.tdr-exit{grid-column:span 2;justify-content:center}
 .tdr-m.tdr-exit.armed{background:var(--tdr-ball)!important}
 
 /* ---------- botones de oleada ---------- */
@@ -123,7 +122,7 @@ html.tdr-v .tdr-team{flex:1 1 0;min-height:0;grid-auto-rows:minmax(0,1fr);max-he
 html.tdr-v.tdr-low .tdr-menu{grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
 html.tdr-v.tdr-low .tdr-m{padding:6px 0}
 html.tdr-v.tdr-low .tdr-m span{display:none}
-html.tdr-v.tdr-low .tdr-m.tdr-classic span,html.tdr-v.tdr-low .tdr-m.tdr-exit span{display:block;font-size:9px;white-space:normal;line-height:1}
+html.tdr-v.tdr-low .tdr-m.tdr-exit span{display:block;font-size:9px;white-space:normal;line-height:1}
 html.tdr-v.tdr-low .tdr-next{min-height:34px}
 html.tdr-v.tdr-low .tdr-next-row i{width:26px;height:26px}
 html.tdr-v .tdr-dock{left:calc(var(--tdr-sl) + 8px);right:calc(var(--tdr-sr) + 8px);bottom:calc(var(--tdr-sb) + 8px);height:62px}
@@ -147,7 +146,7 @@ html.tdr-h .tdr-spr{max-height:72px}
   html.tdr-h .tdr-next-row i{width:26px;height:26px}
   html.tdr-h .tdr-menu{grid-template-columns:repeat(10,minmax(0,1fr))}
   html.tdr-h .tdr-m span{display:none}
-  html.tdr-h .tdr-m.tdr-classic span,html.tdr-h .tdr-m.tdr-exit span{display:block;font-size:9.5px;white-space:normal;line-height:1.05;text-align:center}
+  html.tdr-h .tdr-m.tdr-exit span{display:block;font-size:9.5px;white-space:normal;line-height:1.05;text-align:center}
 }
 @media (prefers-reduced-motion:reduce){.tdr *{transition:none!important;animation:none!important}}
 
