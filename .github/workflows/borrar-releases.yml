@@ -1,0 +1,38 @@
+# Borra las releases viejas (con su etiqueta) y deja solo las más nuevas.
+# Se lanza a mano: Actions > Borrar releases viejas > Run workflow.
+# La app se actualiza con la última release, así que siempre se conserva al menos una.
+name: Borrar releases viejas
+
+on:
+  workflow_dispatch:
+    inputs:
+      conservar:
+        description: 'Cuántas releases nuevas conservar (mínimo 1)'
+        required: true
+        default: '2'
+
+permissions:
+  contents: write
+
+jobs:
+  borrar:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Borrar
+        env:
+          GH_TOKEN: ${{ github.token }}
+          REPO: ${{ github.repository }}
+          CONSERVAR: ${{ inputs.conservar }}
+        run: |
+          set -e
+          case "$CONSERVAR" in ''|*[!0-9]*) echo "::error::Pon un número"; exit 1;; esac
+          if [ "$CONSERVAR" -lt 1 ]; then echo "::error::Hay que conservar al menos 1"; exit 1; fi
+          # Todas las releases, de la más nueva a la más vieja.
+          gh api --paginate "repos/$REPO/releases?per_page=100" -q '.[] | "\(.created_at) \(.tag_name)"' \
+            | sort -r | awk '{print $2}' > todas.txt
+          echo "Se conservan:"; head -n "$CONSERVAR" todas.txt
+          n=0
+          for tag in $(tail -n +"$((CONSERVAR + 1))" todas.txt); do
+            gh release delete "$tag" -R "$REPO" --cleanup-tag -y && n=$((n + 1))
+          done
+          echo "Borradas: $n"
