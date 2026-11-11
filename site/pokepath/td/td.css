@@ -251,3 +251,33 @@ html.tdr-reph .maps-scene-route-container-global{top:45px!important;transform:tr
 html.tdr-reph .inventory-scene-item-container{height:auto!important;bottom:200px!important}
 html.tdr-reph .maps-scene-route-container-global{top:62px!important}
 html.tdr-reph .profile-stats-container,html.tdr-rep .profile-stats-container{bottom:10px!important;overflow-y:auto!important;height:auto!important}
+
+/* Opciones de la vista nueva, en la barra de Ajustes */
+.tdr-opts{display:none;gap:6px}
+html.tdr-sec-menu .tdr-opts{display:flex}
+.tdr-opt{height:34px;padding:0 12px;border-radius:99px;background:#ffffff1a!important;color:#e9e1ff!important;font:800 12.5px var(--tdr-font)!important;box-shadow:inset 0 0 0 1.5px #ffffff30;white-space:nowrap}
+.tdr-opt.on{background:var(--tdr-leaf)!important;color:#fff!important;box-shadow:none}
+@media (max-width:420px){html.tdr-sec-menu .tdr-secbar b{display:none}.tdr-opt{padding:0 9px;font-size:11.5px}}
+
+/* ---------- botones de las ventanas del juego, al estilo PokéBonk ----------
+   Mismos colores de fondo que pone el juego (verde, rojo, azul… según su estado), pero sin borde negro,
+   con esquinas redondeadas, sombra abajo y la letra redondeada en negrita. */
+html.tdr-on :is(.box-scene-button,.box-scene-tab,.box-scene-view-button,.challenge-scene-start-button,.defeat-restart-button,.defeat-retry-button,
+  .delete-scene-no-button,.delete-scene-yes-button,.dex-scene-tab,.draft-scene-reroll-button,.draft-scene-restart-button,.export-scene-button,
+  .final-accept-button,.import-scene-button,.maps-scene-nav-button,.menu-scene-option-button,.name-change-accept-button,.name-change-restore-button,
+  .new-game-start-button,.pokemon-scene-level-up,.pokemon-scene-extra-button,.draft-scene-data-button-container>*,[class*="inventory-scene-tab"],[class*="challenge-scene-tab"]){
+  outline:0!important;border:0!important;border-radius:99px!important;
+  box-shadow:0 3px 0 #0006,inset 0 1px 0 #ffffff33!important;
+  font-family:"M PLUS Rounded 1c","Nunito",sans-serif!important;font-weight:900!important;letter-spacing:.02em;
+  -webkit-text-stroke:0!important;text-shadow:0 1px 0 #0005!important;image-rendering:auto!important}
+html.tdr-on :is(.box-scene-button,.box-scene-tab,.menu-scene-option-button,.pokemon-scene-level-up,.draft-scene-reroll-button,.draft-scene-restart-button):active{translate:0 2px;box-shadow:0 1px 0 #0006!important}
+html.tdr-on .menu-scene-option-button{height:22px!important;line-height:22px!important;font-size:9.5px!important;margin:0 2px}
+html.tdr-on .menu-scene-option-buttons{gap:3px}
+html.tdr-on .box-scene-search,html.tdr-on .inventory-scene-search,html.tdr-on input[type=text]{border-radius:99px!important;border:0!important;padding:0 12px!important;background:#ffffff1f!important;color:#fff!important;font-family:"Nunito",sans-serif!important}
+html.tdr-on :is(.box-scene-unit-container,.inventory-scene-item-container,.inventory-scene-item-selected-container,.menu-scene-section,.profile-stats-container){border-radius:14px!important}
+html.tdr-on .inventory-scene-item-slot,html.tdr-on .box-scene-unit{border-radius:10px!important}
+
+/* En vertical: buscador a la izquierda y orden a la derecha, sin taparse */
+html.tdr-rep .box-scene-search,html.tdr-rep .inventory-scene-search{left:12px!important;width:46%!important}
+html.tdr-rep .box-scene-sort-container,html.tdr-rep .box-scene-sort-container-inventory{right:8px!important;width:46%!important}
+html.tdr-rep .inventory-scene-item-container{overflow-y:auto!important;bottom:215px!important}

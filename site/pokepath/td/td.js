@@ -7,6 +7,9 @@
    - «Vista clásica» vuelve a la pantalla de siempre. Se recuerda en este equipo (pb-td-vista). */
 (() => {
   const KEY = 'pb-td-vista';
+  const OPC = 'pb-td-opciones';
+  const opciones = (() => { try { return Object.assign({ zoomJefe: true, vibrar: true }, JSON.parse(localStorage.getItem(OPC) || '{}')); } catch { return { zoomJefe: true, vibrar: true }; } })();
+  const guardaOpc = () => { try { localStorage.setItem(OPC, JSON.stringify(opciones)); } catch {} };
   const MAP = { x: 259, y: 25, w: 720, h: 624 };
   const STAGE = { w: 1238, h: 674 };
   const SECCIONES = [
@@ -147,6 +150,7 @@
     return { x: Z.cx + (px - (m.x + m.w / 2)) / s, y: Z.cy + (py - (m.y + m.h / 2)) / s };
   };
   const zoomEn = (px, py, nz) => {
+    zoomManual();
     const a = aMapa(px, py);
     Z.z = nz; limitar();
     const m = ultimo.map, s = m.w / MAP.w * Z.z;
@@ -187,7 +191,7 @@
       if (!arrastre || e.pointerId !== arrastre.id || pinza) return;
       const dx = e.clientX - arrastre.x, dy = e.clientY - arrastre.y;
       if (!arrastre.movido && Math.hypot(dx, dy) < 6) return;
-      arrastre.movido = true; arrastreHecho = true;
+      arrastre.movido = true; arrastreHecho = true; zoomManual();
       const s = ultimo.map.w / MAP.w * Z.z;
       Z.cx = arrastre.cx - dx / s; Z.cy = arrastre.cy - dy / s;
       limitar(); colocar();
@@ -221,6 +225,7 @@
       dedos.set(e.pointerId, { x: e.clientX, y: e.clientY });
       if (dedos.size === 2) arrastre = null;
       if (dedos.size === 2) {
+        zoomManual();
         const m = medio();
         pinza = { d: m.d, z: Z.z, a: aMapa(m.x, m.y) };
         e.stopImmediatePropagation(); e.preventDefault();
@@ -270,7 +275,7 @@
         <button type="button" class="tdr-b tdr-auto" aria-pressed="false">Auto</button>
         <button type="button" class="tdr-wave"><span>Siguiente oleada</span><small></small></button>
       </footer>
-      <div class="tdr-secbar"><b></b><button type="button" class="tdr-close">Cerrar</button></div>
+      <div class="tdr-secbar"><b></b><span class="tdr-opts"><button type="button" class="tdr-opt" data-o="zoomJefe"></button><button type="button" class="tdr-opt" data-o="vibrar"></button></span><button type="button" class="tdr-close">Cerrar</button></div>
       <div class="tdr-zbar"><button type="button" class="tdr-zin" aria-label="Acercar">+</button><button type="button" class="tdr-zout" aria-label="Alejar">−</button><button type="button" class="tdr-zfit">Ver todo</button></div>`;
     document.body.append(hud);
 
@@ -310,7 +315,8 @@
       else if (t.classList.contains('tdr-wave')) ui.nextWave.click();
       else if (t.classList.contains('tdr-zin') || t.classList.contains('tdr-zout')) {
         const m = ultimo.map; zoomEn(m.x + m.w / 2, m.y + m.h / 2, Z.z * (t.classList.contains('tdr-zin') ? 1.4 : 1 / 1.4));
-      } else if (t.classList.contains('tdr-zfit')) { Z.z = 1; limitar(); colocar(); }
+      } else if (t.classList.contains('tdr-zfit')) { zoomManual(); Z.z = 1; limitar(); colocar(); }
+      else if (t.classList.contains('tdr-opt')) { opciones[t.dataset.o] = !opciones[t.dataset.o]; guardaOpc(); if (t.dataset.o === 'vibrar' && opciones.vibrar) vibra(40); }
       else if (t.classList.contains('tdr-close')) { const sc = pp.sections?.find(x => x.isOpen); sc?.close(); }
       else if (t.classList.contains('tdr-classic')) { try { localStorage.setItem(KEY, 'clasica'); } catch {} cambiar(); }
       else if (t.classList.contains('tdr-exit')) {
@@ -343,6 +349,8 @@
 
   // ---------- pintar (copia el estado del juego) ----------
   const pintar = () => {
+    musica();
+    vigilaJefe();
     if (!pp || !hud || !nueva()) return;
     if (document.body.dataset.font !== 'Lexend') document.body.dataset.font = 'Lexend';
     const a = pp.area, p = pp.player;
@@ -427,6 +435,13 @@
       lks.dataset.k = lkk; lks.textContent = '';
       if (lk.length) { lks.append(el('span', null, 'Más huecos')); for (const t of lk) lks.append(el('b', null, t)); }
     }
+
+    // Opciones propias de la vista nueva (en la barra de Ajustes)
+    hud.querySelectorAll('.tdr-opt').forEach(b => {
+      const on = !!opciones[b.dataset.o];
+      b.classList.toggle('on', on);
+      b.textContent = (b.dataset.o === 'zoomJefe' ? 'Zoom al jefe' : 'Vibración') + (on ? ': Sí' : ': No');
+    });
 
     // Oleada y botones
     const st = pp.game.stopped;
@@ -596,6 +611,86 @@
     };
   };
 
+  // ---------- música de PokéSurvivor ----------
+  // En la vista nueva, cada canción de PokéPath se cambia por una pista de PokéSurvivor (de JPTER78, MIT)
+  // según el mundo de la primera ruta que la usa; mientras hay un jefe en el mapa suena la del jefe.
+  // Se cambia el archivo de la propia pista del juego, así que el volumen, las pausas y los fundidos
+  // siguen siendo los suyos. La vista clásica recupera la música original.
+  const PISTA_MUNDO = { 1: 'village', 2: 'forest', 3: 'cave', 4: 'rift', 5: 'forest', 6: 'cave', 7: 'volcano', 8: 'judgment', 9: 'rift', 10: 'volcano' };
+  const pistaDe = {};
+  let musicaPuesta = null, jefeSonando = null;
+  const prepararMusica = () => {
+    const M = window.__tdMusica;
+    if (!M) return;
+    for (const r of Object.values(M.routeData)) {
+      const song = r.music?.song;
+      if (!song || pistaDe[song]) continue;
+      const w = +(String(r.name?.[0] || '').match(/(\d+)-\d+/) || [])[1];
+      pistaDe[song] = song === 'halloween' ? 'halloween' : r.isSecret ? 'judgment' : (PISTA_MUNDO[w] || 'village');
+    }
+    pistaDe.intro = 'village';
+    for (const [k, a] of Object.entries(M.soundMusic)) if (!a.dataset.orig) a.dataset.orig = a.getAttribute('src') || a.src;
+  };
+  const cambiaSrc = (a, src) => {
+    if (a.getAttribute('src') === src) return;
+    const sonaba = !a.paused, vol = a.volume;
+    a.src = src; a.loop = true;
+    if (sonaba) { a.volume = vol; a.play().catch(() => {}); }
+  };
+  const musica = () => {
+    const M = window.__tdMusica;
+    if (!M) return;
+    const n = nueva();
+    if (musicaPuesta !== n) {
+      musicaPuesta = n;
+      for (const [k, a] of Object.entries(M.soundMusic)) cambiaSrc(a, n && pistaDe[k] ? `./td/musica/${pistaDe[k]}.ogg` : a.dataset.orig);
+      jefeSonando = null;
+    }
+    if (!n || !pp?.area?.music) return;
+    const pista = M.soundMusic[pp.area.music.song];
+    if (!pista) return;
+    const jefe = pp.area.enemies?.some(e => e.enemy?.isBoss && !e.dying);
+    if (jefe && jefeSonando !== pista) { jefeSonando = pista; cambiaSrc(pista, './td/musica/boss.ogg'); }
+    else if (!jefe && jefeSonando) { cambiaSrc(jefeSonando, `./td/musica/${pistaDe[pp.area.music.song] || 'village'}.ogg`); jefeSonando = null; }
+  };
+
+  // ---------- jefe: zoom automático y vibración ----------
+  // Cuando aparece un jefe y no estás usando el zoom, la cámara se acerca y lo sigue; al caer el jefe
+  // vuelve al mapa entero. Si tocas el zoom tú, manda el tuyo. Vibra al perder una vida y al llegar el jefe
+  // (Android). Las dos cosas se apagan en Ajustes.
+  const auto = { on: false, jefe: null };
+  const vibra = p => { if (opciones.vibrar && nueva()) try { navigator.vibrate?.(p); } catch {} };
+  let vidasAntes = null;
+  const sigueJefe = () => {
+    if (!auto.on) return;
+    const j = auto.jefe;
+    if (!j || j.dying || j.hp <= 0 || !pp.area.enemies.includes(j) || !nueva()) {
+      auto.on = false; auto.jefe = null;
+      Z.z = 1; limitar(); colocar();
+      return;
+    }
+    if (!root.classList.contains('tdr-modal')) {
+      const tx = j.position.x + j.width / 2, ty = j.position.y + j.height / 2;
+      Z.z += (1.8 - Z.z) * .08;
+      Z.cx += (tx - Z.cx) * .08; Z.cy += (ty - Z.cy) * .08;
+      limitar(); colocar();
+    }
+    requestAnimationFrame(sigueJefe);
+  };
+  const vigilaJefe = () => {
+    if (!pp?.area || !nueva()) return;
+    const hp = pp.player.health?.[pp.area.map?.id];
+    if (vidasAntes != null && hp < vidasAntes) vibra(60);
+    vidasAntes = hp;
+    const j = pp.area.enemies?.find(e => e.enemy?.isBoss && !e.dying && e.hp > 0);
+    if (j && j !== auto.visto) {
+      auto.visto = j;
+      vibra([90, 60, 90]);
+      if (opciones.zoomJefe && Z.z <= 1.01 && !auto.on) { auto.on = true; auto.jefe = j; requestAnimationFrame(sigueJefe); }
+    }
+  };
+  const zoomManual = () => { auto.on = false; auto.jefe = null; };
+
   // ---------- textos que se quedan en inglés ----------
   // Algunas ventanas ponen su título al arrancar el juego, antes de elegir idioma en una partida nueva
   // («END OF ROUTE», «DRAFT PICK»…). Si un texto corto coincide con la versión inglesa de text.js,
@@ -608,6 +703,9 @@
       if (o && typeof o === 'object') for (const v of Object.values(o)) recorre(v);
     };
     recorre(text);
+    // Textos que el juego no trae traducidos.
+    const extra = { 'reroll': 'Volver a tirar', 'route view': 'Vista de ruta' };
+    for (const [en, es] of Object.entries(extra)) if (!idx.has(en)) idx.set(en, [en, es, en, en, en, en, en, en, en, en]);
     traduce = raiz => {
       const l = lang();
       if (!l || !raiz) return;
@@ -630,6 +728,7 @@
     agrandar();
     // Partida nueva: el perfil empieza en español (se puede cambiar con las banderas).
     try { if (pp.data?.new && pp.lang === 0) pp.newGameScene?.selectLanguage?.(1); } catch {}
+    prepararMusica();
     montar();
     gestos();
     fuente();

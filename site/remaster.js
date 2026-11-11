@@ -120,7 +120,8 @@
       survivors: { runs: num(life.runs), wins: num(life.wins), time: num(life.bestTime), level: num(life.bestLevel) },
       survivor: { runs: num(sv.runs), kills: num(sv.kills), bosses: num(sv.bosses), level: num(sv.best_level) },
       pokelike: { elite: num(json('poke_elite_wins') ?? raw('poke_elite_wins')), dex: num(json('poke_dex')), hall: num(json('poke_hall_of_fame')) },
-      pokepath: { waves: num(pathPl.stats?.wavesCompleted), defeated: num(pathPl.stats?.defeatedEnemies), stars: num(pathPl.stars), owned: num(pathPl.stats?.pokemonOwned) },
+      pokepath: { waves: num(pathPl.stats?.wavesCompleted), defeated: num(pathPl.stats?.defeatedEnemies), stars: num(pathPl.stars), owned: num(pathPl.stats?.pokemonOwned),
+        rutas: (Array.isArray(pathPl.records) ? pathPl.records : []).filter(w => num(w) >= 100).length, mejor: Math.max(0, ...(Array.isArray(pathPl.records) ? pathPl.records.map(num) : [0])) },
       plunder: { wins: num(plSt[0]), battles: num(plSt[1]), points: num(plunder.profile?.points) },
       overlord: { hay: !!ovBytes, legible: !!ov, lideres: cuenta(decks), mewtwo: !!busca(ov, 'mewtwo_cleared') }
     };
@@ -139,9 +140,13 @@
     ['PokéSurvivor', 'svk', 'Mil bajas', (d) => d.survivor.kills >= 1000, 'Derrota 1.000 enemigos', 300],
     ['Pokelike', 'pl50', 'Investigador', (d) => d.pokelike.dex >= 50, '50 Pokémon en la Pokédex', 250],
     ['Pokelike', 'plw', 'Campeón de la Liga', (d) => d.pokelike.elite >= 1 || d.pokelike.hall >= 1, 'Gana a la Liga', 500],
-    ['PokéPath TD', 'pp10', 'Defensor', (d) => d.pokepath.waves >= 10, 'Supera 10 oleadas', 150],
-    ['PokéPath TD', 'pp100', 'Muralla', (d) => d.pokepath.waves >= 100, 'Supera 100 oleadas', 400],
-    ['PokéPath TD', 'pp20', 'Entrenador de torres', (d) => d.pokepath.owned >= 20, 'Consigue 20 Pokémon', 250],
+    // PokéBonk TD y PokéPath TD comparten partida, así que cuentan las dos.
+    ['PokéBonk TD', 'pp10', 'Defensor', (d) => d.pokepath.waves >= 10, 'Supera 10 oleadas', 150],
+    ['PokéBonk TD', 'pp100', 'Muralla', (d) => d.pokepath.waves >= 100, 'Supera 100 oleadas', 400],
+    ['PokéBonk TD', 'pp20', 'Entrenador de torres', (d) => d.pokepath.owned >= 20, 'Consigue 20 Pokémon', 250],
+    ['PokéBonk TD', 'pprt', 'Ruta despejada', (d) => d.pokepath.rutas >= 1, 'Llega a la oleada 100 de una ruta', 400],
+    ['PokéBonk TD', 'pp5r', 'Guardián de la región', (d) => d.pokepath.rutas >= 5, 'Llega a la oleada 100 en 5 rutas', 600],
+    ['PokéBonk TD', 'pp500', 'Coleccionista de estrellas', (d) => d.pokepath.stars >= 500, 'Consigue 500 estrellas', 300],
     ['Pokémon Overlord', 'ov1', 'Primer líder', (d) => d.overlord.lideres >= 1, 'Vence a 1 líder o rival', 150],
     ['Pokémon Overlord', 'ov8', 'Ocho medallas', (d) => d.overlord.lideres >= 8, 'Vence a 8 líderes o rivales', 300],
     ['Pokémon Overlord', 'ovm', 'Cara a cara con Mewtwo', (d) => d.overlord.mewtwo, 'Vence a Mewtwo', 500],
@@ -453,7 +458,7 @@
     ['Bienvenido a PokéBonk Remaster', 'El PokéBonk de siempre con muchas novedades. Te enseñamos lo principal en un momento.'],
     ['Megaevolución y Dynamax', 'En la partida, los botones MEGA y DMAX se cargan derrotando enemigos. El Dynamax sirve para cualquier Pokémon; la Mega, para los que la tienen cuando su investigación está al 100%.'],
     ['Laboratorio individual', 'Cada mejora del Laboratorio se compra para un Pokémon concreto y solo le afecta a él. Gasta tu Polvo Estelar en tus favoritos.'],
-    ['Más juegos', 'En la barra del menú, Más juegos abre PokéIsaac, Pokémon Survivors, PokéSurvivor, PokéPath TD, PokéPlunder, Pokémon Overlord y Pokelike. Todos sin iniciar sesión.'],
+    ['Más juegos', 'En la barra del menú, Más juegos abre PokéIsaac, Pokémon Survivors, PokéSurvivor, PokéBonk TD (en pruebas), PokéPath TD, PokéPlunder, Pokémon Overlord y Pokelike. Todos sin iniciar sesión.'],
     ['Pasaporte, Desafío y Traspaso', 'El botón Remaster tiene tu Pasaporte de entrenador (insignias de los otros juegos que dan Polvo), un desafío nuevo cada semana con premios y rachas, y el Traspaso para pasar tu partida entre el móvil y el PC.'],
     ['Editor del HUD y mando', 'Desde la pausa puedes mover y cambiar el tamaño de los botones. En PC y Android también puedes jugar con mando.']
   ];

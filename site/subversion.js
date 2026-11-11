@@ -4,11 +4,39 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.38';
+  const SUB = '0.39';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.39',
+      date: Date.UTC(2026, 10, 11, 5, 0),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.39`,
+      summary: 'PokéBonk TD: música de PokéSurvivor, cámara al jefe, vibración y botones nuevos.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# PokéBonk TD (en pruebas)`,
+        `- **Música de PokéSurvivor** (de JPTER78): cada mundo tiene su pista y cuando aparece un jefe suena la música de jefe. Respeta el volumen de música de Ajustes. La vista clásica sigue con la música de PokéPath.`,
+        `- **Cámara al jefe**: cuando llega un jefe y no estás usando el zoom, la cámara se acerca y lo sigue; al caer vuelve al mapa entero. Si tocas el zoom tú, manda el tuyo.`,
+        `- **Vibración** al perder una vida y al llegar un jefe (Android).`,
+        `- Las dos cosas se apagan en **Ajustes** (botones arriba: Zoom al jefe y Vibración).`,
+        `- **Botones** de la Caja, la Mochila, Ajustes, el Draft y el resto de ventanas con el estilo de PokéBonk. «Reroll» ahora es **Volver a tirar**.`,
+        `- En vertical, el buscador y el orden de la Caja y la Mochila ya no se pisan.`,
+        ``,
+        `# Pasaporte`,
+        `- Las insignias del tower defense salen como **PokéBonk TD** (cuentan igual las partidas de PokéPath TD, que es la misma) y hay tres nuevas: **Ruta despejada**, **Guardián de la región** y **Coleccionista de estrellas**.`,
+        ``,
+        `- Probado: exportar e importar con **Traspaso** devuelve la partida del TD igual, con sus opciones.`,
+        `- **Android**: esta versión añade el permiso de vibración, así que la actualización trae la app completa (el actualizador la instala como siempre).`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.38',
       date: Date.UTC(2026, 10, 11, 4, 30),
@@ -969,6 +997,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.39',
+      date: '2026-11-10',
+      title: 'PokéBonk TD: música y jefes.',
+      notes: [
+        ['new', 'PokéBonk TD: música de PokéSurvivor por mundo y música de jefe.'],
+        ['new', 'PokéBonk TD: la cámara sigue al jefe y vibración al perder vida (se apagan en Ajustes).'],
+        ['better', 'PokéBonk TD: botones de las ventanas al estilo PokéBonk; tres insignias nuevas en el Pasaporte.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.38',

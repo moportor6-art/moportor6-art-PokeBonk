@@ -1,5 +1,12 @@
 # Cambios respecto al port original
 
+## PokéBonk TD: música y jefes (Subversión 0.39)
+- Música: `td/musica/*.ogg` son las pistas de PokéSurvivor (`juegos/poke-survivor/audio/mus_*`, MIT, JPTER78; `LEEME.txt`). `arranque.js` deja `soundMusic` y `routeData` en `window.__tdMusica`; cada canción de PokéPath se asigna a una pista según el mundo de la primera ruta que la usa (secretas: judgment; Halloween: halloween) y se cambia el `src` del propio `Audio` del juego (volumen, fundidos y pausa siguen siendo suyos). Con un enemigo `enemy.isBoss` vivo, la pista actual pasa a `boss.ogg`. La vista clásica recupera los `src` originales.
+- Jefe: al aparecer un jefe con zoom 1, la cámara se acerca a ×1.8 y lo sigue con `requestAnimationFrame` hasta que cae; cualquier zoom manual (rueda, botones, dos dedos, arrastre) lo cancela. `navigator.vibrate` al perder vida (60 ms) y al llegar el jefe. Opciones en `localStorage` `pb-td-opciones` (con el prefijo de `pb-guardado.js`), botones en la barra de Ajustes. Android: permiso `VIBRATE` (cambia el hash de la app, así que el actualizador baja el APK).
+- Botones de las ventanas del juego: mismos colores de fondo, sin borde negro, redondeados, sombra abajo y letra redondeada (td.css). «Reroll» (sin traducción en `text.js`) y «Route View» se traducen en `td.js`.
+- Pasaporte (`remaster.js`): el juego se llama PokéBonk TD en las insignias (mismos ids); nuevas `pprt` (oleada 100 en una ruta, desde `player.records`), `pp5r` (en 5 rutas) y `pp500` (500 estrellas).
+- Traspaso probado con una partida del TD: exportar, borrar, importar devuelve `pokepath:data` y `pokepath:pb-td-opciones` iguales.
+
 ## PokéBonk TD: combate con animaciones (Subversión 0.38)
 - `td/pmd.json` (generado de `data/sprites.json` y `data/pokemon.json`): para los 651 Pokémon de PokéPath que tienen hoja en `assets/pmd`, la posición, tamaño y duración de sus animaciones de ataque, golpe y caída. Los sprites de PokéPath son las mismas hojas PMD (mismas 8 direcciones), así que la fila de dirección se reaprovecha.
 - `arranque.js` deja `Tower` y `Enemy` en `window.__tdClases`. `td.js` envuelve `Tower.draw` (detecta el disparo cuando `attackCooldown` se recarga), `Enemy.draw` (caída cuando `dying`; destello del golpe) y `Enemy.getDamaged` (marca el golpe y si fue crítico, solo si bajó la vida), y en `drawImage` cambia el sprite por el fotograma de la hoja de PokéBonk mientras dura la animación. `Enemy.drawFloatingTexts` dibuja los números más grandes.
