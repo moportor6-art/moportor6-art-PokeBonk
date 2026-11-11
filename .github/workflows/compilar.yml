@@ -214,6 +214,8 @@ jobs:
           test -f pokemonsurvivors-web/index.html
           rm -rf site/pokemonsurvivors
           cp -r pokemonsurvivors-web site/pokemonsurvivors
+          # Sin las páginas de su web (también si la compilación viene de la caché, de antes de la 0.42).
+          python3 tools/preparar_pokemonsurvivors.py --podar site/pokemonsurvivors
           echo "Pokémon Survivors en la app: $(cat site/pokemonsurvivors/version.txt)"
 
       - name: Respaldo de Pokémon Survivors
