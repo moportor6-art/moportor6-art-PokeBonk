@@ -4,11 +4,32 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.37';
+  const SUB = '0.38';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.38',
+      date: Date.UTC(2026, 10, 11, 4, 30),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.38`,
+      summary: 'PokéBonk TD: animaciones de PokéBonk en el combate y Datos con un toque.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# PokéBonk TD (en pruebas)`,
+        `- **Animaciones de PokéBonk** en el mapa: tus Pokémon hacen su animación de **ataque** al disparar, los enemigos la de **recibir un golpe** y la de **caer** al ser derrotados (también los variocolor).`,
+        `- **Destello** en cada golpe, más grande y amarillo en los críticos.`,
+        `- **Números de daño** más grandes, con la letra de PokéBonk; los críticos más grandes todavía.`,
+        `- **Toca uno de tus Pokémon en el mapa** para abrir sus Datos. Para moverlo de casilla, arrástralo (o toca su tarjeta).`,
+        `- Solo cambia cómo se ve: el daño, el alcance y las casillas son los del juego.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.37',
       date: Date.UTC(2026, 10, 11, 3, 30),
@@ -948,6 +969,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.38',
+      date: '2026-11-10',
+      title: 'PokéBonk TD: combate con animaciones.',
+      notes: [
+        ['new', 'PokéBonk TD: animaciones de ataque, golpe y caída de PokéBonk en el mapa.'],
+        ['better', 'PokéBonk TD: destello en cada golpe y números de daño más grandes.'],
+        ['new', 'PokéBonk TD: toca un Pokémon del mapa para ver sus Datos.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.37',

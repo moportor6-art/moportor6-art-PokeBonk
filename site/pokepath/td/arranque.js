@@ -5,6 +5,11 @@
 import { Main } from '../src/js/game/Main.js';
 import { Init } from '../src/js/game/Init.js';
 import { loadData } from '../src/js/file/data.js';
+import { Tower } from '../src/js/game/component/Tower.js';
+import { Enemy } from '../src/js/game/component/Enemy.js';
+
+// La vista nueva (td.js) necesita las clases de torre y enemigo para dibujar sus animaciones.
+window.__tdClases = { Tower, Enemy };
 
 const cargar = Main.prototype.load;
 Main.prototype.load = function (...args) {

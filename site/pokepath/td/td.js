@@ -167,6 +167,11 @@
     const medio = () => { const p = [...dedos.values()]; return { x: (p[0].x + p[1].x) / 2, y: (p[0].y + p[1].y) / 2, d: Math.hypot(p[0].x - p[1].x, p[0].y - p[1].y) }; };
     // Con zoom, un dedo sobre una zona sin Pokémon mueve el mapa (si no estás colocando a uno).
     let arrastre = null;
+    // Tras mover el mapa con el dedo, el «click» que sigue no cuenta como toque.
+    let arrastreHecho = false;
+    let inicio = null;
+    addEventListener('pointerdown', e => { arrastreHecho = false; inicio = { x: e.clientX, y: e.clientY }; }, true);
+    addEventListener('pointermove', e => { if (inicio && e.buttons && Math.hypot(e.clientX - inicio.x, e.clientY - inicio.y) > 8) arrastreHecho = true; }, true);
     const hayPokemon = (x, y) => {
       const c = pp.game.canvas.getBoundingClientRect(), k = pp.game.canvas.width / c.width;
       const cx = (x - c.left) * k, cy = (y - c.top) * k;
@@ -182,7 +187,7 @@
       if (!arrastre || e.pointerId !== arrastre.id || pinza) return;
       const dx = e.clientX - arrastre.x, dy = e.clientY - arrastre.y;
       if (!arrastre.movido && Math.hypot(dx, dy) < 6) return;
-      arrastre.movido = true;
+      arrastre.movido = true; arrastreHecho = true;
       const s = ultimo.map.w / MAP.w * Z.z;
       Z.cx = arrastre.cx - dx / s; Z.cy = arrastre.cy - dy / s;
       limitar(); colocar();
@@ -190,6 +195,26 @@
     const suelta = e => { if (arrastre && e.pointerId === arrastre.id) arrastre = null; };
     addEventListener('pointerup', suelta, true);
     addEventListener('pointercancel', suelta, true);
+
+    // Toque corto sobre uno de tus Pokémon del mapa: abre sus Datos (en el juego original, el toque lo
+    // levantaba para moverlo; para moverlo, arrástralo). Casos especiales del juego (Bombardeo pendiente,
+    // Patines) se dejan como están.
+    const enCasilla = (x, y) => {
+      const c = pp.game.canvas.getBoundingClientRect(), k = pp.game.canvas.width / c.width;
+      const cx = (x - c.left) * k, cy = (y - c.top) * k;
+      return pp.area.placementTiles.find(t => cx > t.position.x && cx < t.position.x + t.size && cy > t.position.y && cy < t.position.y + t.size);
+    };
+    pp.game.canvas.addEventListener('click', e => {
+      if (!nueva() || pp.game.deployingUnit || arrastreHecho) return;
+      if (pp.area.towers.some(t => t.awaitingBombardZone)) return;
+      const t = enCasilla(e.clientX, e.clientY);
+      const pk = t && (t.passenger || t.tower);
+      if (!pk || pk.item?.id === 'pokeSkates') return;
+      const i = pp.team.pokemon.indexOf(pk);
+      if (i < 0) return;
+      e.stopImmediatePropagation(); e.preventDefault();
+      ui.pokemon[i].info.click();
+    }, true);
 
     w.addEventListener('pointerdown', e => {
       if (!nueva() || e.pointerType === 'mouse') return;
@@ -432,24 +457,139 @@
     if (firma !== ultimaFirma) { ultimaFirma = firma; colocar(); }
   };
 
-  // ---------- Pokémon más grandes en el mapa ----------
-  // Los sprites de Pokémon (tuyos y enemigos) se dibujan escalados desde su centro. Solo cambia el dibujo:
-  // posiciones, casillas, alcance y golpes no cambian.
+  // ---------- Pokémon del mapa: más grandes y con las animaciones de PokéBonk ----------
+  // Los sprites de PokéPath son los mismos de PMD que usa PokéBonk, pero solo con andar y quieto.
+  // Aquí se añaden, desde las hojas de PokéBonk (assets/pmd), el ataque de tus Pokémon cuando disparan,
+  // el golpe recibido de los enemigos y su caída al ser derrotados, más un destello en cada golpe.
+  // Solo cambia el dibujo: posiciones, casillas, alcance y golpes son los del juego.
   const ESCALA = 1.65;
+  const TICK = 1000 / 60;
+  let PMD = {};
+  fetch('./td/pmd.json').then(r => r.json()).then(j => { PMD = j; }).catch(() => {});
+  const hojas = new Map();
+  const hoja = (id, shiny) => {
+    const k = (shiny ? 's' : 'n') + id;
+    let im = hojas.get(k);
+    if (!im) { im = new Image(); im.src = `../assets/${shiny ? 'pmd-shiny' : 'pmd'}/${id}.png`; hojas.set(k, im); }
+    return im.complete && im.naturalWidth ? im : null;
+  };
+  const info = new WeakMap();
   const esPokemon = new WeakMap();
+  const nombreDe = img => {
+    let v = esPokemon.get(img);
+    if (v === undefined) {
+      const m = img.src.match(/\/images\/pokemon\/(normal|shiny|skin)\/([^/]+?)(?:-idle|-walk)?\.png/);
+      v = m ? { n: decodeURIComponent(m[2]), shiny: m[1] === 'shiny' } : null;
+      esPokemon.set(img, v);
+    }
+    return v;
+  };
+  let actual = null;
+  const ahora = () => performance.now();
+  const velocidad = () => Math.max(.5, (pp?.game?.speedFactor || .8) / .8);
+  // Fotograma de una animación según el tiempo (ms) desde que empezó; null si ya terminó.
+  const fotograma = (anim, t) => {
+    const [, , , n, d] = anim;
+    let tick = t / TICK, i = 0;
+    while (i < n && tick >= d[i]) { tick -= d[i]; i++; }
+    return i < n ? i : null;
+  };
+  const durAnim = anim => anim[4].reduce((a, b) => a + b, 0) * TICK;
+
   const agrandar = () => {
-    const c = pp.game?.ctx;
+    const c = pp.game?.ctx, K = window.__tdClases;
     if (!c || c.__td) return;
     c.__td = true;
+    if (K) {
+      const dibT = K.Tower.prototype.draw;
+      K.Tower.prototype.draw = function (...a) {
+        const st = info.get(this) || {}; info.set(this, st);
+        const cd = this.attackCooldown ?? 0;
+        if (st.cd != null && cd > st.cd + 1) st.atk = ahora();
+        st.cd = cd;
+        actual = this;
+        try { return dibT.apply(this, a); } finally { actual = null; }
+      };
+      const dibE = K.Enemy.prototype.draw;
+      K.Enemy.prototype.draw = function (...a) {
+        const st = info.get(this) || {}; info.set(this, st);
+        if (this.dying && !st.cae) st.cae = ahora();
+        actual = this;
+        try { return dibE.apply(this, a); } finally {
+          actual = null;
+          // Destello del golpe: un aro blanco que se abre y se apaga.
+          const t = ahora() - (st.golpe || -1e9);
+          if (nueva() && t < 180 && !this.dying) {
+            const x = this.position.x + this.width / 2, y = this.position.y + this.height / 2, k = t / 180;
+            c.save();
+            c.globalAlpha = (1 - k) * .9;
+            c.strokeStyle = st.crit ? '#ffcb05' : '#fff';
+            c.lineWidth = st.crit ? 4 : 3;
+            c.beginPath(); c.arc(x, y, 8 + k * (st.crit ? 26 : 16), 0, Math.PI * 2); c.stroke();
+            c.restore();
+          }
+        }
+      };
+      // Números de daño: más grandes, con la letra de PokéBonk y un pequeño salto al aparecer.
+      const textos = K.Enemy.prototype.drawFloatingTexts;
+      K.Enemy.prototype.drawFloatingTexts = function (...a) {
+        if (!nueva()) return textos.apply(this, a);
+        const c = this.ctx, x = this.position.x + this.width / 2;
+        for (const ft of this.floatingTexts) {
+          const al = ft.alpha ?? 1;
+          const pop = al > .85 ? 1 + (al - .85) * 2.5 : 1;
+          const crit = ft.color && /ff|ffd|ffc|yellow/i.test(ft.color);
+          c.save();
+          c.globalAlpha = al;
+          c.font = `900 ${Math.round((crit ? 22 : 18) * pop)}px "M PLUS Rounded 1c","Nunito",sans-serif`;
+          c.textAlign = 'center'; c.textBaseline = 'middle';
+          c.lineJoin = 'round'; c.lineWidth = 4; c.strokeStyle = '#1d1336';
+          c.strokeText(ft.text, x, ft.y);
+          c.fillStyle = ft.color || '#ffb347';
+          c.fillText(ft.text, x, ft.y);
+          c.restore();
+        }
+      };
+      const dano = K.Enemy.prototype.getDamaged;
+      K.Enemy.prototype.getDamaged = function (amount, source, ability, isCritical, ...r) {
+        const antes = this.hp;
+        const res = dano.call(this, amount, source, ability, isCritical, ...r);
+        if (this.hp < antes) { const st = info.get(this) || {}; st.golpe = ahora(); st.crit = !!isCritical; info.set(this, st); }
+        return res;
+      };
+    }
     const orig = c.drawImage;
     c.drawImage = function (img, ...a) {
       if (a.length === 8 && nueva() && img instanceof HTMLImageElement) {
-        let si = esPokemon.get(img);
-        if (si === undefined) { si = /\/images\/pokemon\//.test(img.src); esPokemon.set(img, si); }
-        if (si) {
+        const nm = nombreDe(img);
+        if (nm) {
           const [sx, sy, sw, sh, dx, dy, dw, dh] = a;
+          const cx = dx + dw / 2, cy = dy + dh / 2, px = dw / sw * ESCALA;
+          // ¿Animación de PokéBonk?
+          const st = actual && info.get(actual), p = PMD[nm.n];
+          let anim = null, t = 0;
+          if (st && p) {
+            const v = velocidad();
+            if (actual instanceof window.__tdClases.Tower && p.attack && st.atk) {
+              t = (ahora() - st.atk) * v;
+              const lim = Math.min(durAnim(p.attack), (actual.attackSpeed || actual.speed || 600) * .8);
+              if (t < lim) anim = p.attack;
+            } else if (actual instanceof window.__tdClases.Enemy) {
+              if (actual.dying && p.faint && st.cae) { t = (ahora() - st.cae) * v; anim = p.faint; }
+              else if (p.hurt && st.golpe && (t = (ahora() - st.golpe) * v) < durAnim(p.hurt)) anim = p.hurt;
+            }
+          }
+          const sheet = anim && hoja(p.id, nm.shiny);
+          const i = anim && sheet ? fotograma(anim, t) : null;
+          if (anim && sheet && (i != null || anim === p.faint)) {
+            const [y0, fw, fh, n] = anim;
+            const fi = i == null ? n - 1 : i;
+            const fila = Math.max(0, Math.min(7, Math.round(sy / sh)));
+            const w = fw * px, h = fh * px;
+            return orig.call(this, sheet, fi * fw, y0 + fila * fh, fw, fh, cx - w / 2, cy - h / 2, w, h);
+          }
           const w = dw * ESCALA, h = dh * ESCALA;
-          return orig.call(this, img, sx, sy, sw, sh, dx - (w - dw) / 2, dy - (h - dh) / 2, w, h);
+          return orig.call(this, img, sx, sy, sw, sh, cx - w / 2, cy - h / 2, w, h);
         }
       }
       return orig.call(this, img, ...a);

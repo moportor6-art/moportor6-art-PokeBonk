@@ -1,5 +1,11 @@
 # Cambios respecto al port original
 
+## PokéBonk TD: combate con animaciones (Subversión 0.38)
+- `td/pmd.json` (generado de `data/sprites.json` y `data/pokemon.json`): para los 651 Pokémon de PokéPath que tienen hoja en `assets/pmd`, la posición, tamaño y duración de sus animaciones de ataque, golpe y caída. Los sprites de PokéPath son las mismas hojas PMD (mismas 8 direcciones), así que la fila de dirección se reaprovecha.
+- `arranque.js` deja `Tower` y `Enemy` en `window.__tdClases`. `td.js` envuelve `Tower.draw` (detecta el disparo cuando `attackCooldown` se recarga), `Enemy.draw` (caída cuando `dying`; destello del golpe) y `Enemy.getDamaged` (marca el golpe y si fue crítico, solo si bajó la vida), y en `drawImage` cambia el sprite por el fotograma de la hoja de PokéBonk mientras dura la animación. `Enemy.drawFloatingTexts` dibuja los números más grandes.
+- Toque corto sobre un Pokémon del mapa: abre `UI.pokemon[i].info` (si no estás colocando uno, sin Bombardeo pendiente ni Patines y sin haber arrastrado). Arrastrar sigue moviéndolo.
+- Prueba de valores repetida: iguales.
+
 ## PokéBonk TD: ventanas nuevas (Subversión 0.37)
 - `colocar()` tiene tres modos: mapa (con zoom), sección abierta (Caja, Mochila, Tienda, Mapa, Pokédex, Perfil, Desafío, Ajustes) y ventana pequeña (`GameScene`: avisos, datos del Pokémon, tutorial…). Un `MutationObserver` sobre `#screen` recoloca al abrir o cerrar.
 - Secciones: barra propia con el nombre y Cerrar (`sections.find(isOpen).close()`). En vertical (`tdr-rep`) el contenedor de la sección pasa a medir 440 de ancho lógico y el alto que quede (`--tdr-lw`, `--tdr-lh`), escalado al ancho del móvil; en horizontal (`tdr-reph`) se escala al alto con un alto lógico de unos 470 y hasta 1000 de ancho. Ajustes por ventana en `td.css` (Tienda en dos columnas, Mapa escalado y rutas de dos en dos, Perfil apilado, Mochila más alta).
