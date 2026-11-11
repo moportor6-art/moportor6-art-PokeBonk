@@ -4,11 +4,40 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.42';
+  const SUB = '0.43';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.43',
+      date: Date.UTC(2026, 10, 11, 23, 0),
+      tag: 'novedad',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.43`,
+      summary: 'Tres objetos nuevos: Fiebre del Oro, Fiebre Estelar y Bonkoin Doble.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Son **objetos**: salen en las Poké Balls como los demás y no ocupan huecos de movimiento ni de vitamina.`,
+        ``,
+        `# Fiebre del Oro (rara, hasta 3)`,
+        `- Cada **90 s** (75 s con dos, 60 s con tres) llega la **Fiebre del oro**: durante **15 s** llueven monedas a tu alrededor y todos los Pokédólares que recoges valen de **×1,5 a ×2,5**.`,
+        `- El múltiplo se sortea en cada fiebre y la **suerte** lo inclina hacia arriba.`,
+        ``,
+        `# Fiebre Estelar (rara, hasta 3)`,
+        `- Cada **120 s** (100 s con dos, 80 s con tres) llega la **Fiebre del Polvo Estelar**: durante **15 s**, cada Pokémon que derrotas da de **×1,5 a ×2,5** del Polvo normal por derrota, también según tu suerte.`,
+        `- Las estrellas vuelan hacia ti y ese Polvo se suma al de la partida al terminar.`,
+        ``,
+        `# Bonkoin Doble (épica, hasta 2)`,
+        `- Cada Bonkoin que recoges tiene un **25 %** (50 % con dos) de **valer por dos**. La suerte lo sube un poco.`,
+        ``,
+        `Mientras dura una fiebre, un aviso arriba enseña cuánto llevas juntado y cuánto le queda.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.42',
       date: Date.UTC(2026, 10, 11, 12, 0),
@@ -1069,6 +1098,18 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.43',
+      date: '2026-11-11',
+      title: 'Fiebre del Oro, Fiebre Estelar y Bonkoin Doble.',
+      notes: [
+        ['new', 'Objeto Fiebre del Oro: cada 90 s, 15 s de lluvia de monedas y Pokédólares ×1,5 a ×2,5 según la suerte.'],
+        ['new', 'Objeto Fiebre Estelar: cada 120 s, 15 s en los que cada derrota da ×1,5 a ×2,5 de Polvo Estelar.'],
+        ['new', 'Objeto Bonkoin Doble: 25 % (hasta 50 %) de que una Bonkoin cuente por dos.'],
+        ['better', 'No ocupan huecos de movimiento ni de vitamina, y un aviso enseña lo juntado en cada fiebre.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.42',

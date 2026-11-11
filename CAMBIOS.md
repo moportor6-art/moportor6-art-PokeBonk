@@ -1,5 +1,14 @@
 # Cambios respecto al port original
 
+## Fiebres y Bonkoin doble (Subversión 0.43)
+- Tres objetos nuevos en la lista de objetos de `defineProperty-…js` (antes de `gold-teeth`): `pb-fiebre-oro` (rareza 2, hasta 3), `pb-fiebre-polvo` (rareza 2, hasta 3) y `pb-bonk-doble` (rareza 3, hasta 2), con `mods: []`. Nombres en `data/items.json` (ids 9001-9003) y `data/i18n/en.json`; se cambia su `?v=` (`pbfiebr1`) para que no salga el JSON viejo de la caché. Iconos nuevos en `assets/items/pb-*.png`, hechos con los de Pepita, Maxipepita, Polvo Estelar, Trozo Estrella, Fragmento Cometa y Bonkoin.
+- `fiebres.js` (`window.PB_FIEBRE`), cada 100 ms con `window.__pbRun` y el tiempo de juego (`run.time`), sin Duelos:
+  - Fiebre del oro: cada 90 s menos 15 s por unidad extra (mínimo 30 s), 15 s con `run.goldMul` multiplicado (las monedas usan `goldMul`), 3 monedas por segundo alrededor con el valor normal `(2 + 2·zona)·oro`. Al acabar se divide `goldMul` por el mismo número.
+  - Fiebre del Polvo Estelar: cada 120 s menos 20 s por unidad extra, 15 s en los que cada derrota suma `0,1 · diff.stardust · múltiplo` a `stats.pbDust`.
+  - Múltiplo: `1,5 + u`, con `u = 1 − (1 − aleatorio)^(1 + suerte/40)`, redondeado a décimas.
+  - Bonkoin doble: `menus-…js` llama a `PB_FIEBRE.bonk(run)` después de `stats.bonks++`; probabilidad `0,25 + 0,25·(unidades − 1) + 0,002·suerte`, como mucho 0,75.
+- `main-…js`: `result()` y `leanResult()` llevan `pbDust` y el servidor local lo suma al Polvo de la partida.
+
 ## Un solo tower defense y optimización de espacio (Subversión 0.42)
 - PokéPath TD original fuera: `pokepath/index.html` es ahora PokéBonk TD (lo que era `remaster.html`) y `remaster.html` solo redirige a `index.html` (para enlaces y `st.ult` antiguos). Fuera el `alt` «PokéPath TD original» de `pokeisaac-boton.js`; en la Sala, un `st.ult = 'pokepath'` antiguo cuenta como PokéBonk TD.
 - `td.js`: fuera la vista clásica (`pb-td-vista`, que se borra al cargar), los botones «Vista clásica» y «Vista nueva» y el cambio de `src` de música y sonidos en marcha; solo queda el cambio a `boss.ogg` con jefe (vuelve al `src` que tenía). En el menú, «Salir» ocupa dos columnas.
