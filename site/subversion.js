@@ -4,11 +4,31 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.39';
+  const SUB = '0.40';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.40',
+      date: Date.UTC(2026, 10, 11, 5, 30),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.40`,
+      summary: 'PokéBonk TD: efectos de sonido de PokéSurvivor, con disparos según el tipo.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# PokéBonk TD (en pruebas)`,
+        `- **Efectos de sonido de PokéSurvivor**: cada Pokémon dispara con el sonido de su tipo (fuego, agua, eléctrico, planta… 18 tipos), los golpes y las caídas de los enemigos suenan como en PokéSurvivor, y el jefe tiene sonido de llegada y de derrota.`,
+        `- Los botones y ventanas también usan los sonidos de PokéSurvivor.`,
+        `- Los sonidos especiales de algunos Pokémon y habilidades (Chatot, Kyogre, campanas…) se mantienen.`,
+        `- Respeta el volumen de efectos y de interfaz de Ajustes y la opción de silenciar proyectiles. La vista clásica sigue con los sonidos de PokéPath.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.39',
       date: Date.UTC(2026, 10, 11, 5, 0),
@@ -997,6 +1017,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.40',
+      date: '2026-11-10',
+      title: 'PokéBonk TD: sonidos nuevos.',
+      notes: [
+        ['new', 'PokéBonk TD: efectos de sonido de PokéSurvivor, con disparos según el tipo del Pokémon.'],
+        ['better', 'PokéBonk TD: sonidos de golpe, caída y jefe, y de botones y ventanas.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.39',

@@ -4,3 +4,5 @@ igual que el resto de su código. Se usa en PokéBonk TD con su misma licencia.
 
 Archivos: village, forest, cave, rift, volcano, judgment (rutas), boss (jefes),
 halloween (convertida a OGG desde mus_halloween.wav).
+
+../sonidos/: efectos de sonido de PokéSurvivor (audio/sfx_*.ogg), mismo origen y licencia.

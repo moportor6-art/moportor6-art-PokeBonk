@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## PokéBonk TD: sonidos nuevos (Subversión 0.40)
+- `td/sonidos/*.ogg`: efectos de PokéSurvivor (`juegos/poke-survivor/audio/sfx_*`, MIT). `td/pmd.json` lleva también el primer tipo (`t`) de 755 de los 779 Pokémon de PokéPath (de `data/pokemon.json`, también formas mega/regionales por nombre base).
+- Interfaz y efectos del juego: se cambia el `src` de sus `Audio` (`soundUi`, `soundEffect`) por el equivalente de PokéSurvivor; los disparos genéricos (`projectileN`, `areaN`, `beamN`, `sword`, `ice`…) se silencian (`muted`) en la vista nueva y suenan desde `td.js`: `shot_<tipo>` al detectar el disparo, `hit` en golpes físicos o especiales (no en quemadura, veneno…), `faint` / `bossDown` al caer y `boss` al llegar el jefe. Tres reproductores por sonido, como mucho uno cada 70–90 ms; volumen de `config.audio` (master × efectos), respeta `mute[0]` (silenciar proyectiles).
+- La vista clásica recupera los `src` y quita el silencio. Prueba de valores repetida: iguales.
+
 ## PokéBonk TD: música y jefes (Subversión 0.39)
 - Música: `td/musica/*.ogg` son las pistas de PokéSurvivor (`juegos/poke-survivor/audio/mus_*`, MIT, JPTER78; `LEEME.txt`). `arranque.js` deja `soundMusic` y `routeData` en `window.__tdMusica`; cada canción de PokéPath se asigna a una pista según el mundo de la primera ruta que la usa (secretas: judgment; Halloween: halloween) y se cambia el `src` del propio `Audio` del juego (volumen, fundidos y pausa siguen siendo suyos). Con un enemigo `enemy.isBoss` vivo, la pista actual pasa a `boss.ogg`. La vista clásica recupera los `src` originales.
 - Jefe: al aparecer un jefe con zoom 1, la cámara se acerca a ×1.8 y lo sigue con `requestAnimationFrame` hasta que cae; cualquier zoom manual (rueda, botones, dos dedos, arrastre) lo cancela. `navigator.vibrate` al perder vida (60 ms) y al llegar el jefe. Opciones en `localStorage` `pb-td-opciones` (con el prefijo de `pb-guardado.js`), botones en la barra de Ajustes. Android: permiso `VIBRATE` (cambia el hash de la app, así que el actualizador baja el APK).

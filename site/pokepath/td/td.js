@@ -350,6 +350,7 @@
   // ---------- pintar (copia el estado del juego) ----------
   const pintar = () => {
     musica();
+    sonidos();
     vigilaJefe();
     if (!pp || !hud || !nueva()) return;
     if (document.body.dataset.font !== 'Lexend') document.body.dataset.font = 'Lexend';
@@ -520,7 +521,7 @@
       K.Tower.prototype.draw = function (...a) {
         const st = info.get(this) || {}; info.set(this, st);
         const cd = this.attackCooldown ?? 0;
-        if (st.cd != null && cd > st.cd + 1) st.atk = ahora();
+        if (st.cd != null && cd > st.cd + 1) { st.atk = ahora(); try { sonidoDisparo(this); } catch {} }
         st.cd = cd;
         actual = this;
         try { return dibT.apply(this, a); } finally { actual = null; }
@@ -528,7 +529,7 @@
       const dibE = K.Enemy.prototype.draw;
       K.Enemy.prototype.draw = function (...a) {
         const st = info.get(this) || {}; info.set(this, st);
-        if (this.dying && !st.cae) st.cae = ahora();
+        if (this.dying && !st.cae) { st.cae = ahora(); if (!pp.mute?.[0]) suena(this.enemy?.isBoss ? 'bossDown' : 'faint', 'effects', 90); }
         actual = this;
         try { return dibE.apply(this, a); } finally {
           actual = null;
@@ -569,7 +570,7 @@
       K.Enemy.prototype.getDamaged = function (amount, source, ability, isCritical, ...r) {
         const antes = this.hp;
         const res = dano.call(this, amount, source, ability, isCritical, ...r);
-        if (this.hp < antes) { const st = info.get(this) || {}; st.golpe = ahora(); st.crit = !!isCritical; info.set(this, st); }
+        if (this.hp < antes) { const st = info.get(this) || {}; st.golpe = ahora(); st.crit = !!isCritical; info.set(this, st); if (!pp.mute?.[0] && (source === 'physical' || source === 'special' || source == null)) suena('hit', 'effects', 90); }
         return res;
       };
     }
@@ -654,6 +655,62 @@
     else if (!jefe && jefeSonando) { cambiaSrc(jefeSonando, `./td/musica/${pistaDe[pp.area.music.song] || 'village'}.ogg`); jefeSonando = null; }
   };
 
+  // ---------- efectos de sonido de PokéSurvivor ----------
+  // En la vista nueva: los disparos de tus Pokémon suenan según su tipo (fuego, agua, eléctrico…), los golpes
+  // y las caídas con los sonidos de PokéSurvivor, y los sonidos de los menús también. Los disparos genéricos
+  // del juego se silencian en la vista nueva para no sonar dos veces; los sonidos propios de un Pokémon
+  // (Chatot, Kyogre…) y los de habilidades especiales se quedan como están. Usa el volumen de efectos y de
+  // interfaz de Ajustes y respeta sus silencios.
+  const SON = './td/sonidos/';
+  const UI_SON = { close: 'back', open: 'select', hover1: 'hover', hover2: 'hover', hover3: 'hover', option: 'click', button1: 'click', button2: 'click',
+    key0: 'click', key1: 'click', click0: 'click', click1: 'click', select: 'select', obtain: 'chest', equip: 'confirm', unequip: 'back', pop0: 'error',
+    purchase: 'buy', start: 'confirm', results: 'levelup' };
+  const EF_SON = { shiny: 'shiny', explosion: 'burst1', earthquake: 'quake', teleport: 'rift', bell: 'toll', regenerator: 'heal', ding: 'xp' };
+  const SILENCIO = /^(projectile\d|area\d|beam\d|hit4|sword|ice|rockThrow|thunder|chain|fire)$/;
+  let sonidosPuestos = null;
+  const volumen = tipo => {
+    try { const a = JSON.parse(localStorage.getItem('data')).config.audio; return Math.min(1, a.master * .05 * a[tipo] * .05); } catch { return .3; }
+  };
+  const sonidos = () => {
+    const M = window.__tdMusica;
+    if (!M?.soundEffect) return;
+    const n = nueva();
+    if (sonidosPuestos === n) return;
+    sonidosPuestos = n;
+    const pon = (bank, mapa) => {
+      for (const [k, a] of Object.entries(bank)) {
+        if (!a.dataset.orig) a.dataset.orig = a.getAttribute('src') || a.src;
+        const nuevo = n && mapa[k] ? SON + mapa[k] + '.ogg' : a.dataset.orig;
+        if (a.getAttribute('src') !== nuevo) a.src = nuevo;
+        if (bank === M.soundEffect) a.muted = n && SILENCIO.test(k);
+      }
+    };
+    pon(M.soundUi, UI_SON);
+    pon(M.soundEffect, EF_SON);
+  };
+  // Varios reproductores por sonido para que se puedan solapar; como mucho uno cada `cada` ms.
+  const reproductores = new Map(), ultimoSon = new Map();
+  const suena = (nombre, tipo = 'effects', cada = 70) => {
+    if (!nueva() || document.hidden) return;
+    const t = performance.now();
+    if (t - (ultimoSon.get(nombre) || 0) < cada) return;
+    ultimoSon.set(nombre, t);
+    let lista = reproductores.get(nombre);
+    if (!lista) { lista = [0, 1, 2].map(() => { const a = new Audio(SON + nombre + '.ogg'); a.preload = 'auto'; return a; }); lista.i = 0; reproductores.set(nombre, lista); }
+    const a = lista[lista.i++ % lista.length];
+    a.volume = volumen(tipo);
+    if (!a.volume) return;
+    try { a.currentTime = 0; a.play().catch(() => {}); } catch {}
+  };
+  const TIPOS_SON = new Set(['bug', 'dark', 'dragon', 'electric', 'fairy', 'fighting', 'fire', 'flying', 'ghost', 'grass', 'ground', 'ice', 'normal', 'poison', 'psychic', 'rock', 'steel', 'water']);
+  const sonidoDisparo = torre => {
+    if (pp.mute?.[0]) return;
+    const src = torre.pokemon?.sprite?.base || torre.pokemon?.sprite?.idle || '';
+    const k = (String(src).match(/\/([^/]+?)(?:-idle|-walk)?\.png/) || [])[1] || torre.pokemon?.key;
+    const t = PMD[k]?.t;
+    suena('shot_' + (TIPOS_SON.has(t) ? t : 'normal'));
+  };
+
   // ---------- jefe: zoom automático y vibración ----------
   // Cuando aparece un jefe y no estás usando el zoom, la cámara se acerca y lo sigue; al caer el jefe
   // vuelve al mapa entero. Si tocas el zoom tú, manda el tuyo. Vibra al perder una vida y al llegar el jefe
@@ -686,6 +743,7 @@
     if (j && j !== auto.visto) {
       auto.visto = j;
       vibra([90, 60, 90]);
+      suena('boss', 'effects', 0);
       if (opciones.zoomJefe && Z.z <= 1.01 && !auto.on) { auto.on = true; auto.jefe = j; requestAnimationFrame(sigueJefe); }
     }
   };
