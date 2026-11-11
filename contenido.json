@@ -1,0 +1,635 @@
+{
+ "formato": 1,
+ "version": 67,
+ "sub": "0.37",
+ "shell": {
+  "android": "0d865f9ac847e247",
+  "windows": "684c417a0bae956d"
+ },
+ "modulos": {
+  "pokebonk": {
+   "nombre": "PokéBonk (juego principal)",
+   "hash": "d0e4240e456e5ed7ca54cc5f7366a77963f8cfafc982df7438bb4906ba1ee275",
+   "archivos": 7676,
+   "bytes": 170890319
+  },
+  "pokeisaac": {
+   "nombre": "PokéIsaac",
+   "hash": "43c894cc1e7af7312508f4a752905c5a1dc163eeedc8d7174e37fda9a8ebdf01",
+   "archivos": 5679,
+   "bytes": 82365172
+  },
+  "pokemonsurvivors": {
+   "nombre": "Pokémon Survivors",
+   "hash": "d91254db1abdb8d64acd1d2dfa13196b309b31239bed255ca31e1a1075ac9e49",
+   "archivos": 7868,
+   "bytes": 96257262
+  },
+  "pokesurvivor": {
+   "nombre": "PokéSurvivor",
+   "hash": "dddc11d848d810317a02aaadb3352a0dda589441d1ba456a8dda128cfb7d691b",
+   "archivos": 10,
+   "bytes": 187898756
+  },
+  "pokepath": {
+   "nombre": "PokéPath TD",
+   "hash": "b56cebeee8551c3b3a25a0b215936c2786a1aebb6ecba4a0d0f3ce4eb0372baa",
+   "archivos": 3723,
+   "bytes": 101226784
+  },
+  "pokeplunder": {
+   "nombre": "PokéPlunder",
+   "hash": "6bc576cfb3370e4a7559e7b8facf0eacaa5e0c56696b7274dc67bb224eb6af1b",
+   "archivos": 665,
+   "bytes": 29732731
+  },
+  "pokeoverlord": {
+   "nombre": "Pokémon Overlord",
+   "hash": "0a800fc8b3188b0c09069aac0ba846f318d18b36545286d7b2de8294c6ab7eb0",
+   "archivos": 11,
+   "bytes": 103106486
+  },
+  "pokelike": {
+   "nombre": "Pokelike",
+   "hash": "50e4e8a2ed719f7906c95992ea0791f392affbc4cc3f887dae2ebea4a225f02c",
+   "archivos": 1994,
+   "bytes": 133209473
+  }
+ },
+ "tag": "v67",
+ "base": "https://raw.githubusercontent.com/moportor6-art/moportor6-art-PokeBonk/contenido-v67/",
+ "cambios": [
+  {
+   "oficial": "0.9.9",
+   "sub": "0.37",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: ventanas nuevas.",
+   "notes": [
+    [
+     "better",
+     "PokéBonk TD: ventanas a pantalla completa con los colores y la letra de PokéBonk."
+    ],
+    [
+     "better",
+     "PokéBonk TD: en vertical, Tienda, Mapa, Perfil y Mochila repartidas para el móvil."
+    ],
+    [
+     "fix",
+     "PokéBonk TD: textos que salían en inglés y dinero de la oleada en español."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.36",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: todas las rutas.",
+   "notes": [
+    [
+     "better",
+     "PokéBonk TD: las 47 rutas revisadas, también las secretas y las de mapa grande."
+    ],
+    [
+     "better",
+     "PokéBonk TD: con zoom, el mapa se mueve con un dedo."
+    ],
+    [
+     "better",
+     "PokéBonk TD: el botón grande avisa cuando estás colocando un Pokémon."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.35",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: mapa más claro.",
+   "notes": [
+    [
+     "better",
+     "PokéBonk TD: Pokémon más grandes en el mapa y zoom con dos dedos o con + y −."
+    ],
+    [
+     "new",
+     "PokéBonk TD: datos del enemigo de la próxima oleada."
+    ],
+    [
+     "fix",
+     "PokéBonk TD: botones Vista clásica y Salir sin texto en horizontal."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.34",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD en pruebas.",
+   "notes": [
+    [
+     "new",
+     "**PokéBonk TD** en Más juegos: PokéPath TD con pantalla nueva para el móvil, misma partida y mismos valores."
+    ],
+    [
+     "new",
+     "Tarjetas del equipo con subir de nivel y su precio, y botón grande de Siguiente oleada."
+    ],
+    [
+     "better",
+     "Vista clásica a un toque, por si prefieres la pantalla de siempre."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.33",
+   "date": "2026-11-10",
+   "title": "Vertical rediseñado.",
+   "notes": [
+    [
+     "better",
+     "Partida en vertical: barra de arriba con la cuenta atrás grande, zona, reloj y dinero bien separados."
+    ],
+    [
+     "better",
+     "Partida en vertical: barra del jefe a lo ancho; retrato y minimapa a la misma altura."
+    ],
+    [
+     "better",
+     "Menú en vertical: eventos uno por fila y la cuenta atrás de los Encargos entera."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.32",
+   "date": "2026-11-10",
+   "title": "Modo vertical mejorado.",
+   "notes": [
+    [
+     "better",
+     "En vertical, las cartas de subir de nivel van a todo el ancho y se leen enteras."
+    ],
+    [
+     "better",
+     "En vertical, La Liga y Elige mapa ordenadas para el móvil, con el botón de empezar siempre a mano."
+    ],
+    [
+     "fix",
+     "En vertical, pestañas de la pausa y de Ajustes, nombres de los Encargos y título de la Mutación del día ya no se cortan."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.31",
+   "date": "2026-11-10",
+   "title": "Auto aprender.",
+   "notes": [
+    [
+     "new",
+     "**Auto aprender** en la pausa: elige sola la mejor mejora según si tu Pokémon es físico, especial o mixto."
+    ],
+    [
+     "new",
+     "Auto aprender también en Pokémon Survivors y PokéSurvivor."
+    ],
+    [
+     "better",
+     "Botones de la pausa juntos y sin tapar texto."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.30",
+   "date": "2026-11-10",
+   "title": "Versiones en Más juegos.",
+   "notes": [
+    [
+     "new",
+     "Más juegos enseña la versión de cada juego."
+    ],
+    [
+     "better",
+     "PokéPath TD: el botón dice \"Volver a PokéBonk Remaster\"."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.29",
+   "date": "2026-11-10",
+   "title": "Prueba del actualizador.",
+   "notes": [
+    [
+     "better",
+     "El logo enseña la subversión (REMASTER 0.29)."
+    ],
+    [
+     "better",
+     "PokéPlunder: el botón dice \"Volver a PokéBonk Remaster\"."
+    ],
+    [
+     "fix",
+     "Actualizador: archivos de más de 100 MB en trozos (no se podía publicar)."
+    ],
+    [
+     "fix",
+     "PokéSurvivor ya no se vuelve a bajar en cada versión."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.28",
+   "date": "2026-11-10",
+   "title": "Actualizador propio.",
+   "notes": [
+    [
+     "new",
+     "Actualizaciones por archivos: solo se baja lo que cambia, por partes del juego."
+    ],
+    [
+     "new",
+     "Historial de cambios antes de actualizar, y Remaster > Actualizaciones."
+    ],
+    [
+     "new",
+     "Android instala el APK nuevo sin pasar por GitHub cuando cambia la app."
+    ],
+    [
+     "better",
+     "Actualizaciones firmadas y comprobadas, con vuelta atrás si algo falla."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.27",
+   "date": "2026-11-10",
+   "title": "Traspaso, avisos y gráficos completos.",
+   "notes": [
+    [
+     "new",
+     "**Traspaso** de partida entre el móvil y el PC (Remaster > Traspaso)."
+    ],
+    [
+     "new",
+     "Aviso de versión nueva en Android y Windows."
+    ],
+    [
+     "new",
+     "Desafío del Alfa: rachas con premio y tabla de récords."
+    ],
+    [
+     "new",
+     "Pokémon Overlord da insignias en el Pasaporte."
+    ],
+    [
+     "fix",
+     "Todos los sprites y retratos variocolor dentro de la app: ya no sale \"Faltan gráficos\"."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.26",
+   "date": "2026-11-09",
+   "title": "Windows: motor nuevo.",
+   "notes": [
+    [
+     "fix",
+     "Windows: Electron 44 (Chromium actual). Ya no se cierra al llegar al menú."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.25",
+   "date": "2026-11-09",
+   "title": "Windows: menú arreglado.",
+   "notes": [
+    [
+     "fix",
+     "Windows: el juego ya no se cierra al llegar al menú (panel Tu compañero)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.24",
+   "date": "2026-11-09",
+   "title": "Windows: informe de fallos.",
+   "notes": [
+    [
+     "fix",
+     "Windows: vuelve a usar la tarjeta gráfica (fuera el modo seguro)."
+    ],
+    [
+     "new",
+     "Windows: informe del fallo en ultimo-fallo.dmp."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.23",
+   "date": "2026-11-09",
+   "title": "Windows: modo seguro.",
+   "notes": [
+    [
+     "fix",
+     "Windows: si el juego se cierra al arrancar, la app se reinicia sola en modo seguro."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.22",
+   "date": "2026-11-09",
+   "title": "Windows: pantalla morada.",
+   "notes": [
+    [
+     "fix",
+     "Windows: ya no se queda la pantalla morada con gráficas AMD."
+    ],
+    [
+     "new",
+     "Windows: registro de errores en %APPDATA%\\PokeBonk\\registro.txt."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.21",
+   "date": "2026-11-09",
+   "title": "Windows arreglado.",
+   "notes": [
+    [
+     "fix",
+     "Windows: ya no sale el aviso de copia no oficial al abrir el juego."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.20",
+   "date": "2026-11-10",
+   "title": "PokéBonk Remaster.",
+   "notes": [
+    [
+     "new",
+     "Nuevo nombre: **PokéBonk Remaster**, con botón **Remaster** en el menú."
+    ],
+    [
+     "new",
+     "**Pasaporte de entrenador**: insignias por tu progreso en los otros juegos, con Polvo Estelar."
+    ],
+    [
+     "new",
+     "**Desafío del Alfa** semanal con reglas fijas, récord y premios."
+    ],
+    [
+     "new",
+     "Tour de bienvenida la primera vez."
+    ],
+    [
+     "fix",
+     "PokéPath TD y PokéPlunder ya no comparten guardado."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.19",
+   "date": "2026-11-09",
+   "title": "Soporte extendido: mando y PC.",
+   "notes": [
+    [
+     "new",
+     "Windows: pestaña **Pantalla** con resolución **Súper 1,5×/2×**, motor gráfico (Direct3D 11, OpenGL, Vulkan) y **FPS sin tope** (para AFMF 2)."
+    ],
+    [
+     "new",
+     "Límite de FPS con 165 y 240."
+    ],
+    [
+     "new",
+     "Mando con cursor en Pokelike, PokéPath TD, PokéPlunder y en Más juegos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.18",
+   "date": "2026-11-09",
+   "title": "Pokémon Survivors en Más juegos.",
+   "notes": [
+    [
+     "new",
+     "**Pokémon Survivors** (de pedrobarretto) en Más juegos: survivors con 82 Pokémon, en español, sin internet y sin cuenta. Se actualiza solo en cada versión."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.17",
+   "date": "2026-11-09",
+   "title": "Pokémon Overlord en Más juegos.",
+   "notes": [
+    [
+     "new",
+     "**Pokémon Overlord** (de jab_lao) en Más juegos: roguelike de combates por equipos, sin internet y sin cuenta."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.16",
+   "date": "2026-11-09",
+   "title": "PokéIsaac: disparo automático sin mantener.",
+   "notes": [
+    [
+     "new",
+     "PokéIsaac: **Modo AUTO: SIEMPRE** en Opciones > Táctil. Con Disparar con AUTO, apunta y dispara solo al enemigo más cercano."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.15",
+   "date": "2026-11-09",
+   "title": "PokéPlunder en Más juegos.",
+   "notes": [
+    [
+     "new",
+     "**PokéPlunder** (de Khydra) en Más juegos: roguelike por turnos sin internet y sin cuenta."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.14",
+   "date": "2026-11-09",
+   "title": "PokéPath TD en Más juegos.",
+   "notes": [
+    [
+     "new",
+     "**PokéPath TD** (de Khydra) en Más juegos: tower defense sin internet y sin cuenta, en español."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.13",
+   "date": "2026-11-09",
+   "title": "Ningún juego pide iniciar sesión.",
+   "notes": [
+    [
+     "new",
+     "**PokéIsaac sin cuenta**: Gacha, fichas, Tickets, misiones y huevos funcionan sin iniciar sesión y sin internet, guardados en el dispositivo."
+    ],
+    [
+     "new",
+     "**PokéIsaac online** en Más juegos, para usar tu cuenta de pokeisaac.com (Ranking, cooperativo, clan y chat)."
+    ],
+    [
+     "better",
+     "Revisados PokéBonk, PokéSurvivor y Pokelike: no piden cuenta (solo las clasificatorias y la nube de Pokelike)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.12",
+   "date": "2026-11-09",
+   "title": "Más juegos: PokéSurvivor, Pokelike y PokéIsaac 1.1.1.",
+   "notes": [
+    [
+     "new",
+     "**PokéSurvivor** (Pokémon Survivors 6.2, de JPTER78 y JayElDragon) dentro de la app, sin internet. En Más juegos."
+    ],
+    [
+     "new",
+     "**PokéIsaac 1.1.1**, igual que la web (Clan, Chat, Mi equipo, Clásico por capítulos, entrenamiento...). Se actualiza solo en cada versión de la app."
+    ],
+    [
+     "fix",
+     "PokéIsaac: los enemigos ya pueden hacerte daño y derrotarte (la copia anterior te hacía invencible)."
+    ],
+    [
+     "new",
+     "**Pokelike** (el de la web, 3.6.3) dentro de la app, con su música y sin publicidad. Lo que falte se baja y se guarda."
+    ],
+    [
+     "better",
+     "Botón **Más juegos** con PokéIsaac, PokéSurvivor y Pokelike."
+    ],
+    [
+     "better",
+     "Barra de accesos en vertical: icono encima del nombre para que se lean enteros."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.11",
+   "date": "2026-11-09",
+   "title": "Guardado automático al salir de la app.",
+   "notes": [
+    [
+     "new",
+     "**Guardado automático**: si sales de la app en mitad de una partida, se guarda sola y al volver puedes continuarla o finalizarla."
+    ],
+    [
+     "fix",
+     "Menú principal: los textos largos (Continuar, Supervivencia, eventos) ya caben en sus botones y la barra lateral muestra todos los accesos."
+    ],
+    [
+     "better",
+     "Partida en vertical menos apretada, y Editor del HUD también en Ajustes > Gráficos."
+    ],
+    [
+     "new",
+     "Editor del HUD: ahora puedes girar y ocultar cada elemento."
+    ],
+    [
+     "new",
+     "Versión para Windows en cada release (instalador y .zip)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.10",
+   "date": "2026-11-09",
+   "title": "Modo vertical.",
+   "notes": [
+    [
+     "new",
+     "**Orientación** en Ajustes > Gráficos: Horizontal, Vertical o Automática."
+    ],
+    [
+     "new",
+     "Menú principal, HUD de la partida y pausa ordenados para vertical."
+    ],
+    [
+     "better",
+     "El Editor del HUD guarda una disposición distinta para cada orientación."
+    ],
+    [
+     "fix",
+     "MEGA y DMAX ya funcionan durante la aparición de jefes y Alfas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.9",
+   "date": "2026-11-09",
+   "title": "Mega temporal y más huecos de vitamina.",
+   "notes": [
+    [
+     "balance",
+     "**Mega temporal**: dura 40 s y se recarga con bajas (150 en los primeros 5 minutos, 300 después)."
+    ],
+    [
+     "new",
+     "**Huecos de vitamina** en el Laboratorio: ahora 4 niveles, hasta 7 huecos."
+    ],
+    [
+     "fix",
+     "MEGA y DMAX ya no se ven encima de la pausa, y las estadísticas de la pausa ya no quedan tapadas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.8",
+   "date": "2026-11-09",
+   "title": "PokéIsaac como minijuego.",
+   "notes": [
+    [
+     "new",
+     "**PokéIsaac** (de @SrBatai) dentro de la app: botón en el menú principal y botón Volver a PokéBonk."
+    ],
+    [
+     "better",
+     "Sin internet se juega con Jugar sin conexión, pero los sprites de PokéIsaac se descargan de sus servidores, como en su APK original."
+    ]
+   ]
+  }
+ ],
+ "completo": {
+  "android": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v67/PokeBonk.apk",
+   "bytes": 836586238,
+   "sha256": "be4340e3290cccff94e14f54b4ebaeb9db878937c036fdd4f7db0de7f8030d18"
+  },
+  "windows": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v67/PokeBonk-Windows-Instalador.exe",
+   "bytes": 825690071,
+   "sha256": "9b0c718a6d9f1a3feac64f207e37709ce15cc67640c2401d31a2e949ef859a80"
+  }
+ }
+}
