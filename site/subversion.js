@@ -4,11 +4,32 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.43';
+  const SUB = '0.44';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.44',
+      date: Date.UTC(2026, 10, 11, 23, 30),
+      tag: 'novedad',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.44`,
+      summary: 'Todas las familias empiezan por su primera forma: Pikachu nace como Pichu.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Empiezas por la primera forma`,
+        `- Los miembros de la Liga que tienen un bebé antes empiezan la partida **como ese bebé**: Pikachu como **Pichu**, Clefairy como **Cleffa**, Jigglypuff como **Igglybuff**, Jynx como **Smoochum**, Electabuzz como **Elekid**, Magmar como **Magby**, y Hitmonlee, Hitmonchan y Hitmontop como **Tyrogue**.`,
+        `- Llevas el kit y la pasiva del miembro que elegiste y **evolucionas a él en el nivel 12**. Después sigue igual (Pikachu a Raichu, Cleffa a Clefairy y a Clefable...).`,
+        `- El bebé empieza más flojo, pero al evolucionar una vez más acabas un poco más fuerte.`,
+        `- Los bebés siguen siendo miembros aparte de la Liga, con su propio kit y su reto de investigación.`,
+        `- Los bebés de otras regiones (Happiny, Munchlax, Azurill...) llegarán con su región. En Duelos no cambia nada.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.43',
       date: Date.UTC(2026, 10, 11, 23, 0),
@@ -1098,6 +1119,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.44',
+      date: '2026-11-11',
+      title: 'Todas las familias empiezan por su primera forma.',
+      notes: [
+        ['new', 'Pikachu, Clefairy, Jigglypuff, Jynx, Electabuzz, Magmar y los Hitmon empiezan como su bebé y evolucionan a su forma en el nivel 12.'],
+        ['better', 'Llevas el kit del miembro que elegiste desde el principio.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.43',
