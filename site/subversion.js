@@ -17,16 +17,17 @@
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.44`,
-      summary: 'Todas las familias empiezan por su primera forma: Pikachu nace como Pichu.',
+      summary: 'Cada familia empieza por su primera forma: Pichu, Cleffa, Igglybuff, Tyrogue, Smoochum, Elekid y Magby.',
       body: [
         `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
         ``,
-        `# Empiezas por la primera forma`,
-        `- Los miembros de la Liga que tienen un bebé antes empiezan la partida **como ese bebé**: Pikachu como **Pichu**, Clefairy como **Cleffa**, Jigglypuff como **Igglybuff**, Jynx como **Smoochum**, Electabuzz como **Elekid**, Magmar como **Magby**, y Hitmonlee, Hitmonchan y Hitmontop como **Tyrogue**.`,
-        `- Llevas el kit y la pasiva del miembro que elegiste y **evolucionas a él en el nivel 12**. Después sigue igual (Pikachu a Raichu, Cleffa a Clefairy y a Clefable...).`,
-        `- El bebé empieza más flojo, pero al evolucionar una vez más acabas un poco más fuerte.`,
-        `- Los bebés siguen siendo miembros aparte de la Liga, con su propio kit y su reto de investigación.`,
-        `- Los bebés de otras regiones (Happiny, Munchlax, Azurill...) llegarán con su región. En Duelos no cambia nada.`,
+        `# La familia empieza por el bebé`,
+        `- **Pikachu, Clefairy, Jigglypuff, Jynx, Electabuzz, Magmar, Hitmonlee, Hitmonchan y Hitmontop** ya no son miembros aparte de la Liga: su familia es la de su bebé, que es el que se investiga, se desbloquea y se elige.`,
+        `- **Pichu** evoluciona a Pikachu y a Raichu en la partida, **Cleffa** a Clefairy y Clefable, **Igglybuff** a Jigglypuff y Wigglytuff, **Smoochum** a Jynx, **Elekid** a Electabuzz, **Magby** a Magmar y **Tyrogue** al Hitmon que elijas.`,
+        `- Llevas el kit, la pasiva y el reto de investigación del bebé. Como en el juego, al evolucionar puedes quedarte como estás.`,
+        `- La Liga pasa de 138 a **129 miembros**: una por familia.`,
+        `- Si ya tenías a alguno de esos en tu Liga, recibes a su bebé.`,
+        `- Los bebés de otras regiones (Happiny, Munchlax, Azurill...) llegarán con su región.`,
         PIE
       ].join('\n')
     },
@@ -1123,10 +1124,10 @@
       oficial: OFICIAL,
       sub: '0.44',
       date: '2026-11-11',
-      title: 'Todas las familias empiezan por su primera forma.',
+      title: 'Cada familia empieza por su primera forma.',
       notes: [
-        ['new', 'Pikachu, Clefairy, Jigglypuff, Jynx, Electabuzz, Magmar y los Hitmon empiezan como su bebé y evolucionan a su forma en el nivel 12.'],
-        ['better', 'Llevas el kit del miembro que elegiste desde el principio.']
+        ['better', 'Pikachu, Clefairy, Jigglypuff, Jynx, Electabuzz, Magmar y los Hitmon se consiguen con su bebé (Pichu, Cleffa, Igglybuff, Smoochum, Elekid, Magby, Tyrogue), que evoluciona en la partida.'],
+        ['better', 'La Liga queda en 129 miembros, uno por familia. Quien ya los tenía recibe a su bebé.']
       ]
     },
     {

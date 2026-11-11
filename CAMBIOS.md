@@ -1,9 +1,9 @@
 # Cambios respecto al port original
 
 ## Empezar por la primera forma (Subversión 0.44)
-- `bebes.js` (`window.PB_BEBE`): los miembros 25, 35, 39, 106, 107, 237, 124, 125 y 126 empiezan como su bebé (172, 173, 174, 236, 238, 239, 240) si su id está dentro de la Pokédex abierta (hasta el 251). Al crear al jugador se cambian `speciesId`, `data`, `types` y `hp`; `roster` sigue siendo el del miembro elegido (kit, pasiva) y `startSpecies` no cambia (récords, investigación, aspectos). La Ultimate es la del bebé mientras lo eres (`wy[speciesId]`). Sin Duelos.
-- `main-…js`: `PB_BEBE.start(run, R)` en el gancho de creación del jugador (antes de `PB_MEGA.start`), `PB_BEBE.evo()` al principio de `$fgy9bf` (siguiente evolución: del bebé a la forma elegida en el nivel `NIVEL` = 12) y el primer `nextEvo` se calcula con `player.speciesId` en vez de `startSpecies`.
-- `menus-…js`: la línea evolutiva de la ficha (`$6`) pone el bebé primero (`PB_BEBE.pre`).
+- `defineProperty-…js`: tras quitar de la Liga lo que pasa del tope de la Pokédex, se quitan 25, 35, 39, 106, 107, 237, 124, 125 y 126 si su bebé (172, 173, 174, 236, 238, 239, 240) está en la Pokédex abierta. La Liga queda en 129 miembros, uno por familia. `oi` (especie → miembro) manda esas especies y 26, 36 y 40 a su bebé.
+- `bebes.js` (`window.PB_BEBE`): traspaso. Si el perfil tiene a uno de los quitados en `league`, se añade su bebé (`meta.save()`). Se mira cada segundo durante el primer minuto, por si el perfil llega tarde.
+- Ganchos que quedan en `main-…js` y `menus-…js`: `PB_BEBE.start(run, R)` al crear al jugador, `PB_BEBE.evo()` al principio de `$fgy9bf`, el primer `nextEvo` con `player.speciesId` y `PB_BEBE.pre()` en `$6`. Ahora no hacen nada (de una prueba anterior, en la que el intermedio empezaba como su bebé).
 
 ## Fiebres y Bonkoin doble (Subversión 0.43)
 - Tres objetos nuevos en la lista de objetos de `defineProperty-…js` (antes de `gold-teeth`): `pb-fiebre-oro` (rareza 2, hasta 3), `pb-fiebre-polvo` (rareza 2, hasta 3) y `pb-bonk-doble` (rareza 3, hasta 2), con `mods: []`. Nombres en `data/items.json` (ids 9001-9003) y `data/i18n/en.json`; se cambia su `?v=` (`pbfiebr1`) para que no salga el JSON viejo de la caché. Iconos nuevos en `assets/items/pb-*.png`, hechos con los de Pepita, Maxipepita, Polvo Estelar, Trozo Estrella, Fragmento Cometa y Bonkoin.
