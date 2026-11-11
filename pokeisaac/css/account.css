@@ -1,0 +1,450 @@
+/* Pantallas de cuenta (#account-ui): formularios DOM sobre el canvas, estética del juego. */
+#account-ui {
+  --gold: #ffd23c;
+  --gold-dim: rgba(255, 210, 60, .45);
+  --panel: rgba(12, 9, 20, .94);
+  --ink: #e8e8f0;
+  --muted: #9a9aa6;
+  --err: #ff6b6b;
+  --ok: #6fdc5a;
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  font-family: 'Press Start 2P', 'Courier New', monospace;
+  color: var(--ink);
+  -webkit-tap-highlight-color: transparent;
+}
+#account-ui[hidden] { display: none; }
+
+#account-ui .acc-backdrop {
+  position: absolute;
+  inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right)) max(12px, env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  box-sizing: border-box;
+  background: radial-gradient(ellipse at 50% 30%, rgba(40, 20, 80, .45), rgba(4, 3, 8, .78) 70%);
+  -webkit-backdrop-filter: blur(2px);
+  backdrop-filter: blur(2px);
+  animation: acc-fade .16s ease-out;
+}
+@keyframes acc-fade { from { opacity: 0; } to { opacity: 1; } }
+@keyframes acc-pop { from { transform: translateY(10px) scale(.97); opacity: 0; } to { transform: none; opacity: 1; } }
+
+#account-ui .acc-panel {
+  position: relative;
+  width: min(560px, 100%);
+  margin: auto;
+  box-sizing: border-box;
+  background: linear-gradient(180deg, rgba(255, 210, 60, .07) 0, rgba(255, 210, 60, 0) 64px), var(--panel);
+  border: 2px solid rgba(255, 210, 60, .75);
+  border-radius: 8px;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, .06) inset, 0 12px 40px rgba(0, 0, 0, .8), 0 0 24px rgba(255, 210, 60, .12);
+  padding: 0 22px 18px;
+  animation: acc-pop .18s ease-out;
+}
+#account-ui .acc-panel.is-busy { cursor: progress; }
+
+#account-ui .acc-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 56px;
+  border-bottom: 1px solid var(--gold-dim);
+  margin: 0 -22px 14px;
+  padding: 0 14px 0 22px;
+}
+#account-ui h1 {
+  flex: 1;
+  margin: 0;
+  font-size: 15px;
+  font-weight: normal;
+  color: var(--gold);
+  text-shadow: 2px 2px 0 #2a1030, -1px -1px 0 #2a1030, 1px -1px 0 #2a1030, -1px 1px 0 #2a1030, 3px 4px 0 rgba(0, 0, 0, .6);
+  letter-spacing: 1px;
+}
+#account-ui .acc-close,
+#account-ui .acc-back {
+  flex: none;
+  width: 36px;
+  height: 36px;
+  border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, .2);
+  background: rgba(255, 255, 255, .04);
+  color: var(--ink);
+  font: inherit;
+  font-size: 11px;
+  cursor: pointer;
+}
+#account-ui .acc-close:hover,
+#account-ui .acc-back:hover { border-color: var(--gold); color: var(--gold); }
+
+#account-ui .acc-lead {
+  margin: 0 0 14px;
+  font-size: 9px;
+  line-height: 1.8;
+  color: #d8d8e4;
+}
+#account-ui .acc-note {
+  margin: 12px 0 0;
+  font-size: 8px;
+  line-height: 1.8;
+  color: var(--muted);
+}
+
+#account-ui .acc-grid { display: grid; grid-template-columns: 1fr; gap: 0 14px; }
+@media (min-width: 620px) { #account-ui .acc-grid { grid-template-columns: 1fr 1fr; } }
+
+#account-ui .acc-field { display: block; margin: 0 0 12px; }
+#account-ui .acc-field-wrap .acc-field { margin-bottom: 4px; }
+#account-ui .acc-field-wrap { margin-bottom: 12px; }
+#account-ui .acc-label {
+  display: block;
+  margin-bottom: 7px;
+  font-size: 8px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+}
+#account-ui input {
+  display: block;
+  width: 100%;
+  box-sizing: border-box;
+  height: 42px;
+  padding: 0 12px;
+  font: inherit;
+  font-size: 11px;
+  color: #fff;
+  background: rgba(0, 0, 0, .5);
+  border: 1px solid rgba(255, 255, 255, .22);
+  border-radius: 6px;
+  outline: none;
+  transition: border-color .12s, box-shadow .12s;
+}
+#account-ui input::placeholder { color: #5a5a6e; }
+#account-ui input:focus { border-color: var(--gold); box-shadow: 0 0 0 2px rgba(255, 210, 60, .2); }
+#account-ui input:-webkit-autofill { -webkit-text-fill-color: #fff; -webkit-box-shadow: 0 0 0 40px #141020 inset; caret-color: #fff; }
+
+#account-ui .acc-hint { min-height: 10px; font-size: 7px; line-height: 1.6; color: var(--muted); }
+#account-ui .acc-hint.is-ok { color: var(--ok); }
+#account-ui .acc-hint.is-err { color: var(--err); }
+
+#account-ui .acc-msg { min-height: 12px; margin: 4px 0 10px; font-size: 8px; line-height: 1.8; color: var(--muted); }
+#account-ui .acc-msg:empty { min-height: 0; margin: 0; }
+#account-ui .acc-msg.is-err { color: var(--err); }
+#account-ui .acc-msg.is-ok { color: var(--ok); }
+#account-ui .acc-msg.is-info { color: var(--gold); }
+#account-ui p.acc-msg { margin: 0 0 12px; }
+
+#account-ui .acc-actions { display: flex; flex-direction: column; gap: 10px; margin-top: 6px; }
+#account-ui .acc-btn {
+  display: block;
+  width: 100%;
+  min-height: 46px;
+  padding: 10px 14px;
+  font: inherit;
+  font-size: 11px;
+  color: #e8e8f0;
+  background: rgba(255, 255, 255, .04);
+  border: 1px solid rgba(255, 255, 255, .25);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background .12s, border-color .12s, transform .06s;
+}
+#account-ui .acc-btn:hover:not(:disabled),
+#account-ui .acc-btn:focus-visible { border-color: var(--gold); background: rgba(255, 210, 60, .1); color: #fff; outline: none; }
+#account-ui .acc-btn:active:not(:disabled) { transform: translateY(1px); }
+#account-ui .acc-btn.is-primary {
+  color: #2a1a00;
+  background: linear-gradient(180deg, #ffe27a, #ffd23c 55%, #e0a91e);
+  border-color: #ffe9a0;
+  box-shadow: 0 3px 0 #8a5a00, 0 0 14px rgba(255, 210, 60, .25);
+}
+#account-ui .acc-btn.is-primary:hover:not(:disabled),
+#account-ui .acc-btn.is-primary:focus-visible { background: linear-gradient(180deg, #fff0a8, #ffdc5a 55%, #eab42a); color: #2a1a00; }
+#account-ui .acc-btn.is-ghost { border-style: dashed; color: var(--muted); }
+#account-ui .acc-btn.is-danger { border-color: rgba(255, 107, 107, .5); color: #ffb0b0; }
+#account-ui .acc-btn.is-danger:hover:not(:disabled) { border-color: var(--err); background: rgba(255, 107, 107, .1); color: #fff; }
+#account-ui .acc-btn.is-small { width: auto; flex: none; min-height: 42px; font-size: 9px; padding: 0 14px; }
+#account-ui .acc-btn:disabled { opacity: .45; cursor: default; }
+
+#account-ui .acc-links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; margin-top: 14px; }
+#account-ui .acc-link {
+  padding: 8px 0;
+  font: inherit;
+  font-size: 8px;
+  color: var(--gold);
+  background: none;
+  border: 0;
+  cursor: pointer;
+  text-decoration: underline;
+  text-underline-offset: 4px;
+}
+#account-ui .acc-link:hover { color: #fff; }
+#account-ui .acc-link:disabled { opacity: .45; }
+
+#account-ui .acc-avatars { display: flex; gap: 10px; flex-wrap: wrap; }
+#account-ui .acc-avatar {
+  width: 58px;
+  height: 58px;
+  padding: 0;
+  border-radius: 8px;
+  border: 2px solid rgba(255, 255, 255, .15);
+  background: rgba(0, 0, 0, .45);
+  cursor: pointer;
+  overflow: hidden;
+  opacity: .6;
+  transition: opacity .12s, border-color .12s, transform .12s;
+}
+#account-ui .acc-avatar img { display: block; width: 100%; height: 100%; image-rendering: pixelated; pointer-events: none; }
+#account-ui .acc-avatar:hover { opacity: .9; }
+#account-ui .acc-avatar.is-sel { opacity: 1; border-color: var(--gold); box-shadow: 0 0 12px rgba(255, 210, 60, .45); transform: translateY(-2px); }
+
+#account-ui .acc-row { display: flex; align-items: flex-end; gap: 10px; }
+#account-ui .acc-row .acc-field { flex: 1; margin-bottom: 4px; }
+
+#account-ui .acc-head { display: flex; align-items: center; gap: 14px; margin-bottom: 16px; }
+#account-ui .acc-head-img { width: 64px; height: 64px; border-radius: 8px; border: 2px solid var(--gold); background: rgba(0, 0, 0, .45); image-rendering: pixelated; }
+#account-ui .acc-head-name { font-size: 13px; color: #fff; margin-bottom: 8px; }
+#account-ui .acc-head-sub { font-size: 8px; color: var(--muted); line-height: 1.6; word-break: break-all; }
+
+#account-ui .acc-mock {
+  margin-top: 12px;
+  font-size: 7px;
+  color: #ff9a60;
+  text-align: center;
+}
+
+/* Pantallas bajas (móvil en horizontal): más compacto para que quepa con el teclado. */
+@media (max-height: 520px) {
+  #account-ui .acc-backdrop { align-items: flex-start; }
+  #account-ui .acc-panel { padding: 0 16px 12px; }
+  #account-ui .acc-header { min-height: 44px; margin: 0 -16px 10px; padding: 0 10px 0 16px; }
+  #account-ui h1 { font-size: 12px; }
+  #account-ui .acc-lead { font-size: 8px; margin-bottom: 10px; }
+  #account-ui .acc-field { margin-bottom: 8px; }
+  #account-ui .acc-label { margin-bottom: 5px; }
+  #account-ui input { height: 36px; font-size: 10px; }
+  #account-ui .acc-btn { min-height: 38px; font-size: 10px; padding: 8px 12px; }
+  #account-ui .acc-actions { gap: 8px; }
+  #account-ui .acc-avatar { width: 46px; height: 46px; }
+  #account-ui .acc-links { margin-top: 8px; }
+  #account-ui .acc-note { margin-top: 8px; }
+}
+@media (max-height: 520px) and (min-width: 620px) {
+  #account-ui .acc-actions { flex-direction: row; flex-wrap: wrap; }
+  #account-ui .acc-actions .acc-btn { flex: 1 1 40%; }
+}
+
+/* Avatar: todos los Pokémon que tienes (rejilla con scroll y buscador) */
+#account-ui .acc-avatar { position: relative; }
+#account-ui .acc-avatar[hidden] { display: none; }
+#account-ui .acc-avatars.is-many { gap: 6px; max-height: 196px; overflow-y: auto; padding: 4px 2px; scrollbar-width: thin; }
+#account-ui .acc-avatars.is-many .acc-avatar { width: 44px; height: 44px; border-width: 1px; }
+#account-ui .acc-avatars.is-many .acc-avatar.is-sel { transform: none; }
+#account-ui .acc-av-shiny { position: absolute; right: 2px; top: 0; font-size: 9px; color: #ffe066; text-shadow: 0 0 3px #000; pointer-events: none; }
+#account-ui .acc-av-search {
+  width: 100%; box-sizing: border-box; height: 34px; margin: 0 0 8px; padding: 0 10px; border-radius: 6px;
+  border: 1px solid rgba(255, 255, 255, .22); background: rgba(0, 0, 0, .45); color: #fff; font: inherit; font-size: 9px; outline: none;
+}
+#account-ui .acc-av-search:focus { border-color: var(--gold); }
+
+/* --- «Mi cuenta» como página (diseño «CuentaEstilo» del lienzo): 1024x576 a la escala del canvas (UI.place) --- */
+#account-ui .ap-wrap { position: absolute; inset: 0; overflow: hidden; }
+#account-ui .ap-page {
+  position: absolute; left: 0; top: 0; width: 1024px; height: 576px; transform-origin: 0 0; margin: 0;
+  --line: #3a3450; --pn: #0f0b18; --chip: #2a2440; --dim: #9a9aae;
+  animation: acc-fade .16s ease-out;
+}
+#account-ui .ap-page.is-busy { cursor: progress; }
+#account-ui .ap-title { position: absolute; left: 16px; top: 14px; font-size: 20px; color: var(--gold); text-shadow: 3px 3px 0 #2a1030; }
+#account-ui .ap-msg { position: absolute; right: 16px; top: 22px; margin: 0; max-width: 640px; text-align: right; font-size: 7px; }
+#account-ui .ap-pn { position: absolute; box-sizing: border-box; border-radius: 12px; background: var(--pn); border: 1.5px solid var(--line); padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+#account-ui .ap-row { display: flex; align-items: center; gap: 8px; }
+#account-ui .ap-h { font-size: 8px; color: #fff; flex: none; }
+#account-ui .ap-sub { font-size: 6px; color: var(--dim); }
+#account-ui .ap-txt { margin: 0; font-size: 6px; line-height: 1.8; color: var(--dim); }
+#account-ui .ap-note { font-size: 6px; line-height: 1.7; color: var(--dim); }
+#account-ui .ap-note b { color: var(--gold); font-weight: normal; }
+#account-ui .ap-hint { margin-left: auto; min-height: 0; font-size: 6px; }
+
+/* Tarjeta del entrenador */
+#account-ui .ap-card { position: absolute; left: 16px; top: 56px; width: 300px; height: 460px; box-sizing: border-box; border-radius: 14px; overflow: hidden; background: var(--pn); border: 2px solid var(--tc, #d9b06a); }
+#account-ui .ap-stage { position: relative; height: 200px; }
+#account-ui .ap-rays { position: absolute; inset: 0; background: repeating-conic-gradient(from 0deg at 50% 100%, rgba(255,255,255,0) 0deg, rgba(255,255,255,.08) 5deg, rgba(255,255,255,.08) 7deg, rgba(255,255,255,0) 12deg, rgba(255,255,255,0) 20deg); filter: blur(3px); }
+#account-ui .ap-fade { position: absolute; left: 0; right: 0; bottom: 0; height: 60px; background: linear-gradient(180deg, rgba(15,11,24,0), #0f0b18); }
+#account-ui .ap-chip { position: absolute; left: 12px; top: 12px; z-index: 2; font-size: 6px; padding: 4px 7px; border-radius: 5px; }
+#account-ui .ap-chip.is-acc { color: #0a2a12; background: #7fe07f; }
+#account-ui .ap-chip.is-guest { color: #0a1a2a; background: #7ab8ff; }
+#account-ui .ap-arena { position: absolute; left: 16px; bottom: 0; width: 268px; height: 150px; image-rendering: pixelated; }
+#account-ui .ap-who { display: flex; flex-direction: column; align-items: center; gap: 9px; margin-top: 2px; }
+#account-ui .ap-name { font-size: 14px; color: #fff; }
+#account-ui .ap-mail { font-size: 6px; color: var(--dim); }
+#account-ui .ap-bal { display: flex; gap: 6px; margin-top: 6px; }
+#account-ui .ap-pill { height: 24px; box-sizing: border-box; display: flex; align-items: center; gap: 6px; padding: 0 9px; border-radius: 5px; background: #1a1528; border: 1.5px solid var(--line); font-size: 7px; color: #fff; }
+#account-ui .ap-pill img { width: 16px; height: 16px; image-rendering: pixelated; }
+#account-ui .ap-facts { position: absolute; left: 14px; right: 14px; bottom: 14px; margin: 0; display: flex; flex-direction: column; gap: 9px; font-size: 6px; }
+#account-ui .ap-facts div { display: flex; justify-content: space-between; }
+#account-ui .ap-facts dt { color: var(--dim); }
+#account-ui .ap-facts dd { margin: 0; color: #fff; }
+#account-ui .ap-facts dd.is-ok { color: #7fe07f; }
+#account-ui .ap-facts dd.is-warn { color: #ff9a60; }
+
+/* Avatar */
+#account-ui .ap-avpn { left: 328px; top: 56px; width: 680px; height: 170px; }
+#account-ui .ap-search { margin-left: auto; width: 250px; height: 26px; box-sizing: border-box; display: flex; align-items: center; gap: 8px; background: #1a1528; border: 1.5px solid var(--line); border-radius: 6px; padding: 0 10px; }
+#account-ui .ap-search:focus-within { border-color: var(--gold); }
+#account-ui .ap-search svg { width: 12px; height: 12px; flex: none; }
+#account-ui .ap-search .acc-av-search { height: 22px; margin: 0; padding: 0; border: 0; background: none; font-size: 6px; box-shadow: none; }
+#account-ui .acc-avatars.ap-avs { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 6px; max-height: 104px; padding: 2px; overflow-y: auto; }
+#account-ui .acc-avatars.ap-avs .ap-av { width: auto; height: 44px; border-radius: 8px; border: 2px solid color-mix(in srgb, var(--tc) 55%, transparent); background: radial-gradient(ellipse at 50% 120%, color-mix(in srgb, var(--tc) 40%, transparent) 0%, #1a1528 70%); opacity: 1; display: flex; align-items: center; justify-content: center; }
+#account-ui .acc-avatars.ap-avs .ap-av img { width: 36px; height: 36px; border-radius: 5px; }
+#account-ui .acc-avatars.ap-avs .ap-av:hover { border-color: rgba(255, 210, 60, .7); }
+#account-ui .acc-avatars.ap-avs .ap-av.is-sel { border-color: var(--gold); box-shadow: 0 0 12px rgba(255, 210, 60, .45); transform: none; }
+#account-ui .acc-avatars.ap-avs .ap-av[hidden] { display: none; }
+#account-ui .ap-av .acc-av-shiny { left: 3px; right: auto; top: 1px; font-size: 7px; color: var(--gold); }
+
+/* Nombre, seguridad y sesión */
+#account-ui .ap-namepn { left: 328px; top: 234px; width: 680px; height: 92px; padding-top: 10px; padding-bottom: 8px; gap: 7px; }
+#account-ui .ap-secpn { left: 328px; top: 334px; width: 404px; height: 122px; gap: 9px; }
+#account-ui .ap-sespn { left: 742px; top: 334px; width: 266px; height: 122px; gap: 9px; }
+#account-ui .ap-dcpn { left: 328px; top: 464px; width: 680px; height: 56px; flex-direction: row; align-items: center; gap: 10px; padding-top: 0; padding-bottom: 0; border-color: #5865f2; }
+#account-ui .ap-dcgrow { flex: 1; min-width: 0; }
+#account-ui .ap-dcok { font-size: 6px; color: #7fe07f; flex: none; }
+#account-ui .ap-dccode { flex: none; font-size: 13px; letter-spacing: 2px; color: #fff; background: #1a1528; border: 1.5px dashed #5865f2; border-radius: 6px; padding: 7px 12px; cursor: pointer; }
+#account-ui .ap-dcpn .ap-txt b { color: #fff; font-weight: normal; }
+#account-ui .ap-b.ap-dcun { border-color: #ff6b6b; background: #3a1020; color: #ff8a8a; }
+#account-ui .ap-page input.ap-in { flex: 1; width: auto; min-width: 0; height: 30px; padding: 0 10px; font-size: 7px; background: #1a1528; border: 1.5px solid var(--line); }
+#account-ui .ap-page input.ap-in:focus { border-color: var(--gold); }
+#account-ui .ap-b { flex: none; height: 30px; display: inline-flex; align-items: center; gap: 6px; border-radius: 8px; border: 1px solid var(--gold); background: linear-gradient(180deg, #3a2a12, #241808); color: var(--gold); font: inherit; font-size: 6px; cursor: pointer; padding: 0 12px; }
+#account-ui .ap-b:hover:not(:disabled), #account-ui .ap-b:focus-visible { background: linear-gradient(180deg, #4c3818, #30200a); outline: none; }
+#account-ui .ap-b.is-gold { border: 2px solid var(--gold); background: linear-gradient(180deg, #ffd23c, #c8962a); color: #2a1a06; }
+#account-ui .ap-b.is-gold:hover:not(:disabled), #account-ui .ap-b.is-gold:focus-visible { background: linear-gradient(180deg, #ffe070, #d8a43a); }
+#account-ui .ap-b img { width: 12px; height: 12px; image-rendering: pixelated; }
+#account-ui .ap-b.is-danger { margin-top: auto; height: 32px; justify-content: center; border: 1.5px solid #ff6b6b; background: #3a1020; color: #ff8a8a; font-size: 7px; }
+#account-ui .ap-b.is-danger:hover:not(:disabled), #account-ui .ap-b.is-danger:focus-visible { background: #4a1428; color: #fff; }
+#account-ui .ap-b.ap-wide { justify-content: center; margin-top: auto; }
+#account-ui .ap-b:disabled { opacity: .45; cursor: default; }
+#account-ui .ap-sec { font-size: 6px; color: var(--dim); }
+#account-ui .ap-lab { width: 70px; flex: none; }
+#account-ui .ap-val { flex: 1; min-width: 0; height: 26px; box-sizing: border-box; display: flex; align-items: center; gap: 6px; padding: 0 10px; border-radius: 6px; background: #1a1528; border: 1.5px solid var(--line); font-size: 7px; color: #fff; overflow: hidden; white-space: nowrap; }
+#account-ui .ap-val i { font-style: normal; font-size: 5px; color: var(--gold); }
+#account-ui .ap-sec .ap-b { height: 26px; }
+#account-ui .ap-sec.is-warn .ap-val { border-color: rgba(255, 210, 60, .6); }
+/* Seguridad con la fila GOOGLE (vincular la cuenta): tres filas más bajas para que quepan en el mismo panel. */
+#account-ui .ap-secpn.is-3 { gap: 6px; }
+#account-ui .ap-secpn.is-3 .ap-val, #account-ui .ap-secpn.is-3 .ap-sec .ap-b { height: 22px; }
+#account-ui .ap-gsec .ap-val .au-g { width: 12px; height: 12px; flex: none; }
+#account-ui .ap-gsec.is-on .ap-val { border-color: rgba(127, 224, 127, .55); color: #e8e8f0; }
+#account-ui .ap-gsec .ap-val i.ap-off { color: var(--dim); }
+#account-ui .ap-back { position: absolute; left: 447px; top: 528px; width: 130px; height: 36px; border-radius: 10px; border: 1px solid var(--gold); background: linear-gradient(180deg, #3a2a12, #241808); color: var(--gold); font: inherit; font-size: 9px; cursor: pointer; }
+#account-ui .ap-back:hover, #account-ui .ap-back:focus-visible { background: linear-gradient(180deg, #4c3818, #30200a); outline: none; }
+#account-ui .ap-mock { position: absolute; left: 16px; bottom: 22px; font-size: 6px; color: #ff9a60; }
+
+/* ---- Acceso rediseñado (Bienvenido / Iniciar sesión / Crear cuenta), 20/10/2026 ---- */
+#account-ui .acc-panel.is-auth { width: min(900px, 100%); padding: 0; display: grid; grid-template-columns: 310px minmax(0, 1fr); overflow: hidden; border-radius: 12px; }
+#account-ui .au-side { position: relative; display: flex; flex-direction: column; align-items: center; padding: 22px 16px 20px; background: radial-gradient(ellipse 260px 200px at 50% 62%, rgba(255, 210, 60, .16), transparent 70%), linear-gradient(180deg, #2a1d50 0, #171030 55%, #0e0a1c 100%); border-right: 1px solid var(--gold-dim); }
+#account-ui .au-logo { font-size: 18px; color: var(--gold); text-shadow: 3px 3px 0 #2a1030, -1px -1px 0 #2a1030, 1px -1px 0 #2a1030, -1px 1px 0 #2a1030; letter-spacing: 1px; }
+#account-ui .au-arena { width: 280px; height: 200px; margin: 6px 0 4px; image-rendering: pixelated; }
+#account-ui .au-perks { list-style: none; margin: auto 0 0; padding: 0; width: 100%; display: flex; flex-direction: column; gap: 11px; }
+#account-ui .au-perks li { position: relative; padding-left: 20px; font-size: 8px; line-height: 1.7; color: #dcdcec; }
+#account-ui .au-perks li::before { content: ""; position: absolute; left: 0; top: 2px; width: 9px; height: 9px; background: var(--gold); box-shadow: 0 0 8px rgba(255, 210, 60, .5); clip-path: polygon(0 50%, 38% 50%, 38% 25%, 62% 25%, 62% 50%, 100% 50%, 100% 75%, 62% 75%, 62% 100%, 38% 100%, 38% 75%, 0 75%); }
+#account-ui .au-main { min-width: 0; padding: 0 28px 22px; }
+#account-ui .au-tabs { display: flex; align-items: flex-end; gap: 6px; margin: 0 -28px 18px; padding: 14px 14px 0 28px; border-bottom: 1px solid var(--gold-dim); }
+#account-ui .au-tab { flex: none; height: 40px; padding: 0 16px; font: inherit; font-size: 10px; color: var(--muted); background: transparent; border: 0; border-bottom: 3px solid transparent; cursor: pointer; margin-bottom: -1px; }
+#account-ui .au-tab:hover { color: #fff; }
+#account-ui .au-tab.is-on { color: var(--gold); border-bottom-color: var(--gold); text-shadow: 2px 2px 0 #2a1030; }
+#account-ui .au-x { margin: 0 0 6px auto; flex: none; width: 34px; height: 34px; border-radius: 6px; border: 1px solid rgba(255, 255, 255, .2); background: rgba(255, 255, 255, .04); color: var(--ink); font: inherit; font-size: 11px; cursor: pointer; }
+#account-ui .au-x:hover { border-color: var(--gold); color: var(--gold); }
+#account-ui .au-h { margin: 0 0 10px; font-size: 14px; font-weight: normal; line-height: 1.5; color: #fff; text-shadow: 2px 2px 0 #2a1030; }
+#account-ui .au-sub { margin: 0 0 18px; font-size: 9px; line-height: 1.9; color: #c8c8d8; }
+#account-ui .au-pw { position: relative; display: block; }
+#account-ui .au-pw input { padding-right: 78px; }
+#account-ui .au-eye { position: absolute; right: 6px; top: 6px; height: 30px; padding: 0 9px; font: inherit; font-size: 7px; color: var(--gold); background: rgba(255, 210, 60, .08); border: 1px solid var(--gold-dim); border-radius: 5px; cursor: pointer; }
+#account-ui .au-eye:hover { background: rgba(255, 210, 60, .18); color: #fff; }
+#account-ui .au-meter { display: flex; gap: 4px; margin: 5px 0 5px; }
+#account-ui .au-meter i { flex: 1; height: 5px; border-radius: 3px; background: rgba(255, 255, 255, .12); }
+#account-ui .au-meter[data-lv="1"] i:nth-child(-n+1) { background: var(--err); }
+#account-ui .au-meter[data-lv="2"] i:nth-child(-n+2) { background: #ff9a3c; }
+#account-ui .au-meter[data-lv="3"] i:nth-child(-n+3) { background: #c8e04a; }
+#account-ui .au-meter[data-lv="4"] i:nth-child(-n+4) { background: var(--ok); }
+#account-ui .au-links { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 6px 14px; margin-top: 12px; }
+#account-ui .au-or { display: flex; align-items: center; gap: 12px; margin: 16px 0 12px; font-size: 8px; color: #6a6a80; }
+#account-ui .au-or::before, #account-ui .au-or::after { content: ""; flex: 1; height: 1px; background: rgba(255, 255, 255, .12); }
+#account-ui .au-offnote { margin-top: 8px; text-align: center; }
+/* Continuar con Google (28/10/2026): botón blanco con el logotipo oficial, como pide la guía de marca de Google. */
+#account-ui .au-google { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 44px; margin: 10px 0 0; padding: 0 16px; font: 500 15px/1 Roboto, 'Segoe UI', system-ui, -apple-system, sans-serif; letter-spacing: .1px; color: #1f1f1f; background: #fff; border: 1px solid #747775; border-radius: 6px; cursor: pointer; transition: background .12s, box-shadow .12s, transform .06s; }
+#account-ui .au-google:hover:not(:disabled), #account-ui .au-google:focus-visible { background: #f2f2f2; box-shadow: 0 0 0 2px var(--gold); outline: none; }
+#account-ui .au-google:active:not(:disabled) { transform: translateY(1px); }
+#account-ui .au-google:disabled { opacity: .5; cursor: default; }
+#account-ui .au-google .au-g { width: 20px; height: 20px; flex: none; }
+#account-ui .au-google + .au-or, #account-ui .au-discord + .au-or { margin: 12px 0 4px; }
+/* Continuar con Discord (03/11/2026): azul de Discord con la mascota en blanco (nada del estilo de Google). */
+#account-ui .au-discord { display: flex; align-items: center; justify-content: center; gap: 12px; width: 100%; min-height: 44px; margin: 10px 0 0; padding: 0 16px; font: 500 15px/1 'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; letter-spacing: .1px; color: #fff; background: #5865f2; border: 1px solid #4752c4; border-radius: 6px; cursor: pointer; transition: background .12s, box-shadow .12s, transform .06s; }
+#account-ui .au-discord:hover:not(:disabled), #account-ui .au-discord:focus-visible { background: #4752c4; box-shadow: 0 0 0 2px var(--gold); outline: none; }
+#account-ui .au-discord:active:not(:disabled) { transform: translateY(1px); }
+#account-ui .au-discord:disabled { opacity: .5; cursor: default; }
+#account-ui .au-discord .au-d { width: 22px; height: 22px; flex: none; }
+#account-ui .ap-dcpn .ap-dcone { flex: none; }
+#account-ui .is-auth .acc-grid { grid-template-columns: 1fr 1fr; }
+#account-ui .is-auth .acc-field-wrap { margin-bottom: 8px; }
+#account-ui .is-auth .acc-hint { font-size: 8px; min-height: 12px; }
+#account-ui .is-auth .acc-lead, #account-ui .is-auth .acc-msg { font-size: 9px; }
+#account-ui .is-auth .acc-avatar { width: 62px; height: 62px; }
+@media (max-width: 760px) {
+  #account-ui .acc-panel.is-auth { grid-template-columns: 1fr; width: min(520px, 100%); }
+  #account-ui .au-side { display: none; }
+  #account-ui .au-main { padding: 0 18px 18px; }
+  #account-ui .au-tabs { margin: 0 -18px 14px; padding: 12px 10px 0 18px; }
+  #account-ui .is-auth .acc-grid { grid-template-columns: 1fr; }
+}
+@media (max-height: 520px) {
+  #account-ui .au-h { font-size: 11px; margin-bottom: 6px; }
+  #account-ui .au-sub { margin-bottom: 10px; font-size: 8px; }
+  #account-ui .au-or { margin: 8px 0 6px; }
+  #account-ui .au-offnote { display: none; }
+}
+#account-ui .is-auth .acc-mock { grid-column: 1 / -1; margin: 0; padding: 4px 0 6px; background: rgba(0, 0, 0, .35); }
+
+/* ---- Flujos de cuenta (26/10/2026): requisitos de la contraseña, «Revisa tu correo», salidas bajo el error y Borrar cuenta ---- */
+#account-ui input.is-bad { border-color: var(--err); box-shadow: 0 0 0 2px rgba(255, 107, 107, .22); }
+#account-ui .au-static { cursor: default; }
+#account-ui .au-wide { grid-column: 1 / -1; }
+#account-ui .au-reqs { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-wrap: wrap; gap: 6px 14px; }
+#account-ui .au-reqs li { position: relative; padding-left: 14px; font-size: 8px; line-height: 1.5; color: var(--muted); }
+#account-ui .au-reqs li::before { content: ""; position: absolute; left: 0; top: 1px; width: 8px; height: 8px; border-radius: 2px; border: 1.5px solid rgba(255, 255, 255, .28); box-sizing: border-box; }
+#account-ui .au-reqs[data-typed="1"] li:not(.is-ok) { color: #ffb0b0; }
+#account-ui .au-reqs[data-typed="1"] li:not(.is-ok)::before { border-color: var(--err); }
+#account-ui .au-reqs li.is-ok { color: var(--ok); }
+#account-ui .au-reqs li.is-ok::before { background: var(--ok); border-color: var(--ok); }
+#account-ui .au-fix { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 8px; }
+#account-ui .au-fix:empty { display: none; }
+#account-ui .au-fix .acc-btn { width: auto; min-height: 36px; padding: 8px 12px; font-size: 8px; border-color: var(--gold-dim); color: var(--gold); }
+#account-ui .au-terms { margin: 10px 0 0; text-align: center; }
+#account-ui .au-terms .acc-link { font-size: 7px; padding: 0; }
+#account-ui .au-mailbig { display: flex; align-items: center; gap: 14px; margin: 0 0 16px; padding: 14px 16px; border-radius: 8px; background: rgba(255, 210, 60, .07); border: 1px dashed var(--gold-dim); }
+#account-ui .au-mailbig svg { flex: none; width: 48px; height: 36px; image-rendering: pixelated; filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, .5)); }
+#account-ui .au-mailbig b { min-width: 0; font-weight: normal; font-size: 11px; line-height: 1.6; color: #fff; word-break: break-all; }
+#account-ui .au-steps { margin: 0 0 12px; padding: 0 0 0 22px; display: flex; flex-direction: column; gap: 9px; font-size: 9px; line-height: 1.7; color: #dcdcec; }
+#account-ui .au-steps li::marker { color: var(--gold); }
+#account-ui .au-tip { margin: 0 0 14px; font-size: 8px; line-height: 1.8; color: var(--muted); }
+#account-ui a.acc-btn { display: flex; align-items: center; justify-content: center; box-sizing: border-box; text-align: center; text-decoration: none; }
+#account-ui .de-warn { color: #ffb0b0; }
+#account-ui .de-box { margin: 0 0 12px; padding: 12px 14px; border-radius: 8px; background: rgba(255, 107, 107, .07); border: 1px solid rgba(255, 107, 107, .4); }
+#account-ui .de-list { margin: 4px 0 0; padding: 0 0 0 16px; display: flex; flex-direction: column; gap: 7px; font-size: 8px; line-height: 1.7; color: #dcdcec; }
+#account-ui .de-list li::marker { color: var(--err); }
+#account-ui .de-alt { margin: 0 0 14px; }
+#account-ui .de-alt .acc-link { font-size: 8px; padding: 0; }
+#account-ui .acc-btn.is-danger:disabled { opacity: .35; }
+#account-ui .ap-sesbtns { display: flex; gap: 8px; margin-top: auto; }
+#account-ui .ap-sesbtns .ap-b { flex: 1; margin-top: 0; justify-content: center; }
+#account-ui .ap-b.ap-del { height: 32px; border: 1.5px dashed rgba(255, 107, 107, .55); background: transparent; color: #ff8a8a; font-size: 6px; }
+#account-ui .ap-b.ap-del:hover:not(:disabled), #account-ui .ap-b.ap-del:focus-visible { border-style: solid; background: #3a1020; color: #fff; }
+@media (max-width: 760px) { #account-ui .au-wide { grid-column: auto; } }
+
+/* APK de Android: «Entrar desde el navegador» (Google bloquea el WebView y el teclado/gestor de contraseñas van mejor en el navegador del sistema) */
+.au-web { display: block; width: 100%; margin: 0 0 10px; padding: 11px 14px; border-radius: 10px; border: 1.5px solid #3a3450; background: #1f1836; color: #ece9f7; font: 600 13px/1.2 system-ui, sans-serif; cursor: pointer; }
+.au-web:hover { border-color: #ffd23c; }
