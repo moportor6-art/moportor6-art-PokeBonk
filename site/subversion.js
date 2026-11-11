@@ -4,11 +4,40 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.40';
+  const SUB = '0.41';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.41',
+      date: Date.UTC(2026, 10, 11, 8, 30),
+      tag: 'parche',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.41`,
+      summary: 'Sala de juegos, un entrenador para todo el Remaster y juego de la semana.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Sala de juegos`,
+        `- **Más juegos** pasa a ser la **Sala de juegos** (botón dorado **Juegos**): una tarjeta por juego con su dibujo, lo que llevas en él y tus insignias. El último al que jugaste sale grande arriba con **Seguir jugando**.`,
+        `- PokéBonk TD es ahora el tower defense principal; PokéPath TD sigue como «PokéPath TD original» en su tarjeta. PokéIsaac online también va en la tarjeta de PokéIsaac.`,
+        `- Al entrar en un juego sale un momento la marca del Remaster con tu compañero y tu nivel, y el botón **REMASTER** (dos toques) te devuelve a la Sala.`,
+        ``,
+        `# Un entrenador para todo`,
+        `- **Nivel de entrenador** único: sube con lo que juegas en cualquier juego y con tus insignias. Cada nivel nuevo da Polvo Estelar. Lo ves arriba en Juegos y en el Pasaporte, con tu compañero.`,
+        `- **Juego de la semana**: cada semana toca un juego de la Sala, con tres metas y Polvo de premio (pestaña **Desafíos**, junto al Desafío del Alfa).`,
+        `- El logo REMASTER del menú abre la Sala. El hub tiene las pestañas Juegos, Pasaporte, Desafíos, Traspaso, Actualizaciones y Acerca de (con los créditos y licencias de cada juego).`,
+        `- En el navegador, Actualizaciones enseña tu versión y lo último que ha cambiado.`,
+        ``,
+        `# Licencias y donaciones`,
+        `- Fuera el botón de **Donaciones**: el Remaster es gratis y sin ánimo de lucro, sin anuncios, compras ni donaciones.`,
+        `- PokéSurvivor cambió de licencia el 14-10-2026 (PolyForm Noncommercial, solo uso sin fines comerciales). Añadido su aviso de copyright de JPTER78 en sus créditos y en los de la música del TD.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.40',
       date: Date.UTC(2026, 10, 11, 5, 30),
@@ -1017,6 +1046,18 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.41',
+      date: '2026-11-11',
+      title: 'Sala de juegos y entrenador único.',
+      notes: [
+        ['new', 'Sala de juegos: una tarjeta por juego con tu progreso y Seguir jugando.'],
+        ['new', 'Nivel de entrenador para todo el Remaster y juego de la semana con premios.'],
+        ['better', 'Marca común al entrar en cada juego y botón REMASTER para volver a la Sala.'],
+        ['fix', 'Fuera las donaciones; licencia y aviso de copyright de PokéSurvivor en los créditos.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.40',

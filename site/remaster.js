@@ -115,7 +115,9 @@
     const busca = (obj, k) => { if (!obj || typeof obj !== 'object') return undefined; if (k in obj) return obj[k]; for (const v of Object.values(obj)) { const r = busca(v, k); if (r !== undefined) return r; } return undefined; };
     const decks = busca(ov, 'decks_cleared');
     const cuenta = (v) => v == null ? 0 : typeof v === 'object' ? Object.values(v).filter(x => x && x !== 0).length : num(v);
+    const pf = meta()?.profile || {};
     return {
+      bonk: { runs: num(pf.runs), kills: num(pf.kills), capt: num(pf.captured) },
       isaac: { runs: num(isaac.runs), wins: num(isaac.wins), floor: num(isaac.bestFloor) },
       survivors: { runs: num(life.runs), wins: num(life.wins), time: num(life.bestTime), level: num(life.bestLevel) },
       survivor: { runs: num(sv.runs), kills: num(sv.kills), bosses: num(sv.bosses), level: num(sv.best_level) },
@@ -157,7 +159,87 @@
   const MAESTRO = { id: 'maestro', name: 'Maestro de PokéBonk Remaster', need: 5, dust: 1500 };
   const juegosConInsignia = () => new Set(INSIGNIAS.filter(i => st.badges[i[1]]).map(i => i[0])).size;
 
-  // Revisa insignias nuevas y da su Polvo. Devuelve la lista de las nuevas.
+
+  // ---------- Entrenador único ----------
+  // Un solo nivel de entrenador para todo el Remaster: sube con lo que juegas en cualquier juego
+  // (se calcula de sus partidas guardadas) y con las insignias. Cada nivel nuevo da Polvo Estelar.
+  const TITULOS = [[30, 'Maestro'], [20, 'Élite'], [15, 'Veterano'], [10, 'Experto'], [6, 'Entrenador'], [3, 'Explorador'], [1, 'Novato']];
+  const xpDe = (d) => Math.floor(
+    Object.keys(st.badges).length * 120 +
+    d.bonk.runs * 12 + d.bonk.capt * 3 +
+    d.isaac.runs * 15 + d.isaac.floor * 10 + d.isaac.wins * 150 +
+    d.survivors.runs * 15 + Math.min(d.survivors.time, 900) / 6 + d.survivors.wins * 150 +
+    d.survivor.runs * 15 + d.survivor.bosses * 40 + Math.min(d.survivor.kills, 20000) / 20 +
+    d.pokelike.dex * 4 + (d.pokelike.elite + d.pokelike.hall) * 150 +
+    d.pokepath.waves * 2 + d.pokepath.rutas * 200 + d.pokepath.owned * 5 +
+    d.plunder.battles * 6 + d.plunder.wins * 150 +
+    d.overlord.lideres * 60 + (d.overlord.mewtwo ? 300 : 0) +
+    Object.values(st.weeks).reduce((a, w) => a + Math.min(300, (w.best || 0) / 20), 0));
+  const XP_NIVEL = (n) => 150 * (n - 1) * (n - 1);
+  const entrenador = (d) => {
+    const xp = xpDe(d), nivel = Math.floor(Math.sqrt(xp / 150)) + 1;
+    const a = XP_NIVEL(nivel), b = XP_NIVEL(nivel + 1);
+    let comp = null;
+    try { comp = JSON.parse(document.querySelector('.jay-companion')?.dataset.snapshot || 'null'); } catch {}
+    if (comp) {
+      // El dibujo del compañero tal como lo pinta el menú (sirve para la ficha y para los otros juegos).
+      let img = st.comp?.id === comp.id ? st.comp.img : null;
+      const cv = document.querySelector('.jay-companion-sprite');
+      if (cv && (!img || st.comp?.f !== cv.width + 'x' + cv.height)) {
+        try {
+          const c = document.createElement('canvas'); c.width = cv.width; c.height = cv.height;
+          c.getContext('2d').drawImage(cv, 0, 0);
+          const d = c.getContext('2d').getImageData(0, 0, c.width, c.height).data;
+          if (d.some((v, i) => i % 4 === 3 && v)) img = c.toDataURL('image/png');
+        } catch {}
+      }
+      st.comp = { id: comp.id, name: comp.name, img, f: cv ? cv.width + 'x' + cv.height : '' };
+    }
+    return { xp, nivel, titulo: TITULOS.find(t => nivel >= t[0])[1], pct: Math.max(0, Math.min(1, (xp - a) / (b - a))), falta: b - xp,
+      nombre: meta()?.profile?.name || 'Entrenador', comp: st.comp || null };
+  };
+  // Cobra los niveles nuevos y deja la ficha a mano para los otros juegos (pb-entrenador).
+  const subirNivel = (d) => {
+    const e = entrenador(d), subidas = [];
+    if (!st.nivel) st.nivel = 1;
+    while (st.nivel < e.nivel) {
+      if (!giveDust(100 * (st.nivel + 1))) break;
+      st.nivel++; subidas.push(['Nivel de entrenador ' + st.nivel, 100 * st.nivel]);
+    }
+    try { localStorage.setItem('pb-entrenador', JSON.stringify({ nombre: e.nombre, nivel: e.nivel, titulo: e.titulo, comp: e.comp && { id: e.comp.id, name: e.comp.name, img: e.comp.img } })); } catch {}
+    return subidas;
+  };
+
+  // ---------- Juego de la semana ----------
+  // Cada semana toca un juego distinto de la Sala. Cuenta lo que avances en él desde que empieza la semana.
+  const RETOS = [
+    { g: 'pokebonk-td', n: 'PokéBonk TD', m: (d) => d.pokepath.waves, u: 'oleadas superadas', metas: [20, 60, 150] },
+    { g: 'pokeisaac', n: 'PokéIsaac', m: (d) => d.isaac.runs, u: 'partidas', metas: [1, 3, 6] },
+    { g: 'pokemonsurvivors', n: 'Pokémon Survivors', m: (d) => d.survivors.runs, u: 'partidas', metas: [1, 3, 6] },
+    { g: 'pokesurvivor', n: 'PokéSurvivor', m: (d) => d.survivor.kills, u: 'enemigos derrotados', metas: [300, 1000, 2500] },
+    { g: 'pokeplunder', n: 'PokéPlunder', m: (d) => d.plunder.battles, u: 'combates ganados', metas: [3, 8, 15] },
+    { g: 'pokeoverlord', n: 'Pokémon Overlord', m: (d) => d.overlord.lideres, u: 'líderes vencidos', metas: [1, 2, 4] },
+    { g: 'pokelike', n: 'Pokelike', m: (d) => d.pokelike.dex, u: 'Pokémon nuevos en la Pokédex', metas: [3, 8, 15] }
+  ];
+  const PREMIOS_RETO = [200, 400, 800];
+  const retoSemana = () => RETOS[((semana() % RETOS.length) + RETOS.length) % RETOS.length];
+  const reto = (d) => {
+    const r = retoSemana(), w = semana(), v = r.m(d);
+    if (!st.reto || st.reto.w !== w) { st.reto = { w, base: v, ok: [] }; save(); }
+    if (v < st.reto.base) { st.reto.base = v; save(); } // partida borrada o importada
+    return { r, hecho: v - st.reto.base, ok: st.reto.ok };
+  };
+  const cobrarReto = (d) => {
+    const { r, hecho, ok } = reto(d), dados = [];
+    r.metas.forEach((m, i) => {
+      if (ok[i] || hecho < m) return;
+      if (!giveDust(PREMIOS_RETO[i])) return;
+      ok[i] = Date.now(); dados.push([`Juego de la semana (${r.n}): ${m} ${r.u}`, PREMIOS_RETO[i]]);
+    });
+    return dados;
+  };
+
+  // Revisa insignias nuevas, el nivel de entrenador y el juego de la semana, y da su Polvo. Devuelve lo nuevo.
   const revisar = async () => {
     const d = await leer();
     const nuevas = [];
@@ -171,7 +253,8 @@
       st.badges[MAESTRO.id] = Date.now();
       nuevas.push([MAESTRO.name, MAESTRO.dust]);
     }
-    if (nuevas.length) save();
+    nuevas.push(...cobrarReto(d), ...subirNivel(d));
+    save();
     return { d, nuevas };
   };
 
@@ -302,6 +385,50 @@
 .pb-rm .rm-tab-rec tr.hoy td{background:rgba(255,203,5,.14)}
 .pb-rm-tag{display:inline-block;margin:2px 0 0 4px;padding:2px 10px;border-radius:999px;background:linear-gradient(#ffe43b,#ffb800);color:#2c1a4e;font-weight:900;font-size:clamp(11px,1.6vw,18px);letter-spacing:.12em;border:2px solid #2c1a4e;box-shadow:0 3px 0 #2c1a4e;transform:rotate(-3deg);vertical-align:middle}
 .logo.hero .logo-com{display:none!important}
+.pb-rm .rm-box{width:min(760px,96vw)!important}
+.pb-rm .rm-tabs{flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;margin:0 -4px 12px;padding:0 4px}
+.pb-rm .rm-tabs::-webkit-scrollbar{display:none}
+.pb-rm .rm-tab{flex:1 0 auto;min-width:0;padding:8px 12px;border-radius:999px;white-space:nowrap}
+.pb-rm .rm-top b{display:flex;flex-direction:column;line-height:1}
+.pb-rm .rm-top b small{font-size:11px;font-weight:800;letter-spacing:.14em;color:#ffcb05}
+.rm-ent{display:flex;align-items:center;gap:12px;padding:10px 12px;margin-bottom:12px;border-radius:16px;background:linear-gradient(100deg,#ffcb05,#ff9d2e);color:#2c1a4e;box-shadow:0 3px 0 #0005}
+.rm-ent img{width:56px;height:64px;flex:none;object-fit:contain;object-position:center bottom;image-rendering:pixelated}
+.rm-ent div{flex:1;min-width:0}
+.rm-ent b{display:block;font-size:17px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rm-ent small{display:block;font-weight:800;font-size:12px;opacity:.85}
+.rm-ent .rm-xp{height:8px;margin-top:5px;border-radius:99px;background:#2c1a4e33;overflow:hidden}
+.rm-ent .rm-xp i{display:block;height:100%;background:#2c1a4e;border-radius:99px}
+.rm-ent em{font-style:normal;font-weight:900;font-size:26px;line-height:1;text-align:center;flex:none}
+.rm-ent em small{font-size:10px;letter-spacing:.08em}
+.rm-sala{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:10px}
+.rm-j{--c:#8a6bff;position:relative;display:flex;flex-direction:column;border-radius:18px;overflow:hidden;background:#1d1336;box-shadow:0 3px 0 #0006,inset 0 0 0 2px color-mix(in srgb,var(--c) 70%,#fff 0%);text-align:left;color:#fff;font-family:inherit;padding:0;border:0}
+.rm-j .rm-jb{position:relative;height:84px;background:linear-gradient(120deg,color-mix(in srgb,var(--c) 85%,#000),var(--c) 55%,color-mix(in srgb,var(--c) 60%,#fff));overflow:hidden}
+.rm-j .rm-jb:before{content:"";position:absolute;inset:0;background:repeating-linear-gradient(135deg,#ffffff14 0 14px,transparent 14px 28px)}
+.rm-j .rm-jb img{position:absolute;right:10px;top:50%;translate:0 -50%;width:72px;height:72px;object-fit:contain;filter:drop-shadow(0 4px 0 #0004)}
+.rm-j .rm-jb b{position:absolute;left:12px;bottom:8px;right:90px;font-size:20px;line-height:1.05;text-shadow:0 2px 0 #0006}
+.rm-j .rm-jt{position:absolute;left:10px;top:8px;padding:2px 8px;border-radius:99px;background:#2c1a4e;color:#ffcb05;font-size:11px;font-weight:900}
+.rm-j .rm-jd{padding:8px 12px 4px;font-size:12.5px;opacity:.9;flex:1}
+.rm-j .rm-jp{padding:0 12px 8px;font-size:12.5px;font-weight:800;color:#ffe27a}
+.rm-j .rm-jp span{color:#cfc4ee;font-weight:700}
+.rm-j .rm-ja{display:flex;gap:6px;padding:0 10px 10px}
+.rm-j .rm-ja button{flex:1;padding:9px 6px;border-radius:12px;border:0;background:var(--c);color:#fff;font:900 15px inherit;font-family:inherit;box-shadow:0 3px 0 #0006}
+.rm-j .rm-ja button.sec{flex:none;background:#ffffff1f;font-size:12px;font-weight:800;padding:9px 10px}
+.rm-j.big{grid-column:1/-1;flex-direction:row;align-items:stretch}
+.rm-j.big .rm-jb{flex:1 1 44%;height:auto;min-height:110px}
+.rm-j.big .rm-jr{flex:1 1 56%;display:flex;flex-direction:column;min-width:0}
+.rm-j.big .rm-jb b{font-size:24px}
+.rm-h{margin:14px 2px 8px;font-weight:900;font-size:15px;color:#ffcb05;letter-spacing:.04em}
+.rm-meta{display:flex;align-items:center;gap:8px;padding:6px 10px;margin:4px 0;border-radius:10px;background:rgba(255,255,255,.08)}
+.rm-meta.ok{background:rgba(255,203,5,.2)}
+.rm-meta span{flex:1}
+.rm-barra{height:10px;border-radius:99px;background:#ffffff22;overflow:hidden;margin:6px 0}
+.rm-barra i{display:block;height:100%;background:#ffcb05;border-radius:99px}
+.pb-portrait .pb-rm .rm-box{width:100vw!important;max-height:100vh;height:100vh;border-radius:0;border:0;padding:calc(12px + env(safe-area-inset-top)) 12px 12px}
+.pb-portrait .rm-j.big{flex-direction:column}
+.pb-rm-tag{cursor:pointer}
+.pb-rm-tag small{font-size:.62em;opacity:.75;margin-left:.5em;letter-spacing:.04em}
+.jay-sidebar .mm-small .mm-item.pb-sala-btn{border-color:#fff3b0!important;background:linear-gradient(#ffe43b,#ffb800)!important;box-shadow:0 calc(3 * var(--u,1px)) #9c6a00!important}
+.jay-sidebar .mm-small .mm-item.pb-sala-btn .mm-tx b{color:#2c1a4e!important;text-shadow:none!important;-webkit-text-stroke:0!important}
 .pb-tour .rm-box{text-align:center}
 .pb-tour .rm-step{min-height:150px}
 .pb-tour h2{margin:6px 0 10px;font-size:22px}
@@ -322,15 +449,72 @@
     return m;
   };
 
+  const CREDITOS = [
+    ['PokéBonk', 'Juego original de Charcher. Port para Android de JayElDragon. Subversión no oficial de moportor6.'],
+    ['PokéBonk TD y PokéPath TD', 'Juego de Khydra. Música y efectos de PokéSurvivor (ver abajo).'],
+    ['PokéSurvivor', 'Juego original de JPTER78 (pokesurvivor.com), port de JayElDragon. Código y música con licencia PolyForm Noncommercial 1.0.0 desde el 14-10-2026 (antes, MIT): solo uso sin fines comerciales. Required Notice: Copyright 2026 JPTER78 (https://github.com/JPTER78/pokesurvivor). Sprites CC BY-NC 4.0.'],
+    ['Pokémon Survivors', 'De pedrobarretto.'],
+    ['PokéIsaac', 'De @SrBatai (pokeisaac.com).'],
+    ['PokéPlunder', 'De Khydra.'],
+    ['Pokémon Overlord', 'De jab_lao.'],
+    ['Pokelike', 'De pokelike.xyz.'],
+    ['Sprites de Pokémon', 'PMDCollab (SpriteCollab) y sus artistas, CC BY-NC 4.0.']
+  ];
+  // Ficha del entrenador (arriba de Juegos y del Pasaporte).
+  const fichaHTML = (d) => {
+    const e = entrenador(d);
+    return `<div class="rm-ent">${e.comp?.img ? `<img src="${e.comp.img}" alt="">` : ''}<div><b>${esc(e.nombre)}</b><small>${e.titulo}${e.comp ? ' con ' + esc(e.comp.name) : ''} · faltan ${fmt(e.falta)} de experiencia</small><div class="rm-xp"><i style="width:${Math.round(e.pct * 100)}%"></i></div></div><em>${e.nivel}<small><br>NIVEL</small></em></div>`;
+  };
+  const esc = (t) => String(t ?? '').replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const mmss = (s) => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+  // Lo que llevas en cada juego, en una línea.
+  const PROGRESO = {
+    'pokebonk-td': (d) => d.pokepath.waves ? `${fmt(d.pokepath.stars)} estrellas, ${d.pokepath.rutas} rutas completas` : '',
+    pokemonsurvivors: (d) => d.survivors.runs ? `Mejor tiempo ${mmss(d.survivors.time)}, nivel ${d.survivors.level}` : '',
+    pokesurvivor: (d) => d.survivor.runs ? `${fmt(d.survivor.kills)} derrotados, ${d.survivor.bosses} jefes` : '',
+    pokeisaac: (d) => d.isaac.runs ? `Piso máximo ${d.isaac.floor}, ${d.isaac.runs} partidas` : '',
+    pokeplunder: (d) => d.plunder.battles ? `${d.plunder.wins} victorias, ${d.plunder.battles} combates` : '',
+    pokeoverlord: (d) => d.overlord.lideres ? `${d.overlord.lideres} líderes vencidos` : '',
+    pokelike: (d) => d.pokelike.dex ? `${d.pokelike.dex} en la Pokédex` : ''
+  };
+  const tarjeta = (j, d, grande, semanal) => {
+    const ins = INSIGNIAS.filter(i => i[0] === j.p), tengo = ins.filter(i => st.badges[i[1]]).length;
+    const prog = PROGRESO[j.id]?.(d) || 'Sin estrenar';
+    const cuerpo = `<div class="rm-jd">${j.desc}</div><div class="rm-jp">${prog} <span>· ${tengo}/${ins.length} insignias</span></div><div class="rm-ja"><button type="button" data-ir="${j.id}">${grande ? 'Seguir jugando' : 'Jugar'}</button>${j.alt ? `<button type="button" class="sec" data-ir="${j.alt.id}">${j.alt.name}</button>` : ''}</div>`;
+    return `<div class="rm-j${grande ? ' big' : ''}" style="--c:${j.color}"><div class="rm-jb">${semanal ? '<span class="rm-jt">Juego de la semana</span>' : ''}<img src="${j.icon}" alt=""${j.pix ? ' style="image-rendering:pixelated"' : ''}><b>${j.name}</b></div>${grande ? `<div class="rm-jr">${cuerpo}</div>` : cuerpo}</div>`;
+  };
+  const pintarSala = async (cuerpo) => {
+    const lista = window.PB_GAMES?.list || [];
+    cuerpo.innerHTML = '<p class="rm-muted">Leyendo tus partidas...</p>';
+    const { d, nuevas } = await revisar();
+    if (tab !== 'juegos') return;
+    const sem = retoSemana().g;
+    const ult = st.ult ? lista.find(j => j.id === st.ult || j.alt?.id === st.ult) : null;
+    let h = fichaHTML(d);
+    if (nuevas.length) h += `<div class="rm-card"><p><b>Nuevo: ${nuevas.map(n => esc(n[0]) + ' (+' + fmt(n[1]) + ' Polvo)').join(', ')}</b></p></div>`;
+    h += '<div class="rm-sala">';
+    if (ult) h += tarjeta(ult, d, true, ult.id === sem);
+    for (const j of lista) if (j !== ult) h += tarjeta(j, d, false, j.id === sem);
+    h += '</div><p class="rm-muted" style="margin-top:10px">Todos se juegan sin iniciar sesión. Cada juego es de su autor; aquí solo los reunimos.</p>';
+    cuerpo.innerHTML = h;
+    cuerpo.querySelectorAll('[data-ir]').forEach(b => b.addEventListener('click', () => {
+      const id = b.dataset.ir;
+      const j = lista.find(x => x.id === id) || lista.map(x => x.alt).find(x => x?.id === id);
+      if (!j) return;
+      st.ult = id; save();
+      location.href = j.url;
+    }));
+  };
+
   let hub = null;
-  let tab = 'pasaporte';
+  let tab = 'juegos';
   const pintarPasaporte = async (cuerpo) => {
     cuerpo.innerHTML = '<p class="rm-muted">Leyendo tus partidas...</p>';
     const { nuevas, d: ultimo } = await revisar();
     const total = INSIGNIAS.length + 1;
     const tengo = Object.keys(st.badges).length;
-    let h = `<div class="rm-card"><p><b>${tengo}/${total} insignias</b></p><p class="rm-muted">Juega a los juegos de Más juegos: cada insignia da Polvo Estelar en PokéBonk una sola vez. Se revisa cada vez que abres el Pasaporte.</p>`;
-    if (nuevas.length) h += `<p><b>Nuevas: ${nuevas.map(n => n[0] + ' (+' + fmt(n[1]) + ' Polvo)').join(', ')}</b></p>`;
+    let h = fichaHTML(ultimo) + `<div class="rm-card"><p><b>${tengo}/${total} insignias</b></p><p class="rm-muted">Juega a los juegos de la Sala: cada insignia da Polvo Estelar en PokéBonk una sola vez. Se revisa cada vez que abres el Pasaporte.</p>`;
+    if (nuevas.length) h += `<p><b>Nuevo: ${nuevas.map(n => n[0] + ' (+' + fmt(n[1]) + ' Polvo)').join(', ')}</b></p>`;
     if (inRun()) h += '<p class="rm-muted">Termina la partida para cobrar las insignias nuevas.</p>';
     h += '</div>';
     for (const g of JUEGOS_P) {
@@ -347,7 +531,23 @@
     cuerpo.innerHTML = h;
   };
 
-  const pintarDesafio = (cuerpo) => {
+  // Desafíos: el juego de la semana (rota entre los juegos de la Sala) y el Desafío del Alfa de PokéBonk.
+  const ponReto = async (cuerpo) => {
+    const { d } = await revisar();
+    if (tab !== 'desafio') return;
+    const { r, hecho, ok } = reto(d);
+    const j = (window.PB_GAMES?.list || []).find(x => x.id === r.g);
+    const max = r.metas[r.metas.length - 1];
+    let h = `<div class="rm-h">Juego de la semana: ${r.n}</div><div class="rm-card"><p>Esta semana llevas <b>${fmt(hecho)}</b> ${r.u}.</p><div class="rm-barra"><i style="width:${Math.min(100, Math.round(hecho / max * 100))}%"></i></div>`;
+    r.metas.forEach((m, i) => { h += `<div class="rm-meta${ok[i] ? ' ok' : ''}"><span>${ok[i] ? '★' : '·'} ${fmt(m)} ${r.u}</span><b>+${fmt(PREMIOS_RETO[i])}</b></div>`; });
+    h += `<p class="rm-muted">Cuenta lo que juegues desde el lunes. La semana que viene toca otro juego.</p>${j ? '<button type="button" class="rm-btn rm-ir-reto">Jugar ' + r.n + '</button>' : ''}</div><div class="rm-h">Desafío del Alfa (PokéBonk)</div>`;
+    const div = document.createElement('div');
+    div.innerHTML = h;
+    cuerpo.prepend(div);
+    div.querySelector('.rm-ir-reto')?.addEventListener('click', () => { st.ult = j.id; save(); location.href = j.url; });
+  };
+  const pintarDesafio = (cuerpo) => { pintarAlfa(cuerpo); ponReto(cuerpo); };
+  const pintarAlfa = (cuerpo) => {
     const rg = reglas();
     const dados = cobrarSemana();
     const w = semanaSt();
@@ -427,12 +627,13 @@
   const pintar = () => {
     hub.querySelectorAll('.rm-tab').forEach(b => b.classList.toggle('on', b.dataset.t === tab));
     const cuerpo = hub.querySelector('.rm-body');
-    if (tab === 'pasaporte') pintarPasaporte(cuerpo);
+    if (tab === 'juegos') pintarSala(cuerpo);
+    else if (tab === 'pasaporte') pintarPasaporte(cuerpo);
     else if (tab === 'desafio') pintarDesafio(cuerpo);
     else if (tab === 'traspaso') pintarTraspaso(cuerpo);
     else if (tab === 'act') { if (window.PB_ACT) window.PB_ACT.pintar(cuerpo); else cuerpo.innerHTML = ''; }
     else {
-      cuerpo.innerHTML = `<div class="rm-card"><p><b>PokéBonk Remaster</b> es PokéBonk ${window.PB_SUB ? window.PB_SUB.oficial : ''} (el juego oficial de Charcher) con la subversión ${window.PB_SUB ? window.PB_SUB.sub : ''} de moportor6 (no oficial).</p><p class="rm-muted">Todo lo nuevo está en Noticias, apartado Subversiones.</p></div><button type="button" class="rm-btn alt rm-tour">Ver el tour de bienvenida</button>`;
+      cuerpo.innerHTML = `<div class="rm-card"><p><b>PokéBonk Remaster</b> es PokéBonk ${window.PB_SUB ? window.PB_SUB.oficial : ''} (el juego oficial de Charcher) con la subversión ${window.PB_SUB ? window.PB_SUB.sub : ''} de moportor6 (no oficial).</p><p class="rm-muted">Reúne PokéBonk y siete juegos más con un solo entrenador: tu nivel sube juegues a lo que juegues, las insignias del Pasaporte dan Polvo Estelar y cada semana hay un juego destacado y un Desafío del Alfa. Todo lo nuevo está en Noticias, apartado Subversiones.</p></div><div class="rm-h">Créditos y licencias de los juegos</div>${CREDITOS.map(c => `<div class="rm-b"><span>${c[0]}<small>${c[1]}</small></span></div>`).join('')}<p class="rm-muted">Pokémon y sus personajes pertenecen a Nintendo, Creatures Inc. y GAME FREAK inc. Todo el Remaster es gratis y sin ánimo de lucro: sin anuncios, compras ni donaciones.</p><button type="button" class="rm-btn alt rm-tour">Ver el tour de bienvenida</button>`;
       cuerpo.querySelector('.rm-tour').addEventListener('click', () => { hub.hidden = true; tour(); });
     }
   };
@@ -440,7 +641,7 @@
   const abrir = (t) => {
     if (!hub) {
       hub = modal();
-      hub.innerHTML = `<div class="rm-box"><div class="rm-top"><b>PokéBonk Remaster</b><button type="button" class="rm-x" aria-label="Cerrar">X</button></div><div class="rm-tabs"><button type="button" class="rm-tab" data-t="pasaporte">Pasaporte</button><button type="button" class="rm-tab" data-t="desafio">Desafío del Alfa</button><button type="button" class="rm-tab" data-t="traspaso">Traspaso</button><button type="button" class="rm-tab" data-t="act">Actualizaciones</button><button type="button" class="rm-tab" data-t="info">Remaster</button></div><div class="rm-body"></div></div>`;
+      hub.innerHTML = `<div class="rm-box"><div class="rm-top"><b><small>POKÉBONK</small>Remaster</b><button type="button" class="rm-x" aria-label="Cerrar">X</button></div><div class="rm-tabs"><button type="button" class="rm-tab" data-t="juegos">Juegos</button><button type="button" class="rm-tab" data-t="pasaporte">Pasaporte</button><button type="button" class="rm-tab" data-t="desafio">Desafíos</button><button type="button" class="rm-tab" data-t="traspaso">Traspaso</button><button type="button" class="rm-tab" data-t="act">Actualizaciones</button><button type="button" class="rm-tab" data-t="info">Acerca de</button></div><div class="rm-body"></div></div>`;
       hub.addEventListener('click', (e) => {
         const b = e.target.closest('.rm-tab');
         if (b) { tab = b.dataset.t; pintar(); return; }
@@ -458,8 +659,8 @@
     ['Bienvenido a PokéBonk Remaster', 'El PokéBonk de siempre con muchas novedades. Te enseñamos lo principal en un momento.'],
     ['Megaevolución y Dynamax', 'En la partida, los botones MEGA y DMAX se cargan derrotando enemigos. El Dynamax sirve para cualquier Pokémon; la Mega, para los que la tienen cuando su investigación está al 100%.'],
     ['Laboratorio individual', 'Cada mejora del Laboratorio se compra para un Pokémon concreto y solo le afecta a él. Gasta tu Polvo Estelar en tus favoritos.'],
-    ['Más juegos', 'En la barra del menú, Más juegos abre PokéIsaac, Pokémon Survivors, PokéSurvivor, PokéBonk TD (en pruebas), PokéPath TD, PokéPlunder, Pokémon Overlord y Pokelike. Todos sin iniciar sesión.'],
-    ['Pasaporte, Desafío y Traspaso', 'El botón Remaster tiene tu Pasaporte de entrenador (insignias de los otros juegos que dan Polvo), un desafío nuevo cada semana con premios y rachas, y el Traspaso para pasar tu partida entre el móvil y el PC.'],
+    ['Sala de juegos', 'El botón dorado Juegos abre la Sala: PokéBonk TD, Pokémon Survivors, PokéSurvivor, PokéIsaac, PokéPlunder, Pokémon Overlord y Pokelike, con tu progreso en cada uno. Todos sin iniciar sesión.'],
+    ['Un entrenador para todo', 'Tu nivel de entrenador sube juegues a lo que juegues. En Remaster tienes el Pasaporte (insignias que dan Polvo), los Desafíos de cada semana y el Traspaso para pasar tu partida entre el móvil y el PC.'],
     ['Editor del HUD y mando', 'Desde la pausa puedes mover y cambiar el tamaño de los botones. En PC y Android también puedes jugar con mando.']
   ];
   let tourM = null;
@@ -486,7 +687,9 @@
     if (w && !w.parentNode.querySelector('.pb-rm-tag')) {
       const tag = document.createElement('span');
       tag.className = 'pb-rm-tag';
-      tag.textContent = 'REMASTER' + (window.PB_SUB ? ' ' + window.PB_SUB.sub : '');
+      tag.innerHTML = 'REMASTER' + (window.PB_SUB ? '<small>' + window.PB_SUB.sub + '</small>' : '');
+      tag.setAttribute('role', 'button');
+      tag.addEventListener('click', (e) => { e.stopPropagation(); if (!inRun()) abrir('juegos'); });
       w.after(tag);
     }
     if (document.title.includes('PokéBonk') && !document.title.includes('Remaster')) document.title = document.title.replace('PokéBonk', 'PokéBonk Remaster');
@@ -496,9 +699,14 @@
       b.type = 'button';
       b.className = 'mm-item mini pb-rm-btn';
       b.innerHTML = '<span class="mm-ic"><svg viewBox="0 0 24 24" width="28" height="28" aria-hidden="true"><path d="M4 3h13l3 3v15H4Z" fill="#ffcb05" stroke="#2c1a4e" stroke-width="1.7" stroke-linejoin="round"/><path d="m12 7 1.5 3 3.3.5-2.4 2.3.6 3.3L12 14.6 9 16.1l.6-3.3-2.4-2.3 3.3-.5Z" fill="#ff667f" stroke="#2c1a4e" stroke-width="1.2" stroke-linejoin="round"/></svg></span><span class="mm-tx"><b>Remaster</b></span>';
-      b.addEventListener('click', () => abrir());
+      b.addEventListener('click', () => abrir('pasaporte'));
       const after = small.querySelector('.pb-isaac') || small.querySelector('.jay-donate');
       if (after) after.after(b); else small.append(b);
+    }
+    // Al volver de un juego (…/index.html#sala) se abre la Sala.
+    if (small && location.hash === '#sala' && st.tour && !inRun()) {
+      try { history.replaceState(null, '', location.pathname + location.search); } catch { location.hash = ''; }
+      abrir('juegos');
     }
     // Tour la primera vez, cuando el menú ya está a la vista y sin partida.
     if (!st.tour && small && !inRun() && !document.querySelector('.pb-tour:not([hidden])')) tour();

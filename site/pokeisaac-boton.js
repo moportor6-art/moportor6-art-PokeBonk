@@ -4,24 +4,23 @@
 (() => {
   if (window.__pbIsaac) return;
   window.__pbIsaac = true;
+  // color: tono de su tarjeta en la Sala de juegos. p: nombre en el Pasaporte. alt: segundo botón de la tarjeta.
   const JUEGOS = [
-    { id: 'pokeisaac', name: 'PokéIsaac', icon: 'pokeisaac/favicon.svg', url: 'pokeisaac/index.html?mockauth=1&mockdelay=0',
-      desc: 'Mazmorras al estilo The Binding of Isaac. Sin cuenta: Gacha y fichas en este dispositivo. De @SrBatai.', pix: true },
-    { id: 'pokeisaac-online', name: 'PokéIsaac online', icon: 'pokeisaac/favicon.svg', url: 'pokeisaac/index.html',
-      desc: 'Con tu cuenta de pokeisaac.com: Ranking, cooperativo, clan y chat. Necesita internet.', pix: true },
-    { id: 'pokemonsurvivors', name: 'Pokémon Survivors', icon: 'pokemonsurvivors-icono.png', url: 'pokemonsurvivors/index.html',
-      desc: 'Survivors con 82 Pokémon: aguanta 15 minutos de hordas, evoluciona y vence a Mewtwo. De pedrobarretto.', pix: true },
-    { id: 'pokesurvivor', name: 'PokéSurvivor', icon: 'pokesurvivor-icono.png', url: 'pokesurvivor/index.html',
-      desc: 'Sobrevive a oleadas de enemigos. De JPTER78 y JayElDragon.' },
-    { id: 'pokepath', name: 'PokéPath TD', icon: 'pokepath-icono.png', url: 'pokepath/index.html',
-      desc: 'Tower defense: construye el camino y defiende 9 rutas. De Khydra.', pix: true },
-    { id: 'pokebonk-td', name: 'PokéBonk TD (en pruebas)', icon: 'pokepath-icono.png', url: 'pokepath/remaster.html',
-      desc: 'PokéPath TD con la cara de PokéBonk: misma partida y mismos valores, pensado para el móvil. Juego de Khydra.', pix: true },
-    { id: 'pokeplunder', name: 'PokéPlunder', icon: 'pokeplunder-icono.png', url: 'pokeplunder/index.html',
-      desc: 'Roguelike por turnos: 12 Pokémon, 9 zonas, objetos y jefes. De Khydra.', pix: true },
-    { id: 'pokeoverlord', name: 'Pokémon Overlord', icon: 'pokeoverlord-icono.png', url: 'pokeoverlord/index.html',
-      desc: 'Roguelike de combates por equipos: coloca tu equipo y lucha. Battle Frontier y Versus. De jab_lao.', pix: true },
-    { id: 'pokelike', name: 'Pokelike', icon: 'pokelike/favicon.svg', url: 'pokelike/index.html',
+    { id: 'pokebonk-td', name: 'PokéBonk TD', icon: 'pokepath-icono.png', url: 'pokepath/remaster.html', dir: 'pokepath', color: '#3ec26a', p: 'PokéBonk TD', pix: true,
+      desc: 'Tower defense con 47 rutas y 100 oleadas por ruta. El juego de Khydra con la cara de PokéBonk.',
+      alt: { id: 'pokepath', name: 'PokéPath TD original', url: 'pokepath/index.html' } },
+    { id: 'pokemonsurvivors', name: 'Pokémon Survivors', icon: 'pokemonsurvivors-icono.png', url: 'pokemonsurvivors/index.html', color: '#ff7a2a', p: 'Pokémon Survivors', pix: true,
+      desc: 'Aguanta 15 minutos de hordas con 82 Pokémon, evoluciona y vence a Mewtwo. De pedrobarretto.' },
+    { id: 'pokesurvivor', name: 'PokéSurvivor', icon: 'pokesurvivor-icono.png', url: 'pokesurvivor/index.html', color: '#ff4a6e', p: 'PokéSurvivor',
+      desc: 'Sobrevive a oleadas con más de 960 Pokémon. Juego de JPTER78 (pokesurvivor.com), port de JayElDragon. Uso sin fines comerciales.' },
+    { id: 'pokeisaac', name: 'PokéIsaac', icon: 'pokeisaac/favicon.svg', url: 'pokeisaac/index.html?mockauth=1&mockdelay=0', color: '#8a6bff', p: 'PokéIsaac', pix: true,
+      desc: 'Mazmorras al estilo The Binding of Isaac, sin cuenta. De @SrBatai.',
+      alt: { id: 'pokeisaac-online', name: 'Jugar online (con cuenta)', url: 'pokeisaac/index.html' } },
+    { id: 'pokeplunder', name: 'PokéPlunder', icon: 'pokeplunder-icono.png', url: 'pokeplunder/index.html', color: '#4a9dff', p: 'PokéPlunder', pix: true,
+      desc: 'Roguelike por turnos: 12 Pokémon, 9 zonas, objetos y jefes. De Khydra.' },
+    { id: 'pokeoverlord', name: 'Pokémon Overlord', icon: 'pokeoverlord-icono.png', url: 'pokeoverlord/index.html', color: '#ffb800', p: 'Pokémon Overlord', pix: true,
+      desc: 'Combates por equipos: coloca tu equipo y lucha. Battle Frontier y Versus. De jab_lao.' },
+    { id: 'pokelike', name: 'Pokelike', icon: 'pokelike/favicon.svg', url: 'pokelike/index.html', color: '#2fc7c0', p: 'Pokelike',
       desc: 'Roguelike por turnos: Historia, Torre Batalla y Desafíos. De pokelike.xyz.' }
   ];
 
@@ -43,6 +42,8 @@
 
   let modal = null;
   const open = () => {
+    // La Sala de juegos del Remaster, si está; esta lista queda de respaldo.
+    if (window.PB_REMASTER?.open) return window.PB_REMASTER.open('juegos');
     if (!modal) {
       const st = document.createElement('style');
       st.textContent = css;
@@ -50,7 +51,7 @@
       modal = document.createElement('div');
       modal.className = 'pb-games';
       modal.innerHTML = `<div class="pg-box"><div class="pg-top"><b>Más juegos</b><button type="button" class="pg-x" aria-label="Cerrar">X</button></div><div class="pg-list">${
-        JUEGOS.map(j => `<button type="button" class="pg-g" data-url="${j.url}"><img src="${j.icon}" alt=""${j.pix ? ' style="image-rendering:pixelated"' : ''}><span><b>${j.name} <i class="pg-v" data-dir="${j.url.split('/')[0]}"></i></b><small>${j.desc}</small></span></button>`).join('')
+        JUEGOS.map(j => `<button type="button" class="pg-g" data-url="${j.url}"><img src="${j.icon}" alt=""${j.pix ? ' style="image-rendering:pixelated"' : ''}><span><b>${j.name} <i class="pg-v" data-dir="${j.dir || j.url.split('/')[0]}"></i></b><small>${j.desc}</small></span></button>`).join('')
       }</div></div>`;
       // Versión de cada juego (su version.txt). Los que no lo traen se quedan sin número.
       modal.querySelectorAll('.pg-v').forEach(el => {
@@ -76,8 +77,8 @@
     if (!small || small.querySelector('.pb-isaac')) return;
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'mm-item mini pb-isaac';
-    b.innerHTML = '<span class="mm-ic"><img src="pokeisaac/favicon.svg" alt="" style="width:28px;height:28px;image-rendering:pixelated"></span><span class="mm-tx"><b>Más juegos</b></span>';
+    b.className = 'mm-item mini pb-isaac pb-sala-btn';
+    b.innerHTML = '<span class="mm-ic"><img src="pokeisaac/favicon.svg" alt="" style="width:28px;height:28px;image-rendering:pixelated"></span><span class="mm-tx"><b>Juegos</b></span>';
     b.addEventListener('click', open);
     const after = small.querySelector('.jay-donate') || small.querySelector('.mm-item:not(.bug)');
     if (after) after.after(b); else small.append(b);

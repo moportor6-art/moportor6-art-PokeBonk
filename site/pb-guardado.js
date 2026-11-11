@@ -22,6 +22,8 @@
       if (esDe(viejo) === juego) set.call(localStorage, pre + 'data', viejo);
     }
   } catch (e) {}
+  // Acceso sin prefijo, para lo que es de todo el Remaster (la ficha del entrenador).
+  window.__pbCrudo = { get: (k) => get.call(localStorage, k), set: (k, v) => set.call(localStorage, k, v) };
   const mio = (s) => s === localStorage;
   S.getItem = function (k) { return get.call(this, mio(this) ? pre + k : k); };
   S.setItem = function (k, v) { return set.call(this, mio(this) ? pre + k : k, v); };

@@ -258,6 +258,7 @@
     hud = el('div', 'tdr');
     hud.innerHTML = `
       <header class="tdr-top">
+        <i class="tdr-comp" hidden></i>
         <div class="tdr-route"><b></b><span></span></div>
         <div class="tdr-life" title="Vidas"><i></i><b></b></div>
         <div class="tdr-gold"><b></b></div>
@@ -279,6 +280,12 @@
       <div class="tdr-zbar"><button type="button" class="tdr-zin" aria-label="Acercar">+</button><button type="button" class="tdr-zout" aria-label="Alejar">−</button><button type="button" class="tdr-zfit">Ver todo</button></div>`;
     document.body.append(hud);
 
+    // Tu compañero del Remaster, junto al nombre de la ruta.
+    try {
+      const e = JSON.parse((window.__pbCrudo?.get || ((k) => localStorage.getItem(k)))('pb-entrenador') || 'null');
+      const ic = hud.querySelector('.tdr-comp');
+      if (e?.comp?.img && /^data:image\/png;base64,[A-Za-z0-9+/=]+$/.test(e.comp.img)) { ic.hidden = false; ic.style.backgroundImage = `url("${e.comp.img}")`; ic.title = `${e.comp.name} · nivel ${e.nivel}`; }
+    } catch {}
     const team = hud.querySelector('.tdr-team');
     for (let i = 0; i < 10; i++) {
       const c = el('div', 'tdr-card');
@@ -321,7 +328,7 @@
       else if (t.classList.contains('tdr-classic')) { try { localStorage.setItem(KEY, 'clasica'); } catch {} cambiar(); }
       else if (t.classList.contains('tdr-exit')) {
         if (!t.classList.contains('armed')) { t.classList.add('armed'); t.querySelector('span').textContent = 'Toca otra vez'; setTimeout(() => { t.classList.remove('armed'); t.querySelector('span').textContent = 'Salir'; }, 3000); return; }
-        location.href = '../index.html';
+        location.href = '../index.html#sala';
       } else if (t.dataset.k) ui.section[t.dataset.k]?.click();
       pintar();
     });

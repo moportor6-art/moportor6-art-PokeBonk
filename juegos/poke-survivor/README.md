@@ -19,5 +19,5 @@ Get the APK from the [Releases](../../releases) page.
 2. Open `project.godot`, let it import, then export with the included Android preset.
 
 ## Credits and licenses
-- Code: MIT (see [`LICENSE`](LICENSE)). Sprites: CC BY-NC 4.0, non-commercial use only. Full artist list in [`CREDITS.md`](CREDITS.md).
+- Code: PolyForm Noncommercial 1.0.0 for the content from 2026-10-14 on (see [`LICENSE-NONCOMMERCIAL.md`](LICENSE-NONCOMMERCIAL.md)); MIT for earlier versions (see [`LICENSE`](LICENSE)). Required Notice: Copyright 2026 JPTER78 (https://github.com/JPTER78/pokesurvivor). Sprites: CC BY-NC 4.0, non-commercial use only. Full artist list in [`CREDITS.md`](CREDITS.md).
 - Pokémon and its characters are trademarks of Nintendo, Creatures Inc. and GAME FREAK inc. This is a non-profit fan project with no affiliation to them.

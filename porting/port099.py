@@ -329,7 +329,6 @@ PORT_TAGS = '''    <script src="./port-i18n.js"></script>
     <script src="./port.js" defer></script>
     <script src="./companion.js" defer></script>
     <script src="./preferences.js" defer></script>
-    <script src="./donate.js" defer></script>
     <script src="./updater.js" defer></script>
     <script src="./pad-labels.js" defer></script>
     <script src="./scroll-bars.js" defer></script>

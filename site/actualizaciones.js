@@ -169,7 +169,13 @@
 
   // Pestaña "Actualizaciones" de Remaster.
   const pintar = async (cuerpo) => {
-    if (!disponible) { cuerpo.innerHTML = '<div class="rm-card"><p>Las actualizaciones van en la app de Android o de Windows.</p></div>'; return; }
+    if (!disponible) {
+      // En el navegador no hay nada que instalar: se enseña la versión y lo último que cambió.
+      const S = window.PB_SUB, ult = (S?.changelog || []).slice(0, 4);
+      cuerpo.innerHTML = `<div class="rm-card"><p><b>Versión ${esc(S?.oficial || '')}, subversión ${esc(S?.sub || '')}</b></p><p class="rm-muted">Estás en el navegador, que siempre carga la última versión. La app de Android y la de Windows se actualizan desde aquí.</p></div>` +
+        ult.map(c => `<div class="rm-card"><p><b>${esc(c.sub)} · ${esc(c.title)}</b></p>${(c.notes || []).map(n => `<p class="rm-muted">${esc(String(n[1]).replace(/\*\*/g, ''))}</p>`).join('')}</div>`).join('');
+      return;
+    }
     let e = {};
     try { e = and ? JSON.parse(window.AndroidMenu.actualizacionEstado()) : await llamar('estado'); } catch {}
     const mods = Object.values(e.modulos || {}).map(m => `<div class="rm-b${m.actualizado ? ' ok' : ''}"><i>${m.actualizado ? '★' : '·'}</i><span>${esc(m.nombre)}<small>${m.actualizado ? 'Actualizado por descarga' : 'El que trae la app'}</small></span></div>`).join('');

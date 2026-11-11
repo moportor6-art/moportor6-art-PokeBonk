@@ -1,6 +1,11 @@
 Música de PokéSurvivor (https://github.com/JPTER78/pokesurvivor), de JPTER78.
-Generada por el código del juego (js/data/music.js) y publicada con licencia MIT,
-igual que el resto de su código. Se usa en PokéBonk TD con su misma licencia.
+Generada por el código del juego (js/data/music.js). Viene del port 6.2 de JayElDragon, que
+incluye contenido del original posterior al 14-10-2026, así que va con la licencia
+PolyForm Noncommercial 1.0.0 (sin fines comerciales; versiones anteriores, MIT).
+PokéBonk TD es gratis, sin anuncios, compras ni donaciones.
+
+Required Notice: Copyright 2026 JPTER78 (https://github.com/JPTER78/pokesurvivor)
+El repositorio original ya no está publicado; el juego oficial está en https://pokesurvivor.com
 
 Archivos: village, forest, cave, rift, volcano, judgment (rutas), boss (jefes),
 halloween (convertida a OGG desde mus_halloween.wav).

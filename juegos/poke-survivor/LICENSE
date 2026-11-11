@@ -3,6 +3,13 @@ Pokémon Survivors (Android port of PokéSurvivor by JPTER78) — licencias / li
 Original game: https://github.com/JPTER78/pokesurvivor
 This Android port is a derivative work of the original and keeps its licenses.
 
+IMPORTANT: from 2026-10-14 (after original commit b297089) the original's code and music are under the
+PolyForm Noncommercial License 1.0.0. This port (6.2) includes later content, so it is distributed under
+that license: see LICENSE-NONCOMMERCIAL.md. The MIT text below applies to the versions up to b297089.
+
+Required Notice: Copyright 2026 JPTER78 (https://github.com/JPTER78/pokesurvivor)
+
+
 PokéSurvivor — licencias
 
 1) CÓDIGO (todo lo que hay en js/, css/, index.html, tools/ y la música de
