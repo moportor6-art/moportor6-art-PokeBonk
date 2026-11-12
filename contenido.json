@@ -1,0 +1,671 @@
+{
+ "formato": 1,
+ "version": 114,
+ "sub": "0.59",
+ "shell": {
+  "android": "1833e5c99d71a395",
+  "windows": "684c417a0bae956d"
+ },
+ "modulos": {
+  "pokebonk": {
+   "nombre": "PokéBonk (juego principal)",
+   "hash": "21aec843228c595be66951463779b403f738e7fd32a7f0926a6df9fcf2af3685",
+   "archivos": 8036,
+   "bytes": 217898694
+  },
+  "pokeisaac": {
+   "nombre": "PokéIsaac",
+   "hash": "71e7112d6711efdfe856dc30bc20a397592a5c3408399a3621e9b24819308302",
+   "archivos": 5679,
+   "bytes": 82367848
+  },
+  "pokemonsurvivors": {
+   "nombre": "Pokémon Survivors",
+   "hash": "7ef9241dd4de04c0cd49b4e734c7ffb4ce66e451ffe899711fa393f81a0bc53c",
+   "archivos": 7244,
+   "bytes": 65404423
+  },
+  "pokesurvivor": {
+   "nombre": "PokéSurvivor",
+   "hash": "d5eb83edadaeddfca4d4863752a6371713fb2fa069ffc8431c1d9338377c4238",
+   "archivos": 10,
+   "bytes": 187901432
+  },
+  "pokepath": {
+   "nombre": "PokéBonk TD",
+   "hash": "0d884a5a8ade40b54255358b16d48ff73111f852c0f52f998ded5d7f93deac70",
+   "archivos": 3684,
+   "bytes": 41183181
+  },
+  "pokeplunder": {
+   "nombre": "PokéPlunder",
+   "hash": "0303453dd6fb1e11bc32338bdf721833b84a354e59c478bacc31ba72641e738e",
+   "archivos": 665,
+   "bytes": 29735389
+  },
+  "pokeoverlord": {
+   "nombre": "Pokémon Overlord",
+   "hash": "df0eb363ae033074c26b929c949b44de00c97c40db2984aeb6762f69b23b2666",
+   "archivos": 11,
+   "bytes": 103109162
+  },
+  "pokelike": {
+   "nombre": "Pokelike",
+   "hash": "50e4e8a2ed719f7906c95992ea0791f392affbc4cc3f887dae2ebea4a225f02c",
+   "archivos": 1994,
+   "bytes": 133209473
+  }
+ },
+ "tag": "v114",
+ "base": "https://raw.githubusercontent.com/moportor6-art/moportor6-art-PokeBonk/contenido-v114/",
+ "cambios": [
+  {
+   "oficial": "0.9.9",
+   "sub": "0.59",
+   "date": "2026-11-12",
+   "title": "Paldea, la novena región.",
+   "notes": [
+    [
+     "new",
+     "Paldea: 72 familias jugables (con los Pokémon paradoja), 4 mapas y 4 santuarios con sus legendarios."
+    ],
+    [
+     "new",
+     "7 evoluciones de Paldea para líneas antiguas, con reto."
+    ],
+    [
+     "new",
+     "Mega Scovillain en el Laboratorio."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.58",
+   "date": "2026-11-12",
+   "title": "Galar, la octava región.",
+   "notes": [
+    [
+     "new",
+     "Galar: 48 familias jugables, 4 mapas y 4 santuarios con sus legendarios."
+    ],
+    [
+     "new",
+     "12 evoluciones de Galar e Hisui para líneas antiguas, con reto."
+    ],
+    [
+     "new",
+     "17 Gigamax de Galar (con Eternatus Eternamax) y Mega Falinks."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.57",
+   "date": "2026-11-12",
+   "title": "Alola, la séptima región.",
+   "notes": [
+    [
+     "new",
+     "Alola: 55 familias jugables (con los Ultraentes), 4 mapas y 4 santuarios con sus legendarios."
+    ],
+    [
+     "new",
+     "Lunala como evolución alternativa de Cosmoem."
+    ],
+    [
+     "new",
+     "Mega Crabominable, Mega Drampa y Melmetal Gigamax."
+    ],
+    [
+     "new",
+     "Mega Zoroark y formas extra opcionales: Mega Raichu (Reloaded), Mega Tyranitar Negro y Mega Steelix de Hielo."
+    ],
+    [
+     "better",
+     "Botones de MEGA y DYNAMAX con su propio diseño."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.56",
+   "date": "2026-11-12",
+   "title": "Kalos, la sexta región.",
+   "notes": [
+    [
+     "new",
+     "Kalos: 37 familias jugables, 4 mapas y 4 santuarios con sus legendarios."
+    ],
+    [
+     "new",
+     "Sylveon como nueva evolución de Eevee."
+    ],
+    [
+     "new",
+     "Megas de Chesnaught, Delphox, Greninja, Pyroar, Meowstic, Malamar, Barbaracle, Dragalge, Hawlucha, Zygarde, Diancie, Floette y Butterfree."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.55",
+   "date": "2026-11-12",
+   "title": "Teselia, la quinta región.",
+   "notes": [
+    [
+     "new",
+     "Teselia: 82 familias jugables, 4 mapas y 4 santuarios con sus legendarios."
+    ],
+    [
+     "new",
+     "Megas de Emboar, Excadrill, Audino, Scolipede, Scrafty, Eelektross, Chandelure y Golurk; Garbodor Gigamax."
+    ],
+    [
+     "fix",
+     "Los guardianes de los mapas de Sinnoh ya son de Sinnoh."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.54",
+   "date": "2026-11-12",
+   "title": "Pestaña «Megas y Gigamax» en la Pokédex.",
+   "notes": [
+    [
+     "new",
+     "Pokédex: pestaña con todas las megas y Gigamax, con filtros y variocolor; las que no tienes se ven en gris."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.53",
+   "date": "2026-11-12",
+   "title": "Megas con dibujo propio, formas X/Y/Z y Gigamax.",
+   "notes": [
+    [
+     "new",
+     "16 megas ya tienen su dibujo y 10 megas nuevas de Leyendas Z-A (sprites de Pokémon Reloaded)."
+    ],
+    [
+     "new",
+     "Mega Raichu X y Y, Mega Charizard Y, Mega Mewtwo X y megas Z de Absol, Garchomp y Lucario, a elegir en el Laboratorio."
+    ],
+    [
+     "new",
+     "Aspecto Gigamax con el Dynamax para 12 Pokémon."
+    ],
+    [
+     "fix",
+     "Las megas sin dibujo propio ya no entran."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.52",
+   "date": "2026-11-12",
+   "title": "Comprar megas en el Laboratorio.",
+   "notes": [
+    [
+     "new",
+     "Las megas se compran en el Laboratorio: 3,000 Polvo + 2,000 oro (legendarias: 5,000 + 3,000)."
+    ],
+    [
+     "new",
+     "El oro guardado de las partidas se ve en el Laboratorio."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.51",
+   "date": "2026-11-12",
+   "title": "Combates por fases de Kyogre y Rayquaza.",
+   "notes": [
+    [
+     "new",
+     "Kyogre: Surf, Hidrobomba, Salpicar, Rayo Hielo; lluvia con rayos en la fase 2; Pulso Primigenio en la fase 3."
+    ],
+    [
+     "new",
+     "Rayquaza: Pulso Dragón, Ciclón, Velocidad Extrema, Hiperrayo; Enfado y Cometa Draco en la fase 2; Ascenso del Dragón en la fase 3."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.50",
+   "date": "2026-11-11",
+   "title": "Santuarios en los mapas de Hoenn y Sinnoh.",
+   "notes": [
+    [
+     "new",
+     "Los 8 mapas de Hoenn y Sinnoh tienen santuario con su legendario."
+    ],
+    [
+     "new",
+     "Groudon y Shaymin tienen combate por fases; el resto, combate de legendario normal."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.49",
+   "date": "2026-11-11",
+   "title": "Mega Darkrai y Dialga Primigenio.",
+   "notes": [
+    [
+     "new",
+     "Mega Darkrai y Dialga Primigenio, con animaciones."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.48",
+   "date": "2026-11-11",
+   "title": "Otras evoluciones y más megas.",
+   "notes": [
+    [
+     "new",
+     "Gallade, Froslass, Leafeon y Glaceon, con su reto, para elegirlos al evolucionar."
+    ],
+    [
+     "fix",
+     "Las 11 evoluciones de Johto ya se desbloquean sin el servidor oficial."
+    ],
+    [
+     "new",
+     "Megas de Lopunny, Lucario, Gallade y Slowbro con sprite; otras 11 con el sprite normal."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.47",
+   "date": "2026-11-11",
+   "title": "¡Llega Sinnoh! 45 familias, 4 mapas y evoluciones nuevas.",
+   "notes": [
+    [
+     "new",
+     "Mapas de Sinnoh: Bosque Vetusto, Ruta Nevada, Lago Valor y Mundo Distorsión, con Shaymin, Regigigas, el trío del lago y Dialga, Palkia o Giratina."
+    ],
+    [
+     "new",
+     "Liga de Sinnoh: 45 familias con kit, pasiva, evolución y reto, Arceus incluido."
+    ],
+    [
+     "new",
+     "Evoluciones de Sinnoh para familias antiguas (Magnezone, Togekiss, Weavile, Mamoswine...)."
+    ],
+    [
+     "better",
+     "Happiny, Munchlax, Mime Jr., Bonsly, Mantyke, Budew y Chingling empiezan sus familias."
+    ],
+    [
+     "balance",
+     "Los mapas de Sinnoh son más duros que los de Hoenn (+40 % PS y +25 % daño; Mundo Distorsión, +60 % y +35 %)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.46",
+   "date": "2026-11-11",
+   "title": "Megas de Hoenn y Groudon y Kyogre primigenios.",
+   "notes": [
+    [
+     "new",
+     "20 megas de Hoenn y Groudon y Kyogre primigenios, con la investigación de su familia al 100 %."
+    ],
+    [
+     "better",
+     "Blaziken, Swampert, Aggron, Salamence y Metagross se ven con su sprite normal hasta que haya dibujo de su mega."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.45",
+   "date": "2026-11-11",
+   "title": "¡Llega Hoenn! 73 familias y 4 mapas nuevos.",
+   "notes": [
+    [
+     "new",
+     "Mapas de Hoenn: Bosque Petalia, Monte Cenizo, Fondo Marino y Pilar Celeste, con Jirachi, Groudon, Kyogre y Rayquaza al final."
+    ],
+    [
+     "new",
+     "Liga de Hoenn: 73 familias con kit, pasiva, evolución y reto, legendarios incluidos."
+    ],
+    [
+     "new",
+     "Bono de local (+10 % daño con Pokémon de Hoenn) y de forastero (+20 % ₽ y +30 % Polvo con Pokémon de Kanto o Johto)."
+    ],
+    [
+     "balance",
+     "Los mapas de Hoenn son más duros (+25 % PS y +15 % daño; Pilar Celeste, +40 % y +25 %)."
+    ],
+    [
+     "better",
+     "Los Pokémon de Hoenn solo salen en sus mapas; Azurill y Wynaut empiezan las familias de Marill y Wobbuffet."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.44",
+   "date": "2026-11-11",
+   "title": "Cada familia empieza por su primera forma.",
+   "notes": [
+    [
+     "better",
+     "Pikachu, Clefairy, Jigglypuff, Jynx, Electabuzz, Magmar y los Hitmon se consiguen con su bebé (Pichu, Cleffa, Igglybuff, Smoochum, Elekid, Magby, Tyrogue), que evoluciona en la partida."
+    ],
+    [
+     "better",
+     "La Liga queda en 129 miembros, uno por familia. Quien ya los tenía recibe a su bebé."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.43",
+   "date": "2026-11-11",
+   "title": "Fiebre del Oro, Fiebre Estelar y Bonkoin Doble.",
+   "notes": [
+    [
+     "new",
+     "Objeto Fiebre del Oro: cada 90 s, 15 s de lluvia de monedas y Pokédólares ×1,5 a ×2,5 según la suerte."
+    ],
+    [
+     "new",
+     "Objeto Fiebre Estelar: cada 120 s, 15 s en los que cada derrota da ×1,5 a ×2,5 de Polvo Estelar."
+    ],
+    [
+     "new",
+     "Objeto Bonkoin Doble: 25 % (hasta 50 %) de que una Bonkoin cuente por dos."
+    ],
+    [
+     "better",
+     "No ocupan huecos de movimiento ni de vitamina, y un aviso enseña lo juntado en cada fiebre."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.42",
+   "date": "2026-11-11",
+   "title": "Un solo tower defense y unos 89 MB menos.",
+   "notes": [
+    [
+     "better",
+     "PokéBonk TD es el único tower defense: fuera PokéPath TD original y la vista clásica."
+    ],
+    [
+     "better",
+     "Borrados la música, sonidos y letras de PokéPath que ya no se usaban: el TD pesa 39 MB en vez de 98."
+    ],
+    [
+     "better",
+     "Pokémon Survivors sin las páginas de su web que el juego no usa: 29 MB menos."
+    ],
+    [
+     "fix",
+     "La carga del TD ya no precarga la música antigua."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.41",
+   "date": "2026-11-11",
+   "title": "Sala de juegos y entrenador único.",
+   "notes": [
+    [
+     "new",
+     "Sala de juegos: una tarjeta por juego con tu progreso y Seguir jugando."
+    ],
+    [
+     "new",
+     "Nivel de entrenador para todo el Remaster y juego de la semana con premios."
+    ],
+    [
+     "better",
+     "Marca común al entrar en cada juego y botón REMASTER para volver a la Sala."
+    ],
+    [
+     "fix",
+     "Fuera las donaciones; licencia y aviso de copyright de PokéSurvivor en los créditos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.40",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: sonidos nuevos.",
+   "notes": [
+    [
+     "new",
+     "PokéBonk TD: efectos de sonido de PokéSurvivor, con disparos según el tipo del Pokémon."
+    ],
+    [
+     "better",
+     "PokéBonk TD: sonidos de golpe, caída y jefe, y de botones y ventanas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.39",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: música y jefes.",
+   "notes": [
+    [
+     "new",
+     "PokéBonk TD: música de PokéSurvivor por mundo y música de jefe."
+    ],
+    [
+     "new",
+     "PokéBonk TD: la cámara sigue al jefe y vibración al perder vida (se apagan en Ajustes)."
+    ],
+    [
+     "better",
+     "PokéBonk TD: botones de las ventanas al estilo PokéBonk; tres insignias nuevas en el Pasaporte."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.38",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: combate con animaciones.",
+   "notes": [
+    [
+     "new",
+     "PokéBonk TD: animaciones de ataque, golpe y caída de PokéBonk en el mapa."
+    ],
+    [
+     "better",
+     "PokéBonk TD: destello en cada golpe y números de daño más grandes."
+    ],
+    [
+     "new",
+     "PokéBonk TD: toca un Pokémon del mapa para ver sus Datos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.37",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: ventanas nuevas.",
+   "notes": [
+    [
+     "better",
+     "PokéBonk TD: ventanas a pantalla completa con los colores y la letra de PokéBonk."
+    ],
+    [
+     "better",
+     "PokéBonk TD: en vertical, Tienda, Mapa, Perfil y Mochila repartidas para el móvil."
+    ],
+    [
+     "fix",
+     "PokéBonk TD: textos que salían en inglés y dinero de la oleada en español."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.36",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: todas las rutas.",
+   "notes": [
+    [
+     "better",
+     "PokéBonk TD: las 47 rutas revisadas, también las secretas y las de mapa grande."
+    ],
+    [
+     "better",
+     "PokéBonk TD: con zoom, el mapa se mueve con un dedo."
+    ],
+    [
+     "better",
+     "PokéBonk TD: el botón grande avisa cuando estás colocando un Pokémon."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.35",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: mapa más claro.",
+   "notes": [
+    [
+     "better",
+     "PokéBonk TD: Pokémon más grandes en el mapa y zoom con dos dedos o con + y −."
+    ],
+    [
+     "new",
+     "PokéBonk TD: datos del enemigo de la próxima oleada."
+    ],
+    [
+     "fix",
+     "PokéBonk TD: botones Vista clásica y Salir sin texto en horizontal."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.34",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD en pruebas.",
+   "notes": [
+    [
+     "new",
+     "**PokéBonk TD** en Más juegos: PokéPath TD con pantalla nueva para el móvil, misma partida y mismos valores."
+    ],
+    [
+     "new",
+     "Tarjetas del equipo con subir de nivel y su precio, y botón grande de Siguiente oleada."
+    ],
+    [
+     "better",
+     "Vista clásica a un toque, por si prefieres la pantalla de siempre."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.33",
+   "date": "2026-11-10",
+   "title": "Vertical rediseñado.",
+   "notes": [
+    [
+     "better",
+     "Partida en vertical: barra de arriba con la cuenta atrás grande, zona, reloj y dinero bien separados."
+    ],
+    [
+     "better",
+     "Partida en vertical: barra del jefe a lo ancho; retrato y minimapa a la misma altura."
+    ],
+    [
+     "better",
+     "Menú en vertical: eventos uno por fila y la cuenta atrás de los Encargos entera."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.32",
+   "date": "2026-11-10",
+   "title": "Modo vertical mejorado.",
+   "notes": [
+    [
+     "better",
+     "En vertical, las cartas de subir de nivel van a todo el ancho y se leen enteras."
+    ],
+    [
+     "better",
+     "En vertical, La Liga y Elige mapa ordenadas para el móvil, con el botón de empezar siempre a mano."
+    ],
+    [
+     "fix",
+     "En vertical, pestañas de la pausa y de Ajustes, nombres de los Encargos y título de la Mutación del día ya no se cortan."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.31",
+   "date": "2026-11-10",
+   "title": "Auto aprender.",
+   "notes": [
+    [
+     "new",
+     "**Auto aprender** en la pausa: elige sola la mejor mejora según si tu Pokémon es físico, especial o mixto."
+    ],
+    [
+     "new",
+     "Auto aprender también en Pokémon Survivors y PokéSurvivor."
+    ],
+    [
+     "better",
+     "Botones de la pausa juntos y sin tapar texto."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.30",
+   "date": "2026-11-10",
+   "title": "Versiones en Más juegos.",
+   "notes": [
+    [
+     "new",
+     "Más juegos enseña la versión de cada juego."
+    ],
+    [
+     "better",
+     "PokéPath TD: el botón dice \"Volver a PokéBonk Remaster\"."
+    ]
+   ]
+  }
+ ],
+ "completo": {
+  "android": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v114/PokeBonk.apk",
+   "bytes": 819633413,
+   "sha256": "1c279176c113cfcf4827b565f7b9bb26e5c09244e2a6dbb14d58021871da18cc"
+  },
+  "windows": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v114/PokeBonk-Windows-Instalador.exe",
+   "bytes": 801980726,
+   "sha256": "2822e6cd9117411a7895fedc59c19e8fcfed96d154656012755ad2c0b83b36ce"
+  }
+ }
+}
