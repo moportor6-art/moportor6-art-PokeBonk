@@ -4,11 +4,30 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.53';
+  const SUB = '0.54';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.54',
+      date: Date.UTC(2026, 10, 12, 10, 0),
+      tag: 'novedad',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.54`,
+      summary: 'Nueva pestaña «Megas y Gigamax» en la Pokédex.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- La **Pokédex** tiene una pestaña nueva, **Megas y Gigamax**, con todas las megas, sus segundas formas y los Gigamax del juego.`,
+        `- Filtros: Todas, Megas, Gigamax y Desbloqueadas; y un botón para verlas en variocolor.`,
+        `- Salen todas aunque no las tengas, solo como información: las que te faltan se ven en gris. No desbloquea nada; las megas se siguen comprando en el Laboratorio.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.53',
       date: Date.UTC(2026, 10, 12, 9, 0),
@@ -1340,6 +1359,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.54',
+      date: '2026-11-12',
+      title: 'Pestaña «Megas y Gigamax» en la Pokédex.',
+      notes: [
+        ['new', 'Pokédex: pestaña con todas las megas y Gigamax, con filtros y variocolor; las que no tienes se ven en gris.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.53',

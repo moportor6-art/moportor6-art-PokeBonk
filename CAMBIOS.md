@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Pokédex: Megas y Gigamax (Subversión 0.54)
+- `dex-megas.js` (`window.PB_DEX_MEGA`): panel con todas las formas de `PB_MEGA` (megas, `forms()` y `GMAX`), miniatura del primer fotograma de su hoja PMD (`data/sprites.json`), Pokémon base, tipos y estado. Filtros Todas/Megas/Gigamax/Desbloqueadas y botón de variocolor. Solo informativo.
+- `menus-…js`: la Pokédex añade la pestaña `pbmega` y la abre con `PB_DEX_MEGA.panel(i, {nombre, tipos})`.
+
 ## Megas de Pokémon Reloaded, formas X/Y/Z y Gigamax (Subversión 0.53)
 - Sprites de Pokémon Reloaded 1.9.2.2, con permiso de sus autores, solo para este repositorio privado.
 - `tools/megas_reloaded.py`: lee los `.gmspr` originales (zlib desde el byte 8; cabecera delay/origen/n.º de fotogramas; cada fotograma delay/ancho/alto/bytes + BGRA) y arma hojas con el formato de PMD: 5 direcciones de Reloaded + 3 en espejo (o las propias 7/4/1 si la forma las trae), `A` para attack/charge, `H` para hurt y `S` para faint. Variocolor desde los códigos +1000 (101xxx, 151xxx, 201xxx). Escribe `megas-reloaded.js` (`PB_MEGAS_RELOADED`, `PB_MEGAS_ALT`, `PB_GMAX`) y las entradas de `data/sprites.json` (sid 16000+, 17000+ y 18000+).
