@@ -1,5 +1,14 @@
 # Cambios respecto al port original
 
+## Otras evoluciones y más megas (Subversión 0.48)
+- `formas.js` (`window.PB_FORMAS`):
+  - `ci`: Gallade (475, miembro 280, desde 281), Froslass (478, desde 361), Leafeon (470) y Glaceon (471) con `at: eevee`. Van a la lista de formas de `defineProperty-…js` y a `si`, para que no salgan como evolución normal: si no, `runEvolution` elegía al azar entre Gardevoir y Gallade.
+  - `vu`: descripción y meta de cada reto para la ficha (`VU` en `menus-…js`, con `Object.assign`).
+  - `fin(run, res)`: lo llama `main-…js` justo después de `result()`. Suma el progreso de cada forma (`counters['jf:<forma>']`, con `meta.runGain` para lo ganado en la partida) cuando la familia del Pokémon de la partida es la del miembro, y al llegar a la meta la añade a `profile.johtoForms`.
+  - El servidor local no contaba estos retos, así que las 11 formas de Johto tampoco se podían desbloquear: ahora usan las mismas reglas que enseña el juego.
+- La ficha de la Liga dice «Otras evoluciones» en vez de «Evoluciones de Johto».
+- `tools/megas_hoenn.py` (acción «Megas»): también Kanto y Johto (Venusaur, Blastoise, Beedrill, Pidgeot, Slowbro, Pinsir, Gyarados, Ampharos, Scizor, Heracross) y Sinnoh (Lopunny, Garchomp, Lucario, Abomasnow, Gallade).
+
 ## Sinnoh y motor de regiones (Subversión 0.47)
 - `regiones.js` (`window.PB_REGIONES`): la lógica de `hoenn.js` pasa a un motor para varias regiones.
   - `registrar()` recibe cada región: rango, mapas, Liga, bebés, niveles, `oi`, dificultad y contadores.

@@ -4,11 +4,37 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.47';
+  const SUB = '0.48';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.48',
+      date: Date.UTC(2026, 10, 12, 5, 0),
+      tag: 'novedad',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.48`,
+      summary: 'Gallade, Froslass, Leafeon y Glaceon; las evoluciones de Johto ya se desbloquean; más megas.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Otras evoluciones`,
+        `Cumples su reto y, al evolucionar, eliges. Lo ves en la ficha de la Liga, en «Otras evoluciones».`,
+        `- **Gallade** (desde Kirlia): derrota a 3.000 Pokémon de Sinnoh con la línea de Ralts.`,
+        `- **Froslass** (desde Snorunt): gana en la Ruta Nevada con la línea de Snorunt.`,
+        `- **Leafeon** (desde Eevee): gana en el Bosque Vetusto con la línea de Eevee.`,
+        `- **Glaceon** (desde Eevee): congela a 5.000 Pokémon con la línea de Eevee.`,
+        `- **Arreglo**: las 11 evoluciones de Johto (Crobat, Bellossom, Politoed, Espeon, Umbreon, Slowking, Steelix, Scizor, Kingdra, Porygon2 y Blissey) no se podían desbloquear sin el servidor oficial: ahora sus retos cuentan al acabar cada partida.`,
+        ``,
+        `# Más megas`,
+        `- Con sprite propio: **Mega Lopunny**, **Mega Lucario**, **Mega Gallade** y **Mega Slowbro**.`,
+        `- Sin dibujo todavía en el PMD Sprite Repository (funcionan con el sprite normal): Mega Venusaur, Blastoise, Beedrill, Pidgeot, Pinsir, Gyarados, Ampharos, Scizor, Heracross, Garchomp y Abomasnow.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.47',
       date: Date.UTC(2026, 10, 12, 4, 0),
@@ -1206,6 +1232,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.48',
+      date: '2026-11-11',
+      title: 'Otras evoluciones y más megas.',
+      notes: [
+        ['new', 'Gallade, Froslass, Leafeon y Glaceon, con su reto, para elegirlos al evolucionar.'],
+        ['fix', 'Las 11 evoluciones de Johto ya se desbloquean sin el servidor oficial.'],
+        ['new', 'Megas de Lopunny, Lucario, Gallade y Slowbro con sprite; otras 11 con el sprite normal.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.47',
