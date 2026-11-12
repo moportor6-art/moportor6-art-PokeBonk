@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
-"""Subversión propia: sprites de las megaevoluciones de Hoenn (y Groudon y Kyogre primigenios).
+"""Subversión propia: sprites de las megaevoluciones que no trae el juego: las de Hoenn (con Groudon y Kyogre
+primigenios), las de Sinnoh y las de Kanto y Johto que faltaban.
 
 Baja del PMD Sprite Repository (PMDCollab/SpriteCollab, uso no comercial con crédito) las hojas de animación
 de cada mega y arma el atlas que usa el juego: las animaciones walk, idle, attack, hurt, faint (Sleep) y
@@ -20,6 +21,24 @@ from PIL import Image
 RAW = 'https://raw.githubusercontent.com/PMDCollab/SpriteCollab/master/'
 # especie: (nombre, tipos de la mega si cambian, palabras del nombre de la forma en SpriteCollab)
 MEGAS = {
+    # Kanto y Johto que faltaban
+    3: ('Mega Venusaur', None, 'mega'),
+    9: ('Mega Blastoise', None, 'mega'),
+    15: ('Mega Beedrill', None, 'mega'),
+    18: ('Mega Pidgeot', None, 'mega'),
+    80: ('Mega Slowbro', None, 'mega'),
+    127: ('Mega Pinsir', ['bug', 'flying'], 'mega'),
+    130: ('Mega Gyarados', ['water', 'dark'], 'mega'),
+    181: ('Mega Ampharos', ['electric', 'dragon'], 'mega'),
+    212: ('Mega Scizor', None, 'mega'),
+    214: ('Mega Heracross', None, 'mega'),
+    # Sinnoh
+    428: ('Mega Lopunny', ['normal', 'fighting'], 'mega'),
+    445: ('Mega Garchomp', None, 'mega'),
+    448: ('Mega Lucario', None, 'mega'),
+    460: ('Mega Abomasnow', None, 'mega'),
+    475: ('Mega Gallade', None, 'mega'),
+    # Hoenn
     254: ('Mega Sceptile', ['grass', 'dragon'], 'mega'),
     257: ('Mega Blaziken', None, 'mega'),
     260: ('Mega Swampert', None, 'mega'),
@@ -184,7 +203,7 @@ def main():
         print(f'{nombre}: ok ({base}, variocolor: {"sí" if sh is not None else "no"})')
     json.dump(sprites, open(ruta_sprites, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     with open(os.path.join(site, 'megas-extra.js'), 'w', encoding='utf-8') as fh:
-        fh.write('/* Subversión propia: megas de Hoenn montadas con tools/megas_hoenn.py (PMD Sprite Repository).\n'
+        fh.write('/* Subversión propia: megas montadas con tools/megas_hoenn.py (PMD Sprite Repository).\n'
                  '   Las lee mega-dynamax.js. No editar a mano: lo rehace el script. */\n')
         fh.write('window.PB_MEGAS_EXTRA = ' + json.dumps(hechas, ensure_ascii=False, indent=1) + ';\n')
     # Nuevo ?v= para sprites.json, para que no se use el de la caché.
