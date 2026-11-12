@@ -1,0 +1,651 @@
+{
+ "formato": 1,
+ "version": 102,
+ "sub": "0.50",
+ "shell": {
+  "android": "1833e5c99d71a395",
+  "windows": "684c417a0bae956d"
+ },
+ "modulos": {
+  "pokebonk": {
+   "nombre": "PokéBonk (juego principal)",
+   "hash": "6feaa6e38608f41041102ee763bdd3a98d66299e686e7c66aaf4591e188da3e9",
+   "archivos": 7728,
+   "bytes": 177270397
+  },
+  "pokeisaac": {
+   "nombre": "PokéIsaac",
+   "hash": "71e7112d6711efdfe856dc30bc20a397592a5c3408399a3621e9b24819308302",
+   "archivos": 5679,
+   "bytes": 82367848
+  },
+  "pokemonsurvivors": {
+   "nombre": "Pokémon Survivors",
+   "hash": "7ef9241dd4de04c0cd49b4e734c7ffb4ce66e451ffe899711fa393f81a0bc53c",
+   "archivos": 7244,
+   "bytes": 65404423
+  },
+  "pokesurvivor": {
+   "nombre": "PokéSurvivor",
+   "hash": "d5eb83edadaeddfca4d4863752a6371713fb2fa069ffc8431c1d9338377c4238",
+   "archivos": 10,
+   "bytes": 187901432
+  },
+  "pokepath": {
+   "nombre": "PokéBonk TD",
+   "hash": "0d884a5a8ade40b54255358b16d48ff73111f852c0f52f998ded5d7f93deac70",
+   "archivos": 3684,
+   "bytes": 41183181
+  },
+  "pokeplunder": {
+   "nombre": "PokéPlunder",
+   "hash": "0303453dd6fb1e11bc32338bdf721833b84a354e59c478bacc31ba72641e738e",
+   "archivos": 665,
+   "bytes": 29735389
+  },
+  "pokeoverlord": {
+   "nombre": "Pokémon Overlord",
+   "hash": "df0eb363ae033074c26b929c949b44de00c97c40db2984aeb6762f69b23b2666",
+   "archivos": 11,
+   "bytes": 103109162
+  },
+  "pokelike": {
+   "nombre": "Pokelike",
+   "hash": "50e4e8a2ed719f7906c95992ea0791f392affbc4cc3f887dae2ebea4a225f02c",
+   "archivos": 1994,
+   "bytes": 133209473
+  }
+ },
+ "tag": "v102",
+ "base": "https://raw.githubusercontent.com/moportor6-art/moportor6-art-PokeBonk/contenido-v102/",
+ "cambios": [
+  {
+   "oficial": "0.9.9",
+   "sub": "0.50",
+   "date": "2026-11-11",
+   "title": "Santuarios en los mapas de Hoenn y Sinnoh.",
+   "notes": [
+    [
+     "new",
+     "Los 8 mapas de Hoenn y Sinnoh tienen santuario con su legendario."
+    ],
+    [
+     "new",
+     "Groudon y Shaymin tienen combate por fases; el resto, combate de legendario normal."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.49",
+   "date": "2026-11-11",
+   "title": "Mega Darkrai y Dialga Primigenio.",
+   "notes": [
+    [
+     "new",
+     "Mega Darkrai y Dialga Primigenio, con animaciones."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.48",
+   "date": "2026-11-11",
+   "title": "Otras evoluciones y más megas.",
+   "notes": [
+    [
+     "new",
+     "Gallade, Froslass, Leafeon y Glaceon, con su reto, para elegirlos al evolucionar."
+    ],
+    [
+     "fix",
+     "Las 11 evoluciones de Johto ya se desbloquean sin el servidor oficial."
+    ],
+    [
+     "new",
+     "Megas de Lopunny, Lucario, Gallade y Slowbro con sprite; otras 11 con el sprite normal."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.47",
+   "date": "2026-11-11",
+   "title": "¡Llega Sinnoh! 45 familias, 4 mapas y evoluciones nuevas.",
+   "notes": [
+    [
+     "new",
+     "Mapas de Sinnoh: Bosque Vetusto, Ruta Nevada, Lago Valor y Mundo Distorsión, con Shaymin, Regigigas, el trío del lago y Dialga, Palkia o Giratina."
+    ],
+    [
+     "new",
+     "Liga de Sinnoh: 45 familias con kit, pasiva, evolución y reto, Arceus incluido."
+    ],
+    [
+     "new",
+     "Evoluciones de Sinnoh para familias antiguas (Magnezone, Togekiss, Weavile, Mamoswine...)."
+    ],
+    [
+     "better",
+     "Happiny, Munchlax, Mime Jr., Bonsly, Mantyke, Budew y Chingling empiezan sus familias."
+    ],
+    [
+     "balance",
+     "Los mapas de Sinnoh son más duros que los de Hoenn (+40 % PS y +25 % daño; Mundo Distorsión, +60 % y +35 %)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.46",
+   "date": "2026-11-11",
+   "title": "Megas de Hoenn y Groudon y Kyogre primigenios.",
+   "notes": [
+    [
+     "new",
+     "20 megas de Hoenn y Groudon y Kyogre primigenios, con la investigación de su familia al 100 %."
+    ],
+    [
+     "better",
+     "Blaziken, Swampert, Aggron, Salamence y Metagross se ven con su sprite normal hasta que haya dibujo de su mega."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.45",
+   "date": "2026-11-11",
+   "title": "¡Llega Hoenn! 73 familias y 4 mapas nuevos.",
+   "notes": [
+    [
+     "new",
+     "Mapas de Hoenn: Bosque Petalia, Monte Cenizo, Fondo Marino y Pilar Celeste, con Jirachi, Groudon, Kyogre y Rayquaza al final."
+    ],
+    [
+     "new",
+     "Liga de Hoenn: 73 familias con kit, pasiva, evolución y reto, legendarios incluidos."
+    ],
+    [
+     "new",
+     "Bono de local (+10 % daño con Pokémon de Hoenn) y de forastero (+20 % ₽ y +30 % Polvo con Pokémon de Kanto o Johto)."
+    ],
+    [
+     "balance",
+     "Los mapas de Hoenn son más duros (+25 % PS y +15 % daño; Pilar Celeste, +40 % y +25 %)."
+    ],
+    [
+     "better",
+     "Los Pokémon de Hoenn solo salen en sus mapas; Azurill y Wynaut empiezan las familias de Marill y Wobbuffet."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.44",
+   "date": "2026-11-11",
+   "title": "Cada familia empieza por su primera forma.",
+   "notes": [
+    [
+     "better",
+     "Pikachu, Clefairy, Jigglypuff, Jynx, Electabuzz, Magmar y los Hitmon se consiguen con su bebé (Pichu, Cleffa, Igglybuff, Smoochum, Elekid, Magby, Tyrogue), que evoluciona en la partida."
+    ],
+    [
+     "better",
+     "La Liga queda en 129 miembros, uno por familia. Quien ya los tenía recibe a su bebé."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.43",
+   "date": "2026-11-11",
+   "title": "Fiebre del Oro, Fiebre Estelar y Bonkoin Doble.",
+   "notes": [
+    [
+     "new",
+     "Objeto Fiebre del Oro: cada 90 s, 15 s de lluvia de monedas y Pokédólares ×1,5 a ×2,5 según la suerte."
+    ],
+    [
+     "new",
+     "Objeto Fiebre Estelar: cada 120 s, 15 s en los que cada derrota da ×1,5 a ×2,5 de Polvo Estelar."
+    ],
+    [
+     "new",
+     "Objeto Bonkoin Doble: 25 % (hasta 50 %) de que una Bonkoin cuente por dos."
+    ],
+    [
+     "better",
+     "No ocupan huecos de movimiento ni de vitamina, y un aviso enseña lo juntado en cada fiebre."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.42",
+   "date": "2026-11-11",
+   "title": "Un solo tower defense y unos 89 MB menos.",
+   "notes": [
+    [
+     "better",
+     "PokéBonk TD es el único tower defense: fuera PokéPath TD original y la vista clásica."
+    ],
+    [
+     "better",
+     "Borrados la música, sonidos y letras de PokéPath que ya no se usaban: el TD pesa 39 MB en vez de 98."
+    ],
+    [
+     "better",
+     "Pokémon Survivors sin las páginas de su web que el juego no usa: 29 MB menos."
+    ],
+    [
+     "fix",
+     "La carga del TD ya no precarga la música antigua."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.41",
+   "date": "2026-11-11",
+   "title": "Sala de juegos y entrenador único.",
+   "notes": [
+    [
+     "new",
+     "Sala de juegos: una tarjeta por juego con tu progreso y Seguir jugando."
+    ],
+    [
+     "new",
+     "Nivel de entrenador para todo el Remaster y juego de la semana con premios."
+    ],
+    [
+     "better",
+     "Marca común al entrar en cada juego y botón REMASTER para volver a la Sala."
+    ],
+    [
+     "fix",
+     "Fuera las donaciones; licencia y aviso de copyright de PokéSurvivor en los créditos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.40",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: sonidos nuevos.",
+   "notes": [
+    [
+     "new",
+     "PokéBonk TD: efectos de sonido de PokéSurvivor, con disparos según el tipo del Pokémon."
+    ],
+    [
+     "better",
+     "PokéBonk TD: sonidos de golpe, caída y jefe, y de botones y ventanas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.39",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: música y jefes.",
+   "notes": [
+    [
+     "new",
+     "PokéBonk TD: música de PokéSurvivor por mundo y música de jefe."
+    ],
+    [
+     "new",
+     "PokéBonk TD: la cámara sigue al jefe y vibración al perder vida (se apagan en Ajustes)."
+    ],
+    [
+     "better",
+     "PokéBonk TD: botones de las ventanas al estilo PokéBonk; tres insignias nuevas en el Pasaporte."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.38",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: combate con animaciones.",
+   "notes": [
+    [
+     "new",
+     "PokéBonk TD: animaciones de ataque, golpe y caída de PokéBonk en el mapa."
+    ],
+    [
+     "better",
+     "PokéBonk TD: destello en cada golpe y números de daño más grandes."
+    ],
+    [
+     "new",
+     "PokéBonk TD: toca un Pokémon del mapa para ver sus Datos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.37",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: ventanas nuevas.",
+   "notes": [
+    [
+     "better",
+     "PokéBonk TD: ventanas a pantalla completa con los colores y la letra de PokéBonk."
+    ],
+    [
+     "better",
+     "PokéBonk TD: en vertical, Tienda, Mapa, Perfil y Mochila repartidas para el móvil."
+    ],
+    [
+     "fix",
+     "PokéBonk TD: textos que salían en inglés y dinero de la oleada en español."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.36",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: todas las rutas.",
+   "notes": [
+    [
+     "better",
+     "PokéBonk TD: las 47 rutas revisadas, también las secretas y las de mapa grande."
+    ],
+    [
+     "better",
+     "PokéBonk TD: con zoom, el mapa se mueve con un dedo."
+    ],
+    [
+     "better",
+     "PokéBonk TD: el botón grande avisa cuando estás colocando un Pokémon."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.35",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD: mapa más claro.",
+   "notes": [
+    [
+     "better",
+     "PokéBonk TD: Pokémon más grandes en el mapa y zoom con dos dedos o con + y −."
+    ],
+    [
+     "new",
+     "PokéBonk TD: datos del enemigo de la próxima oleada."
+    ],
+    [
+     "fix",
+     "PokéBonk TD: botones Vista clásica y Salir sin texto en horizontal."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.34",
+   "date": "2026-11-10",
+   "title": "PokéBonk TD en pruebas.",
+   "notes": [
+    [
+     "new",
+     "**PokéBonk TD** en Más juegos: PokéPath TD con pantalla nueva para el móvil, misma partida y mismos valores."
+    ],
+    [
+     "new",
+     "Tarjetas del equipo con subir de nivel y su precio, y botón grande de Siguiente oleada."
+    ],
+    [
+     "better",
+     "Vista clásica a un toque, por si prefieres la pantalla de siempre."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.33",
+   "date": "2026-11-10",
+   "title": "Vertical rediseñado.",
+   "notes": [
+    [
+     "better",
+     "Partida en vertical: barra de arriba con la cuenta atrás grande, zona, reloj y dinero bien separados."
+    ],
+    [
+     "better",
+     "Partida en vertical: barra del jefe a lo ancho; retrato y minimapa a la misma altura."
+    ],
+    [
+     "better",
+     "Menú en vertical: eventos uno por fila y la cuenta atrás de los Encargos entera."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.32",
+   "date": "2026-11-10",
+   "title": "Modo vertical mejorado.",
+   "notes": [
+    [
+     "better",
+     "En vertical, las cartas de subir de nivel van a todo el ancho y se leen enteras."
+    ],
+    [
+     "better",
+     "En vertical, La Liga y Elige mapa ordenadas para el móvil, con el botón de empezar siempre a mano."
+    ],
+    [
+     "fix",
+     "En vertical, pestañas de la pausa y de Ajustes, nombres de los Encargos y título de la Mutación del día ya no se cortan."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.31",
+   "date": "2026-11-10",
+   "title": "Auto aprender.",
+   "notes": [
+    [
+     "new",
+     "**Auto aprender** en la pausa: elige sola la mejor mejora según si tu Pokémon es físico, especial o mixto."
+    ],
+    [
+     "new",
+     "Auto aprender también en Pokémon Survivors y PokéSurvivor."
+    ],
+    [
+     "better",
+     "Botones de la pausa juntos y sin tapar texto."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.30",
+   "date": "2026-11-10",
+   "title": "Versiones en Más juegos.",
+   "notes": [
+    [
+     "new",
+     "Más juegos enseña la versión de cada juego."
+    ],
+    [
+     "better",
+     "PokéPath TD: el botón dice \"Volver a PokéBonk Remaster\"."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.29",
+   "date": "2026-11-10",
+   "title": "Prueba del actualizador.",
+   "notes": [
+    [
+     "better",
+     "El logo enseña la subversión (REMASTER 0.29)."
+    ],
+    [
+     "better",
+     "PokéPlunder: el botón dice \"Volver a PokéBonk Remaster\"."
+    ],
+    [
+     "fix",
+     "Actualizador: archivos de más de 100 MB en trozos (no se podía publicar)."
+    ],
+    [
+     "fix",
+     "PokéSurvivor ya no se vuelve a bajar en cada versión."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.28",
+   "date": "2026-11-10",
+   "title": "Actualizador propio.",
+   "notes": [
+    [
+     "new",
+     "Actualizaciones por archivos: solo se baja lo que cambia, por partes del juego."
+    ],
+    [
+     "new",
+     "Historial de cambios antes de actualizar, y Remaster > Actualizaciones."
+    ],
+    [
+     "new",
+     "Android instala el APK nuevo sin pasar por GitHub cuando cambia la app."
+    ],
+    [
+     "better",
+     "Actualizaciones firmadas y comprobadas, con vuelta atrás si algo falla."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.27",
+   "date": "2026-11-10",
+   "title": "Traspaso, avisos y gráficos completos.",
+   "notes": [
+    [
+     "new",
+     "**Traspaso** de partida entre el móvil y el PC (Remaster > Traspaso)."
+    ],
+    [
+     "new",
+     "Aviso de versión nueva en Android y Windows."
+    ],
+    [
+     "new",
+     "Desafío del Alfa: rachas con premio y tabla de récords."
+    ],
+    [
+     "new",
+     "Pokémon Overlord da insignias en el Pasaporte."
+    ],
+    [
+     "fix",
+     "Todos los sprites y retratos variocolor dentro de la app: ya no sale \"Faltan gráficos\"."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.26",
+   "date": "2026-11-09",
+   "title": "Windows: motor nuevo.",
+   "notes": [
+    [
+     "fix",
+     "Windows: Electron 44 (Chromium actual). Ya no se cierra al llegar al menú."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.25",
+   "date": "2026-11-09",
+   "title": "Windows: menú arreglado.",
+   "notes": [
+    [
+     "fix",
+     "Windows: el juego ya no se cierra al llegar al menú (panel Tu compañero)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.24",
+   "date": "2026-11-09",
+   "title": "Windows: informe de fallos.",
+   "notes": [
+    [
+     "fix",
+     "Windows: vuelve a usar la tarjeta gráfica (fuera el modo seguro)."
+    ],
+    [
+     "new",
+     "Windows: informe del fallo en ultimo-fallo.dmp."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.23",
+   "date": "2026-11-09",
+   "title": "Windows: modo seguro.",
+   "notes": [
+    [
+     "fix",
+     "Windows: si el juego se cierra al arrancar, la app se reinicia sola en modo seguro."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.22",
+   "date": "2026-11-09",
+   "title": "Windows: pantalla morada.",
+   "notes": [
+    [
+     "fix",
+     "Windows: ya no se queda la pantalla morada con gráficas AMD."
+    ],
+    [
+     "new",
+     "Windows: registro de errores en %APPDATA%\\PokeBonk\\registro.txt."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.21",
+   "date": "2026-11-09",
+   "title": "Windows arreglado.",
+   "notes": [
+    [
+     "fix",
+     "Windows: ya no sale el aviso de copia no oficial al abrir el juego."
+    ]
+   ]
+  }
+ ],
+ "completo": {
+  "android": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v102/PokeBonk.apk",
+   "bytes": 779074749,
+   "sha256": "ead0364b2a9fe34d2754c7dbe9c53ccf505c65f7ace39ea8631102a6e03eedb9"
+  },
+  "windows": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v102/PokeBonk-Windows-Instalador.exe",
+   "bytes": 772238222,
+   "sha256": "3e24a1ab945c2f159a185710d9e4f1b61ee80a612e87ac5b17ec3c02fedda7e8"
+  }
+ }
+}
