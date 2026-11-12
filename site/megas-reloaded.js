@@ -550,6 +550,108 @@ window.PB_GMAX = {
   "name": "Melmetal Gigamax",
   "shiny": true,
   "src": "reloaded"
+ },
+ "812": {
+  "sid": 18812,
+  "name": "Rillaboom Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "815": {
+  "sid": 18815,
+  "name": "Cinderace Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "818": {
+  "sid": 18818,
+  "name": "Inteleon Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "823": {
+  "sid": 18823,
+  "name": "Corviknight Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "826": {
+  "sid": 18826,
+  "name": "Orbeetle Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "834": {
+  "sid": 18834,
+  "name": "Drednaw Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "839": {
+  "sid": 18839,
+  "name": "Coalossal Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "841": {
+  "sid": 18841,
+  "name": "Flapple Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "842": {
+  "sid": 18842,
+  "name": "Appletun Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "844": {
+  "sid": 18844,
+  "name": "Sandaconda Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "849": {
+  "sid": 18849,
+  "name": "Toxtricity Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "851": {
+  "sid": 18851,
+  "name": "Centiskorch Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "858": {
+  "sid": 18858,
+  "name": "Hatterene Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "861": {
+  "sid": 18861,
+  "name": "Grimmsnarl Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "869": {
+  "sid": 18869,
+  "name": "Alcremie Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "890": {
+  "sid": 18890,
+  "name": "Eternatus Eternamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "892": {
+  "sid": 18892,
+  "name": "Urshifu Gigamax",
+  "shiny": true,
+  "src": "reloaded"
  }
 };
 window.PB_MEGAS_ALT2 = {

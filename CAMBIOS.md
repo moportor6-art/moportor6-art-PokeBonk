@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Galar (Subversión 0.58)
+- `galar.js`: región `galar` (#810-#905, tras Alola) con las 48 familias nuevas (Enamorus incluido; Applin con rama Flapple/Appletun), 4 mapas (`lumirinto`, `tundra`, `armadura`, `torrerose`) con guardianes, jefes, tótems e invocadores de Galar, y santuarios (Zarude y Enamorus; Calyrex, Glastrier y Spectrier; Kubfu, Regieleki y Regidrago; Zacian, Zamazenta y Eternatus). Contadores `galar`, `galar_local`, `runs_g`. Dificultad +120% PS / +85% daño (Torre Rose +150% / +100%).
+- `formas.js`: Obstagoon, Perrserker, Cursola, Sirfetch'd, Mr. Rime, Runerigus, Wyrdeer, Kleavor, Ursaluna, Basculegion, Sneasler y Overqwil como evoluciones alternativas con reto. Hace falta: al subir `maxDex` el juego añade como evolución normal cualquier especie con `evoFrom`, salvo las de `PB_FORMAS.ci`, y esas líneas habrían evolucionado solas (o al azar, como Meowth o Sneasel). Comprobado en el navegador que siguen como antes.
+- `tools/megas_reloaded.py`: 17 Gigamax de Galar (Flapple y Appletun comparten el mismo, como en los juegos; Urshifu usa el Brusco) y Eternatus Eternamax como su Dynamax. Todos los Pokémon de Galar ya tenían animaciones y variocolor de PMD.
+
 ## Alola y botones (Subversión 0.57)
 - `alola.js`: región `alola` (#722-#809, tras Kalos) con las 55 familias (Ultraentes, Código Cero, Meltan y singulares incluidos), 4 mapas (`jungla`, `wela`, `poni`, `ultraumbral`) con guardianes, jefes, tótems e invocadores de Alola, y santuarios (Tapu Lele y Tapu Bulu; Tapu Koko y Zeraora; Tapu Fini y Marshadow; Solgaleo, Lunala y Necrozma). Contadores `alola`, `alola_local`, `runs_a`. Dificultad +100% PS / +70% daño (Ultraumbral +125% / +80%). Pyukumuku no aprende ataques de daño: su kit usa ataques de Agua genéricos.
 - `formas.js`: Lunala (792) como evolución alternativa de Cosmoem; se gana en el Ultraumbral con la línea de Cosmog.

@@ -4,16 +4,38 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.57';
+  const SUB = '0.58';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.58',
+      date: Date.UTC(2026, 10, 12, 20, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.58`,
+      summary: '¡Galar! La octava región: 48 familias jugables, 4 mapas, 17 Gigamax y evoluciones de Galar e Hisui.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Galar** (Pokémon #810 al #898, y Enamorus): las 48 familias nuevas se pueden unir a tu Liga, cada una con sus 4 ataques, su pasiva, sus evoluciones y su reto. Applin elige entre Flapple y Appletun, y Kubfu evoluciona en Urshifu.`,
+        `- **Evoluciones de Galar e Hisui** para líneas antiguas, con su reto: Obstagoon, Perrserker, Cursola, Sirfetch’d, Mr. Rime, Runerigus, Wyrdeer, Kleavor, Ursaluna, Basculegion, Sneasler y Overqwil. Se eligen al evolucionar, como Scizor o Leafeon.`,
+        `- **4 mapas nuevos**, tras el Ultraumbral: Bosque Lumirinto, Tundra Corona, Isla de la Armadura y Torre Rose. Son más difíciles que los de Alola y los Pokémon de Galar solo salen en ellos.`,
+        `- **Santuarios**: Claro de las Hadas (Zarude y Enamorus), Templo de la Corona (Calyrex, Glastrier y Spectrier), Torres del Maestro (Kubfu, Regieleki y Regidrago) y la cima de la Torre Rose (Zacian, Zamazenta y Eternatus).`,
+        `- **17 Gigamax** con el Dynamax: Rillaboom, Cinderace, Inteleon, Corviknight, Orbeetle, Drednaw, Coalossal, Flapple, Appletun, Sandaconda, Toxtricity, Centiskorch, Hatterene, Grimmsnarl, Alcremie, Urshifu y **Eternatus Eternamax**.`,
+        `- **Mega Falinks** ya se puede comprar en el Laboratorio.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.57',
       date: Date.UTC(2026, 10, 12, 18, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.57`,
@@ -1427,6 +1449,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.58',
+      date: '2026-11-12',
+      title: 'Galar, la octava región.',
+      notes: [
+        ['new', 'Galar: 48 familias jugables, 4 mapas y 4 santuarios con sus legendarios.'],
+        ['new', '12 evoluciones de Galar e Hisui para líneas antiguas, con reto.'],
+        ['new', '17 Gigamax de Galar (con Eternatus Eternamax) y Mega Falinks.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.57',

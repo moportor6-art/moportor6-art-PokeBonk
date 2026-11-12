@@ -94,6 +94,13 @@ GMAX = {
     131: (100131, 'Lapras Gigamax'), 133: (100133, 'Eevee Gigamax'), 143: (100143, 'Snorlax Gigamax'),
     569: (100581, 'Garbodor Gigamax'),
     809: (102061, 'Melmetal Gigamax'),
+    # Galar
+    812: (102069, 'Rillaboom Gigamax'), 815: (102072, 'Cinderace Gigamax'), 818: (102075, 'Inteleon Gigamax'),
+    823: (102080, 'Corviknight Gigamax'), 826: (102083, 'Orbeetle Gigamax'), 834: (102091, 'Drednaw Gigamax'),
+    839: (102096, 'Coalossal Gigamax'), 841: (102098, 'Flapple Gigamax'), 842: (102098, 'Appletun Gigamax'),
+    844: (102101, 'Sandaconda Gigamax'), 849: (102106, 'Toxtricity Gigamax'), 851: (102108, 'Centiskorch Gigamax'),
+    858: (102115, 'Hatterene Gigamax'), 861: (102118, 'Grimmsnarl Gigamax'), 869: (102139, 'Alcremie Gigamax'),
+    890: (102160, 'Eternatus Eternamax'), 892: (102236, 'Urshifu Gigamax'),
 }
 # Más formas opcionales para especies que ya tienen mega y su forma X/Y/Z: diseños de fans de Reloaded que
 # el usuario quiso como forma extra elegible en el Laboratorio. Van en window.PB_MEGAS_ALT2 (lista por especie).
