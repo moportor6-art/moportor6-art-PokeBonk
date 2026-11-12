@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.67';
+  const SUB = '0.68';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.68',
+      date: Date.UTC(2026, 10, 13, 5, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.68`,
+      summary: 'Las regiones de Elige mapa se deslizan y la cadena de evolución muestra las megas y los Gigamax.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Elige mapa**: la fila de regiones (Kanto, Johto… Extra) y la de mapas se deslizan con el dedo, el ratón o la rueda, y al abrir se ve la región elegida.`,
+        `- **Cadena de evolución en la Liga**: las fases con megaevolución llevan el icono MEGA y las que tienen forma Gigamax, el icono DYNAMAX (mantén pulsado o pasa el ratón para ver su nombre).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.67',
       date: Date.UTC(2026, 10, 13, 4, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.67`,
@@ -1628,6 +1646,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.68',
+      date: '2026-11-13',
+      title: 'Regiones deslizables e iconos de mega y Gigamax.',
+      notes: [
+        ['fix', 'En Elige mapa, las filas de regiones y de mapas se pueden deslizar en el móvil.'],
+        ['new', 'Icono MEGA o DYNAMAX en las fases de la cadena de evolución que los tienen.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.67',

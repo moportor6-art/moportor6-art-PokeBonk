@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Regiones deslizables e iconos de evolución (Subversión 0.68)
+- `liga-scroll.js`: en Elige mapa, `.rg-realms` (regiones) y `.rg-regions` (mapas) llevan `touch-action:none` y un arrastre propio con eventos de puntero (dedo y ratón; a partir de 8 px, y entonces el toque no cuenta como pulsación), más la rueda en horizontal; al abrir se centra `.rg-realm.on`.
+- `liga-scroll.js`: en la ficha de la Liga, cada `.ls-evo-mon` (especie leída de `portraits/<id>.png`) lleva el icono `botones/mega.png` si está en `PB_MEGA.MEGAS` y `botones/dmax.png` si está en `PB_MEGA.GMAX`, con el nombre de las formas como título.
+
 ## Forma regional en la Liga, lista y pruebas (Subversión 0.67)
 - `regionales.js`: el selector de forma regional también sale en la ficha de la Liga (`.ls-hero .ls-id`, tras `.ls-namerow`; la especie se lee del «#NNN»), con vista previa (retrato de PMDCollab y tipos). En modo de pruebas (`PB_PRUEBAS.activo()`) todas las formas están abiertas.
 - `liga-scroll.js`: `.ls-roster` se desplaza entera y `.ls-grid` crece a su altura natural (la lista no es virtual: tiene todas las tarjetas).
