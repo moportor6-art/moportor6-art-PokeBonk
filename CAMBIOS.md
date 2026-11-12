@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Formas regionales (Subversión 0.62)
+- `regionales.js`: 55 formas con sus tipos (`FORMAS`). Jugador: `profile.pbRegional[familia]`, elegido en el Laboratorio (`lab-individual.js` llama a `PB_REGIONALES.row`); se abre con 1 partida en su región (Hisui = Sinnoh). Un intervalo pone los tipos de la forma (también tras evolucionar y al acabar la mega) y `main-…js` dibuja al jugador con `PB_REGIONALES.psid`. Los ataques no cambian.
+- Enemigos: `regiones.js` añade a la lista de cada región sus especies con forma (`reg.extra`, sin `remap`); `menus-…js` llama a `PB_REG_E` al aparecer (pone `t1`/`t2` y `pbSid`) y el dibujo pasa por `PB_RETOS.sid(run, sp, i, E)`.
+- `tools/regionales.py` + acción «Regionales»: monta las hojas desde PMDCollab con las funciones de `megas_hoenn.py`; sid = 10000 + 1000·región + especie (debe ser < 20000: el juego toma los ids >= 20000 como variocolor). 54 de 55: falta Stunfisk de Galar (incompleto en SpriteCollab).
+
 ## Pasaporte por regiones y tour (Subversión 0.61)
 - `remaster.js`: insignias generadas desde `PB_REGIONES` (grupo «Regiones · X», marcadas `region` para no contar en el Maestro): Viajero (`runs_*`), Conquistador (sus mapas con `profile.biomes[mapa] >= 1`), Señor de las leyendas (miembros `legendary` en la Liga), Campeón (toda su Liga) y, en Retos, completar cada mapa y completarlo en Pesadilla. Enseñan el progreso. La ficha de entrenador añade el título «Campeón de X» de la última Liga completada.
 - Desafío del Alfa: `MAPAS` incluye los mapas de las regiones nuevas (no los de Retos); sigue eligiendo solo entre los que tienes abiertos.

@@ -27,10 +27,10 @@ Responde siempre en español.
 - Ganchos: los bundles minificados de `site/assets` (`defineProperty-…` datos, `main-…` partida y servidor local, `menus-…` menús, enemigos y jefes) llaman a objetos globales de scripts clásicos cargados en `site/index.html` antes del módulo:
   - `regiones.js` motor de regiones; `hoenn.js`, `sinnoh.js`, `teselia.js`, `kalos.js`, `alola.js`, `galar.js`, `paldea.js` datos de cada región; `retos.js` Torre Mega y Dominio Gigamax;
   - `mega-dynamax.js`, `megas-extra.js` (PMD), `megas-reloaded.js` (Reloaded), `megas-tienda.js`, `dex-megas.js`;
-  - `formas.js`, `bebes.js`, `fiebres.js`, `leyendas.js` (kits de Kyogre y Rayquaza).
+  - `formas.js`, `bebes.js`, `fiebres.js`, `leyendas.js` (kits de Kyogre y Rayquaza), `regionales.js` + `regionales-hechas.js` (formas regionales);
 - Datos del juego: `site/data/pokemon.json` y `learnsets.json` traen los 1025 Pokémon; el límite visible es `maxDex`.
 - Sprites: hojas PMD en `site/assets/pmd/<sid>.png` y `pmd-shiny/`, metadatos en `site/data/sprites.json`.
-  - `tools/megas_hoenn.py` (acción «Megas», PMDCollab);
+  - `tools/megas_hoenn.py` (acción «Megas», PMDCollab) y `tools/regionales.py` (acción «Regionales», PMDCollab; sids 10000-13999). Los ids >= 20000 son variocolor;
   - `tools/megas_reloaded.py` y `tools/especies_reloaded.py` (Pokémon Reloaded, uso privado con permiso; numeración en `tools/reloaded_numeros.json`).
 - Secretos: el keystore y su contraseña solo viven en los secrets de GitHub; nunca en el repo.
 - Créditos que se conservan: Charcher, JayElDragon, @SrBatai, autores de PMDCollab, JPTER78/JayElDragon (PokéSurvivor, con su aviso PolyForm Noncommercial), pokelike.xyz, Khydra, jab_lao, pedrobarretto y Pokémon Reloaded. Nada comercial.

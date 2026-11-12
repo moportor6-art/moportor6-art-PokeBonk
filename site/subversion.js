@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.61';
+  const SUB = '0.62';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.62',
+      date: Date.UTC(2026, 10, 13, 0, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.62`,
+      summary: '¡Formas regionales! 54 formas de Alola, Galar, Hisui y Paldea, jugables y como enemigas.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **54 formas regionales** con todas sus animaciones: 19 de Alola (Vulpix, Raichu, Marowak...), 18 de Galar (Ponyta, Slowpoke, las aves legendarias...), 15 de Hisui (Growlithe, Zorua, Typhlosion...) y 2 de Paldea (Tauros y Wooper).`,
+        `- **Jugables**: en el Laboratorio, la fila «Forma regional» elige la forma para toda la línea (Vulpix y Ninetales, Pikachu solo cambia al ser Raichu...). Se abre al jugar 1 partida en su región (Hisui, en Sinnoh). En la partida cambian el dibujo y los **tipos**; los ataques siguen siendo los de su ficha.`,
+        `- **Enemigas**: en los mapas de su región también salen estas especies, con su forma y sus tipos (las de Hisui, en Sinnoh).`,
+        `- Falta Stunfisk de Galar: no tiene todas sus animaciones todavía.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.61',
       date: Date.UTC(2026, 10, 12, 23, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.61`,
@@ -1511,6 +1531,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.62',
+      date: '2026-11-12',
+      title: 'Formas regionales.',
+      notes: [
+        ['new', '54 formas regionales (Alola, Galar, Hisui y Paldea): elígelas en el Laboratorio y enfréntalas en los mapas de su región.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.61',
