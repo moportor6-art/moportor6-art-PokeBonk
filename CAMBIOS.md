@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Compilación sin cuota de artefactos
+- `.github/workflows/compilar.yml`: los juegos extra (PokéSurvivor, PokéIsaac, Pokelike, PokéPath, Pokémon Survivors) y el contenido final pasan de un trabajo a otro por la caché de Actions (`actions/cache/save`/`restore`, clave por `run_id`, `enableCrossOsArchive` para Windows) en vez de por artefactos. Con el repositorio privado, los artefactos llenaban la cuota de almacenamiento y la compilación fallaba. Las copias del APK y del instalador en las ejecuciones sin etiqueta siguen siendo artefactos, pero ya no tumban la compilación si la cuota está llena.
+
 ## Kalos (Subversión 0.56)
 - `kalos.js`: región `kalos` (#650-#721, tras Teselia) con las 37 familias (4 ataques que aprende la familia, pasiva, evolución, reto), 4 mapas (`novarte`, `reflejos`, `desolacion`, `desenlace`) con guardianes, jefes, tótems e invocadores de Kalos, y santuarios (Xerneas; Diancie; Hoopa y Volcanion; Yveltal y Zygarde). Contadores `kalos`, `kalos_local`, `runs_k`. Dificultad +80% PS / +55% daño (Cueva Desenlace +100% / +65%).
 - `formas.js`: Sylveon (700) como rama de Eevee; se gana en el Bosque Novarte con la línea de Eevee.

@@ -71,11 +71,11 @@ jobs:
           ls -la site/pokesurvivor
           test -s site/pokesurvivor/index.pck
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/cache/save@v4
         with:
-          name: pokesurvivor-web
           path: site/pokesurvivor
-          retention-days: 3
+          key: pokesurvivor-web-${{ github.run_id }}
+          enableCrossOsArchive: true
 
       # PokéIsaac: se baja la versión más nueva de pokeisaac.com. Si falla, se usa la copia del repo.
       - name: PokéIsaac actualizado
@@ -108,11 +108,11 @@ jobs:
           git push -q -f "$URL" respaldo-pokeisaac "pokeisaac-$V"
           echo "Respaldada: $V"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/cache/save@v4
         with:
-          name: pokeisaac-web
           path: site/pokeisaac
-          retention-days: 3
+          key: pokeisaac-web-${{ github.run_id }}
+          enableCrossOsArchive: true
 
       # Pokelike 2.0 completo de pokelike.xyz (código, música e imágenes). Solo se vuelve a bajar cuando la web
       # cambia (se guarda en la caché de GitHub según el nombre de su código). Si falla, se usa la copia del repo (1.6).
@@ -160,19 +160,19 @@ jobs:
           git push -q -f "$URL" respaldo-pokelike "pokelike-$V-$H"
           echo "Respaldada: $V-$H"
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/cache/save@v4
         with:
-          name: pokelike-web
           path: site/pokelike
-          retention-days: 3
+          key: pokelike-web-${{ github.run_id }}
+          enableCrossOsArchive: true
 
       # PokéPath TD: copia del repo (su autor no publica el juego en abierto; para actualizar, se mete el
       # instalador nuevo con tools/preparar_pokepath.py).
-      - uses: actions/upload-artifact@v4
+      - uses: actions/cache/save@v4
         with:
-          name: pokepath-web
           path: site/pokepath
-          retention-days: 3
+          key: pokepath-web-${{ github.run_id }}
+          enableCrossOsArchive: true
 
       # Pokémon Survivors (pedrobarretto/pokemon-survivors, código MIT): se compila su última versión con Node 24.
       # Solo cuando hay cambios en su repositorio (caché por commit). Cada versión se respalda en la rama
@@ -237,12 +237,12 @@ jobs:
           git push -q -f "$URL" respaldo-pokemon-survivors "pokemonsurvivors-$V"
           echo "Respaldada: $V"
 
-      - uses: actions/upload-artifact@v4
+      - continue-on-error: true
+        uses: actions/cache/save@v4
         with:
-          name: pokemonsurvivors-web
           path: site/pokemonsurvivors
-          retention-days: 3
-          if-no-files-found: ignore
+          key: pokemonsurvivors-web-${{ github.run_id }}
+          enableCrossOsArchive: true
 
   apk:
     needs: survivor
@@ -252,43 +252,52 @@ jobs:
         with:
           lfs: true
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/cache/restore@v4
         with:
-          name: pokesurvivor-web
           path: site/pokesurvivor
+          key: pokesurvivor-web-${{ github.run_id }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Quitar la copia vieja de PokéIsaac
         shell: bash
         run: rm -rf site/pokeisaac
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/cache/restore@v4
         with:
-          name: pokeisaac-web
           path: site/pokeisaac
+          key: pokeisaac-web-${{ github.run_id }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Quitar la copia vieja de Pokelike
         shell: bash
         run: rm -rf site/pokelike
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/cache/restore@v4
         with:
-          name: pokelike-web
           path: site/pokelike
+          key: pokelike-web-${{ github.run_id }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Quitar la copia vieja de PokéPath
         shell: bash
         run: rm -rf site/pokepath
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/cache/restore@v4
         with:
-          name: pokepath-web
           path: site/pokepath
+          key: pokepath-web-${{ github.run_id }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
-      - uses: actions/download-artifact@v4
-        continue-on-error: true
+      - continue-on-error: true
+        uses: actions/cache/restore@v4
         with:
-          name: pokemonsurvivors-web
           path: site/pokemonsurvivors
+          key: pokemonsurvivors-web-${{ github.run_id }}
+          enableCrossOsArchive: true
 
       - uses: actions/setup-java@v4
         with:
@@ -348,15 +357,15 @@ jobs:
       # El juego tal cual va en el APK: lo publica el trabajo "contenido" para las actualizaciones por archivos.
       - name: Guardar el contenido para el actualizador
         if: startsWith(github.ref, 'refs/tags/')
-        uses: actions/upload-artifact@v4
+        uses: actions/cache/save@v4
         with:
-          name: sitio-final
           path: site
-          retention-days: 3
-          compression-level: 1
+          key: sitio-final-${{ github.run_id }}
+          enableCrossOsArchive: true
 
       - name: Guardar el APK (ejecución manual)
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: PokeBonk-apk
@@ -377,43 +386,52 @@ jobs:
         with:
           lfs: true
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/cache/restore@v4
         with:
-          name: pokesurvivor-web
           path: site/pokesurvivor
+          key: pokesurvivor-web-${{ github.run_id }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Quitar la copia vieja de PokéIsaac
         shell: bash
         run: rm -rf site/pokeisaac
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/cache/restore@v4
         with:
-          name: pokeisaac-web
           path: site/pokeisaac
+          key: pokeisaac-web-${{ github.run_id }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Quitar la copia vieja de Pokelike
         shell: bash
         run: rm -rf site/pokelike
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/cache/restore@v4
         with:
-          name: pokelike-web
           path: site/pokelike
+          key: pokelike-web-${{ github.run_id }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
       - name: Quitar la copia vieja de PokéPath
         shell: bash
         run: rm -rf site/pokepath
 
-      - uses: actions/download-artifact@v4
+      - uses: actions/cache/restore@v4
         with:
-          name: pokepath-web
           path: site/pokepath
+          key: pokepath-web-${{ github.run_id }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
 
-      - uses: actions/download-artifact@v4
-        continue-on-error: true
+      - continue-on-error: true
+        uses: actions/cache/restore@v4
         with:
-          name: pokemonsurvivors-web
           path: site/pokemonsurvivors
+          key: pokemonsurvivors-web-${{ github.run_id }}
+          enableCrossOsArchive: true
 
       - uses: actions/setup-node@v4
         with:
@@ -492,6 +510,7 @@ jobs:
 
       - name: Guardar (ejecución manual)
         if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        continue-on-error: true
         uses: actions/upload-artifact@v4
         with:
           name: PokeBonk-Windows
@@ -508,10 +527,21 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - uses: actions/download-artifact@v4
+      # La caché se extrae sobre la ruta original (site): primero se quita la del checkout.
+      - name: Quitar el site del checkout
+        shell: bash
+        run: rm -rf site
+
+      - uses: actions/cache/restore@v4
         with:
-          name: sitio-final
-          path: sitio
+          path: site
+          key: sitio-final-${{ github.run_id }}
+          enableCrossOsArchive: true
+          fail-on-cache-miss: true
+
+      - name: Pasarlo a sitio
+        shell: bash
+        run: mv site sitio
 
       - name: APK e instalador de la release
         env:
