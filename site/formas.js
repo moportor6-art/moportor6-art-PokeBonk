@@ -2,7 +2,9 @@
    El juego deja elegir otra evolución (Crobat, Bellossom, Espeon, Steelix, Blissey...) cuando su reto está
    cumplido, pero en la versión sin servidor nadie contaba esos retos: nunca se desbloqueaban. Aquí se cuentan
    al acabar cada partida, con las mismas reglas que enseña el juego, y se añaden las de Sinnoh:
-   Gallade (desde Kirlia), Froslass (desde Snorunt), Leafeon y Glaceon (desde Eevee), la de Kalos: Sylveon, y la de Alola: Lunala (desde Cosmoem).
+   Gallade (desde Kirlia), Froslass (desde Snorunt), Leafeon y Glaceon (desde Eevee), la de Kalos: Sylveon, la de Alola: Lunala (desde Cosmoem), y las de Galar e Hisui para líneas antiguas
+   (Obstagoon, Perrserker, Cursola, Sirfetch'd, Mr. Rime, Runerigus, Wyrdeer, Kleavor, Ursaluna, Basculegion,
+   Sneasler y Overqwil): sin estar aquí, el juego las haría evolucionar solas al subir maxDex.
    - ci: formas nuevas para la lista del juego (defineProperty-…js): forma, miembro de la Liga, desde qué
      especie y cuándo se ofrece (evo = al evolucionar, eevee = con las ramas de Eevee).
    - vu: descripción y meta de cada reto nuevo para la ficha (menus-…js).
@@ -37,7 +39,21 @@
     // Kalos
     { form: 700, member: 133, from: 133, at: 'eevee', desc: 'Gana en el Bosque Novarte con la línea de Eevee.', rule: ganaEn('novarte') },
     // Alola
-    { form: 792, member: 789, from: 790, at: 'evo', desc: 'Gana en el Ultraumbral con la línea de Cosmog.', rule: ganaEn('ultraumbral') }
+    { form: 792, member: 789, from: 790, at: 'evo', desc: 'Gana en el Ultraumbral con la línea de Cosmog.', rule: ganaEn('ultraumbral') },
+    // Galar
+    { form: 862, member: 263, from: 264, at: 'evo', desc: 'Derrota a 3.000 Pokémon de Galar con la línea de Zigzagoon.', rule: sum('galar', 3e3) },
+    { form: 863, member: 52, from: 52, at: 'evo', desc: 'Gana en la Torre Rose con la línea de Meowth.', rule: ganaEn('torrerose') },
+    { form: 864, member: 222, from: 222, at: 'evo', desc: 'Gana en la Isla de la Armadura con Corsola.', rule: ganaEn('armadura') },
+    { form: 865, member: 83, from: 83, at: 'evo', desc: 'Asesta 30.000 golpes críticos con la línea de Farfetch’d.', rule: sum('crits', 3e4) },
+    { form: 866, member: 439, from: 122, at: 'evo', desc: 'Gana en la Tundra Corona con la línea de Mime Jr.', rule: ganaEn('tundra') },
+    { form: 867, member: 562, from: 562, at: 'evo', desc: 'Derrota a 4.000 Pokémon de Galar con la línea de Yamask.', rule: sum('galar', 4e3) },
+    // Hisui
+    { form: 899, member: 234, from: 234, at: 'evo', desc: 'Gana en el Bosque Lumirinto con Stantler.', rule: ganaEn('lumirinto') },
+    { form: 900, member: 123, from: 123, at: 'evo', desc: 'Gana en la Tundra Corona con la línea de Scyther.', rule: ganaEn('tundra') },
+    { form: 901, member: 216, from: 217, at: 'evo', desc: 'Derrota a 5.000 Pokémon de Galar con la línea de Teddiursa.', rule: sum('galar', 5e3) },
+    { form: 902, member: 550, from: 550, at: 'evo', desc: 'Gana en la Isla de la Armadura con Basculin.', rule: ganaEn('armadura') },
+    { form: 903, member: 215, from: 215, at: 'evo', desc: 'Gana en la Torre Rose con la línea de Sneasel.', rule: ganaEn('torrerose') },
+    { form: 904, member: 211, from: 211, at: 'evo', desc: 'Derrota a 4.000 Pokémon de Galar con Qwilfish.', rule: sum('galar', 4e3) }
   ];
   for (const n of NUEVAS) REGLAS[n.form] = { member: n.member, rule: n.rule };
 
