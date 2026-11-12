@@ -1,0 +1,279 @@
+.challenge-scene-route-name {
+	position: absolute;
+	top: 26px;
+	left: 50px;
+	right: 50px;
+	text-align: center;
+	font-size: 16px;
+	font-weight: bold;
+	color: var(--white);
+	text-transform: uppercase;
+	letter-spacing: 1px;
+	padding-bottom: 5px;
+	border-bottom: 4px solid var(--challengeColor1);
+	filter: drop-shadow(2px 2px black);
+}
+
+.challenge-scene-list-container {
+	position: absolute;
+	top: 70px;
+	left: 20px;
+	right: 20px;
+
+	font-size: 10px;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	padding: 20px;
+
+	background: rgba(30, 30, 30, 0.55);
+	backdrop-filter: blur(20px);
+	border: 1px solid #000;
+}
+
+.challenge-scene-list-row {
+	position: relative;
+	height: 27px;
+	width: 90%;
+	display: flex;
+	flex-wrap: wrap;
+	line-height: 27px; 
+	cursor: pointer;
+	padding-top: 4px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+	transition: 0.1s;	
+}
+
+.challenge-scene-list-row:hover {
+	background-color: rgba(60, 60, 60, 0.25);
+	border-bottom-color: var(--challengeColor1);
+}
+
+.challenge-scene-list-row-ribbon-container {
+	position: absolute;
+	top: 9px;
+	left: -38px;
+	width: 32px;
+	height: 16px;
+	
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	gap: 2px;
+
+	filter: drop-shadow(1px 1px black) var(--ribbonFilter);
+}
+
+.challenge-scene-list-row-ribbon {
+	position: relative;
+	width: 14px;
+	height: 14px;
+	background-image: url("../assets/images/icons/ribbon1.png");
+	background-size: contain;
+	background-repeat: no-repeat;
+}
+
+.challenge-scene-list-row-ribbon:nth-child(2n) {
+	background-image: url("../assets/images/icons/ribbon3.png");
+}
+
+.challenge-scene-list-row-label {
+	position: relative;
+	width: 70%;
+	height: 100%;
+	text-align: left;
+	color: var(--white);
+	text-transform: uppercase;
+	left: 10px;
+}
+
+.challenge-scene-list-row-result {
+	position: relative;
+	width: 30%;
+	height: 100%;
+	text-align: right;
+	font-weight: bold;
+	right: 10px;
+}
+
+.challenge-scene-info-container {
+	position: absolute;
+    left: 20px;
+    right: 20px;
+    bottom: 170px;
+    height: 70px;
+    
+    background: var(--descriptionBackground); 
+    padding: 10px;
+    outline: 1px solid black;
+    border-bottom: 4px solid var(--challengeColor1);
+}
+
+.challenge-scene-info-title {
+	position: absolute;
+    top: -12px; 
+    left: 15px;
+    
+    height: 20px;
+    padding: 0 12px;
+
+    background-color: var(--challengeColor1); 
+    color: var(--white);
+    border: 1px solid #000;
+    
+    font-size: 10px;
+    font-weight: bold;
+    line-height: 20px;
+    text-align: center;
+    text-transform: uppercase;
+    
+    z-index: 5;
+}
+
+.challenge-scene-info-text {
+	position: absolute;
+	padding: 12px;
+	font-size: 10px;
+	line-height: 14px;
+	color: var(--white);
+}
+
+.challenge-warning {
+	font-size: 7px;
+	line-height: 7px;
+	color: var(--red);
+}
+
+.challenge-debuff {
+	font-size: 7px;
+	line-height: 7px;
+	color: var(--green);
+}
+
+
+.challenge-scene-start-button {
+	position: absolute;
+	bottom: 130px;
+	width: 85%;
+	left: 50%;
+	transform: translate(-50%, 0);
+	height: 26px;
+
+	text-align: center;
+	line-height: 26px;
+	font-size: 11px;
+	font-weight: bold;
+	text-transform: uppercase;
+	border-radius: 2px;
+	
+	color: var(--white);
+	outline: 1px solid black;
+
+	background: var(--challengeColor1); 
+	
+	box-shadow: 
+		inset 1px 1px 0 rgba(255, 255, 255, 0.2), 
+		inset -1px -2px 0 rgba(0, 0, 0, 0.3);
+
+	cursor: pointer;
+	transition: all 0.1s;
+	image-rendering: pixelated;
+	overflow: hidden;
+}
+
+.challenge-scene-start-button:hover {
+	filter: brightness(1.15);
+	box-shadow: 
+		inset 1px 1px 0 rgba(255, 255, 255, 0.3), 
+		inset -1px -2px 0 rgba(0, 0, 0, 0.4),
+		0 0 10px rgba(0,0,0,0.3);
+}
+
+.challenge-scene-start-button:active {
+	transform: translateX(-50%) translateY(1px);
+	box-shadow: 
+		inset 1px 2px 2px rgba(0, 0, 0, 0.5), 
+		inset -1px -1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.reward-scene-window {
+	position: absolute;
+	bottom: 15px;
+	left: 50%;
+	transform: translateX(-50%);
+	width: 522px;
+	height: 100px;
+	background: rgba(30, 30, 30, 0.3);
+	border: 1px solid #000;
+}
+
+.reward-scene-container {
+	position: absolute;
+	inset: 0;
+
+}
+
+.reward-scene-slot-container {
+	position: absolute;
+	top: 0px;
+	left: 0px;
+	right: 0px;
+	bottom: 0px;
+	display: flex;
+	flex-wrap: wrap;
+	justify-content: center;
+	align-items: center;
+	gap: 39px;
+}
+
+.reward-scene-item {
+	position: relative;
+	width: 80px;
+	height: 70px;
+	background-color: rgba(255, 255, 255, 0.05);
+	background-position: center 30%;
+	background-repeat: no-repeat;
+	background-size: 32px;
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	outline: 1px solid #000;
+	cursor: pointer;
+	transition: 0.1s;
+}
+
+.reward-scene-item:hover {
+	background-color: rgba(163, 54, 53, 0.15);
+	border-color: var(--red);
+	transform: translateY(-2px);
+}
+
+.reward-scene-claim {
+	position: absolute;
+	bottom: 4px;
+	left: -10px;
+	right: -10px;
+	height: 18px;
+
+	text-align: center;
+	line-height: 18px;
+	color: var(--white);
+	font-size: 9px;
+	text-transform: uppercase;
+
+	cursor: pointer;
+	transition: 0.1s;
+	letter-spacing: 1px;
+}
+
+.reward-scene-claim:active {
+	transform: translateY(1px);
+	filter: brightness(0.8);
+}
+
+
+.reward-scene-claim-ribbon {
+	position: relative;
+	width: 10px;
+	height: 10px;
+	background-size: contain;
+	background-repeat: no-repeat;
+}
