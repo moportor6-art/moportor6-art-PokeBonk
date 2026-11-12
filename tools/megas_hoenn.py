@@ -166,7 +166,10 @@ def main():
         base = f'sprite/{pid:04d}/{f}/'
         im, meta = atlas(base)
         if im is None:
-            print(f'{nombre}: no hay sprites en {base}')
+            g = tracker.get(f'{pid:04d}', {}).get('subgroups') or {}
+            formas = {k: (v.get('name'), v.get('sprite_complete')) for k, v in g.items()}
+            ad = anim_data(base)
+            print(f'{nombre}: no hay sprites en {base} | formas: {formas} | animaciones: {sorted(ad) if ad else None}')
             continue
         im.save(os.path.join(site, 'assets', 'pmd', f'{sid}.png'), optimize=True)
         sh = variocolor(base, im)
