@@ -4,11 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.52';
+  const SUB = '0.53';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.53',
+      date: Date.UTC(2026, 10, 12, 9, 0),
+      tag: 'novedad',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.53`,
+      summary: 'Megas con dibujo propio, Charizard Y, Mewtwo X, megas Z y Gigamax.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Sprites de **Pokémon Reloaded 1.9.2.2**, usados con permiso de sus autores y solo en esta versión privada.`,
+        ``,
+        `- **16 megas** que se veían como el Pokémon normal ya tienen su dibujo y animaciones: Venusaur, Blastoise, Beedrill, Pidgeot, Pinsir, Gyarados, Ampharos, Scizor, Heracross, Blaziken, Swampert, Aggron, Salamence, Metagross, Garchomp y Abomasnow.`,
+        `- **10 megas nuevas** de Leyendas Z-A: Clefable, Victreebel, Starmie, Dragonite, Meganium, Feraligatr, Chimecho, Staraptor, Froslass y Heatran.`,
+        `- **Mega Raichu X y Mega Raichu Y**.`,
+        `- **Segundas formas**: Mega Charizard Y, Mega Mewtwo X, Mega Raichu Y, Mega Absol Z, Mega Garchomp Z y Mega Lucario Z. Se elige cuál usar en el Laboratorio.`,
+        `- **Gigamax**: al usar el Dynamax, Venusaur, Charizard, Blastoise, Butterfree, Pikachu, Meowth, Machamp, Gengar, Kingler, Lapras, Eevee y Snorlax toman su aspecto Gigamax.`,
+        `- Todas con su variocolor. Ya no hay megas sin dibujo propio: si una forma no tiene todas sus animaciones, no entra.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.52',
       date: Date.UTC(2026, 10, 12, 8, 0),
@@ -1316,6 +1340,18 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.53',
+      date: '2026-11-12',
+      title: 'Megas con dibujo propio, formas X/Y/Z y Gigamax.',
+      notes: [
+        ['new', '16 megas ya tienen su dibujo y 10 megas nuevas de Leyendas Z-A (sprites de Pokémon Reloaded).'],
+        ['new', 'Mega Raichu X y Y, Mega Charizard Y, Mega Mewtwo X y megas Z de Absol, Garchomp y Lucario, a elegir en el Laboratorio.'],
+        ['new', 'Aspecto Gigamax con el Dynamax para 12 Pokémon.'],
+        ['fix', 'Las megas sin dibujo propio ya no entran.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.52',

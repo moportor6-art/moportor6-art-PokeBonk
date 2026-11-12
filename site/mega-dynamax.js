@@ -30,8 +30,15 @@
     229: { sid: 15229, name: 'Mega Houndoom', shiny: true },
     248: { sid: 15248, name: 'Mega Tyranitar', shiny: false }
   };
-  // Megas de Hoenn y Groudon/Kyogre primigenios: solo las que tienen sprites montados (megas-extra.js).
-  Object.assign(MEGAS, window.PB_MEGAS_EXTRA ?? {});
+  // Megas montadas con animaciones completas: Pokémon Reloaded (megas-reloaded.js) y PMD Sprite Repository
+  // (megas-extra.js, tiene prioridad). Las que no tienen dibujo propio no entran.
+  const conSprite = o => Object.fromEntries(Object.entries(o ?? {}).filter(([, v]) => !v.sinSprite));
+  Object.assign(MEGAS, conSprite(window.PB_MEGAS_RELOADED), conSprite(window.PB_MEGAS_EXTRA));
+  // Segundas formas (Charizard Y, Mewtwo X, megas Z): se eligen en el Laboratorio.
+  const ALT = {};
+  for (const [k, v] of Object.entries(window.PB_MEGAS_ALT ?? {})) if (MEGAS[k]) ALT[k] = [v];
+  // Aspecto Gigamax durante el Dynamax.
+  const GMAX = window.PB_GMAX ?? {};
   const MEGA_MODS = [
     { stat: 'damage', mul: 1.25 }, { stat: 'maxHp', mul: 1.15 },
     { stat: 'attackSpeed', mul: 1.1 }, { stat: 'armor', add: 10 }
@@ -41,7 +48,15 @@
   ];
 
   const M = {
-    MEGAS,
+    MEGAS, ALT, GMAX,
+
+    // Formas de mega de una especie: la principal y, si hay, las alternativas.
+    forms(sp) { return MEGAS[sp] ? [MEGAS[sp], ...(ALT[sp] ?? [])] : []; },
+    // Forma elegida en el Laboratorio (profile.pbMegaForma[especie] = índice).
+    form(meta, sp) {
+      const l = M.forms(sp), i = meta?.profile?.pbMegaForma?.[sp] ?? 0;
+      return l[i] ?? l[0];
+    },
     run: null,
     st: null,
 
@@ -58,17 +73,18 @@
     // Llamado por el juego al empezar cada partida.
     start(run) {
       M.run = run;
-      M.st = { megaFor: null, megaEnd: 0, megaBase: 0, megaNeed: MEGA_KILLS_EARLY, baseTypes: null, dmaxEnd: 0, dmaxBase: 0, dmaxNeed: DMAX_KILLS_EARLY, off: run.mode === 'duel' };
+      M.st = { gmax: false, megaFor: null, megaEnd: 0, megaBase: 0, megaNeed: MEGA_KILLS_EARLY, baseTypes: null, dmaxEnd: 0, dmaxBase: 0, dmaxNeed: DMAX_KILLS_EARLY, off: run.mode === 'duel' };
       const p = run.player;
       if (p) { p.__msid = null; p.__mshp = false; p.__dmax = false; }
-      try { for (const k in MEGAS) if (M.unlocked(run.meta, +k)) run.sprites.get(MEGAS[k].sid); } catch {}
+      try { for (const k in MEGAS) if (M.unlocked(run.meta, +k)) run.sprites.get(M.form(run.meta, +k).sid); } catch {}
+      try { const g = GMAX[run.player?.speciesId]; if (g) run.sprites.get(g.sid); } catch {}
       M.ui();
     },
 
     // Mods de estadísticas que el juego suma en recompute().
     mods(p) {
       const out = [];
-      if (p.__msid) out.push(...MEGA_MODS);
+      if (p.__msid && !M.st?.gmax) out.push(...MEGA_MODS);
       if (p.__dmax) out.push(...DMAX_MODS);
       return out;
     },
@@ -81,7 +97,7 @@
 
     canMega() {
       const r = M.run, s = M.st;
-      if (!r || !s || s.off || !M.active(r) || !r.player || r.player.dead || r.player.__msid) return false;
+      if (!r || !s || s.off || !M.active(r) || !r.player || r.player.dead || (r.player.__msid && !s.gmax)) return false;
       const sp = r.player.speciesId;
       return M.unlocked(r.meta, sp) && M.megaProgress() >= s.megaNeed;
     },
@@ -105,10 +121,11 @@
     // Vuelve a la forma normal (sprite, tipos y estadísticas).
     megaOff() {
       const r = M.run, s = M.st, p = r?.player;
-      if (!p || !p.__msid) return;
+      if (!p || !p.__msid || s.gmax) return;
       M.keepHp(p, () => {
         p.__msid = null; p.__mshp = false;
         if (s.baseTypes) { p.types = s.baseTypes; s.baseTypes = null; }
+        if (p.__dmax) M.gmaxOn(p);
       });
       M.megaReset();
     },
@@ -133,7 +150,8 @@
 
     megaevolve() {
       if (!M.canMega()) return;
-      const r = M.run, p = r.player, m = MEGAS[p.speciesId], sh = r.shinySkin || r.skinLook === 'classic';
+      const r = M.run, p = r.player, m = M.form(r.meta, p.speciesId), sh = r.shinySkin || r.skinLook === 'classic';
+      M.st.gmax = false;
       M.keepHp(p, () => {
         p.__msid = sh && m.shiny ? m.sid + 2e4 : m.sid;
         p.__mshp = sh && !m.shiny;
@@ -148,14 +166,30 @@
       try { r.ui.toast(`¡${m.name}! ${MEGA_SECS} s con más daño, PS, velocidad de ataque y armadura.`, null); } catch {}
     },
 
+    // Aspecto Gigamax (si la especie lo tiene y no está megaevolucionada).
+    gmaxOn(p) {
+      const g = GMAX[p.speciesId], r = M.run;
+      if (!g || p.__msid) return;
+      const sh = r.shinySkin || r.skinLook === 'classic';
+      p.__msid = sh && g.shiny ? g.sid + 2e4 : g.sid;
+      p.__mshp = sh && !g.shiny;
+      M.st.gmax = true;
+    },
+    gmaxOff(p) {
+      if (!M.st.gmax) return;
+      p.__msid = null; p.__mshp = false; M.st.gmax = false;
+    },
+
     dynamax() {
       if (!M.canDmax()) return;
       const r = M.run, p = r.player;
-      M.keepHp(p, () => { p.__dmax = true; });
+      M.keepHp(p, () => { p.__dmax = true; if (!p.__msid) M.gmaxOn(p); });
       M.st.dmaxEnd = r.time + DMAX_SECS;
+      const g = M.st.gmax && GMAX[p.speciesId];
+      if (g) try { r.sprites.get(p.__msid); } catch {}
       try { r.audio.power(); } catch {}
       try { r.shake?.(.6); } catch {}
-      try { r.ui.toast(`¡Dynamax! ${DMAX_SECS} s gigante: más daño, PS y área.`, null); } catch {}
+      try { r.ui.toast(`¡${g ? g.name : 'Dynamax'}! ${DMAX_SECS} s gigante: más daño, PS y área.`, null); } catch {}
     },
 
     tick() {
@@ -164,12 +198,12 @@
       const p = r.player;
       if (r.state === 'over') { M.hide(); M.run = null; return; }
       if (p && p.__dmax && r.time >= s.dmaxEnd) {
-        M.keepHp(p, () => { p.__dmax = false; });
+        M.keepHp(p, () => { p.__dmax = false; M.gmaxOff(p); });
         M.dmaxReset();
         try { r.ui.toast(`El Dynamax se ha acabado. Recarga: ${s.dmaxNeed} bajas.`, null); } catch {}
       }
       // Se acaba la mega por tiempo, o si cambia de especie (solo vale para la que la tenía).
-      if (p && p.__msid && (r.time >= s.megaEnd || s.megaFor !== p.speciesId)) {
+      if (p && p.__msid && !s.gmax && (r.time >= s.megaEnd || s.megaFor !== p.speciesId)) {
         const timeUp = r.time >= s.megaEnd;
         M.megaOff();
         if (timeUp) try { r.ui.toast(`La megaevolución se ha acabado. Recarga: ${s.megaNeed} bajas.`, null); } catch {}
@@ -230,9 +264,9 @@
       M.el.hidden = !M.active(r);
       const kills = r.stats?.kills ?? 0, p = r.player;
       // MEGA: solo si esta especie tiene mega desbloqueada
-      const hasMega = p && (p.__msid || M.unlocked(r.meta, p.speciesId));
+      const megaOn = p && p.__msid && !s.gmax, hasMega = p && (megaOn || M.unlocked(r.meta, p.speciesId));
       M.bMega.hidden = !hasMega;
-      if (hasMega && p.__msid) {
+      if (hasMega && megaOn) {
         M.bMega.disabled = true; M.bMega.classList.remove('ready'); M.bMega.style.boxShadow = '';
         M.bMega.textContent = `${Math.max(0, Math.ceil(s.megaEnd - r.time))} s`;
       } else if (hasMega) {

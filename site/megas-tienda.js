@@ -42,7 +42,7 @@
         box.append(caja, n);
         return box;
       }
-      const M = window.PB_MEGA, nombres = lista.map(k => M.MEGAS[k].name).join(' y ');
+      const M = window.PB_MEGA, nombres = lista.flatMap(k => M.forms(k).map(f => f.name)).join(', ').replace(/, ([^,]*)$/, ' y $1');
       const abierta = lista.every(k => M.unlocked(meta, k));
       const t = document.createElement('span');
       t.style.cssText = 'font-weight:900;color:#6a2ab8';
@@ -52,6 +52,27 @@
         ok.style.cssText = 'font-weight:800;color:#2a9a4a';
         ok.textContent = '✓ Desbloqueada';
         box.append(t, ok, caja);
+        // Especies con más de una mega (Charizard X/Y, Mewtwo X/Y, megas Z): elegir cuál usar en la partida.
+        for (const k of lista) {
+          const fs = M.forms(k);
+          if (fs.length < 2) continue;
+          const sel = document.createElement('select');
+          sel.style.cssText = 'font:inherit;font-weight:800;padding:4px 8px;border-radius:10px;border:2px solid #8a5ad8;background:#fff;color:#2a2340';
+          fs.forEach((f, i) => {
+            const o = document.createElement('option');
+            o.value = String(i); o.textContent = f.name;
+            if (i === (meta.profile.pbMegaForma?.[k] ?? 0)) o.selected = true;
+            sel.append(o);
+          });
+          sel.addEventListener('change', () => {
+            (meta.profile.pbMegaForma ??= {})[k] = Number(sel.value);
+            try { meta.save(); } catch {}
+          });
+          const l = document.createElement('span');
+          l.style.cssText = 'font-weight:800';
+          l.textContent = 'Usar en la partida:';
+          box.append(l, sel);
+        }
         return box;
       }
       const p = T.precio(lista);

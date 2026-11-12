@@ -213,10 +213,7 @@ def main():
             lista_formas = {k: (v.get('name'), v.get('sprite_complete')) for k, v in g.items()}
             ad = anim_data(base)
             print(f'{nombre}: no hay sprites en {base} | formas: {lista_formas} | animaciones: {sorted(ad) if ad else None}')
-            # Sin dibujo de la mega en SpriteCollab: la mega funciona igual con el sprite de su forma normal.
-            if str(pid) in sprites and pid not in SOLO_CON_SPRITE:
-                variocolor_base = os.path.exists(os.path.join(site, 'assets', 'pmd-shiny', f'{pid}.png'))
-                hechas[pid] = {'sid': pid, 'name': nombre, 'shiny': variocolor_base, 'sinSprite': True, **({'types': tipos} if tipos else {})}
+            # Sin dibujo de la mega en SpriteCollab: no entra (solo megas con todas sus animaciones).
             continue
         im.save(os.path.join(site, 'assets', 'pmd', f'{sid}.png'), optimize=True)
         sh = variocolor(base, im)

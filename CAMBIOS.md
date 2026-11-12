@@ -1,5 +1,13 @@
 # Cambios respecto al port original
 
+## Megas de Pokémon Reloaded, formas X/Y/Z y Gigamax (Subversión 0.53)
+- Sprites de Pokémon Reloaded 1.9.2.2, con permiso de sus autores, solo para este repositorio privado.
+- `tools/megas_reloaded.py`: lee los `.gmspr` originales (zlib desde el byte 8; cabecera delay/origen/n.º de fotogramas; cada fotograma delay/ancho/alto/bytes + BGRA) y arma hojas con el formato de PMD: 5 direcciones de Reloaded + 3 en espejo (o las propias 7/4/1 si la forma las trae), `A` para attack/charge, `H` para hurt y `S` para faint. Variocolor desde los códigos +1000 (101xxx, 151xxx, 201xxx). Escribe `megas-reloaded.js` (`PB_MEGAS_RELOADED`, `PB_MEGAS_ALT`, `PB_GMAX`) y las entradas de `data/sprites.json` (sid 16000+, 17000+ y 18000+).
+- `mega-dynamax.js`: une las megas de Reloaded y las de PMD (estas tienen prioridad) sin las que no tienen dibujo; `forms()`/`form()` para elegir forma (`profile.pbMegaForma`); `gmaxOn()`/`gmaxOff()` ponen el aspecto Gigamax durante el Dynamax sin dar las mejoras de la mega.
+- `megas-tienda.js`: nombra todas las formas y, si hay más de una, deja elegir cuál usar.
+- Mega Raichu X (150026) y Mega Raichu Y (200026), identificadas por el usuario.
+- `tools/megas_hoenn.py`: ya no mete megas con el sprite del Pokémon normal; quitadas de `megas-extra.js`.
+
 ## Comprar megas en el Laboratorio (Subversión 0.52)
 - `megas-tienda.js` (`window.PB_MEGA_TIENDA`): fila en la barra del Laboratorio individual con las megas de la familia del Pokémon elegido, el Polvo y el oro guardado (`PB_GOLD`). Comprar resta 3000 Polvo + 2000 oro (legendarias 5000 + 3000), apunta la familia en `profile.pbMegas` y guarda con `meta.save()`.
 - `mega-dynamax.js`: `unlocked()` también da por desbloqueada la mega si la familia está en `profile.pbMegas`. La investigación al 100 % sigue valiendo.
