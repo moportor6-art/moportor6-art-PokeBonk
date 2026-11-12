@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.59';
+  const SUB = '0.60';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.60',
+      date: Date.UTC(2026, 10, 12, 23, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.60`,
+      summary: '¡Retos! La Torre Mega y el Dominio Gigamax, dos mapas de jefes con megas y Gigamax.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- Nueva pestaña **Extra · Retos** al elegir mapa, que se abre tras la Zona Cero.`,
+        `- **Torre Mega**: solo salen las familias que tienen mega, y todo Pokémon que puede megaevolucionar aparece **megaevolucionado**. En la cima esperan **Mega Rayquaza, Mega Mewtwo y Mega Zygarde**.`,
+        `- **Dominio Gigamax**: solo salen las familias con Gigamax, y todo Pokémon que puede gigamaxizarse aparece en su **forma Gigamax**. En el núcleo esperan **Eternatus Eternamax, Urshifu Gigamax y Melmetal Gigamax**.`,
+        `- Son los mapas más difíciles del juego. Cualquier Pokémon de tu Liga juega como forastero: +20% Pokédólares y +30% Polvo.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.59',
       date: Date.UTC(2026, 10, 12, 22, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.59`,
@@ -1470,6 +1490,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.60',
+      date: '2026-11-12',
+      title: 'Retos: Torre Mega y Dominio Gigamax.',
+      notes: [
+        ['new', 'Torre Mega: enemigos megaevolucionados y Mega Rayquaza, Mega Mewtwo y Mega Zygarde en la cima.'],
+        ['new', 'Dominio Gigamax: enemigos Gigamax y Eternatus Eternamax, Urshifu y Melmetal en el núcleo.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.59',

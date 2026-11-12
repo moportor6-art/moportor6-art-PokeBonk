@@ -37,7 +37,8 @@
     get bebes() { return Object.assign({}, ...R.lista.map(r => r.bebes ?? {})); },
     // especie -> miembro de la Liga, para las especies cuya ficha ya no existe
     get oi() { return Object.assign({}, ...R.lista.map(r => r.oi ?? {})); },
-    regionDe(id) { return R.lista.find(r => id >= r.min && id <= r.max) ?? null; },
+    // Las regiones especiales (Retos) abarcan toda la Pokédex: no cuentan como región de ninguna especie.
+    regionDe(id) { return R.lista.find(r => !r.especial && id >= r.min && id <= r.max) ?? null; },
     regionMapa(run) { return run?.biome?.region ? R.lista.find(r => r.id === run.biome.region) ?? null : null; },
 
     // ---- datos para el juego ----
@@ -82,7 +83,7 @@
       return out;
     },
     regiones() {
-      return R.lista.map(r => ({ id: r.id, name: r.name, gen: r.gen, maps: r.mapas.map(m => m.id), slots: 0, gate: r.gate, emblem: r.emblem, c: r.c, c2: r.c2 }));
+      return R.lista.map(r => ({ id: r.id, name: r.name, gen: r.gen, genLabel: r.genLabel, maps: r.mapas.map(m => m.id), slots: 0, gate: r.gate, emblem: r.emblem, c: r.c, c2: r.c2 }));
     },
 
     // ---- durante la partida ----
@@ -90,10 +91,12 @@
     todos: null,
     lista_(todos, run) {
       const reg = R.regionMapa(run);
-      const k = (reg?.id ?? 'kj') + todos.length;
+      const k = (reg?.id ?? 'kj') + (reg?.familias ? run.biome.id : '') + todos.length;
       let v = R.cache.get(k);
       if (!v || v.src !== todos) {
-        v = todos.filter(p => reg ? p.id >= reg.min && p.id <= reg.max : p.id <= KANTO_JOHTO_MAX);
+        // Una región puede limitar sus enemigos a ciertas familias (Retos: las que tienen mega o Gigamax).
+        const fams = reg?.familias?.(todos);
+        v = todos.filter(p => reg ? p.id >= reg.min && p.id <= reg.max && (!fams || fams.has(p.family)) : p.id <= KANTO_JOHTO_MAX);
         v.src = todos;
         R.cache.set(k, v);
       }
@@ -125,7 +128,7 @@
     },
     esLocal(run, reg = R.regionMapa(run)) {
       const id = run?.player?.roster?.id ?? 0;
-      return !!reg && id >= reg.min && id <= reg.max;
+      return !!reg && !reg.especial && id >= reg.min && id <= reg.max;
     },
     start(run) {
       const reg = R.regionMapa(run);
@@ -136,6 +139,7 @@
       const local = R.esLocal(run, reg);
       if (!local) run.goldMul = (run.goldMul ?? 1) * 1.2;
       try { run.meta.count(reg.contadores.runs, 1); } catch {}
+      try { reg.alEmpezar?.(run); } catch {}
       setTimeout(() => {
         try {
           run.ui.toast(local ? `Bono de local: +10% de daño en ${reg.name}`
@@ -146,7 +150,7 @@
     mods(p) {
       const run = p?.run, reg = R.regionMapa(run);
       const id = p?.roster?.id ?? 0;
-      return reg && id >= reg.min && id <= reg.max ? [{ stat: 'damage', mul: 1.1 }] : [];
+      return reg && !reg.especial && id >= reg.min && id <= reg.max ? [{ stat: 'damage', mul: 1.1 }] : [];
     },
     polvo(run) {
       const reg = R.regionMapa(run);

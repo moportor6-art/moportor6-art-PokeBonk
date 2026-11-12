@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Retos: Torre Mega y Dominio Gigamax (Subversión 0.60)
+- `retos.js`: región especial `retos` (pestaña «Extra», tras Paldea, sin Liga) con los mapas `torremega` y `dominio`. Sus enemigos se limitan a las familias con mega (o con Gigamax), y cada enemigo con mega/Gigamax se dibuja con esa hoja (`PB_RETOS.sid`). Santuarios: Rayquaza, Mewtwo y Zygarde (con su mega); Eternatus Eternamax, Urshifu y Melmetal (Gigamax). Dificultad +160% PS / +110% daño (Dominio +180% / +120%). Contadores `retos`, `retos_local`, `runs_r`.
+- `regiones.js`: regiones `especial` (no cuentan en `regionDe`, sin bono de local), `familias(todos)` para limitar enemigos (la caché va por mapa), `alEmpezar(run)` (precarga de hojas) y `genLabel` para la pestaña.
+- `menus-…js`: dos ganchos: la hoja de cada enemigo pasa por `window.PB_RETOS?.sid` (si no devuelve nada, la de siempre) y la etiqueta «Gen. N» de la pestaña admite `genLabel`.
+
 ## Paldea (Subversión 0.59)
 - `paldea.js`: región `paldea` (#906-#1025, tras Galar; con Kitakami y Arándano) con las 72 familias nuevas (paradojas incluidas; Charcadet con rama Armarouge/Ceruledge), 4 mapas (`kitakami`, `glaseada`, `asado`, `zonacero`) con guardianes, jefes, tótems e invocadores de Paldea, y santuarios (Ogerpon y los Leales; los Tesoros Funestos; Pecharunt; Koraidon, Miraidon y Terapagos). Contadores `paldea`, `paldea_local`, `runs_p`. Dificultad +150% PS / +100% daño (Zona Cero +180% / +120%). `maxDex` llega a 1025.
 - `formas.js`: Annihilape, Clodsire, Farigiraf, Dudunsparce, Kingambit y Archaludon como evoluciones alternativas con reto (`evo`), y Dipplin como rama de Applin (`eevee`, porque Applin ya tiene rama Flapple/Appletun); Hydrapple sale sola de Dipplin. Comprobado en el navegador que las líneas antiguas siguen como antes.
