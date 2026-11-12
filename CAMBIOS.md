@@ -1,5 +1,12 @@
 # Cambios respecto al port original
 
+## Mega Darkrai y Dialga Primigenio (Subversión 0.49)
+- `tools/megas_hoenn.py`:
+  - prueba todas las formas mega o primigenias de cada especie, sin las de color alternativo, sombra, bebé o alternativa, hasta que una tenga animaciones;
+  - al acabar, lista las formas de SpriteCollab hasta el 493 que aún no se usan;
+  - las megas de `SOLO_CON_SPRITE` (las nuevas de Leyendas Z-A, Mega Darkrai y Dialga Primigenio) solo entran si tienen animaciones, sin usar el sprite normal de reserva.
+- Entraron Mega Darkrai y Dialga Primigenio.
+
 ## Otras evoluciones y más megas (Subversión 0.48)
 - `formas.js` (`window.PB_FORMAS`):
   - `ci`: Gallade (475, miembro 280, desde 281), Froslass (478, desde 361), Leafeon (470) y Glaceon (471) con `at: eevee`. Van a la lista de formas de `defineProperty-…js` y a `si`, para que no salgan como evolución normal: si no, `runEvolution` elegía al azar entre Gardevoir y Gallade.

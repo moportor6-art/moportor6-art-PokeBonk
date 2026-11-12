@@ -4,11 +4,28 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.48';
+  const SUB = '0.49';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.49',
+      date: Date.UTC(2026, 10, 12, 5, 30),
+      tag: 'novedad',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.49`,
+      summary: 'Mega Darkrai y Dialga Primigenio.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Mega Darkrai** y **Dialga Primigenio** (la forma de Pokémon Mundo Misterioso: Exploradores del Cielo), con sus animaciones del PMD Sprite Repository.`,
+        `- Las megas nuevas de Leyendas Z-A (Raichu, Clefable, Victreebel, Starmie, Dragonite, Meganium, Feraligatr, Chimecho, Staraptor, Froslass, Heatran...) entrarán solas cuando tengan animaciones.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.48',
       date: Date.UTC(2026, 10, 12, 5, 0),
@@ -1232,6 +1249,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.49',
+      date: '2026-11-11',
+      title: 'Mega Darkrai y Dialga Primigenio.',
+      notes: [
+        ['new', 'Mega Darkrai y Dialga Primigenio, con animaciones.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.48',
