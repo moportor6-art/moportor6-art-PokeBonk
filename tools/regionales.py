@@ -6,8 +6,8 @@ regional y arma el atlas del juego con las mismas funciones que tools/megas_hoen
 SpriteCollab la tiene con todas las animaciones que pide el atlas (si no, se omite).
 
 La lista de formas y sus tipos vive en site/regionales.js (PB_REGIONALES.FORMAS); aquí se lee de ese archivo.
-sid de cada forma: 40000 + 2000 * región + especie (alola 0, galar 1, hisui 2, paldea 3); su variocolor va en
-pmd-shiny con el mismo sid (el juego lo pide como sid + 20000).
+sid de cada forma: 10000 + 1000 * región + especie (alola 0, galar 1, hisui 2, paldea 3). Tiene que ser menor que
+20000: el juego lee cualquier id >= 20000 como variocolor de id - 20000. Su variocolor va en pmd-shiny con el mismo sid.
 
 Escribe site/assets/pmd/<sid>.png, site/assets/pmd-shiny/<sid>.png, sus entradas en site/data/sprites.json
 y site/regionales-hechas.js (las lee regionales.js).
@@ -52,7 +52,7 @@ def main():
     for sp, regs in formas.items():
         pid = int(sp)
         for reg in regs:
-            sid = 40000 + 2000 * REGIONES.index(reg) + pid
+            sid = 10000 + 1000 * REGIONES.index(reg) + pid
             nombre = f'{tracker.get(f"{pid:04d}", {}).get("name", pid)} de {NOMBRE[reg]}'
             im = meta = base = None
             for f in carpetas(tracker, pid, reg):
