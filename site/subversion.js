@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.65';
+  const SUB = '0.66';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.66',
+      date: Date.UTC(2026, 10, 13, 3, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.66`,
+      summary: 'Botón temporal para desbloquear todos los Pokémon y hacer pruebas.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Modo de pruebas (temporal)**: al darle a Jugar o Continuar, en la lista de la Liga hay un botón **«Desbloquear todos (pruebas)»** que une a tu Liga a los 541 Pokémon para probarlos. Toca dos veces para confirmar.`,
+        `- Antes guarda una copia de tu Liga real. El botón **«Restaurar mi Liga»** la devuelve tal cual estaba (los que hayas unido durante las pruebas se quitan).`,
+        `- Este botón se quitará en unas versiones.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.65',
       date: Date.UTC(2026, 10, 13, 2, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.65`,
@@ -1590,6 +1609,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.66',
+      date: '2026-11-12',
+      title: 'Modo de pruebas temporal.',
+      notes: [
+        ['new', 'Botón temporal para desbloquear todos los Pokémon de la Liga, con copia y botón para restaurar tu Liga.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.65',

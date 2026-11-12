@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Modo de pruebas temporal (Subversión 0.66)
+- `pruebas.js` (cargado en `index.html` antes de `remaster.js`): junto al contador de la Liga (`.ls-count`) de la pantalla de elegir Pokémon, botón «Desbloquear todos (pruebas)» que guarda `profile.league` en `localStorage['pb-pruebas-liga']` y une todos los miembros (`fr` de `defineProperty-…js`); «Restaurar mi Liga» la devuelve. **Temporal: quitar `pruebas.js` y su `<script>` cuando ya no haga falta.**
+
 ## Colores de las fusiones regionales y retrato regional (Subversión 0.65)
 - `regionales.js`: las 13 fusiones de `RECOLOR` llaman al `cast` de su base con un `run` envuelto (Proxy, uno por partida y paleta) en el que todo lo que pasa por `vfx` y `projectiles` se repinta: números de color y campos `*col*` van a los colores de sus tipos con la misma luminosidad (los casi blancos se dejan); las partículas con dibujo de otro tipo (`FORMA_TIPO`: llamas, rayos, gotas, copos, hojas, rocas) pasan a Wisp o Spark teñidos; y el estado de la base pasa al de su tipo (`ESTADO`). Las fusiones del juego no se tocan.
 - HUD (`main-…js`): la clave del retrato incluye la forma regional (`PB_REGIONALES.hud`) y el retrato se dibuja con su sid; así también se repintan sus tipos. `tools/regionales.py` baja los retratos (`portraits/` y `portraits-shiny/`, 40x40) de PMDCollab: 54 y 54.
