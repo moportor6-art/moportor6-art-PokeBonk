@@ -45,7 +45,7 @@ MEGAS = {
 }
 # animación del juego -> nombres de la animación en SpriteCollab, por orden de preferencia
 ANIMS = [('walk', ['Walk']), ('idle', ['Idle', 'Walk']), ('attack', ['Attack', 'Strike', 'Shoot', 'Walk']),
-         ('hurt', ['Hurt', 'Idle']), ('faint', ['Sleep', 'Faint', 'Hurt']), ('charge', ['Charge', 'Attack', 'Idle'])]
+         ('hurt', ['Hurt', 'Idle']), ('faint', ['Sleep', 'Faint', 'Hurt', 'Idle']), ('charge', ['Charge', 'Attack', 'Idle'])]
 
 
 def bajar(ruta):
@@ -170,6 +170,10 @@ def main():
             formas = {k: (v.get('name'), v.get('sprite_complete')) for k, v in g.items()}
             ad = anim_data(base)
             print(f'{nombre}: no hay sprites en {base} | formas: {formas} | animaciones: {sorted(ad) if ad else None}')
+            # Sin dibujo de la mega en SpriteCollab: la mega funciona igual con el sprite de su forma normal.
+            if str(pid) in sprites:
+                variocolor_base = os.path.exists(os.path.join(site, 'assets', 'pmd-shiny', f'{pid}.png'))
+                hechas[pid] = {'sid': pid, 'name': nombre, 'shiny': variocolor_base, 'sinSprite': True, **({'types': tipos} if tipos else {})}
             continue
         im.save(os.path.join(site, 'assets', 'pmd', f'{sid}.png'), optimize=True)
         sh = variocolor(base, im)
