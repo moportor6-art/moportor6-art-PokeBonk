@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Megas de Hoenn (Subversión 0.46)
+- `tools/megas_hoenn.py` (lo lanza `.github/workflows/megas.yml` al cambiar el script, o a mano) baja del PMD Sprite Repository las hojas de animación de cada mega de Hoenn y de Groudon/Kyogre primigenios. Busca la forma por su nombre en `tracker.json` y monta el atlas como los de las megas del juego: walk, idle, attack, hurt, faint (Sleep) y charge, una debajo de otra con 8 filas, repitiendo la fila en las de una sola dirección y con alternativas si falta alguna animación. Lo guarda en `pmd/15xxx.png` y `pmd-shiny/15xxx.png` (la variocolor sale de comparar colores), lo añade a `data/sprites.json` con un `?v=` nuevo y escribe `megas-extra.js` (`window.PB_MEGAS_EXTRA`).
+- Las que no tienen dibujo en SpriteCollab (Blaziken, Swampert, Aggron, Salamence, Metagross) usan el sprite de la especie normal (`sinSprite`).
+- `mega-dynamax.js` añade `PB_MEGAS_EXTRA` a `MEGAS`; `megas-extra.js` se carga antes.
+
 ## Hoenn (Subversión 0.45)
 - `hoenn.js` (`window.PB_HOENN`), cargado antes de los módulos del juego:
   - `liga(D)`: 73 fichas de Hoenn (`pbHoenn: true`) más Azurill (298) y Wynaut (360), copiadas de las fichas de Marill (183) y Wobbuffet (202) con un primer nivel de evolución en el 12. Los kits usan ataques de `data/moves.json`, las pasivas son de las que ya existen y las ramas van con `branch`/`evoLevel` (Wurmple, Nincada, Clamperl).

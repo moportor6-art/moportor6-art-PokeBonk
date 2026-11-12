@@ -4,11 +4,32 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.45';
+  const SUB = '0.46';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.46',
+      date: Date.UTC(2026, 10, 12, 3, 0),
+      tag: 'novedad',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.46`,
+      summary: 'Megaevoluciones de Hoenn y Groudon y Kyogre primigenios.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Megas de Hoenn`,
+        `Se desbloquean igual que las demás: con la investigación de su familia al 100 %, y se activan en la partida con el botón **MEGA**.`,
+        `- Con sus propios sprites: **Mega Sceptile** (Planta/Dragón), Gardevoir, Sableye, Mawile, Medicham, Manectric, Sharpedo, Camerupt, **Mega Altaria** (Dragón/Hada), Banette, Absol, Glalie, Latias, Latios y **Mega Rayquaza**.`,
+        `- **Kyogre Primigenio** y **Groudon Primigenio** (Tierra/Fuego).`,
+        `- **Mega Blaziken, Swampert, Aggron (Acero), Salamence y Metagross** funcionan igual, pero todavía no tienen dibujo en el PMD Sprite Repository: se ven con el sprite de su forma normal.`,
+        `Sprites del PMD Sprite Repository (PMDCollab), uso no comercial con crédito.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.45',
       date: Date.UTC(2026, 10, 12, 2, 0),
@@ -1153,6 +1174,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.46',
+      date: '2026-11-11',
+      title: 'Megas de Hoenn y Groudon y Kyogre primigenios.',
+      notes: [
+        ['new', '20 megas de Hoenn y Groudon y Kyogre primigenios, con la investigación de su familia al 100 %.'],
+        ['better', 'Blaziken, Swampert, Aggron, Salamence y Metagross se ven con su sprite normal hasta que haya dibujo de su mega.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.45',
