@@ -123,6 +123,82 @@
     ['paldea', 194, 'fu-194', 'Pantano Tóxico', 'poison', 'ground', 'sludge-bomb', 'earthquake', 'Convierte el suelo en un pantano venenoso que sacude y envenena.']
   ];
   const fuKey = (reg, sp) => `fu-${reg}-${sp}`;
+  // Fusiones cuya animación base tiene colores de otro tipo: se pintan con los colores de sus tipos.
+  const RECOLOR = new Set(['galar:146', 'galar:145', 'galar:144', 'galar:77', 'galar:79', 'galar:222', 'galar:263',
+    'alola:105', 'alola:74', 'hisui:215', 'hisui:157', 'hisui:628', 'paldea:128']);
+  const COLOR = { normal: 0xd8d4c0, fire: 0xff6a20, water: 0x3a8aff, grass: 0x4ac850, electric: 0xffd020, ice: 0x8ae4ff,
+    fighting: 0xe0402a, poison: 0xa840e0, ground: 0xd8a850, flying: 0x9ab8ff, psychic: 0xff4aa0, bug: 0x9ac030,
+    rock: 0xb89a5a, ghost: 0x7a40e0, dragon: 0x5a48ff, dark: 0x6a28c0, steel: 0xb0c0d0, fairy: 0xff9ae0 };
+  // Cambia un color de la animación por uno de los tipos de la fusión, con la misma luminosidad.
+  // Los casi blancos se dejan (destellos); el tono decide si usa el primer o el segundo tipo.
+  const repinta = (c, t1, t2) => {
+    const r = c >> 16 & 255, g = c >> 8 & 255, b = c & 255;
+    if (Math.min(r, g, b) > 225) return c;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b);
+    let h = 0;
+    if (mx !== mn) h = mx === r ? ((g - b) / (mx - mn) + 6) % 6 : mx === g ? (b - r) / (mx - mn) + 2 : (r - g) / (mx - mn) + 4;
+    const base = h >= 3 && t2 != null ? t2 : t1;
+    const L = (0.299 * r + 0.587 * g + 0.114 * b) / 255;
+    const br = base >> 16 & 255, bg = base >> 8 & 255, bb = base & 255;
+    const Lb = (0.299 * br + 0.587 * bg + 0.114 * bb) / 255 || 0.01;
+    const k = L / Lb;
+    const f = v => k <= 1 ? Math.round(v * k) : Math.round(v + (255 - v) * Math.min(1, (L - Lb) / (1 - Lb || 1)));
+    return f(br) << 16 | f(bg) << 8 | f(bb);
+  };
+  const ESTADO = { fire: 'burn', ice: 'freeze', electric: 'paralysis', poison: 'poison', grass: 'root', water: 'wet',
+    psychic: 'confusion', ghost: 'curse', dark: 'curse', fairy: 'charm', fighting: 'stun', normal: 'stun', rock: 'stun',
+    ground: 'stun', dragon: 'stun', steel: 'knock', flying: 'knock', bug: 'poison' };
+  // Formas de partícula (enum de menus-…js) que ya traen el color de un tipo en su dibujo.
+  const FORMA_TIPO = { 5: 'fire', 33: 'fire', 38: 'fire', 8: 'electric', 40: 'electric', 6: 'water', 15: 'water', 42: 'water',
+    49: 'water', 126: 'water', 127: 'water', 128: 'water', 129: 'water', 130: 'water', 131: 'water', 132: 'water',
+    7: 'ice', 51: 'ice', 4: 'grass', 64: 'grass', 79: 'grass', 9: 'rock', 41: 'rock' };
+  const esColor = v => typeof v === 'number' && Number.isInteger(v) && v >= 0x10000 && v <= 0xffffff;
+  // Envoltorio de la partida para el cast de una fusión: todo lo que pase por vfx y proyectiles sale repintado.
+  const PROXIES = new WeakMap();
+  const pintado = (run, t1, t2, st0, st1, tipos) => {
+    const k = t1 + ':' + t2 + ':' + st0 + ':' + st1;
+    let m = PROXIES.get(run);
+    if (!m) PROXIES.set(run, m = new Map());
+    if (m.has(k)) return m.get(k);
+    const fixArg = a => {
+      if (esColor(a)) return repinta(a, t1, t2);
+      if (Array.isArray(a)) return a.map(x => esColor(x) ? repinta(x, t1, t2) : x);
+      if (a && typeof a === 'object' && !(a instanceof Float32Array) && Object.getPrototypeOf(a) === Object.prototype) {
+        const o = { ...a };
+        if (st0 && o.status === st0) o.status = st1;
+        // Partículas con dibujo propio de otro tipo (llamas, rayos, gotas...): pasan a una forma que se tiñe.
+        const dt = typeof o.shape === 'number' ? FORMA_TIPO[o.shape] : null;
+        if (dt && !tipos.includes(dt)) {
+          o.shape = dt === 'fire' ? 31 : 2;
+          if (!esColor(o.color) || Math.min(o.color >> 16 & 255, o.color >> 8 & 255, o.color & 255) > 225) o.color = t1;
+        }
+        for (const key of Object.keys(o)) {
+          if (/col/i.test(key)) o[key] = Array.isArray(o[key]) ? o[key].map(x => esColor(x) ? repinta(x, t1, t2) : x) : esColor(o[key]) ? repinta(o[key], t1, t2) : o[key];
+        }
+        return o;
+      }
+      return a;
+    };
+    const envolver = (obj, hondo) => new Proxy(obj, {
+      get(o, prop) {
+        const v = o[prop];
+        if (typeof v === 'function') return (...args) => v.apply(o, args.map(fixArg));
+        if (hondo && v && typeof v === 'object' && !ArrayBuffer.isView(v) && !Array.isArray(v)) return envolver(v, false);
+        return v;
+      }
+    });
+    const SUB = new Set(['vfx', 'projectiles']);
+    const px = new Proxy(run, {
+      get(o, prop) {
+        const v = o[prop];
+        if (SUB.has(prop) && v) return envolver(v, true);
+        return typeof v === 'function' ? v.bind(o) : v;
+      },
+      set(o, prop, v) { o[prop] = v; return true; }
+    });
+    m.set(k, px);
+    return px;
+  };
   const NOMBRE = { alola: 'Alola', galar: 'Galar', hisui: 'Hisui', paldea: 'Paldea' };
   // Región del juego donde sale (y se abre) cada forma.
   const MAPAS_DE = { alola: 'alola', galar: 'galar', hisui: 'sinnoh', paldea: 'paldea' };
@@ -193,6 +269,13 @@
         if (!src || !info[b]) continue;
         const key = fuKey(reg, sp);
         const f = { ...src, key, member: sp, moves: [m1, m2], name, desc, type };
+        if (RECOLOR.has(reg + ':' + sp)) {
+          const t1 = COLOR[type], t2 = type2 ? COLOR[type2] : null, cast = src.cast;
+          // El estado que causa también pasa a ser el de su tipo (Fénix Sombrío ya no quema).
+          const st1 = ESTADO[type] ?? null, st0 = src.status ?? null, tipos = [type, type2].filter(Boolean);
+          f.status = st1;
+          f.cast = function (e) { if (e?.run) e.run = pintado(e.run, t1, t2, st0, st1, tipos); return cast.call(this, e); };
+        }
         if (type2) f.type2 = type2; else delete f.type2;
         info[key] = info[b];
         if (pot[b] != null) pot[key] = pot[b];
@@ -206,6 +289,12 @@
       const p = window.__pbRun?.player;
       if (!p?.__regFu || p.roster?.id !== member) return undefined;
       return lista.find(f => f.key === p.__regFu);
+    },
+    // HUD (main-…js): retrato de la forma y clave para volver a pintarlo (y sus tipos) cuando se aplica.
+    hud(p, run) {
+      if (!p?.__regK) return null;
+      const f = X.elegida(run?.meta, p.speciesId);
+      return f ? { k: ':' + p.__regK, sid: f.sid } : null;
     },
     abierta(meta, reg) {
       const r = window.PB_REGIONES?.lista?.find(x => x.id === MAPAS_DE[reg]);

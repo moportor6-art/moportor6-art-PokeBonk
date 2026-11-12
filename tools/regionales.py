@@ -9,7 +9,7 @@ La lista de formas y sus tipos vive en site/regionales.js (PB_REGIONALES.FORMAS)
 sid de cada forma: 10000 + 1000 * región + especie (alola 0, galar 1, hisui 2, paldea 3). Tiene que ser menor que
 20000: el juego lee cualquier id >= 20000 como variocolor de id - 20000. Su variocolor va en pmd-shiny con el mismo sid.
 
-Escribe site/assets/pmd/<sid>.png, site/assets/pmd-shiny/<sid>.png, sus entradas en site/data/sprites.json
+Escribe site/assets/pmd/<sid>.png, site/assets/pmd-shiny/<sid>.png, los retratos (portraits/ y portraits-shiny/), sus entradas en site/data/sprites.json
 y site/regionales-hechas.js (las lee regionales.js).
 
 Uso: python3 tools/regionales.py site      (necesita Pillow e internet: se ejecuta en GitHub Actions)
@@ -68,6 +68,14 @@ def main():
             if sh is not None:
                 sh.save(os.path.join(site, 'assets', 'pmd-shiny', f'{sid}.png'), optimize=True)
             sprites[str(sid)] = meta
+            # Retrato (el de la cara, 40x40, como portraits/<especie>.png) y su variocolor, si SpriteCollab los tiene.
+            carpeta = base.replace('sprite/', 'portrait/')
+            for dest, rutas in (('portraits', [carpeta + 'Normal.png']), ('portraits-shiny', [carpeta + '0001/Normal.png'])):
+                for r in rutas:
+                    b = bajar(r)
+                    if b:
+                        open(os.path.join(site, 'assets', dest, f'{sid}.png'), 'wb').write(b)
+                        break
             hechas[f'{pid}:{reg}'] = {'sid': sid, 'shiny': sh is not None}
             print(f'{nombre}: ok ({base}, variocolor: {"sí" if sh is not None else "no"})')
     json.dump(sprites, open(ruta_sprites, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
