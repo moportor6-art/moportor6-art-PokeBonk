@@ -215,6 +215,19 @@ def main():
             if s2 != s:
                 open(p, 'w', encoding='utf-8').write(s2)
     print(f'{len(hechas)} de {len(MEGAS)} megas montadas')
+    # Formas mega/primigenias con sprites en SpriteCollab (Pokédex 1-493) que no están en la lista.
+    usadas = {(pid, forma(tracker, pid, c)) for pid, (_, _, c) in MEGAS.items()}
+    for k, g in sorted(tracker.items()):
+        try:
+            pid = int(k)
+        except ValueError:
+            continue
+        if not 1 <= pid <= 493:
+            continue
+        for f, v in (g.get('subgroups') or {}).items():
+            nombre = str(v.get('name', ''))
+            if ('mega' in nombre.lower() or 'primal' in nombre.lower()) and (pid, f) not in usadas:
+                print(f'DISPONIBLE {pid} {g.get("name")} forma {f} "{nombre}" completo={v.get("sprite_complete")}')
 
 
 if __name__ == '__main__':
