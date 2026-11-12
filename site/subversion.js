@@ -4,11 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.49';
+  const SUB = '0.50';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.50',
+      date: Date.UTC(2026, 10, 12, 6, 0),
+      tag: 'novedad',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.50`,
+      summary: 'Los 8 mapas de Hoenn y Sinnoh ya tienen santuario con su legendario.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Cada mapa nuevo tiene ahora su santuario: busca el portal y entra para pelear contra el legendario.`,
+        ``,
+        `- **Hoenn**: Claro del Deseo (Jirachi), Cráter del Monte Cenizo (Groudon), Cueva Ancestral (Kyogre) y Cima del Pilar Celeste (Rayquaza).`,
+        `- **Sinnoh**: Jardín Floral (Shaymin), Templo Puntaneva (Regigigas), Caverna del Lago (Uxie, Mesprit o Azelf) y Columna Lanza (Dialga, Palkia o Giratina).`,
+        `- Groudon y Shaymin usan su combate especial por fases. Los demás usan el combate de legendario normal.`,
+        `- Los escenarios reutilizan los de los santuarios originales, con el color de cada lugar.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.49',
       date: Date.UTC(2026, 10, 12, 5, 30),
@@ -1249,6 +1271,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.50',
+      date: '2026-11-11',
+      title: 'Santuarios en los mapas de Hoenn y Sinnoh.',
+      notes: [
+        ['new', 'Los 8 mapas de Hoenn y Sinnoh tienen santuario con su legendario.'],
+        ['new', 'Groudon y Shaymin tienen combate por fases; el resto, combate de legendario normal.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.49',

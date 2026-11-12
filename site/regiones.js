@@ -67,6 +67,15 @@
           delete o.sanctuary; delete o.johto;
           const zonas = o.zones.map((z, i) => ({ ...clon(z), name: m.zonas?.[i] ?? z.name }));
           Object.assign(o, m.datos, { id: m.id, name: m.name, desc: m.desc, unlock: m.unlock, region: r.id, specials: [], zones: zonas });
+          // Santuario (zona 4): la arena, el altar y el portal de un santuario del juego, con el cielo teñido y
+          // el legendario de este mapa. Sin santuario, el legendario es el jefe de la zona 3.
+          const sa = m.santuario && lista.find(x => x.id === m.santuario.de)?.sanctuary;
+          if (sa) {
+            const s2 = tinte(clon(sa), m.santuario.color ?? m.color, m.santuario.k ?? .3);
+            Object.assign(s2, { name: m.santuario.name, heart: m.santuario.heart, legendaries: m.santuario.legendaries ?? o.legendaries });
+            if (m.santuario.music) s2.music = m.santuario.music;
+            o.sanctuary = s2;
+          }
           out.push(o);
         }
       }

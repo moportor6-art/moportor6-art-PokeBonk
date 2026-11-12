@@ -1,5 +1,11 @@
 # Cambios respecto al port original
 
+## Santuarios de Hoenn y Sinnoh (Subversión 0.50)
+- `regiones.js` `mapas()`: si el mapa tiene `santuario`, clona el `sanctuary` del bioma original indicado en `santuario.de`, lo tiñe (`color`, `k`) y le pone `name`, `heart`, `legendaries` y, si hay, `music`.
+- `hoenn.js`: Claro del Deseo (encina, Jirachi), Cráter del Monte Cenizo (canela, Groudon), Cueva Ancestral (coast, Kyogre), Cima del Pilar Celeste (iris, Rayquaza).
+- `sinnoh.js`: Jardín Floral (forest, Shaymin), Templo Puntaneva (glacier, Regigigas), Caverna del Lago (desert, Uxie/Mesprit/Azelf), Columna Lanza (cave, Dialga/Palkia/Giratina).
+- Groudon (`qN`) y Shaymin (`KN`) usan su kit por fases del juego; los demás, el kit genérico de legendario.
+
 ## Mega Darkrai y Dialga Primigenio (Subversión 0.49)
 - `tools/megas_hoenn.py`:
   - prueba todas las formas mega o primigenias de cada especie, sin las de color alternativo, sombra, bebé o alternativa, hasta que una tenga animaciones;

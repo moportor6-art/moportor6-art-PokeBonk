@@ -112,6 +112,7 @@
       id: 'petalia', base: 'forest', color: 0x2fae5a, k: .12,
       name: 'Bosque Petalia', desc: 'Un bosque húmedo y espeso de Hoenn, lleno de setas y Pokémon traviesos. Los de Kanto y Johto no viven aquí.',
       unlock: 'Completa Ciudad Iris', zonas: ['Bosque al amanecer', 'Lluvia entre setas'],
+      santuario: { de: 'encina', name: 'Claro del Deseo', heart: 'Corazón del claro', legendaries: [385], color: 0xffe07a },
       datos: {
         types: ['grass', 'bug', 'normal', 'dark'], late: ['fighting', 'poison'],
       legendaries: [385], residents: [263, 261, 265, 285, 287, 276], weather: ['clear', 'rain', 'clear'],
@@ -126,6 +127,7 @@
       id: 'cenizo', base: 'canela', color: 0x5a3a34, k: .4,
       name: 'Monte Cenizo', desc: 'El volcán de Hoenn: lava, ceniza que cae del cielo y Pokémon de fuego y roca. El calor se nota.',
       unlock: 'Completa el Bosque Petalia', zonas: ['Laderas de ceniza', 'Cráter al rojo'],
+      santuario: { de: 'canela', name: 'Cráter del Monte Cenizo', heart: 'Corazón de la lava', legendaries: [383], color: 0xff4a1a },
       datos: {
         types: ['fire', 'ground', 'rock'], late: ['dragon', 'steel'],
       legendaries: [383], residents: [322, 324, 304, 328, 299, 331], weather: ['sun', 'ash', 'sun'],
@@ -140,6 +142,7 @@
       id: 'marino', base: 'coast', color: 0x1a5aa8, k: .15, suelo: [0xe2c98e, .78],
       name: 'Fondo Marino', desc: 'Arrecifes, cuevas marinas y lluvia sin fin cerca de Arrecípolis. Los de agua mandan aquí.',
       unlock: 'Completa el Monte Cenizo', zonas: ['Arrecife al atardecer', 'Tormenta en alta mar'],
+      santuario: { de: 'coast', name: 'Cueva Ancestral', heart: 'Corazón del océano', legendaries: [382], color: 0x1a6ad8 },
       datos: {
         types: ['water', 'ice', 'dark'], late: ['dragon', 'psychic'],
       legendaries: [382], residents: [278, 318, 320, 341, 339, 370, 366], weather: ['rain', 'clear', 'rain'],
@@ -154,6 +157,7 @@
       id: 'celeste', base: 'cave', color: 0x6a5ac8, k: .15,
       name: 'Pilar Celeste', desc: 'La torre en ruinas donde duerme Rayquaza: dragones, fantasmas y psíquicos. El reto más duro de Hoenn.',
       unlock: 'Completa el Fondo Marino', zonas: ['Pisos en ruinas', 'La cima del pilar'],
+      santuario: { de: 'iris', name: 'Cima del Pilar Celeste', heart: 'Corazón del cielo', legendaries: [384], color: 0x3ac87a },
       datos: {
         types: ['dragon', 'flying', 'psychic', 'ghost'], late: ['steel', 'dark'], evolved: true,
       legendaries: [384], residents: [333, 353, 355, 359, 337, 338, 343], weather: ['fog', 'clear', 'fog'],

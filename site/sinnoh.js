@@ -85,6 +85,7 @@
         id: 'eterna', base: 'forest', color: 0x1e3a2a, k: .35,
         name: 'Bosque Vetusto', desc: 'Un bosque viejo y oscuro de Sinnoh donde la niebla esconde fantasmas. Solo viven Pokémon de Sinnoh.',
         unlock: 'Completa el Pilar Celeste', zonas: ['Bosque en penumbra', 'La vieja mansión'],
+        santuario: { de: 'forest', name: 'Jardín Floral', heart: 'Corazón del jardín', legendaries: [492], color: 0x8ae85a },
         datos: {
           types: ['grass', 'bug', 'ghost', 'normal'], late: ['poison', 'fairy'], legendaries: [492],
           residents: [396, 399, 401, 412, 415, 420, 425], weather: ['fog', 'clear', 'rain'],
@@ -99,6 +100,7 @@
         id: 'nevada', base: 'glacier', color: 0xc8d8f0, k: .12,
         name: 'Ruta Nevada', desc: 'Ventisca, montañas y un templo antiguo cerca de Ciudad Puntaneva. Hielo, roca y acero.',
         unlock: 'Completa el Bosque Vetusto', zonas: ['Ventisca en la ruta', 'Templo Puntaneva'],
+        santuario: { de: 'glacier', name: 'Templo Puntaneva', heart: 'Corazón del templo', legendaries: [486], color: 0xd8e8ff },
         datos: {
           types: ['ice', 'rock', 'steel', 'fighting'], late: ['dragon', 'dark'], legendaries: [486],
           residents: [459, 447, 436, 410, 408, 449], weather: ['hail', 'clear', 'hail'],
@@ -113,6 +115,7 @@
         id: 'valor', base: 'coast', color: 0x2a9ac8, k: .2,
         name: 'Lago Valor', desc: 'Lagos tranquilos y praderas con tormentas eléctricas. Dicen que el trío del lago vigila sus aguas.',
         unlock: 'Completa la Ruta Nevada', zonas: ['Orilla del lago', 'Tormenta sobre el lago'],
+        santuario: { de: 'desert', name: 'Caverna del Lago', heart: 'Corazón del lago', legendaries: [480, 481, 482], color: 0x4ab8e8 },
         datos: {
           types: ['water', 'electric', 'psychic', 'fairy'], late: ['steel', 'flying'], legendaries: [480, 481, 482],
           residents: [418, 422, 456, 403, 417, 439], weather: ['rain', 'clear', 'clear'],
@@ -127,6 +130,7 @@
         id: 'distorsion', base: 'cave', color: 0x5a1a3a, k: .3,
         name: 'Mundo Distorsión', desc: 'Más allá de la Columna Lanza, donde el tiempo y el espacio se retuercen. El reto más duro hasta ahora.',
         unlock: 'Completa el Lago Valor', zonas: ['Columna Lanza', 'El otro lado'],
+        santuario: { de: 'cave', name: 'Columna Lanza', heart: 'Corazón de la distorsión', legendaries: [483, 484, 487], color: 0x8a2a6a },
         datos: {
           types: ['dragon', 'ghost', 'dark', 'steel', 'psychic'], late: ['poison', 'fire'], evolved: true, legendaries: [483, 484, 487],
           residents: [442, 443, 434, 451, 453, 425], weather: ['fog', 'ash', 'fog'],
