@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Fusiones de las formas regionales (Subversión 0.64)
+- `regionales.js` (`FUS`): 37 fusiones de firma (`fu-<región>-<especie>`), cada una con los dos ataques fuertes de su kit (pareja única: la Máquina de Bill busca la fusión por la pareja de ataques). Clonan una fusión de firma del juego (su `cast`, `sfx`, potencia de `JR` e información de `qR`) con nombre, descripción y tipos propios.
+- `menus-…js`: antes de registrar las fusiones (`$R.forEach`) añade `PB_REGIONALES.fusiones($R, qR, JR)` al final (los ids de las del juego no cambian), y la firma de un miembro (`rz`) pasa antes por `PB_REGIONALES.firma` (la regional si el jugador usa su forma). `player.kitKeys` lleva la clave de la fusión regional.
+
 ## Kits de las formas regionales (Subversión 0.63)
 - `regionales.js`: `KITS[región][especie de la línea]` con 4 ataques del juego (todos existen y tienen potencia). `PB_REGIONALES.start(run)` (llamado desde `PB_REGIONES.start`, que corre en todas las partidas antes de dar el primer ataque) cambia `player.roster` por una copia con ese kit y rehace `player.kitKeys`. El pool de mejoras y la guía de movimientos leen `player.roster`, así que también lo usan.
 

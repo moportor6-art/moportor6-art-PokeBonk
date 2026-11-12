@@ -80,6 +80,49 @@
       194: ['mud-shot', 'poison-sting', 'sludge-bomb', 'earthquake']
     }
   };
+  // Fusión de firma de cada línea regional: los dos ataques fuertes de su kit se funden en la Máquina de Bill.
+  // Reutiliza el efecto (animación y forma de golpear) de una fusión de firma del juego con tipos parecidos.
+  // [región, especie del kit, base, nombre, tipo, tipo2, ataque 1, ataque 2, descripción]
+  const FUS = [
+    ['alola', 19, 'fu-161', 'Banquete Nocturno', 'dark', 'normal', 'sucker-punch', 'crunch', 'Muerde a traición a la presa más cercana y a las que la rodean.'],
+    ['alola', 26, 'fu-25', 'Surfeo Psíquico', 'electric', 'psychic', 'stoked-sparksurfer', 'psychic', 'Surfea sobre su cola entre rayos y ondas psíquicas que estallan a su paso.'],
+    ['alola', 27, 'fu-90', 'Avalancha de Acero', 'ice', 'steel', 'icicle-crash', 'iron-head', 'Hace caer carámbanos duros como el acero sobre los enemigos.'],
+    ['alola', 37, 'fu-86', 'Velo Aurora', 'ice', 'fairy', 'moonblast', 'blizzard', 'Una aurora helada y brillante barre la zona con nieve y luz de luna.'],
+    ['alola', 50, 'fu-50', 'Grieta de Acero', 'ground', 'steel', 'iron-head', 'earthquake', 'Abre grietas por el suelo de las que salen púas de metal.'],
+    ['alola', 52, 'fu-198', 'Garra Elegante', 'dark', null, 'night-slash', 'foul-play', 'Roba y araña con elegancia a los enemigos más fuertes.'],
+    ['alola', 74, 'fu-74', 'Alud Magnético', 'rock', 'electric', 'rock-slide', 'discharge', 'Lanza rocas cargadas de electricidad que estallan al caer.'],
+    ['alola', 88, 'fu-23', 'Fango Voraz', 'poison', 'dark', 'knock-off', 'sludge-bomb', 'Un barro venenoso que muerde y se traga todo lo que toca.'],
+    ['alola', 103, 'fu-102', 'Palmera Dragón', 'grass', 'dragon', 'dragon-hammer', 'wood-hammer', 'Su largo cuello golpea como un martillo de dragón y hace llover cocos.'],
+    ['alola', 105, 'fu-104', 'Danza de Huesos Ígneos', 'fire', 'ghost', 'bonemerang', 'flare-blitz', 'Gira su hueso en llamas fantasmales que vuelven una y otra vez.'],
+    ['galar', 52, 'fu-227', 'Bigote de Acero', 'steel', null, 'iron-tail', 'iron-head', 'Sus bigotes de metal cortan como espadas a su alrededor.'],
+    ['galar', 77, 'fu-77', 'Galope Místico', 'psychic', 'fairy', 'psybeam', 'dazzling-gleam', 'Galopa dejando una estela de luz mágica que hechiza a los enemigos.'],
+    ['galar', 79, 'fu-79', 'Géiser Tóxico', 'poison', 'psychic', 'sludge-bomb', 'shell-side-arm', 'Brota un géiser de veneno y fuerza psíquica bajo los enemigos.'],
+    ['galar', 83, 'fu-83', 'Asalto del Puerro', 'fighting', null, 'leaf-blade', 'meteor-assault', 'Carga con su puerro como una lanza y arrasa todo a su paso.'],
+    ['galar', 110, 'fu-109', 'Niebla Purificadora', 'poison', 'fairy', 'sludge-bomb', 'strange-steam', 'Una niebla de humo extraño que envenena y deslumbra.'],
+    ['galar', 122, 'fu-238', 'Claqué Helado', 'ice', 'psychic', 'freeze-dry', 'psychic', 'Zapatea sobre el hielo y congela con su mente a quien se acerque.'],
+    ['galar', 144, 'fu-144', 'Mirada Glacial', 'psychic', 'flying', 'air-slash', 'freezing-glare', 'Su mirada psíquica congela el viento y hiere a todos los que la cruzan.'],
+    ['galar', 145, 'fu-145', 'Patada Trueno', 'fighting', 'flying', 'brave-bird', 'thunderous-kick', 'Se lanza en picado y remata con patadas que retumban como truenos.'],
+    ['galar', 146, 'fu-146', 'Fénix Sombrío', 'dark', 'flying', 'dark-pulse', 'fiery-wrath', 'Unas llamas de ira oscura cubren el cielo y caen sobre los enemigos.'],
+    ['galar', 222, 'fu-222', 'Coral Maldito', 'ghost', null, 'power-gem', 'shadow-ball', 'Ramas de coral fantasma brotan del suelo y atrapan a los enemigos.'],
+    ['galar', 263, 'fu-209', 'Bloqueo Rebelde', 'dark', 'normal', 'night-slash', 'body-slam', 'Se lanza con los brazos en cruz y aplasta a todo el que se cruza.'],
+    ['galar', 554, 'fu-220', 'Daruma Glacial', 'ice', null, 'icicle-crash', 'ice-hammer', 'Rueda como una bola de nieve gigante que aplasta y congela.'],
+    ['galar', 562, 'fu-56', 'Maldición de Arena', 'ground', 'ghost', 'shadow-ball', 'earth-power', 'Un remolino de arena maldita surge del suelo y arrastra a los enemigos.'],
+    ['hisui', 58, 'fu-58', 'Estampida Volcánica', 'fire', 'rock', 'rock-slide', 'flare-blitz', 'Carga envuelto en fuego y rocas volcánicas que llueven a su alrededor.'],
+    ['hisui', 100, 'fu-100', 'Reacción Clorofílica', 'electric', 'grass', 'energy-ball', 'chloroblast', 'Explota en cadena con energía vegetal y eléctrica.'],
+    ['hisui', 157, 'fu-155', 'Desfile de Almas', 'fire', 'ghost', 'shadow-ball', 'infernal-parade', 'Un muro de llamas espectrales desfila quemando a los enemigos.'],
+    ['hisui', 211, 'fu-211', 'Andanada Umbría', 'dark', 'poison', 'crunch', 'barb-barrage', 'Dispara una lluvia de púas venenosas desde la oscuridad.'],
+    ['hisui', 215, 'fu-215', 'Garra Venenosa', 'fighting', 'poison', 'close-combat', 'dire-claw', 'Ataca en manada con garras que envenenan, duermen o paralizan.'],
+    ['hisui', 503, 'fu-158', 'Tajo de la Marea', 'water', 'dark', 'razor-shell', 'ceaseless-edge', 'Sus sables de concha cortan como una ola oscura y dejan astillas.'],
+    ['hisui', 549, 'fu-43', 'Danza del Combate', 'grass', 'fighting', 'leaf-blade', 'close-combat', 'Gira como una bailarina y reparte patadas entre pétalos.'],
+    ['hisui', 570, 'fu-200', 'Ilusión Rencorosa', 'normal', 'ghost', 'shadow-ball', 'bitter-malice', 'Una procesión de ilusiones rencorosas atormenta a los enemigos.'],
+    ['hisui', 628, 'fu-16', 'Ala Psíquica', 'psychic', 'flying', 'air-slash', 'esper-wing', 'Bate sus alas y lanza un ciclón de plumas cargadas de fuerza psíquica.'],
+    ['hisui', 705, 'fu-147', 'Caparazón Dracónico', 'steel', 'dragon', 'iron-tail', 'dragon-pulse', 'Hace llover energía dracónica desde su caparazón de metal.'],
+    ['hisui', 713, 'fu-90', 'Iceberg Montañoso', 'ice', 'rock', 'avalanche', 'mountain-gale', 'Hace caer pedazos de iceberg duros como la roca.'],
+    ['hisui', 724, 'fu-1', 'Lluvia de Flechas', 'grass', 'fighting', 'leaf-blade', 'triple-arrows', 'Dispara flechas de hoja en ráfaga que atraviesan a los enemigos.'],
+    ['paldea', 128, 'fu-128', 'Embestida Combativa', 'fighting', null, 'raging-bull', 'close-combat', 'Una estampida de embestidas furiosas que no deja a nadie en pie.'],
+    ['paldea', 194, 'fu-194', 'Pantano Tóxico', 'poison', 'ground', 'sludge-bomb', 'earthquake', 'Convierte el suelo en un pantano venenoso que sacude y envenena.']
+  ];
+  const fuKey = (reg, sp) => `fu-${reg}-${sp}`;
   const NOMBRE = { alola: 'Alola', galar: 'Galar', hisui: 'Hisui', paldea: 'Paldea' };
   // Región del juego donde sale (y se abre) cada forma.
   const MAPAS_DE = { alola: 'alola', galar: 'galar', hisui: 'sinnoh', paldea: 'paldea' };
@@ -136,8 +179,33 @@
       if (!p?.roster || run.mode === 'duel') return;
       const kit = X.kit(run.meta, p.speciesId);
       if (!kit) return;
+      const fam = run.meta.family(p.speciesId), reg = run.meta.profile.pbRegional?.[fam];
+      const fu = FUS.find(f => f[0] === reg && run.meta.family(f[1]) === fam);
+      p.__regFu = fu ? fuKey(reg, fu[1]) : null;
       p.roster = { ...p.roster, kit: kit.slice() };
-      p.kitKeys = new Set([...kit, `fu-${p.roster.id}`]);
+      p.kitKeys = new Set([...kit, p.__regFu ?? `fu-${p.roster.id}`]);
+    },
+    // menus-…js, al montar las fusiones: añade las regionales (clonando el efecto de su base).
+    fusiones(base, info, pot) {
+      const out = [];
+      for (const [reg, sp, b, name, type, type2, m1, m2, desc] of FUS) {
+        const src = base.find(f => f.key === b);
+        if (!src || !info[b]) continue;
+        const key = fuKey(reg, sp);
+        const f = { ...src, key, member: sp, moves: [m1, m2], name, desc, type };
+        if (type2) f.type2 = type2; else delete f.type2;
+        info[key] = info[b];
+        if (pot[b] != null) pot[key] = pot[b];
+        out.push(f);
+      }
+      X._fus = out;
+      return out;
+    },
+    // Fusión de firma de la línea del jugador cuando usa su forma regional (para la ficha y la guía).
+    firma(member, lista) {
+      const p = window.__pbRun?.player;
+      if (!p?.__regFu || p.roster?.id !== member) return undefined;
+      return lista.find(f => f.key === p.__regFu);
     },
     abierta(meta, reg) {
       const r = window.PB_REGIONES?.lista?.find(x => x.id === MAPAS_DE[reg]);

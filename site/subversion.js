@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.63';
+  const SUB = '0.64';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.64',
+      date: Date.UTC(2026, 10, 13, 1, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.64`,
+      summary: '37 fusiones de firma nuevas para las formas regionales.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- Cada línea con forma regional tiene su **fusión de firma**: junta en la Máquina de Bill los dos ataques fuertes de su kit, al nivel máximo.`,
+        `- Ejemplos: **Velo Aurora** (Vulpix de Alola: Fuerza Lunar + Ventisca), **Surfeo Psíquico** (Raichu de Alola), **Fénix Sombrío** (Moltres de Galar: Pulso Umbrío + Furia Candente), **Desfile de Almas** (Typhlosion de Hisui), **Tajo de la Marea** (Samurott de Hisui), **Embestida Combativa** (Tauros de Paldea)...`,
+        `- Usan la animación de una fusión del juego con tipos parecidos, con su nombre y sus tipos propios. Salen en la guía de fusiones de la pausa cuando juegas con la forma regional.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.63',
       date: Date.UTC(2026, 10, 13, 1, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.63`,
@@ -1553,6 +1572,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.64',
+      date: '2026-11-12',
+      title: 'Fusiones de firma para las formas regionales.',
+      notes: [
+        ['new', '37 fusiones de firma nuevas, una por línea con forma regional.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.63',
