@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Colores de las fusiones regionales y retrato regional (Subversión 0.65)
+- `regionales.js`: las 13 fusiones de `RECOLOR` llaman al `cast` de su base con un `run` envuelto (Proxy, uno por partida y paleta) en el que todo lo que pasa por `vfx` y `projectiles` se repinta: números de color y campos `*col*` van a los colores de sus tipos con la misma luminosidad (los casi blancos se dejan); las partículas con dibujo de otro tipo (`FORMA_TIPO`: llamas, rayos, gotas, copos, hojas, rocas) pasan a Wisp o Spark teñidos; y el estado de la base pasa al de su tipo (`ESTADO`). Las fusiones del juego no se tocan.
+- HUD (`main-…js`): la clave del retrato incluye la forma regional (`PB_REGIONALES.hud`) y el retrato se dibuja con su sid; así también se repintan sus tipos. `tools/regionales.py` baja los retratos (`portraits/` y `portraits-shiny/`, 40x40) de PMDCollab: 54 y 54.
+
 ## Fusiones de las formas regionales (Subversión 0.64)
 - `regionales.js` (`FUS`): 37 fusiones de firma (`fu-<región>-<especie>`), cada una con los dos ataques fuertes de su kit (pareja única: la Máquina de Bill busca la fusión por la pareja de ataques). Clonan una fusión de firma del juego (su `cast`, `sfx`, potencia de `JR` e información de `qR`) con nombre, descripción y tipos propios.
 - `menus-…js`: antes de registrar las fusiones (`$R.forEach`) añade `PB_REGIONALES.fusiones($R, qR, JR)` al final (los ids de las del juego no cambian), y la firma de un miembro (`rz`) pasa antes por `PB_REGIONALES.firma` (la regional si el jugador usa su forma). `player.kitKeys` lleva la clave de la fusión regional.

@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.64';
+  const SUB = '0.65';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.65',
+      date: Date.UTC(2026, 10, 13, 2, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.65`,
+      summary: 'Las fusiones regionales con los colores de su tipo, y el retrato y los tipos de la forma regional en la partida.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **13 fusiones regionales con los colores de su tipo**: Fénix Sombrío, Patada Trueno, Mirada Glacial, Galope Místico, Géiser Tóxico, Coral Maldito, Bloqueo Rebelde, Danza de Huesos Ígneos, Alud Magnético, Garra Venenosa, Desfile de Almas, Ala Psíquica y Embestida Combativa. Las partículas de otro tipo (llamas, rayos, gotas...) cambian de forma, y el estado que causan es el de su tipo (Fénix Sombrío ya no quema: maldice).`,
+        `- **Retrato y tipos de la forma regional** en el marcador de la partida (arriba a la izquierda): Vulpix de Alola sale con su cara de Alola y como Hielo.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.64',
       date: Date.UTC(2026, 10, 13, 1, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.64`,
@@ -1572,6 +1590,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.65',
+      date: '2026-11-12',
+      title: 'Colores de las fusiones regionales y retrato regional.',
+      notes: [
+        ['better', '13 fusiones regionales con los colores, partículas y estado de su tipo.'],
+        ['fix', 'El marcador de la partida enseña el retrato y los tipos de la forma regional.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.64',
