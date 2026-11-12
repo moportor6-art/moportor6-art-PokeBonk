@@ -4,16 +4,37 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.60';
+  const SUB = '0.61';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.61',
+      date: Date.UTC(2026, 10, 12, 23, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.61`,
+      summary: 'Insignias y títulos por región en el Pasaporte, Desafío semanal en los mapas nuevos y un tour que lo explica todo.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Pasaporte por regiones**: de Hoenn a Paldea, cada región tiene 4 insignias con Polvo Estelar: Viajero (juega allí), Conquistador (completa sus 4 mapas), Señor de las leyendas (ten en tu Liga a sus legendarios) y **Campeón** (completa su Liga). Cada una enseña cuánto te falta.`,
+        `- **Título de Campeón**: al completar la Liga de una región, tu ficha de entrenador lo muestra (por ejemplo, «Campeón de Kalos»).`,
+        `- **Retos** en el Pasaporte: completar la Torre Mega y el Dominio Gigamax, y hacerlo en Pesadilla.`,
+        `- **Desafío del Alfa**: ya puede tocar cualquier mapa de las regiones nuevas que tengas abierto.`,
+        `- **Tour de bienvenida nuevo**: explica las regiones, cómo unir Pokémon a tu Liga, las dos formas de conseguir las megas (investigación o compra en el Laboratorio), las formas y evoluciones que piden un reto y los Retos. Sale una vez aunque ya hubieras visto el anterior, y se puede repetir desde Remaster.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.60',
       date: Date.UTC(2026, 10, 12, 23, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.60`,
@@ -1490,6 +1511,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.61',
+      date: '2026-11-12',
+      title: 'Pasaporte por regiones y tour nuevo.',
+      notes: [
+        ['new', 'Pasaporte: 4 insignias por región (con el título de Campeón) y 4 de Retos.'],
+        ['better', 'El Desafío del Alfa usa también los mapas de las regiones nuevas.'],
+        ['better', 'Tour de bienvenida actualizado: regiones, Liga, megas, formas especiales y Retos.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.60',

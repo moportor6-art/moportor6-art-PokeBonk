@@ -125,7 +125,8 @@
       pokepath: { waves: num(pathPl.stats?.wavesCompleted), defeated: num(pathPl.stats?.defeatedEnemies), stars: num(pathPl.stars), owned: num(pathPl.stats?.pokemonOwned),
         rutas: (Array.isArray(pathPl.records) ? pathPl.records : []).filter(w => num(w) >= 100).length, mejor: Math.max(0, ...(Array.isArray(pathPl.records) ? pathPl.records.map(num) : [0])) },
       plunder: { wins: num(plSt[0]), battles: num(plSt[1]), points: num(plunder.profile?.points) },
-      overlord: { hay: !!ovBytes, legible: !!ov, lideres: cuenta(decks), mewtwo: !!busca(ov, 'mewtwo_cleared') }
+      overlord: { hay: !!ovBytes, legible: !!ov, lideres: cuenta(decks), mewtwo: !!busca(ov, 'mewtwo_cleared') },
+      reg: datosRegiones(pf)
     };
   };
 
@@ -155,9 +156,49 @@
     ['PokéPlunder', 'pd10', 'Saqueador', (d) => d.plunder.battles >= 10, 'Gana 10 combates', 150],
     ['PokéPlunder', 'pdw', 'Botín completo', (d) => d.plunder.wins >= 1, 'Gana 1 partida', 500]
   ];
+  // Insignias de las regiones nuevas y de los Retos (PokéBonk). Llevan 'region' al final: no cuentan para el
+  // Maestro (que pide insignias de juegos distintos). «Campeón de X» además se enseña como título.
+  function datosRegiones(pf) {
+    const out = {}, liga = new Set(pf.league || []), c = pf.counters || {}, b = pf.biomes || {};
+    for (const r of window.PB_REGIONES?.lista ?? []) {
+      const ids = r.liga.map(e => e.id), ley = r.liga.filter(e => e.rank === 'legendary').map(e => e.id);
+      out[r.id] = {
+        runs: num(c[r.contadores.runs]),
+        mapas: r.mapas.filter(m => num(b[m.id]) >= 1).length, mapasT: r.mapas.length,
+        liga: ids.filter(i => liga.has(i)).length, ligaT: ids.length,
+        ley: ley.filter(i => liga.has(i)).length, leyT: ley.length,
+        tier: Object.fromEntries(r.mapas.map(m => [m.id, num(b[m.id])]))
+      };
+    }
+    return out;
+  }
+  for (const r of window.PB_REGIONES?.lista ?? []) {
+    const g = 'Regiones · ' + r.name, x = (d) => d.reg?.[r.id] ?? {};
+    if (r.especial) {
+      for (const m of r.mapas) {
+        INSIGNIAS.push([g, m.id + '-1', 'Escalador: ' + m.name, (d) => (x(d).tier?.[m.id] ?? 0) >= 1, 'Completa ' + m.name, 800, 'region']);
+        INSIGNIAS.push([g, m.id + '-3', 'Leyenda: ' + m.name, (d) => (x(d).tier?.[m.id] ?? 0) >= 3, 'Completa ' + m.name + ' en Pesadilla', 1500, 'region']);
+      }
+      continue;
+    }
+    const nl = r.liga.length, ny = r.liga.filter(e => e.rank === 'legendary').length;
+    INSIGNIAS.push([g, r.id + '-1', 'Viajero de ' + r.name, (d) => x(d).runs >= 1, 'Juega 1 partida en un mapa de ' + r.name, 200, 'region']);
+    INSIGNIAS.push([g, r.id + '-m', 'Conquistador de ' + r.name, (d) => x(d).mapas >= x(d).mapasT && x(d).mapasT > 0, 'Completa sus ' + r.mapas.length + ' mapas', 500, 'region']);
+    if (ny) INSIGNIAS.push([g, r.id + '-l', 'Señor de las leyendas de ' + r.name, (d) => x(d).ley >= ny, 'Ten en tu Liga a sus ' + ny + ' legendarios y singulares', 700, 'region']);
+    INSIGNIAS.push([g, r.id + '-c', 'Campeón de ' + r.name, (d) => x(d).liga >= nl, 'Completa su Liga: ' + nl + ' miembros (da el título)', 1000, 'region']);
+  }
+  // Progreso para enseñar junto a la insignia (p. ej. «12/82»).
+  const progreso = (id, d) => {
+    const [rid, k] = id.split('-'), x = d?.reg?.[rid];
+    if (!x) return '';
+    if (k === 'm') return ` (${x.mapas}/${x.mapasT})`;
+    if (k === 'l') return ` (${x.ley}/${x.leyT})`;
+    if (k === 'c') return ` (${x.liga}/${x.ligaT})`;
+    return '';
+  };
   const JUEGOS_P = [...new Set(INSIGNIAS.map(i => i[0]))];
   const MAESTRO = { id: 'maestro', name: 'Maestro de PokéBonk Remaster', need: 5, dust: 1500 };
-  const juegosConInsignia = () => new Set(INSIGNIAS.filter(i => st.badges[i[1]]).map(i => i[0])).size;
+  const juegosConInsignia = () => new Set(INSIGNIAS.filter(i => !i[6] && st.badges[i[1]]).map(i => i[0])).size;
 
 
   // ---------- Entrenador único ----------
@@ -195,7 +236,9 @@
       }
       st.comp = { id: comp.id, name: comp.name, img, f: cv ? cv.width + 'x' + cv.height : '' };
     }
-    return { xp, nivel, titulo: TITULOS.find(t => nivel >= t[0])[1], pct: Math.max(0, Math.min(1, (xp - a) / (b - a))), falta: b - xp,
+    // Título de la última Liga regional completada (insignia «Campeón de X»), si hay.
+    const camp = INSIGNIAS.filter(i => i[6] && i[1].endsWith('-c') && st.badges[i[1]]).sort((p, q) => st.badges[q[1]] - st.badges[p[1]])[0];
+    return { xp, nivel, titulo: TITULOS.find(t => nivel >= t[0])[1] + (camp ? ' · ' + camp[2] : ''), pct: Math.max(0, Math.min(1, (xp - a) / (b - a))), falta: b - xp,
       nombre: meta()?.profile?.name || 'Entrenador', comp: st.comp || null };
   };
   // Cobra los niveles nuevos y deja la ficha a mano para los otros juegos (pb-entrenador).
@@ -264,6 +307,8 @@
   const finSemana = () => SEMANA0 + (semana() + 1) * 7 * 864e5;
   const rng = (a) => () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
   const MAPAS = { forest: 'Bosque Verde', desert: 'Desierto Rocoso', coast: 'Costa Tormenta', glacier: 'Glaciar Celeste', canela: 'Isla Canela', cave: 'Cueva Celeste', encina: 'Bosque Encina', iris: 'Ciudad Iris' };
+  // Los mapas de las regiones nuevas también entran en el Desafío (solo los que ya tengas abiertos); los Retos no.
+  for (const r of window.PB_REGIONES?.lista ?? []) if (!r.especial) for (const m of r.mapas) MAPAS[m.id] = m.name;
   const DIF = ['Normal', 'Difícil', 'Pesadilla'];
   const PREMIOS = [
     ['jugar', 'Termina una partida del desafío', 150, (w) => w.runs >= 1],
@@ -513,7 +558,7 @@
     const { nuevas, d: ultimo } = await revisar();
     const total = INSIGNIAS.length + 1;
     const tengo = Object.keys(st.badges).length;
-    let h = fichaHTML(ultimo) + `<div class="rm-card"><p><b>${tengo}/${total} insignias</b></p><p class="rm-muted">Juega a los juegos de la Sala: cada insignia da Polvo Estelar en PokéBonk una sola vez. Se revisa cada vez que abres el Pasaporte.</p>`;
+    let h = fichaHTML(ultimo) + `<div class="rm-card"><p><b>${tengo}/${total} insignias</b></p><p class="rm-muted">Juega a los juegos de la Sala y explora las regiones de PokéBonk: cada insignia da Polvo Estelar una sola vez. Se revisa cada vez que abres el Pasaporte.</p>`;
     if (nuevas.length) h += `<p><b>Nuevo: ${nuevas.map(n => n[0] + ' (+' + fmt(n[1]) + ' Polvo)').join(', ')}</b></p>`;
     if (inRun()) h += '<p class="rm-muted">Termina la partida para cobrar las insignias nuevas.</p>';
     h += '</div>';
@@ -522,7 +567,7 @@
       for (const [jg, id, name, , meta2, dust] of INSIGNIAS) {
         if (jg !== g) continue;
         const ok = !!st.badges[id];
-        h += `<div class="rm-b${ok ? ' ok' : ''}"><i>${ok ? '★' : '?'}</i><span>${name}<small>${meta2}</small></span><em>+${fmt(dust)}</em></div>`;
+        h += `<div class="rm-b${ok ? ' ok' : ''}"><i>${ok ? '★' : '?'}</i><span>${name}<small>${meta2}${ok ? '' : progreso(id, ultimo)}</small></span><em>+${fmt(dust)}</em></div>`;
       }
     }
     const okM = !!st.badges[MAESTRO.id];
@@ -657,10 +702,14 @@
   // ---------- Tour de bienvenida ----------
   const PASOS = [
     ['Bienvenido a PokéBonk Remaster', 'El PokéBonk de siempre con muchas novedades. Te enseñamos lo principal en un momento.'],
-    ['Megaevolución y Dynamax', 'En la partida, los botones MEGA y DMAX se cargan derrotando enemigos. El Dynamax sirve para cualquier Pokémon; la Mega, para los que la tienen cuando su investigación está al 100%.'],
+    ['Nueve regiones', 'Al elegir mapa, cambia de región con las pestañas de arriba: de Kanto a Paldea, los 1025 Pokémon. Cada región se abre al completar la anterior, tiene 4 mapas con su santuario y legendarios, y sus Pokémon solo salen en sus mapas. Jugar con un Pokémon de la región da +10% de daño; con uno de fuera, más Pokédólares y Polvo.'],
+    ['Unir Pokémon a tu Liga', 'Abre la Liga y toca un Pokémon: su ficha dice el reto que lo une a tu equipo (derrotar Pokémon de su región, ganar en un mapa, vencer guardianes...). Los legendarios piden retos más duros.'],
+    ['Megas y Dynamax', 'En la partida, los botones MEGA y DYNAMAX se cargan derrotando enemigos (el DYNAMAX está gris mientras carga y rosa cuando está listo). El Dynamax sirve para cualquier Pokémon y algunos toman su forma Gigamax. La mega se consigue de dos formas: con la investigación de su familia al 100% o comprándola en el Laboratorio con Polvo Estelar y oro guardado.'],
+    ['Formas y evoluciones especiales', 'Charizard, Mewtwo o Raichu tienen varias megas, y Tyranitar o Steelix formas extra de fans: elige cuál usar en el Laboratorio. Sylveon, Lunala y las evoluciones de Galar, Hisui y Paldea (Kleavor, Kingambit, Annihilape...) piden cumplir un reto con esa línea; luego se eligen al evolucionar. Míralo en su ficha de la Liga.'],
+    ['Retos: Torre Mega y Dominio Gigamax', 'Tras la Zona Cero se abre la pestaña Extra. En la Torre Mega todos salen megaevolucionados y en el Dominio Gigamax, en forma Gigamax. Son los mapas más difíciles del juego.'],
     ['Laboratorio individual', 'Cada mejora del Laboratorio se compra para un Pokémon concreto y solo le afecta a él. Gasta tu Polvo Estelar en tus favoritos.'],
     ['Sala de juegos', 'El botón dorado Juegos abre la Sala: PokéBonk TD, Pokémon Survivors, PokéSurvivor, PokéIsaac, PokéPlunder, Pokémon Overlord y Pokelike, con tu progreso en cada uno. Todos sin iniciar sesión.'],
-    ['Un entrenador para todo', 'Tu nivel de entrenador sube juegues a lo que juegues. En Remaster tienes el Pasaporte (insignias que dan Polvo), los Desafíos de cada semana y el Traspaso para pasar tu partida entre el móvil y el PC.'],
+    ['Un entrenador para todo', 'Tu nivel de entrenador sube juegues a lo que juegues. En Remaster tienes el Pasaporte (insignias que dan Polvo, también por cada región: completa su Liga y ganas el título de Campeón), los Desafíos de cada semana y el Traspaso para pasar tu partida entre el móvil y el PC.'],
     ['Editor del HUD y mando', 'Desde la pausa puedes mover y cambiar el tamaño de los botones. En PC y Android también puedes jugar con mando.']
   ];
   let tourM = null;
@@ -676,7 +725,8 @@
       else if (e.target.closest('.rm-prev')) { i--; pinta(); }
       else if (e.target.closest('.rm-skip')) fin();
     };
-    const fin = () => { tourM.hidden = true; st.tour = 1; save(); };
+    // 2 = vio el tour con las regiones y las megas nuevas (Subversión 0.61); quien solo vio el viejo lo ve otra vez.
+    const fin = () => { tourM.hidden = true; st.tour = 2; save(); };
     pinta();
     tourM.hidden = false;
   };
@@ -709,7 +759,7 @@
       abrir('juegos');
     }
     // Tour la primera vez, cuando el menú ya está a la vista y sin partida.
-    if (!st.tour && small && !inRun() && !document.querySelector('.pb-tour:not([hidden])')) tour();
+    if ((st.tour ?? 0) < 2 && small && !inRun() && !document.querySelector('.pb-tour:not([hidden])')) tour();
   };
   setInterval(marca, 700);
   marca();

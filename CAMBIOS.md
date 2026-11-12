@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Pasaporte por regiones y tour (Subversión 0.61)
+- `remaster.js`: insignias generadas desde `PB_REGIONES` (grupo «Regiones · X», marcadas `region` para no contar en el Maestro): Viajero (`runs_*`), Conquistador (sus mapas con `profile.biomes[mapa] >= 1`), Señor de las leyendas (miembros `legendary` en la Liga), Campeón (toda su Liga) y, en Retos, completar cada mapa y completarlo en Pesadilla. Enseñan el progreso. La ficha de entrenador añade el título «Campeón de X» de la última Liga completada.
+- Desafío del Alfa: `MAPAS` incluye los mapas de las regiones nuevas (no los de Retos); sigue eligiendo solo entre los que tienes abiertos.
+- Tour: pasos nuevos (regiones, unir a la Liga, megas por investigación o compra, formas extra y evoluciones con reto, Retos). `st.tour = 2`: quien vio el tour viejo lo ve una vez más.
+
 ## Retos: Torre Mega y Dominio Gigamax (Subversión 0.60)
 - `retos.js`: región especial `retos` (pestaña «Extra», tras Paldea, sin Liga) con los mapas `torremega` y `dominio`. Sus enemigos se limitan a las familias con mega (o con Gigamax), y cada enemigo con mega/Gigamax se dibuja con esa hoja (`PB_RETOS.sid`). Santuarios: Rayquaza, Mewtwo y Zygarde (con su mega); Eternatus Eternamax, Urshifu y Melmetal (Gigamax). Dificultad +160% PS / +110% daño (Dominio +180% / +120%). Contadores `retos`, `retos_local`, `runs_r`.
 - `regiones.js`: regiones `especial` (no cuentan en `regionDe`, sin bono de local), `familias(todos)` para limitar enemigos (la caché va por mapa), `alEmpezar(run)` (precarga de hojas) y `genLabel` para la pestaña.
