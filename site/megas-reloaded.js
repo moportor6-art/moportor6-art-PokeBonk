@@ -398,6 +398,24 @@ window.PB_MEGAS_RELOADED = {
    "normal",
    "dragon"
   ]
+ },
+ "571": {
+  "sid": 16571,
+  "name": "Mega Zoroark",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "870": {
+  "sid": 16870,
+  "name": "Mega Falinks",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "952": {
+  "sid": 16952,
+  "name": "Mega Scovillain",
+  "shiny": true,
+  "src": "reloaded"
  }
 };
 window.PB_MEGAS_ALT = {
@@ -533,4 +551,33 @@ window.PB_GMAX = {
   "shiny": true,
   "src": "reloaded"
  }
+};
+window.PB_MEGAS_ALT2 = {
+ "26": [
+  {
+   "sid": 19026,
+   "name": "Mega Raichu (Reloaded)",
+   "shiny": true,
+   "src": "reloaded",
+   "form": "R"
+  }
+ ],
+ "248": [
+  {
+   "sid": 19248,
+   "name": "Mega Tyranitar Negro",
+   "shiny": false,
+   "src": "reloaded",
+   "form": "N"
+  }
+ ],
+ "208": [
+  {
+   "sid": 19208,
+   "name": "Mega Steelix de Hielo",
+   "shiny": true,
+   "src": "reloaded",
+   "form": "H"
+  }
+ ]
 };

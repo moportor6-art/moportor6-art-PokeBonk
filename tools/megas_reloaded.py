@@ -72,6 +72,10 @@ MEGAS = {
     # Alola
     740: (100919, 'Mega Crabominable', ['fighting', 'ice']),
     780: (100971, 'Mega Drampa', ['normal', 'dragon']),
+    # Identificadas por el usuario en el paquete (filas SIN IDENTIFICAR de LISTA.md)
+    571: (102050, 'Mega Zoroark', None),
+    870: (102140, 'Mega Falinks', None),
+    952: (102330, 'Mega Scovillain', None),
 }
 # Segundas formas de especies que ya tienen mega: se eligen en el Laboratorio.
 ALT = {
@@ -91,7 +95,14 @@ GMAX = {
     569: (100581, 'Garbodor Gigamax'),
     809: (102061, 'Melmetal Gigamax'),
 }
-SID = {'mega': 16000, 'alt': 17000, 'gmax': 18000}
+# Más formas opcionales para especies que ya tienen mega y su forma X/Y/Z: diseños de fans de Reloaded que
+# el usuario quiso como forma extra elegible en el Laboratorio. Van en window.PB_MEGAS_ALT2 (lista por especie).
+EXTRA = {
+    26: [(102001, 'Mega Raichu (Reloaded)', None, 'R')],
+    248: [(102247, 'Mega Tyranitar Negro', None, 'N')],
+    208: [(102425, 'Mega Steelix de Hielo', None, 'H')],
+}
+SID = {'mega': 16000, 'alt': 17000, 'gmax': 18000, 'extra': 19000}
 
 # filas del juego (como PMD): abajo, abajo-der., der., arriba-der., arriba, arriba-izq., izq., abajo-izq.
 FILAS = [('2', False), ('3', False), ('6', False), ('9', False), ('8', False), ('9', True), ('6', True), ('3', True)]
@@ -162,13 +173,13 @@ def main():
     site = sys.argv[2] if len(sys.argv) > 2 else 'site'
     ruta_sprites = os.path.join(site, 'data', 'sprites.json')
     sprites = json.load(open(ruta_sprites, encoding='utf-8'))
-    hechas = {'megas': {}, 'alt': {}, 'gmax': {}}
+    hechas = {'megas': {}, 'alt': {}, 'gmax': {}, 'extra': {}}
     # Lo que ya estaba convertido se conserva aunque la carpeta de esta vez no traiga sus archivos
     # (p. ej. al convertir solo un paquete parcial de Reloaded).
     previas = {}
     ruta_js = os.path.join(site, 'megas-reloaded.js')
     if os.path.exists(ruta_js):
-        for var, k in (('PB_MEGAS_RELOADED', 'megas'), ('PB_MEGAS_ALT', 'alt'), ('PB_GMAX', 'gmax')):
+        for var, k in (('PB_MEGAS_RELOADED', 'megas'), ('PB_MEGAS_ALT', 'alt'), ('PB_GMAX', 'gmax'), ('PB_MEGAS_ALT2', 'extra')):
             m = re.search(r'window\.' + var + r' = (\{.*?\n\});', open(ruta_js, encoding='utf-8').read(), re.S)
             previas[k] = json.loads(m.group(1)) if m else {}
 
@@ -176,8 +187,10 @@ def main():
         sid = SID[tipo] + sp
         im, meta = hoja(carpeta, cod)
         if im is None:
-            k = {'mega': 'megas', 'alt': 'alt', 'gmax': 'gmax'}[tipo]
+            k = {'mega': 'megas', 'alt': 'alt', 'gmax': 'gmax', 'extra': 'extra'}[tipo]
             vieja = previas.get(k, {}).get(str(sp))
+            if isinstance(vieja, list):
+                vieja = vieja[0]
             if vieja and str(sid) in sprites:
                 vieja = {x: y for x, y in vieja.items() if x not in ('types', 'form')}
                 print(f'{nombre}: se conserva la ya convertida')
@@ -204,6 +217,12 @@ def main():
         e = montar('gmax', sp, cod, nombre)
         if e:
             hechas['gmax'][sp] = e
+    for sp, formas in EXTRA.items():
+        assert len(formas) == 1, 'el sid 19000+especie solo admite una forma extra por especie'
+        cod, nombre, tipos, forma = formas[0]
+        e = montar('extra', sp, cod, nombre)
+        if e:
+            hechas['extra'][sp] = [{**e, 'form': forma, **({'types': tipos} if tipos else {})}]
 
     json.dump(sprites, open(ruta_sprites, 'w', encoding='utf-8'), ensure_ascii=False, separators=(',', ':'))
     with open(os.path.join(site, 'megas-reloaded.js'), 'w', encoding='utf-8') as fh:
@@ -213,6 +232,7 @@ def main():
         fh.write('window.PB_MEGAS_RELOADED = ' + json.dumps(hechas['megas'], ensure_ascii=False, indent=1) + ';\n')
         fh.write('window.PB_MEGAS_ALT = ' + json.dumps(hechas['alt'], ensure_ascii=False, indent=1) + ';\n')
         fh.write('window.PB_GMAX = ' + json.dumps(hechas['gmax'], ensure_ascii=False, indent=1) + ';\n')
+        fh.write('window.PB_MEGAS_ALT2 = ' + json.dumps(hechas['extra'], ensure_ascii=False, indent=1) + ';\n')
     for nombre in os.listdir(os.path.join(site, 'assets')):
         if nombre.startswith('defineProperty-') and nombre.endswith('.js'):
             p = os.path.join(site, 'assets', nombre)
@@ -220,7 +240,7 @@ def main():
             s2 = re.sub(r'"data/sprites\.json":`[^`]*`', '"data/sprites.json":`pbrel' + str(int(time.time()) % 100000) + '`', s)
             if s2 != s:
                 open(p, 'w', encoding='utf-8').write(s2)
-    print(len(hechas['megas']), 'megas,', len(hechas['alt']), 'formas X/Y/Z,', len(hechas['gmax']), 'Gigamax')
+    print(len(hechas['megas']), 'megas,', len(hechas['alt']), 'formas X/Y/Z,', len(hechas['gmax']), 'Gigamax,', len(hechas['extra']), 'formas extra')
 
 
 if __name__ == '__main__':

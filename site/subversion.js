@@ -26,6 +26,8 @@
         `- **4 mapas nuevos**, tras la Cueva Desenlace: Jungla Umbría, Volcán Wela, Costa de Poni y Ultraumbral. Son más difíciles que los de Kalos y los Pokémon de Alola solo salen en ellos.`,
         `- **Santuarios**: Ruinas de la Abundancia (Tapu Lele y Tapu Bulu), Ruinas del Conflicto (Tapu Koko y Zeraora), Ruinas del Océano (Tapu Fini y Marshadow) y el Altar del Sol y la Luna (Solgaleo, Lunala y Necrozma).`,
         `- **Mega Crabominable** y **Mega Drampa** en el Laboratorio, y **Melmetal Gigamax** con el Dynamax.`,
+        `- **Mega Zoroark** en el Laboratorio (y Mega Falinks y Mega Scovillain listas para cuando lleguen Galar y Paldea).`,
+        `- **Formas extra opcionales** (diseños de fans de Pokémon Reloaded), elegibles en el Laboratorio: **Mega Raichu (Reloaded)**, **Mega Tyranitar Negro** y **Mega Steelix de Hielo**.`,
         `- **Botones nuevos de MEGA y DYNAMAX**: el de Dynamax se ve gris mientras carga y rosa cuando está listo.`,
         ``,
         PIE
@@ -1434,6 +1436,7 @@
         ['new', 'Alola: 55 familias jugables (con los Ultraentes), 4 mapas y 4 santuarios con sus legendarios.'],
         ['new', 'Lunala como evolución alternativa de Cosmoem.'],
         ['new', 'Mega Crabominable, Mega Drampa y Melmetal Gigamax.'],
+        ['new', 'Mega Zoroark y formas extra opcionales: Mega Raichu (Reloaded), Mega Tyranitar Negro y Mega Steelix de Hielo.'],
         ['better', 'Botones de MEGA y DYNAMAX con su propio diseño.']
       ]
     },

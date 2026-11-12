@@ -37,6 +37,8 @@
   // Segundas formas (Charizard Y, Mewtwo X, megas Z): se eligen en el Laboratorio.
   const ALT = {};
   for (const [k, v] of Object.entries(window.PB_MEGAS_ALT ?? {})) if (MEGAS[k]) ALT[k] = [v];
+  // Formas extra opcionales (diseños de fans de Reloaded): se suman a las de arriba.
+  for (const [k, l] of Object.entries(window.PB_MEGAS_ALT2 ?? {})) if (MEGAS[k]) (ALT[k] ??= []).push(...l);
   // Aspecto Gigamax durante el Dynamax.
   const GMAX = window.PB_GMAX ?? {};
   const MEGA_MODS = [
