@@ -4,11 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.50';
+  const SUB = '0.51';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.51',
+      date: Date.UTC(2026, 10, 12, 7, 0),
+      tag: 'novedad',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.51`,
+      summary: 'Kyogre y Rayquaza tienen combate propio por fases en sus santuarios.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `**Kyogre** (Cueva Ancestral, Fondo Marino):`,
+        `- Fase 1, *Señor de los mares*: Surf (olas que se esquivan saltando), Hidrobomba, Salpicar (deja charcos que hacen daño) y Rayo Hielo.`,
+        `- Fase 2, *Llovizna*: empieza a llover y caen rayos sueltos; se suman Trueno y Torbellino.`,
+        `- Fase 3, *Pulso Primigenio*: cada cierto tiempo lanza tres olas gigantes; hay que saltarlas.`,
+        ``,
+        `**Rayquaza** (Cima del Pilar Celeste):`,
+        `- Fase 1, *Guardián del cielo*: Pulso Dragón (teledirigido), Ciclón, Velocidad Extrema (embestida en línea) e Hiperrayo.`,
+        `- Fase 2, *Bloqueo Aéreo*: más rápido; se suman Enfado (tres embestidas seguidas) y Cometa Draco.`,
+        `- Fase 3, *Ascenso del Dragón*: sube al cielo, cae cuatro veces donde estés y termina con un golpe enorme; ponte a cubierto.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.50',
       date: Date.UTC(2026, 10, 12, 6, 0),
@@ -1271,6 +1296,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.51',
+      date: '2026-11-12',
+      title: 'Combates por fases de Kyogre y Rayquaza.',
+      notes: [
+        ['new', 'Kyogre: Surf, Hidrobomba, Salpicar, Rayo Hielo; lluvia con rayos en la fase 2; Pulso Primigenio en la fase 3.'],
+        ['new', 'Rayquaza: Pulso Dragón, Ciclón, Velocidad Extrema, Hiperrayo; Enfado y Cometa Draco en la fase 2; Ascenso del Dragón en la fase 3.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.50',

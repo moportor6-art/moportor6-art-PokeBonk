@@ -1,5 +1,11 @@
 # Cambios respecto al port original
 
+## Combates de Kyogre y Rayquaza (Subversión 0.51)
+- `leyendas.js` (`window.PB_KITS`): clases `Kyogre` (382) y `Rayquaza` (384) que heredan de la clase base de jefes por fases del juego (`UN`), igual que Groudon o Shaymin. Se crean al primer uso con las dependencias que pasa el juego.
+- `menus-…js`: el `default` de `ZN` (kits de legendarios) llama a `window.PB_KITS?.kit?.(e,t,{UN,c,k,A,Oa})`.
+- Kyogre: Surf (ondas que se saltan), Hidrobomba, Salpicar (charcos), Rayo Hielo; fase 2 con lluvia y rayos, Trueno y Torbellino; fase 3 con Pulso Primigenio (tres olas gigantes).
+- Rayquaza: Pulso Dragón, Ciclón, Velocidad Extrema, Hiperrayo; fase 2 con Enfado y Cometa Draco; fase 3 con Ascenso del Dragón (cuatro caídas y golpe final con cobertura). La embestida frena 3 m antes del jugador para no quedar entre la cámara y él.
+
 ## Santuarios de Hoenn y Sinnoh (Subversión 0.50)
 - `regiones.js` `mapas()`: si el mapa tiene `santuario`, clona el `sanctuary` del bioma original indicado en `santuario.de`, lo tiñe (`color`, `k`) y le pone `name`, `heart`, `legendaries` y, si hay, `music`.
 - `hoenn.js`: Claro del Deseo (encina, Jirachi), Cráter del Monte Cenizo (canela, Groudon), Cueva Ancestral (coast, Kyogre), Cima del Pilar Celeste (iris, Rayquaza).
