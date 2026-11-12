@@ -103,6 +103,16 @@ window.PB_MEGAS_EXTRA = {
   "name": "Mega Gallade",
   "shiny": true
  },
+ "491": {
+  "sid": 15491,
+  "name": "Mega Darkrai",
+  "shiny": false
+ },
+ "483": {
+  "sid": 15483,
+  "name": "Dialga Primigenio",
+  "shiny": false
+ },
  "254": {
   "sid": 15254,
   "name": "Mega Sceptile",
