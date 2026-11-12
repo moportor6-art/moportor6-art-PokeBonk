@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Kits de las formas regionales (Subversión 0.63)
+- `regionales.js`: `KITS[región][especie de la línea]` con 4 ataques del juego (todos existen y tienen potencia). `PB_REGIONALES.start(run)` (llamado desde `PB_REGIONES.start`, que corre en todas las partidas antes de dar el primer ataque) cambia `player.roster` por una copia con ese kit y rehace `player.kitKeys`. El pool de mejoras y la guía de movimientos leen `player.roster`, así que también lo usan.
+
 ## Formas regionales (Subversión 0.62)
 - `regionales.js`: 55 formas con sus tipos (`FORMAS`). Jugador: `profile.pbRegional[familia]`, elegido en el Laboratorio (`lab-individual.js` llama a `PB_REGIONALES.row`); se abre con 1 partida en su región (Hisui = Sinnoh). Un intervalo pone los tipos de la forma (también tras evolucionar y al acabar la mega) y `main-…js` dibuja al jugador con `PB_REGIONALES.psid`. Los ataques no cambian.
 - Enemigos: `regiones.js` añade a la lista de cada región sus especies con forma (`reg.extra`, sin `remap`); `menus-…js` llama a `PB_REG_E` al aparecer (pone `t1`/`t2` y `pbSid`) y el dibujo pasa por `PB_RETOS.sid(run, sp, i, E)`.

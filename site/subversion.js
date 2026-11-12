@@ -4,16 +4,38 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.62';
+  const SUB = '0.63';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.63',
+      date: Date.UTC(2026, 10, 13, 1, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.63`,
+      summary: 'Las formas regionales usan ataques de sus tipos: Vulpix de Alola con hielo, Raichu de Alola con eléctricos y psíquicos...',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- Cada una de las **37 líneas con forma regional** tiene su propio kit de 4 ataques del juego, con los tipos de la forma y sus ataques característicos cuando existen:`,
+        `  - **Alola**: Raichu (Impactrueno, Psicorrayo, Surfeo Galvánico, Psíquico), Vulpix y Ninetales (hielo y hada), Marowak (fuego y Hueso Sombrío)...`,
+        `  - **Galar**: Slowbro (Moluscañón), Weezing (Vapor Extraño), Articuno, Zapdos y Moltres con sus ataques propios, Sirfetch'd (Asalto Estelar)...`,
+        `  - **Hisui**: Typhlosion (Desfile Infernal), Samurott (Tajo Metralla), Decidueye (Triple Flecha), Braviary (Ala Mística)...`,
+        `  - **Paldea**: Tauros (Furia Taurina) y Wooper (veneno y tierra).`,
+        `- Al elegir la forma regional en el Laboratorio, el kit cambia para toda la línea en la partida (y en la guía de movimientos de la pausa).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.62',
       date: Date.UTC(2026, 10, 13, 0, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.62`,
@@ -1531,6 +1553,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.63',
+      date: '2026-11-12',
+      title: 'Ataques propios para las formas regionales.',
+      notes: [
+        ['new', 'Kit propio de 4 ataques para cada línea con forma regional, con sus tipos y ataques característicos.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.62',

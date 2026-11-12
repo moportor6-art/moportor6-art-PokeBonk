@@ -133,6 +133,7 @@
       return !!reg && !reg.especial && id >= reg.min && id <= reg.max;
     },
     start(run) {
+      try { window.PB_REGIONALES?.start?.(run); } catch {}
       const reg = R.regionMapa(run);
       if (!reg || run.mode === 'duel') return;
       const d = reg.dificultad[run.biome.id] ?? reg.dificultad.base;

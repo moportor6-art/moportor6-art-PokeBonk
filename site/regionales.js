@@ -31,6 +31,55 @@
     // Paldea
     128: { paldea: ['fighting'] }, 194: { paldea: ['poison', 'ground'] }
   };
+  // Kit de 4 ataques (del juego) para cada línea con forma regional, con los tipos de la forma. Se usa en la
+  // partida en lugar del kit de su ficha de la Liga. Clave: cualquier especie de la línea.
+  const KITS = {
+    alola: {
+      19: ['tackle', 'bite', 'sucker-punch', 'crunch'],
+      26: ['thunder-shock', 'psybeam', 'stoked-sparksurfer', 'psychic'],
+      27: ['powder-snow', 'metal-claw', 'icicle-crash', 'iron-head'],
+      37: ['powder-snow', 'ice-shard', 'moonblast', 'blizzard'],
+      50: ['mud-slap', 'metal-claw', 'iron-head', 'earthquake'],
+      52: ['scratch', 'bite', 'night-slash', 'foul-play'],
+      74: ['rock-throw', 'spark', 'rock-slide', 'discharge'],
+      88: ['acid', 'bite', 'knock-off', 'sludge-bomb'],
+      103: ['bullet-seed', 'dragon-breath', 'dragon-hammer', 'wood-hammer'],
+      105: ['ember', 'shadow-bone', 'bonemerang', 'flare-blitz']
+    },
+    galar: {
+      52: ['scratch', 'metal-claw', 'iron-tail', 'iron-head'],
+      77: ['confusion', 'fairy-wind', 'psybeam', 'dazzling-gleam'],
+      79: ['acid', 'confusion', 'sludge-bomb', 'shell-side-arm'],
+      83: ['rock-smash', 'brick-break', 'leaf-blade', 'meteor-assault'],
+      110: ['smog', 'fairy-wind', 'sludge-bomb', 'strange-steam'],
+      122: ['ice-shard', 'confusion', 'freeze-dry', 'psychic'],
+      144: ['confusion', 'gust', 'air-slash', 'freezing-glare'],
+      145: ['peck', 'rock-smash', 'brave-bird', 'thunderous-kick'],
+      146: ['gust', 'bite', 'dark-pulse', 'fiery-wrath'],
+      222: ['astonish', 'hex', 'power-gem', 'shadow-ball'],
+      263: ['tackle', 'snarl', 'night-slash', 'body-slam'],
+      554: ['powder-snow', 'ice-punch', 'icicle-crash', 'ice-hammer'],
+      562: ['astonish', 'hex', 'shadow-ball', 'earth-power']
+    },
+    hisui: {
+      58: ['ember', 'rock-throw', 'rock-slide', 'flare-blitz'],
+      100: ['thunder-shock', 'bullet-seed', 'energy-ball', 'chloroblast'],
+      157: ['ember', 'hex', 'shadow-ball', 'infernal-parade'],
+      211: ['poison-sting', 'bite', 'crunch', 'barb-barrage'],
+      215: ['poison-jab', 'rock-smash', 'close-combat', 'dire-claw'],
+      503: ['water-gun', 'night-slash', 'razor-shell', 'ceaseless-edge'],
+      549: ['magical-leaf', 'double-kick', 'leaf-blade', 'close-combat'],
+      570: ['scratch', 'shadow-sneak', 'shadow-ball', 'bitter-malice'],
+      628: ['peck', 'confusion', 'air-slash', 'esper-wing'],
+      705: ['dragon-breath', 'metal-claw', 'iron-tail', 'dragon-pulse'],
+      713: ['powder-snow', 'rock-throw', 'avalanche', 'mountain-gale'],
+      724: ['leafage', 'double-kick', 'leaf-blade', 'triple-arrows']
+    },
+    paldea: {
+      128: ['tackle', 'rock-smash', 'raging-bull', 'close-combat'],
+      194: ['mud-shot', 'poison-sting', 'sludge-bomb', 'earthquake']
+    }
+  };
   const NOMBRE = { alola: 'Alola', galar: 'Galar', hisui: 'Hisui', paldea: 'Paldea' };
   // Región del juego donde sale (y se abre) cada forma.
   const MAPAS_DE = { alola: 'alola', galar: 'galar', hisui: 'sinnoh', paldea: 'paldea' };
@@ -70,6 +119,26 @@
       const sh = run.shinySkin || run.skinLook === 'classic';
       return sh && f.shiny ? f.sid + 2e4 : f.sid;
     },
+    KITS,
+    // Kit de la forma regional elegida para la línea de sp (o null).
+    kit(meta, sp) {
+      try {
+        const fam = meta.family(sp), reg = meta.profile.pbRegional?.[fam];
+        if (!reg || !KITS[reg]) return null;
+        const k = Object.keys(KITS[reg]).find(x => meta.family(+x) === fam);
+        // Solo si la línea tiene alguna forma de esa región montada.
+        return k && Object.keys(FORMAS).some(x => FORMAS[x][reg] && hecha(+x, reg) && meta.family(+x) === fam) ? KITS[reg][k] : null;
+      } catch { return null; }
+    },
+    // Al empezar la partida (regiones.js): el jugador usa el kit de su forma regional.
+    start(run) {
+      const p = run?.player;
+      if (!p?.roster || run.mode === 'duel') return;
+      const kit = X.kit(run.meta, p.speciesId);
+      if (!kit) return;
+      p.roster = { ...p.roster, kit: kit.slice() };
+      p.kitKeys = new Set([...kit, `fu-${p.roster.id}`]);
+    },
     abierta(meta, reg) {
       const r = window.PB_REGIONES?.lista?.find(x => x.id === MAPAS_DE[reg]);
       return !!r && (meta?.profile?.counters?.[r.contadores.runs] ?? 0) >= 1;
@@ -104,7 +173,7 @@
       const n = document.createElement('small');
       n.style.cssText = 'flex-basis:100%;font-weight:700;opacity:.75';
       const bloq = regs.filter(r => !X.abierta(meta, r));
-      n.textContent = 'Cambia el dibujo y los tipos en la partida, para toda la línea que tenga esa forma.' +
+      n.textContent = 'Cambia el dibujo, los tipos y los ataques (de su región) en la partida, para toda la línea.' +
         (bloq.length ? ` Se abre al jugar 1 partida en ${bloq.map(r => r === 'hisui' ? 'Sinnoh' : NOMBRE[r]).join(' o ')}.` : '');
       box.append(t, sel, n);
       return box;
