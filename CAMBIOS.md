@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Paldea (Subversión 0.59)
+- `paldea.js`: región `paldea` (#906-#1025, tras Galar; con Kitakami y Arándano) con las 72 familias nuevas (paradojas incluidas; Charcadet con rama Armarouge/Ceruledge), 4 mapas (`kitakami`, `glaseada`, `asado`, `zonacero`) con guardianes, jefes, tótems e invocadores de Paldea, y santuarios (Ogerpon y los Leales; los Tesoros Funestos; Pecharunt; Koraidon, Miraidon y Terapagos). Contadores `paldea`, `paldea_local`, `runs_p`. Dificultad +150% PS / +100% daño (Zona Cero +180% / +120%). `maxDex` llega a 1025.
+- `formas.js`: Annihilape, Clodsire, Farigiraf, Dudunsparce, Kingambit y Archaludon como evoluciones alternativas con reto (`evo`), y Dipplin como rama de Applin (`eevee`, porque Applin ya tiene rama Flapple/Appletun); Hydrapple sale sola de Dipplin. Comprobado en el navegador que las líneas antiguas siguen como antes.
+- Todos los Pokémon de Paldea ya tenían animaciones de PMD; Pecharunt no tiene variocolor (no está en el paquete de Reloaded).
+
 ## Galar (Subversión 0.58)
 - `galar.js`: región `galar` (#810-#905, tras Alola) con las 48 familias nuevas (Enamorus incluido; Applin con rama Flapple/Appletun), 4 mapas (`lumirinto`, `tundra`, `armadura`, `torrerose`) con guardianes, jefes, tótems e invocadores de Galar, y santuarios (Zarude y Enamorus; Calyrex, Glastrier y Spectrier; Kubfu, Regieleki y Regidrago; Zacian, Zamazenta y Eternatus). Contadores `galar`, `galar_local`, `runs_g`. Dificultad +120% PS / +85% daño (Torre Rose +150% / +100%).
 - `formas.js`: Obstagoon, Perrserker, Cursola, Sirfetch'd, Mr. Rime, Runerigus, Wyrdeer, Kleavor, Ursaluna, Basculegion, Sneasler y Overqwil como evoluciones alternativas con reto. Hace falta: al subir `maxDex` el juego añade como evolución normal cualquier especie con `evoFrom`, salvo las de `PB_FORMAS.ci`, y esas líneas habrían evolucionado solas (o al azar, como Meowth o Sneasel). Comprobado en el navegador que siguen como antes.

@@ -4,16 +4,37 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.58';
+  const SUB = '0.59';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.59',
+      date: Date.UTC(2026, 10, 12, 22, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.59`,
+      summary: '¡Paldea! La novena región: 72 familias jugables con los Pokémon paradoja, 4 mapas y 7 evoluciones nuevas.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Paldea** (Pokémon #906 al #1025, con Kitakami y Arándano): las 72 familias nuevas se pueden unir a tu Liga, cada una con sus 4 ataques, su pasiva, sus evoluciones y su reto. Incluye los **Pokémon paradoja**, los Tesoros Funestos, los Leales, Ogerpon, Terapagos y Pecharunt. Charcadet elige entre Armarouge y Ceruledge.`,
+        `- **Evoluciones de Paldea** para líneas antiguas, con su reto: Annihilape, Clodsire, Farigiraf, Dudunsparce, Kingambit, Archaludon y Dipplin (que luego evoluciona en Hydrapple).`,
+        `- **4 mapas nuevos**, tras la Torre Rose: Bosque de Kitakami, Cumbre Glaseada, Desierto Asado y Zona Cero. Son los más difíciles del juego y los Pokémon de Paldea solo salen en ellos.`,
+        `- **Santuarios**: Templo de los Leales (Ogerpon, Okidogi, Munkidori y Fezandipiti), Santuarios Funestos (Wo-Chien, Chien-Pao, Ting-Lu y Chi-Yu), Casa del Mochi (Pecharunt) y la Cripta de Zona Cero (Koraidon, Miraidon y Terapagos).`,
+        `- **Mega Scovillain** ya se puede comprar en el Laboratorio.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.58',
       date: Date.UTC(2026, 10, 12, 20, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.58`,
@@ -1449,6 +1470,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.59',
+      date: '2026-11-12',
+      title: 'Paldea, la novena región.',
+      notes: [
+        ['new', 'Paldea: 72 familias jugables (con los Pokémon paradoja), 4 mapas y 4 santuarios con sus legendarios.'],
+        ['new', '7 evoluciones de Paldea para líneas antiguas, con reto.'],
+        ['new', 'Mega Scovillain en el Laboratorio.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.58',
