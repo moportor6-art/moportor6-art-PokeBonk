@@ -224,11 +224,14 @@
         const st = document.createElement('style');
         st.textContent = `.pb-mx{position:fixed;left:max(14px,env(safe-area-inset-left));top:26%;z-index:30;display:flex;flex-direction:column;gap:10px;pointer-events:none}
 .pb-mx button{pointer-events:auto;width:64px;height:64px;border-radius:50%;border:3px solid #fff;font:900 12px/1 system-ui,sans-serif;color:#fff;letter-spacing:.5px;box-shadow:0 4px 0 rgba(0,0,0,.25);touch-action:manipulation}
-.pb-mx .mg{background:radial-gradient(circle at 35% 30%,#d9a8ff,#7a3fd0)}
-.pb-mx .dx{background:radial-gradient(circle at 35% 30%,#ff9a9a,#d02a3a)}
+.pb-mx .mg,.pb-mx .dx{border:0;background:center/contain no-repeat;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;text-shadow:0 0 3px #000,0 1px 2px #000}
+.pb-mx .mg{background-image:url(./assets/botones/mega.png)}
+.pb-mx .dx{background-image:url(./assets/botones/dmax-carga.png)}
+.pb-mx .dx.on{background-image:url(./assets/botones/dmax.png)}
+.pb-mx button.ready{font-size:0}
 .pb-mx[hidden],.pb-mx button[hidden]{display:none!important}
 .pb-mx button.ready{animation:pbmx 1s ease-in-out infinite}
-.pb-mx button:disabled{filter:grayscale(.7) brightness(.8)}
+.pb-mx .mg:disabled{filter:grayscale(.85) brightness(.85)}
 @keyframes pbmx{50%{transform:scale(1.1)}}`;
         document.head.append(st);
         M.el = document.createElement('div'); M.el.className = 'pb-mx';
@@ -276,6 +279,8 @@
         M.bMega.style.boxShadow = ok ? '' : `0 4px 0 rgba(0,0,0,.25), inset 0 ${-60 * Math.min(1, got / s.megaNeed)}px 0 rgba(255,255,255,.25)`;
       }
       M.bDmax.hidden = false;
+      // Botón Dynamax: gris mientras carga, rosa cuando está listo o activo.
+      M.bDmax.classList.toggle('on', !!(p && p.__dmax) || M.dmaxProgress() >= s.dmaxNeed);
       if (p && p.__dmax) {
         M.bDmax.disabled = true; M.bDmax.classList.remove('ready');
         M.bDmax.textContent = `${Math.max(0, Math.ceil(s.dmaxEnd - r.time))} s`;
