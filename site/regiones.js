@@ -91,12 +91,14 @@
     todos: null,
     lista_(todos, run) {
       const reg = R.regionMapa(run);
-      const k = (reg?.id ?? 'kj') + (reg?.familias ? run.biome.id : '') + todos.length;
+      const k = (reg?.id ?? 'kj') + (reg?.familias ? run.biome.id : '') + todos.length + ':' + (reg?.extra?.size ?? 0);
       let v = R.cache.get(k);
       if (!v || v.src !== todos) {
         // Una región puede limitar sus enemigos a ciertas familias (Retos: las que tienen mega o Gigamax).
         const fams = reg?.familias?.(todos);
-        v = todos.filter(p => reg ? p.id >= reg.min && p.id <= reg.max && (!fams || fams.has(p.family)) : p.id <= KANTO_JOHTO_MAX);
+        // Formas regionales (regionales.js): especies antiguas que también salen en los mapas de su región.
+        const extra = reg?.extra;
+        v = todos.filter(p => reg ? ((p.id >= reg.min && p.id <= reg.max) || extra?.has(p.id)) && (!fams || fams.has(p.family)) : p.id <= KANTO_JOHTO_MAX);
         v.src = todos;
         R.cache.set(k, v);
       }
@@ -110,7 +112,7 @@
     },
     remap(run, id, flags) {
       const reg = R.regionMapa(run);
-      if (!reg || (id >= reg.min && id <= reg.max) || !R.todos || (flags & (4 | 128 | 16384 | 65536))) return null;
+      if (!reg || (id >= reg.min && id <= reg.max) || reg.extra?.has(id) || !R.todos || (flags & (4 | 128 | 16384 | 65536))) return null;
       const m = run.__pbRemap ??= new Map();
       if (m.has(id)) return m.get(id);
       const byId = R.byId ??= new Map(R.todos.map(p => [p.id, p]));

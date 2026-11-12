@@ -27,7 +27,8 @@
 
   window.PB_RETOS = {
     // Hoja que se dibuja para un enemigo de la especie sp (undefined = la normal).
-    sid(run, sp) { return forma(run, sp)?.sid; }
+    // i y E (índice y enemigos) para las formas regionales que puso regionales.js al aparecer.
+    sid(run, sp, i, E) { const x = E?.pbSid?.[i]; return x || forma(run, sp)?.sid; }
   };
 
   window.PB_REGIONES?.registrar({

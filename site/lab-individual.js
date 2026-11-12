@@ -135,6 +135,7 @@
       note.textContent = 'Cada Pokémon tiene sus propias mejoras. Devolverlas te regresa todo el Polvo para repartirlo como quieras. El Archivo es de toda la cuenta.';
       wrap.append(lab, sel, btn, note);
       try { const m = window.PB_MEGA_TIENDA?.row(meta, s, redraw); m && wrap.append(m); } catch {}
+      try { const m = window.PB_REGIONALES?.row(meta, s, redraw); m && wrap.append(m); } catch {}
       if (L.migratedDust) {
         const m = document.createElement('small');
         m.style.cssText = 'flex-basis:100%;font-weight:800;color:#2a9a4a';
