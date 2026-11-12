@@ -4,16 +4,37 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.55';
+  const SUB = '0.56';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.56',
+      date: Date.UTC(2026, 10, 12, 9, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.56`,
+      summary: '¡Kalos! La sexta región: 37 familias jugables, 4 mapas, santuarios y 11 megas.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Kalos** (Pokémon #650 al #721): las 37 familias se pueden unir a tu Liga, cada una con sus 4 ataques, su pasiva, sus evoluciones y su reto.`,
+        `- **Sylveon**: nueva rama de Eevee. Se desbloquea ganando en el Bosque Novarte con la línea de Eevee.`,
+        `- **4 mapas nuevos**, tras la Torre Dragospiral: Bosque Novarte, Cueva Reflejos, Hotel Desolación y Cueva Desenlace. Son más difíciles que los de Teselia y los Pokémon de Kalos solo salen en ellos.`,
+        `- **Santuarios**: Árbol de la Vida (Xerneas), Cámara de Diamantes (Diancie), Anillo de Hoopa (Hoopa y Volcanion) y el fondo de la Cueva Desenlace (Yveltal y Zygarde).`,
+        `- **Megas de Kalos** en el Laboratorio: Chesnaught, Delphox, Greninja, Pyroar, Meowstic, Malamar, Barbaracle, Dragalge, Hawlucha, Zygarde y Diancie.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.55',
       date: Date.UTC(2026, 10, 12, 11, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.55`,
@@ -1381,6 +1402,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.56',
+      date: '2026-11-12',
+      title: 'Kalos, la sexta región.',
+      notes: [
+        ['new', 'Kalos: 37 familias jugables, 4 mapas y 4 santuarios con sus legendarios.'],
+        ['new', 'Sylveon como nueva evolución de Eevee.'],
+        ['new', 'Megas de Chesnaught, Delphox, Greninja, Pyroar, Meowstic, Malamar, Barbaracle, Dragalge, Hawlucha, Zygarde y Diancie.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.55',

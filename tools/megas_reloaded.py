@@ -54,6 +54,18 @@ MEGAS = {
     604: (100697, 'Mega Eelektross', None),
     609: (100534, 'Mega Chandelure', None),
     623: (100655, 'Mega Golurk', None),
+    # Kalos (paquete reloaded_megas_gigamax.zip, códigos internos de Reloaded)
+    652: (100747, 'Mega Chesnaught', ['grass', 'fighting']),
+    655: (100750, 'Mega Delphox', ['fire', 'psychic']),
+    658: (100753, 'Mega Greninja', ['water', 'dark']),
+    668: (100763, 'Mega Pyroar', ['fire', 'normal']),
+    678: (100773, 'Mega Meowstic', ['psychic']),
+    687: (100782, 'Mega Malamar', ['dark', 'psychic']),
+    689: (100784, 'Mega Barbaracle', ['rock', 'fighting']),
+    691: (100786, 'Mega Dragalge', ['poison', 'dragon']),
+    701: (100795, 'Mega Hawlucha', ['fighting', 'flying']),
+    718: (100996, 'Mega Zygarde', ['dragon', 'ground']),
+    719: (100835, 'Mega Diancie', ['rock', 'fairy']),
 }
 # Segundas formas de especies que ya tienen mega: se eligen en el Laboratorio.
 ALT = {
@@ -144,11 +156,25 @@ def main():
     ruta_sprites = os.path.join(site, 'data', 'sprites.json')
     sprites = json.load(open(ruta_sprites, encoding='utf-8'))
     hechas = {'megas': {}, 'alt': {}, 'gmax': {}}
+    # Lo que ya estaba convertido se conserva aunque la carpeta de esta vez no traiga sus archivos
+    # (p. ej. al convertir solo un paquete parcial de Reloaded).
+    previas = {}
+    ruta_js = os.path.join(site, 'megas-reloaded.js')
+    if os.path.exists(ruta_js):
+        for var, k in (('PB_MEGAS_RELOADED', 'megas'), ('PB_MEGAS_ALT', 'alt'), ('PB_GMAX', 'gmax')):
+            m = re.search(r'window\.' + var + r' = (\{.*?\n\});', open(ruta_js, encoding='utf-8').read(), re.S)
+            previas[k] = json.loads(m.group(1)) if m else {}
 
     def montar(tipo, sp, cod, nombre):
         sid = SID[tipo] + sp
         im, meta = hoja(carpeta, cod)
         if im is None:
+            k = {'mega': 'megas', 'alt': 'alt', 'gmax': 'gmax'}[tipo]
+            vieja = previas.get(k, {}).get(str(sp))
+            if vieja and str(sid) in sprites:
+                vieja = {x: y for x, y in vieja.items() if x not in ('types', 'form')}
+                print(f'{nombre}: se conserva la ya convertida')
+                return vieja
             print(f'OMITIDA {nombre} ({cod}): faltan archivos')
             return None
         im.save(os.path.join(site, 'assets', 'pmd', f'{sid}.png'), optimize=True)

@@ -250,6 +250,115 @@ window.PB_MEGAS_RELOADED = {
   "name": "Mega Golurk",
   "shiny": true,
   "src": "reloaded"
+ },
+ "652": {
+  "sid": 16652,
+  "name": "Mega Chesnaught",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "grass",
+   "fighting"
+  ]
+ },
+ "655": {
+  "sid": 16655,
+  "name": "Mega Delphox",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "fire",
+   "psychic"
+  ]
+ },
+ "658": {
+  "sid": 16658,
+  "name": "Mega Greninja",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "water",
+   "dark"
+  ]
+ },
+ "668": {
+  "sid": 16668,
+  "name": "Mega Pyroar",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "fire",
+   "normal"
+  ]
+ },
+ "678": {
+  "sid": 16678,
+  "name": "Mega Meowstic",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "psychic"
+  ]
+ },
+ "687": {
+  "sid": 16687,
+  "name": "Mega Malamar",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "dark",
+   "psychic"
+  ]
+ },
+ "689": {
+  "sid": 16689,
+  "name": "Mega Barbaracle",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "rock",
+   "fighting"
+  ]
+ },
+ "691": {
+  "sid": 16691,
+  "name": "Mega Dragalge",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "poison",
+   "dragon"
+  ]
+ },
+ "701": {
+  "sid": 16701,
+  "name": "Mega Hawlucha",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "fighting",
+   "flying"
+  ]
+ },
+ "718": {
+  "sid": 16718,
+  "name": "Mega Zygarde",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "dragon",
+   "ground"
+  ]
+ },
+ "719": {
+  "sid": 16719,
+  "name": "Mega Diancie",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "rock",
+   "fairy"
+  ]
  }
 };
 window.PB_MEGAS_ALT = {
