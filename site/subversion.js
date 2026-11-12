@@ -4,11 +4,44 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.44';
+  const SUB = '0.45';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.45',
+      date: Date.UTC(2026, 10, 12, 2, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.45: ¡Llega Hoenn!`,
+      summary: 'La tercera región: 73 familias nuevas en la Liga y 4 mapas con Groudon, Kyogre, Rayquaza y Jirachi.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Cuatro mapas nuevos`,
+        `Se abren uno tras otro después de **Ciudad Iris**. En ellos solo viven Pokémon de Hoenn, y en Kanto y Johto siguen solo los suyos.`,
+        `- **Bosque Petalia** (Planta, Bicho, Normal, Siniestro): Slaking, Shiftry y Breloom de guardianes y **Jirachi** al final.`,
+        `- **Monte Cenizo** (Fuego, Tierra, Roca), con sol y ceniza: Camerupt, Flygon y Aggron, y **Groudon** al final.`,
+        `- **Fondo Marino** (Agua, Hielo, Siniestro), con lluvia: Sharpedo, Walrein y Milotic, y **Kyogre** al final.`,
+        `- **Pilar Celeste** (Dragón, Volador, Psíquico, Fantasma), el más duro: Salamence, Metagross y Altaria, y **Rayquaza** en la cima.`,
+        `Son más difíciles que los de antes: enemigos con **+25 % PS y +15 % daño** (en el Pilar Celeste, +40 % y +25 %).`,
+        ``,
+        `# Bonos`,
+        `- **Local**: con un Pokémon de Hoenn en un mapa de Hoenn, **+10 % de daño**. Muchos retos de la Liga de Hoenn solo cuentan con Pokémon de Hoenn.`,
+        `- **Forastero**: con un Pokémon de Kanto o Johto en un mapa de Hoenn, **+20 % Pokédólares** y **+30 % de Polvo Estelar** al acabar.`,
+        ``,
+        `# La Liga de Hoenn`,
+        `- **73 familias nuevas**, cada una con su papel, su pasiva, 4 ataques y su reto de investigación: Treecko, Torchic y Mudkip (basta una partida en Hoenn), Ralts, Aron, Trapinch, Bagon, Beldum, Absol, Feebas...`,
+        `- **Evoluciones con elección**: Wurmple (Silcoon o Cascoon), Nincada (Ninjask o Shedinja) y Clamperl (Huntail o Gorebyss).`,
+        `- **Legendarios**: los tres Regis, Latias, Latios, Kyogre, Groudon, Rayquaza, Jirachi y Deoxys, con retos difíciles.`,
+        `- **Azurill** y **Wynaut** pasan a ser la primera forma de Marill y Wobbuffet. Si ya los tenías, recibes a su bebé.`,
+        `- Roselia y Chimecho empiezan como ellos mismos: sus bebés son de Sinnoh.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.44',
       date: Date.UTC(2026, 10, 11, 23, 30),
@@ -1120,6 +1153,19 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.45',
+      date: '2026-11-11',
+      title: '¡Llega Hoenn! 73 familias y 4 mapas nuevos.',
+      notes: [
+        ['new', 'Mapas de Hoenn: Bosque Petalia, Monte Cenizo, Fondo Marino y Pilar Celeste, con Jirachi, Groudon, Kyogre y Rayquaza al final.'],
+        ['new', 'Liga de Hoenn: 73 familias con kit, pasiva, evolución y reto, legendarios incluidos.'],
+        ['new', 'Bono de local (+10 % daño con Pokémon de Hoenn) y de forastero (+20 % ₽ y +30 % Polvo con Pokémon de Kanto o Johto).'],
+        ['balance', 'Los mapas de Hoenn son más duros (+25 % PS y +15 % daño; Pilar Celeste, +40 % y +25 %).'],
+        ['better', 'Los Pokémon de Hoenn solo salen en sus mapas; Azurill y Wynaut empiezan las familias de Marill y Wobbuffet.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.44',

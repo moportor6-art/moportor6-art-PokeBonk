@@ -1,5 +1,27 @@
 # Cambios respecto al port original
 
+## Hoenn (Subversión 0.45)
+- `hoenn.js` (`window.PB_HOENN`), cargado antes de los módulos del juego:
+  - `liga(D)`: 73 fichas de Hoenn (`pbHoenn: true`) más Azurill (298) y Wynaut (360), copiadas de las fichas de Marill (183) y Wobbuffet (202) con un primer nivel de evolución en el 12. Los kits usan ataques de `data/moves.json`, las pasivas son de las que ya existen y las ramas van con `branch`/`evoLevel` (Wurmple, Nincada, Clamperl).
+  - Retos: contadores del juego (`league`, `kills_<mapa>`, `boss_<mapa>`, `tier_<mapa>`) y tres nuevos: `hoenn` (Pokémon de Hoenn derrotados), `hoenn_local` (bajas con un Pokémon de Hoenn en Hoenn) y `runs_h` (partidas en Hoenn).
+  - `mapas(a)`: cuatro mapas clonados de Bosque Verde, Isla Canela, Costa Tormenta y Cueva Celeste, teñidos (`tinte`; el suelo del Fondo Marino, a arena) y sin santuario (3 zonas). En la zona 3, el jefe es el legendario de `legendaries`, como ya hacía el juego con los mapas sin santuario.
+  - `region()`: región Hoenn (`gate: johto`). `lista()` filtra `O.pokemon` durante la partida por región. `remap()` cambia por uno de Hoenn del mismo tipo y fase a los Pokémon fijos de Kanto que traen algunos sucesos (niebla, estampidas…), salvo jefes y especiales.
+  - `start()`: dificultad (`diff.enemyHp`, `diff.enemyDamage`), `goldMul` ×1,2 para forasteros y `runs_h`. `mods()`: +10 % daño local. `polvo()`: ×1,3 de Polvo para forasteros.
+- `defineProperty-…js`:
+  - `maxDex`/`nextDex` 386 si existe `PB_HOENN`, con los mapas en `biomes`.
+  - Las fichas, los mapas y la región se añaden con `PB_HOENN`.
+  - 183 y 202 salen de la Liga (su familia empieza en 298 y 360), con `oi` actualizado.
+  - El reto de Mew cuenta solo los miembros hasta el 151.
+- `menus-…js`:
+  - `O.pokemon` es un getter con `PB_HOENN.lista`, y la lista completa queda en `pokemonAll`.
+  - `kantoLeague` solo cuenta hasta el 151.
+  - En las bajas se suman los contadores `hoenn` y `hoenn_local`.
+  - `enemies.spawn` pasa por `PB_HOENN.remap`.
+- `main-…js`:
+  - `PB_HOENN.start` al crear al jugador y `PB_HOENN.mods` en `recompute`.
+  - `pbMul` en el resultado, que multiplica el Polvo de la partida antes de sumar el de las fiebres.
+- `bebes.js`: el traspaso también da Azurill y Wynaut a quien tenía a Marill y Wobbuffet.
+
 ## Empezar por la primera forma (Subversión 0.44)
 - `defineProperty-…js`: tras quitar de la Liga lo que pasa del tope de la Pokédex, se quitan 25, 35, 39, 106, 107, 237, 124, 125 y 126 si su bebé (172, 173, 174, 236, 238, 239, 240) está en la Pokédex abierta. La Liga queda en 129 miembros, uno por familia. `oi` (especie → miembro) manda esas especies y 26, 36 y 40 a su bebé.
 - `bebes.js` (`window.PB_BEBE`): traspaso. Si el perfil tiene a uno de los quitados en `league`, se añade su bebé (`meta.save()`). Se mira cada segundo durante el primer minuto, por si el perfil llega tarde.
