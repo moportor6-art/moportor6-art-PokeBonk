@@ -2,7 +2,7 @@
    El juego deja elegir otra evolución (Crobat, Bellossom, Espeon, Steelix, Blissey...) cuando su reto está
    cumplido, pero en la versión sin servidor nadie contaba esos retos: nunca se desbloqueaban. Aquí se cuentan
    al acabar cada partida, con las mismas reglas que enseña el juego, y se añaden las de Sinnoh:
-   Gallade (desde Kirlia), Froslass (desde Snorunt), Leafeon y Glaceon (desde Eevee).
+   Gallade (desde Kirlia), Froslass (desde Snorunt), Leafeon y Glaceon (desde Eevee), y la de Kalos: Sylveon.
    - ci: formas nuevas para la lista del juego (defineProperty-…js): forma, miembro de la Liga, desde qué
      especie y cuándo se ofrece (evo = al evolucionar, eevee = con las ramas de Eevee).
    - vu: descripción y meta de cada reto nuevo para la ficha (menus-…js).
@@ -33,7 +33,9 @@
     { form: 475, member: 280, from: 281, at: 'evo', desc: 'Derrota a 3.000 Pokémon de Sinnoh con la línea de Ralts.', rule: sum('sinnoh', 3e3) },
     { form: 478, member: 361, from: 361, at: 'evo', desc: 'Gana en la Ruta Nevada con la línea de Snorunt.', rule: ganaEn('nevada') },
     { form: 470, member: 133, from: 133, at: 'eevee', desc: 'Gana en el Bosque Vetusto con la línea de Eevee.', rule: ganaEn('eterna') },
-    { form: 471, member: 133, from: 133, at: 'eevee', desc: 'Congela a 5.000 Pokémon con la línea de Eevee.', rule: sum('frozen', 5e3) }
+    { form: 471, member: 133, from: 133, at: 'eevee', desc: 'Congela a 5.000 Pokémon con la línea de Eevee.', rule: sum('frozen', 5e3) },
+    // Kalos
+    { form: 700, member: 133, from: 133, at: 'eevee', desc: 'Gana en el Bosque Novarte con la línea de Eevee.', rule: ganaEn('novarte') }
   ];
   for (const n of NUEVAS) REGLAS[n.form] = { member: n.member, rule: n.rule };
 
