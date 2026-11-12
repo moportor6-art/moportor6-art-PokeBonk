@@ -7,7 +7,8 @@
    Aquí solo queda el traspaso: quien ya tenía al intermedio en su Liga recibe a su bebé.
    Los ganchos start/evo/pre de la Subversión 0.44 siguen en el juego, pero ya no hacen nada. */
 (() => {
-  const BEBE = { 25: 172, 35: 173, 39: 174, 106: 236, 107: 236, 237: 236, 124: 238, 125: 239, 126: 240, 183: 298, 202: 360 };
+  const BEBE = { 25: 172, 35: 173, 39: 174, 106: 236, 107: 236, 237: 236, 124: 238, 125: 239, 126: 240, 183: 298, 202: 360,
+    113: 440, 143: 446, 122: 439, 185: 438, 226: 458, 315: 406, 358: 433 };
   const B = {
     BEBE,
     NIVEL: 12,

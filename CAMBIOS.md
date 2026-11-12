@@ -1,5 +1,22 @@
 # Cambios respecto al port original
 
+## Sinnoh y motor de regiones (Subversión 0.47)
+- `regiones.js` (`window.PB_REGIONES`): la lógica de `hoenn.js` pasa a un motor para varias regiones.
+  - `registrar()` recibe cada región: rango, mapas, Liga, bebés, niveles, `oi`, dificultad y contadores.
+  - `maxDex` es el mayor tope de las regiones registradas; `MAPAS`, `bebes` y `oi` juntan los de todas.
+  - Funciones para el juego: `liga(D)`, `mapas(a)` y `regiones()`.
+  - Durante la partida: `listaPokemon()` filtra por región y `remap()` cambia los Pokémon fijos de los sucesos.
+  - `start()`, `mods()` y `polvo()` aplican la dificultad y los bonos de local y forastero.
+  - `cuenta()` lleva los contadores de Pokémon derrotados y de bajas de local de cada región.
+  - Los mapas llevan `region` en vez de `hoenn`. Las regiones van sin huecos de «Próximamente» (`slots: 0`).
+- `hoenn.js` queda solo con los datos y se registra en el motor. Los ganchos de `defineProperty-…js`, `menus-…js` y `main-…js` usan `PB_REGIONES`:
+  - la lista de bebés que salen de la Liga y `oi` se toman de las regiones;
+  - el contador de bajas llama a `PB_REGIONES.cuenta`;
+  - la forma Blissey (242) pasa a ser del miembro 440 si la Pokédex llega a Happiny.
+- `sinnoh.js`: 45 fichas, más 7 bebés que sustituyen a 113, 143, 122, 185, 226, 315 y 358 (Budew con `[12, 36]`). Cuatro mapas clonados de Bosque Verde, Glaciar Celeste, Costa Tormenta y Cueva Celeste. Dificultad `[1,4, 1,25]` (Mundo Distorsión, `[1,6, 1,35]`) y contadores `sinnoh`, `sinnoh_local` y `runs_s`.
+- Con la Pokédex hasta el 493, las evoluciones de 4.ª generación de familias antiguas entran solas en `O.evolutions`. Gallade, Froslass, Leafeon y Glaceon no: su familia sigue la primera evolución de los datos (Gardevoir, Glalie) o la rama de Eevee del juego.
+- `bebes.js`: traspaso también a los bebés de Sinnoh.
+
 ## Megas de Hoenn (Subversión 0.46)
 - `tools/megas_hoenn.py` (lo lanza `.github/workflows/megas.yml` al cambiar el script, o a mano) baja del PMD Sprite Repository las hojas de animación de cada mega de Hoenn y de Groudon/Kyogre primigenios. Busca la forma por su nombre en `tracker.json` y monta el atlas como los de las megas del juego: walk, idle, attack, hurt, faint (Sleep) y charge, una debajo de otra con 8 filas, repitiendo la fila en las de una sola dirección y con alternativas si falta alguna animación. Lo guarda en `pmd/15xxx.png` y `pmd-shiny/15xxx.png` (la variocolor sale de comparar colores), lo añade a `data/sprites.json` con un `?v=` nuevo y escribe `megas-extra.js` (`window.PB_MEGAS_EXTRA`).
 - Las que no tienen dibujo en SpriteCollab (Blaziken, Swampert, Aggron, Salamence, Metagross) usan el sprite de la especie normal (`sinSprite`).

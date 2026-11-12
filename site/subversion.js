@@ -4,11 +4,43 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.46';
+  const SUB = '0.47';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.47',
+      date: Date.UTC(2026, 10, 12, 4, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.47: ¡Llega Sinnoh!`,
+      summary: 'La cuarta región: 45 familias nuevas, bebés de Sinnoh, evoluciones nuevas para Pokémon antiguos y 4 mapas con Dialga, Palkia y Giratina.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `# Cuatro mapas nuevos`,
+        `Se abren después del **Pilar Celeste**. Solo viven Pokémon de Sinnoh y son **más duros que Hoenn**: enemigos con **+40 % PS y +25 % daño**, y en el Mundo Distorsión **+60 % y +35 %**.`,
+        `- **Bosque Vetusto** (Planta, Bicho, Fantasma, Normal), con niebla: Vespiquen, Drifblim y Carnivine, y **Shaymin** al final.`,
+        `- **Ruta Nevada** (Hielo, Roca, Acero, Lucha), con granizo: Abomasnow, Mamoswine y Weavile, y **Regigigas** al final.`,
+        `- **Lago Valor** (Agua, Eléctrico, Psíquico, Hada): Floatzel, Luxray y Gastrodon, y uno del **trío del lago** al final.`,
+        `- **Mundo Distorsión** (Dragón, Fantasma, Siniestro, Acero, Psíquico): Garchomp, Dusknoir y Drapion, y **Dialga, Palkia o Giratina** al final.`,
+        `Los bonos de **local** (+10 % daño) y **forastero** (+20 % ₽ y +30 % Polvo) también valen aquí.`,
+        ``,
+        `# La Liga de Sinnoh`,
+        `- **45 familias nuevas** con su papel, pasiva, 4 ataques y reto: Turtwig, Chimchar y Piplup (basta una partida en Sinnoh), Shinx, Gible, Riolu, Cranidos, Shieldon, Spiritomb, Rotom...`,
+        `- **Legendarios y singulares**: el trío del lago, Dialga, Palkia, Giratina, Heatran, Regigigas, Cresselia, Darkrai, Shaymin, Manaphy, Phione y **Arceus**.`,
+        `- **Burmy** elige entre Wormadam y Mothim al evolucionar.`,
+        ``,
+        `# Primera forma y familias completas`,
+        `- Los bebés de Sinnoh empiezan ahora sus familias: **Happiny** (Chansey y Blissey), **Munchlax** (Snorlax), **Mime Jr.** (Mr. Mime), **Bonsly** (Sudowoodo), **Mantyke** (Mantine), **Budew** (Roselia y Roserade) y **Chingling** (Chimecho). Si ya tenías al mayor, recibes al bebé.`,
+        `- Las familias antiguas ganan su evolución de Sinnoh en la partida: **Magnezone, Electivire, Magmortar, Togekiss, Rhyperior, Tangrowth, Lickilicky, Ambipom, Honchkrow, Mismagius, Weavile, Gliscor, Mamoswine, Yanmega, Porygon-Z, Probopass, Dusknoir y Roserade**.`,
+        `- La Liga queda en **247 miembros**.`,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.46',
       date: Date.UTC(2026, 10, 12, 3, 0),
@@ -34,7 +66,7 @@
       id: 'moportor6-sub-0.45',
       date: Date.UTC(2026, 10, 12, 2, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.45: ¡Llega Hoenn!`,
@@ -1174,6 +1206,19 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.47',
+      date: '2026-11-11',
+      title: '¡Llega Sinnoh! 45 familias, 4 mapas y evoluciones nuevas.',
+      notes: [
+        ['new', 'Mapas de Sinnoh: Bosque Vetusto, Ruta Nevada, Lago Valor y Mundo Distorsión, con Shaymin, Regigigas, el trío del lago y Dialga, Palkia o Giratina.'],
+        ['new', 'Liga de Sinnoh: 45 familias con kit, pasiva, evolución y reto, Arceus incluido.'],
+        ['new', 'Evoluciones de Sinnoh para familias antiguas (Magnezone, Togekiss, Weavile, Mamoswine...).'],
+        ['better', 'Happiny, Munchlax, Mime Jr., Bonsly, Mantyke, Budew y Chingling empiezan sus familias.'],
+        ['balance', 'Los mapas de Sinnoh son más duros que los de Hoenn (+40 % PS y +25 % daño; Mundo Distorsión, +60 % y +35 %).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.46',
