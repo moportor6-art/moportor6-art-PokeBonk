@@ -210,9 +210,9 @@ def main():
                 break
         if im is None:
             g = tracker.get(f'{pid:04d}', {}).get('subgroups') or {}
-            formas = {k: (v.get('name'), v.get('sprite_complete')) for k, v in g.items()}
+            lista_formas = {k: (v.get('name'), v.get('sprite_complete')) for k, v in g.items()}
             ad = anim_data(base)
-            print(f'{nombre}: no hay sprites en {base} | formas: {formas} | animaciones: {sorted(ad) if ad else None}')
+            print(f'{nombre}: no hay sprites en {base} | formas: {lista_formas} | animaciones: {sorted(ad) if ad else None}')
             # Sin dibujo de la mega en SpriteCollab: la mega funciona igual con el sprite de su forma normal.
             if str(pid) in sprites and pid not in SOLO_CON_SPRITE:
                 variocolor_base = os.path.exists(os.path.join(site, 'assets', 'pmd-shiny', f'{pid}.png'))
