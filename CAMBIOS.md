@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Comprar megas en el Laboratorio (Subversión 0.52)
+- `megas-tienda.js` (`window.PB_MEGA_TIENDA`): fila en la barra del Laboratorio individual con las megas de la familia del Pokémon elegido, el Polvo y el oro guardado (`PB_GOLD`). Comprar resta 3000 Polvo + 2000 oro (legendarias 5000 + 3000), apunta la familia en `profile.pbMegas` y guarda con `meta.save()`.
+- `mega-dynamax.js`: `unlocked()` también da por desbloqueada la mega si la familia está en `profile.pbMegas`. La investigación al 100 % sigue valiendo.
+- `lab-individual.js`: `bar()` añade la fila.
+
 ## Combates de Kyogre y Rayquaza (Subversión 0.51)
 - `leyendas.js` (`window.PB_KITS`): clases `Kyogre` (382) y `Rayquaza` (384) que heredan de la clase base de jefes por fases del juego (`UN`), igual que Groudon o Shaymin. Se crean al primer uso con las dependencias que pasa el juego.
 - `menus-…js`: el `default` de `ZN` (kits de legendarios) llama a `window.PB_KITS?.kit?.(e,t,{UN,c,k,A,Oa})`.

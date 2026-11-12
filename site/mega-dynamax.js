@@ -1,6 +1,6 @@
 /* Subversión propia: Megaevolución y Dynamax dentro de la partida.
    - Mega: solo para los Pokémon que tienen sprite de mega. Se desbloquea con la investigación de su
-     familia al 100%. En la partida es temporal (MEGA_SECS, el doble que el Dynamax) y se recarga con
+     familia al 100% o comprándola en el Laboratorio (megas-tienda.js). En la partida es temporal (MEGA_SECS, el doble que el Dynamax) y se recarga con
      bajas igual que el Dynamax: MEGA_KILLS_EARLY si la recarga empieza en los primeros 5 minutos,
      MEGA_KILLS_LATE después. Las bajas cuentan desde que acaba la mega anterior.
    - Dynamax: cualquier Pokémon, varias veces por partida. Se recarga con bajas: DMAX_KILLS_EARLY
@@ -48,6 +48,7 @@
     // ¿Tiene desbloqueada la mega esta especie? (investigación de su familia al 100%)
     unlocked(meta, sp) {
       if (!MEGAS[sp] || !meta) return false;
+      if (window.PB_MEGA_TIENDA?.comprada(meta, sp)) return true;
       try {
         const fam = meta.family(sp), goal = meta.researchGoal(fam), have = meta.profile.research?.[fam] ?? 0;
         return goal > 0 && have >= goal;

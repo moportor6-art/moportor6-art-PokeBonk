@@ -4,11 +4,31 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.51';
+  const SUB = '0.52';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.52',
+      date: Date.UTC(2026, 10, 12, 8, 0),
+      tag: 'novedad',
+      pinned: false,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.52`,
+      summary: 'Las megas se pueden comprar en el Laboratorio con Polvo y con el oro guardado.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- En el **Laboratorio**, al elegir un Pokémon con megaevolución, aparece el botón para comprarla.`,
+        `- Cuesta **3,000 de Polvo Estelar + 2,000 de oro**. Las de legendarios (Mewtwo, Latias, Latios, Kyogre, Groudon, Rayquaza, Dialga y Darkrai) cuestan **5,000 de Polvo + 3,000 de oro**.`,
+        `- El oro es el que te sobra al terminar las partidas; ahora también se ve en el Laboratorio.`,
+        `- Se compra una vez por familia y sirve para siempre. Completar la investigación la sigue desbloqueando como antes.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.51',
       date: Date.UTC(2026, 10, 12, 7, 0),
@@ -1296,6 +1316,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.52',
+      date: '2026-11-12',
+      title: 'Comprar megas en el Laboratorio.',
+      notes: [
+        ['new', 'Las megas se compran en el Laboratorio: 3,000 Polvo + 2,000 oro (legendarias: 5,000 + 3,000).'],
+        ['new', 'El oro guardado de las partidas se ve en el Laboratorio.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.51',
