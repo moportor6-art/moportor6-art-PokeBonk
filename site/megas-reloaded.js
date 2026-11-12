@@ -198,6 +198,58 @@ window.PB_MEGAS_RELOADED = {
   "name": "Mega Heatran",
   "shiny": true,
   "src": "reloaded"
+ },
+ "500": {
+  "sid": 16500,
+  "name": "Mega Emboar",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "530": {
+  "sid": 16530,
+  "name": "Mega Excadrill",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "531": {
+  "sid": 16531,
+  "name": "Mega Audino",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "normal",
+   "fairy"
+  ]
+ },
+ "545": {
+  "sid": 16545,
+  "name": "Mega Scolipede",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "560": {
+  "sid": 16560,
+  "name": "Mega Scrafty",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "604": {
+  "sid": 16604,
+  "name": "Mega Eelektross",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "609": {
+  "sid": 16609,
+  "name": "Mega Chandelure",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "623": {
+  "sid": 16623,
+  "name": "Mega Golurk",
+  "shiny": true,
+  "src": "reloaded"
  }
 };
 window.PB_MEGAS_ALT = {
@@ -318,6 +370,12 @@ window.PB_GMAX = {
  "143": {
   "sid": 18143,
   "name": "Snorlax Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "569": {
+  "sid": 18569,
+  "name": "Garbodor Gigamax",
   "shiny": true,
   "src": "reloaded"
  }

@@ -45,6 +45,15 @@ MEGAS = {
     460: (100460, 'Mega Abomasnow', None),
     478: (100478, 'Mega Froslass', None),
     485: (100485, 'Mega Heatran', None),
+    # Teselia (códigos con la numeración interna de Reloaded)
+    500: (100523, 'Mega Emboar', None),
+    530: (100528, 'Mega Excadrill', None),
+    531: (100645, 'Mega Audino', ['normal', 'fairy']),
+    545: (100672, 'Mega Scolipede', None),
+    560: (100591, 'Mega Scrafty', None),
+    604: (100697, 'Mega Eelektross', None),
+    609: (100534, 'Mega Chandelure', None),
+    623: (100655, 'Mega Golurk', None),
 }
 # Segundas formas de especies que ya tienen mega: se eligen en el Laboratorio.
 ALT = {
@@ -61,6 +70,7 @@ GMAX = {
     12: (100012, 'Butterfree Gigamax'), 25: (100025, 'Pikachu Gigamax'), 52: (100052, 'Meowth Gigamax'),
     68: (100068, 'Machamp Gigamax'), 94: (150094, 'Gengar Gigamax'), 99: (100099, 'Kingler Gigamax'),
     131: (100131, 'Lapras Gigamax'), 133: (100133, 'Eevee Gigamax'), 143: (100143, 'Snorlax Gigamax'),
+    569: (100581, 'Garbodor Gigamax'),
 }
 SID = {'mega': 16000, 'alt': 17000, 'gmax': 18000}
 

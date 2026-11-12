@@ -88,6 +88,8 @@
         santuario: { de: 'forest', name: 'Jardín Floral', heart: 'Corazón del jardín', legendaries: [492], color: 0x8ae85a },
         datos: {
           types: ['grass', 'bug', 'ghost', 'normal'], late: ['poison', 'fairy'], legendaries: [492],
+          bosses: [407, 426, 416], guardians: [[407, 315], [426, 425], [416, 415]],
+          totems: [[396, 399, 401, 406], [397, 400, 402, 425], [398, 407, 426, 416]], summoners: [[397, 396], [426, 425], [416, 415]],
           residents: [396, 399, 401, 412, 415, 420, 425], weather: ['fog', 'clear', 'rain'],
           bosses: [416, 426, 455], guardians: [[416, 414], [426, 429], [455, 465]],
           totems: [[397, 402, 413, 421], [414, 416, 426, 424], [429, 465, 455, 398]],
@@ -103,6 +105,8 @@
         santuario: { de: 'glacier', name: 'Templo Puntaneva', heart: 'Corazón del templo', legendaries: [486], color: 0xd8e8ff },
         datos: {
           types: ['ice', 'rock', 'steel', 'fighting'], late: ['dragon', 'dark'], legendaries: [486],
+          bosses: [460, 448, 461], guardians: [[460, 459], [448, 447], [461, 215]],
+          totems: [[459, 447, 436, 410], [460, 437, 411, 408], [448, 461, 473, 409]], summoners: [[460, 459], [448, 447], [437, 436]],
           residents: [459, 447, 436, 410, 408, 449], weather: ['hail', 'clear', 'hail'],
           bosses: [460, 473, 461], guardians: [[460, 478], [473, 471], [461, 448]],
           totems: [[460, 437, 411, 409], [473, 476, 448, 462], [461, 478, 471, 464]],
@@ -118,6 +122,8 @@
         santuario: { de: 'desert', name: 'Caverna del Lago', heart: 'Corazón del lago', legendaries: [480, 481, 482], color: 0x4ab8e8 },
         datos: {
           types: ['water', 'electric', 'psychic', 'fairy'], late: ['steel', 'flying'], legendaries: [480, 481, 482],
+          bosses: [419, 405, 423], guardians: [[419, 418], [405, 403], [423, 422]],
+          totems: [[418, 422, 403, 456], [419, 404, 423, 457], [405, 419, 423, 457]], summoners: [[419, 418], [405, 403], [423, 422]],
           residents: [418, 422, 456, 403, 417, 439], weather: ['rain', 'clear', 'clear'],
           bosses: [419, 405, 423], guardians: [[419, 457], [405, 462], [423, 474]],
           totems: [[419, 423, 457, 405], [462, 474, 468, 437], [404, 419, 457, 423]],
@@ -133,6 +139,8 @@
         santuario: { de: 'cave', name: 'Columna Lanza', heart: 'Corazón de la distorsión', legendaries: [483, 484, 487], color: 0x8a2a6a },
         datos: {
           types: ['dragon', 'ghost', 'dark', 'steel', 'psychic'], late: ['poison', 'fire'], evolved: true, legendaries: [483, 484, 487],
+          bosses: [445, 442, 437], guardians: [[445, 444], [442, 429], [437, 436]],
+          totems: [[443, 434, 451, 436], [444, 435, 452, 442], [445, 437, 454, 429]], summoners: [[444, 443], [442, 429], [437, 436]],
           residents: [442, 443, 434, 451, 453, 425], weather: ['fog', 'ash', 'fog'],
           bosses: [445, 477, 452], guardians: [[445, 444], [477, 442], [452, 454]],
           totems: [[444, 435, 452, 454], [445, 477, 442, 430], [445, 452, 477, 461]],

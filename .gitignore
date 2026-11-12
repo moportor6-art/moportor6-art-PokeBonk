@@ -11,3 +11,4 @@ site/pokesurvivor/
 site/contenido.json
 site/contenido/
 desktop/clave.pem
+__pycache__/

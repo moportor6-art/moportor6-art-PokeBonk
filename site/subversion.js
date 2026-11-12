@@ -4,11 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.54';
+  const SUB = '0.55';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
+    {
+      id: 'moportor6-sub-0.55',
+      date: Date.UTC(2026, 10, 12, 11, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.55`,
+      summary: '¡Teselia! La quinta región: 82 familias jugables, 4 mapas, santuarios y megas.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Teselia** (Pokémon #494 al #649): las 82 familias se pueden unir a tu Liga, cada una con sus 4 ataques, su pasiva, sus evoluciones y su reto.`,
+        `- **4 mapas nuevos**, tras el Mundo Distorsión: Bosque Azulejo, Desierto Resort, Cueva Electrorroca y Torre Dragospiral. Son más difíciles que los de Sinnoh y los Pokémon de Teselia solo salen en ellos.`,
+        `- **Santuarios**: Santuario Abundancia (Tornadus, Thundurus y Landorus), Castillo Viejo (Victini), Cueva Gigante (Kyurem) y la cima de la Torre Dragospiral (Reshiram y Zekrom).`,
+        `- **Megas de Teselia**: Emboar, Excadrill, Audino, Scolipede, Scrafty, Eelektross, Chandelure y Golurk, en el Laboratorio. Y **Garbodor Gigamax** con el Dynamax.`,
+        `- Los Pokémon de Teselia que no tenían animaciones (Simisear, Tranquill, Blitzle, Throh, Crustle, Tirtouga, Amoonguss, Frillish, Stunfisk, Bouffalant...) usan sprites de Pokémon Reloaded.`,
+        `- Los guardianes de los mapas de Sinnoh ya son Pokémon de Sinnoh (antes la ficha enseñaba los de Kanto).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
     {
       id: 'moportor6-sub-0.54',
       date: Date.UTC(2026, 10, 12, 10, 0),
@@ -166,7 +188,7 @@
       id: 'moportor6-sub-0.47',
       date: Date.UTC(2026, 10, 12, 4, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.47: ¡Llega Sinnoh!`,
@@ -1359,6 +1381,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.55',
+      date: '2026-11-12',
+      title: 'Teselia, la quinta región.',
+      notes: [
+        ['new', 'Teselia: 82 familias jugables, 4 mapas y 4 santuarios con sus legendarios.'],
+        ['new', 'Megas de Emboar, Excadrill, Audino, Scolipede, Scrafty, Eelektross, Chandelure y Golurk; Garbodor Gigamax.'],
+        ['fix', 'Los guardianes de los mapas de Sinnoh ya son de Sinnoh.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.54',

@@ -1,5 +1,12 @@
 # Cambios respecto al port original
 
+## Teselia (Subversión 0.55)
+- `teselia.js`: región `teselia` (#494-#649, tras Sinnoh) con las 82 familias (4 ataques del juego, pasiva, evolución, reto), 4 mapas (`azulejo`, `resort`, `electrorroca`, `dragospiral`) con guardianes, jefes, tótems e invocadores propios, y santuarios. Contadores `teselia`, `teselia_local`, `runs_u`. Dificultad +60% PS / +40% daño (Torre Dragospiral +80% / +50%).
+- El juego ya traía en `data/pokemon.json` y `data/learnsets.json` los 1025 Pokémon, y sprites PMD de casi todos; el límite era `maxDex`.
+- `tools/especies_reloaded.py` + `tools/reloaded_numeros.json`: completa con Pokémon Reloaded los Pokémon sin animaciones PMD o sin variocolor. Reloaded solo usa la Pokédex nacional hasta el #493; después mete sus propios Pokémon, así que la tabla número nacional -> número de Reloaded sale de los nombres de su `txt_pkmn.dll` (cifrado por sustitución). Códigos: r < 1000, P<r>/P<1000+r>; r >= 1000, P<1000+r>/P<2000+r>. Si solo faltaba el variocolor, cambia también el sprite normal para que encajen.
+- `tools/megas_reloaded.py`: megas de Teselia (Emboar, Excadrill, Audino, Scolipede, Scrafty, Eelektross, Chandelure, Golurk) y Garbodor Gigamax, con los códigos internos de Reloaded.
+- `sinnoh.js`: guardianes, jefes, tótems e invocadores propios en sus 4 mapas (antes la ficha copiaba los de Kanto).
+
 ## Pokédex: Megas y Gigamax (Subversión 0.54)
 - `dex-megas.js` (`window.PB_DEX_MEGA`): panel con todas las formas de `PB_MEGA` (megas, `forms()` y `GMAX`), miniatura del primer fotograma de su hoja PMD (`data/sprites.json`), Pokémon base, tipos y estado. Filtros Todas/Megas/Gigamax/Desbloqueadas y botón de variocolor. Solo informativo.
 - `menus-…js`: la Pokédex añade la pestaña `pbmega` y la abre con `PB_DEX_MEGA.panel(i, {nombre, tipos})`.
