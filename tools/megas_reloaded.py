@@ -69,6 +69,9 @@ MEGAS = {
     # Confirmadas por el usuario (en LISTA.md salían «sin confirmar»): Butterfree y el Floette de AZ.
     12: (100820, 'Mega Butterfree', ['bug', 'flying']),
     670: (100898, 'Mega Floette', ['fairy']),
+    # Alola
+    740: (100919, 'Mega Crabominable', ['fighting', 'ice']),
+    780: (100971, 'Mega Drampa', ['normal', 'dragon']),
 }
 # Segundas formas de especies que ya tienen mega: se eligen en el Laboratorio.
 ALT = {
@@ -86,6 +89,7 @@ GMAX = {
     68: (100068, 'Machamp Gigamax'), 94: (150094, 'Gengar Gigamax'), 99: (100099, 'Kingler Gigamax'),
     131: (100131, 'Lapras Gigamax'), 133: (100133, 'Eevee Gigamax'), 143: (100143, 'Snorlax Gigamax'),
     569: (100581, 'Garbodor Gigamax'),
+    809: (102061, 'Melmetal Gigamax'),
 }
 SID = {'mega': 16000, 'alt': 17000, 'gmax': 18000}
 

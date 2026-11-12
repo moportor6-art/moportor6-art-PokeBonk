@@ -378,6 +378,26 @@ window.PB_MEGAS_RELOADED = {
   "types": [
    "fairy"
   ]
+ },
+ "740": {
+  "sid": 16740,
+  "name": "Mega Crabominable",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "fighting",
+   "ice"
+  ]
+ },
+ "780": {
+  "sid": 16780,
+  "name": "Mega Drampa",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "normal",
+   "dragon"
+  ]
  }
 };
 window.PB_MEGAS_ALT = {
@@ -504,6 +524,12 @@ window.PB_GMAX = {
  "569": {
   "sid": 18569,
   "name": "Garbodor Gigamax",
+  "shiny": true,
+  "src": "reloaded"
+ },
+ "809": {
+  "sid": 18809,
+  "name": "Melmetal Gigamax",
   "shiny": true,
   "src": "reloaded"
  }

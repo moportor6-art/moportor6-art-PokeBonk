@@ -25,7 +25,7 @@ Responde siempre en español.
   - Autor: «Actualización hecha por moportor6 (no oficial)».
 - Releases: el usuario crea los tags `vN`; comprueba a qué commit apunta y que la acción «Compilar y publicar APK» termine bien.
 - Ganchos: los bundles minificados de `site/assets` (`defineProperty-…` datos, `main-…` partida y servidor local, `menus-…` menús, enemigos y jefes) llaman a objetos globales de scripts clásicos cargados en `site/index.html` antes del módulo:
-  - `regiones.js` motor de regiones; `hoenn.js`, `sinnoh.js`, `teselia.js`, `kalos.js` datos de cada región;
+  - `regiones.js` motor de regiones; `hoenn.js`, `sinnoh.js`, `teselia.js`, `kalos.js`, `alola.js` datos de cada región;
   - `mega-dynamax.js`, `megas-extra.js` (PMD), `megas-reloaded.js` (Reloaded), `megas-tienda.js`, `dex-megas.js`;
   - `formas.js`, `bebes.js`, `fiebres.js`, `leyendas.js` (kits de Kyogre y Rayquaza).
 - Datos del juego: `site/data/pokemon.json` y `learnsets.json` traen los 1025 Pokémon; el límite visible es `maxDex`.

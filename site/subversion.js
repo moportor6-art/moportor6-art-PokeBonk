@@ -4,16 +4,38 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.56';
+  const SUB = '0.57';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.57',
+      date: Date.UTC(2026, 10, 12, 18, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.57`,
+      summary: '¡Alola! La séptima región: 55 familias jugables con los Ultraentes, 4 mapas y botones nuevos de Mega y Dynamax.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Alola** (Pokémon #722 al #809): las 55 familias se pueden unir a tu Liga, cada una con sus 4 ataques, su pasiva, sus evoluciones y su reto. Incluye los **Ultraentes**, Código Cero, Meltan, Magearna, Marshadow y Zeraora.`,
+        `- **Lunala**: Cosmoem puede evolucionar en Solgaleo o, ganando en el Ultraumbral con la línea de Cosmog, en Lunala.`,
+        `- **4 mapas nuevos**, tras la Cueva Desenlace: Jungla Umbría, Volcán Wela, Costa de Poni y Ultraumbral. Son más difíciles que los de Kalos y los Pokémon de Alola solo salen en ellos.`,
+        `- **Santuarios**: Ruinas de la Abundancia (Tapu Lele y Tapu Bulu), Ruinas del Conflicto (Tapu Koko y Zeraora), Ruinas del Océano (Tapu Fini y Marshadow) y el Altar del Sol y la Luna (Solgaleo, Lunala y Necrozma).`,
+        `- **Mega Crabominable** y **Mega Drampa** en el Laboratorio, y **Melmetal Gigamax** con el Dynamax.`,
+        `- **Botones nuevos de MEGA y DYNAMAX**: el de Dynamax se ve gris mientras carga y rosa cuando está listo.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.56',
       date: Date.UTC(2026, 10, 12, 9, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.56`,
@@ -1403,6 +1425,18 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.57',
+      date: '2026-11-12',
+      title: 'Alola, la séptima región.',
+      notes: [
+        ['new', 'Alola: 55 familias jugables (con los Ultraentes), 4 mapas y 4 santuarios con sus legendarios.'],
+        ['new', 'Lunala como evolución alternativa de Cosmoem.'],
+        ['new', 'Mega Crabominable, Mega Drampa y Melmetal Gigamax.'],
+        ['better', 'Botones de MEGA y DYNAMAX con su propio diseño.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.56',

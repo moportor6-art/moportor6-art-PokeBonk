@@ -1,5 +1,11 @@
 # Cambios respecto al port original
 
+## Alola y botones (Subversión 0.57)
+- `alola.js`: región `alola` (#722-#809, tras Kalos) con las 55 familias (Ultraentes, Código Cero, Meltan y singulares incluidos), 4 mapas (`jungla`, `wela`, `poni`, `ultraumbral`) con guardianes, jefes, tótems e invocadores de Alola, y santuarios (Tapu Lele y Tapu Bulu; Tapu Koko y Zeraora; Tapu Fini y Marshadow; Solgaleo, Lunala y Necrozma). Contadores `alola`, `alola_local`, `runs_a`. Dificultad +100% PS / +70% daño (Ultraumbral +125% / +80%). Pyukumuku no aprende ataques de daño: su kit usa ataques de Agua genéricos.
+- `formas.js`: Lunala (792) como evolución alternativa de Cosmoem; se gana en el Ultraumbral con la línea de Cosmog.
+- `tools/megas_reloaded.py`: Mega Crabominable (100919), Mega Drampa (100971) y Melmetal Gigamax (102061) del paquete `reloaded_megas_gigamax.zip`. Todos los Pokémon de Alola ya tenían animaciones y variocolor de PMD.
+- `mega-dynamax.js` + `site/assets/botones/`: botones MEGA y DMAX con las imágenes que aportó el usuario (sin fondo); DMAX gris mientras carga (`dmax-carga.png`) y rosa listo o activo (clase `on`). Los contadores siguen saliendo encima.
+
 ## Compilación sin cuota de artefactos
 - `.github/workflows/compilar.yml`: los juegos extra (PokéSurvivor, PokéIsaac, Pokelike, PokéPath, Pokémon Survivors) y el contenido final pasan de un trabajo a otro por la caché de Actions (`actions/cache/save`/`restore`, clave por `run_id`, `enableCrossOsArchive` para Windows) en vez de por artefactos. Con el repositorio privado, los artefactos llenaban la cuota de almacenamiento y la compilación fallaba. Las copias del APK y del instalador en las ejecuciones sin etiqueta siguen siendo artefactos, pero ya no tumban la compilación si la cuota está llena.
 
