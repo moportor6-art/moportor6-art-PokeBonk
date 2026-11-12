@@ -30,6 +30,8 @@
     229: { sid: 15229, name: 'Mega Houndoom', shiny: true },
     248: { sid: 15248, name: 'Mega Tyranitar', shiny: false }
   };
+  // Megas de Hoenn y Groudon/Kyogre primigenios: solo las que tienen sprites montados (megas-extra.js).
+  Object.assign(MEGAS, window.PB_MEGAS_EXTRA ?? {});
   const MEGA_MODS = [
     { stat: 'damage', mul: 1.25 }, { stat: 'maxHp', mul: 1.15 },
     { stat: 'attackSpeed', mul: 1.1 }, { stat: 'armor', add: 10 }

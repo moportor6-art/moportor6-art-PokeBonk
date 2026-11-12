@@ -1,0 +1,29 @@
+# Subversión propia: monta los sprites de las megas de Hoenn (tools/megas_hoenn.py) desde el
+# PMD Sprite Repository y los sube a main. Se lanza solo al cambiar el script, o a mano.
+name: Megas de Hoenn
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - tools/megas_hoenn.py
+      - .github/workflows/megas.yml
+permissions:
+  contents: write
+jobs:
+  megas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Montar
+        run: |
+          pip install pillow
+          python3 tools/megas_hoenn.py site
+      - name: Subir a main
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add site/assets/pmd site/assets/pmd-shiny site/data/sprites.json site/megas-extra.js site/assets/defineProperty-*.js
+          git commit -m "Megas de Hoenn (PMD Sprite Repository)" || { echo "nada nuevo"; exit 0; }
+          git pull --rebase origin main
+          git push origin HEAD:main
