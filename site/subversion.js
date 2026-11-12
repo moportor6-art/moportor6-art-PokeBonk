@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.66';
+  const SUB = '0.67';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.67',
+      date: Date.UTC(2026, 10, 13, 4, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.67`,
+      summary: 'Forma regional en la ficha de la Liga, lista con desplazamiento natural y modo de pruebas con aspectos.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Forma regional en la ficha de la Liga**: al elegir Pokémon, bajo su nombre sale «Forma regional» con su retrato y sus tipos (por ejemplo, Vulpix de Alola · Hielo). Es la misma elección que en el Laboratorio.`,
+        `- **Lista de la Liga con desplazamiento natural**: la columna entera se desplaza; al bajar, las pestañas, el buscador y los filtros se van y quedan solo los Pokémon.`,
+        `- **Modo de pruebas**: el botón «Desbloquear todos» ahora también abre todos los aspectos del Vestidor y todas las formas regionales. «Restaurar mi Liga» devuelve también tus aspectos.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.66',
       date: Date.UTC(2026, 10, 13, 3, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.66`,
@@ -1609,6 +1628,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.67',
+      date: '2026-11-12',
+      title: 'Forma regional en la Liga y lista más cómoda.',
+      notes: [
+        ['new', 'Selector de forma regional (con retrato y tipos) en la ficha de la Liga.'],
+        ['better', 'La lista de la Liga se desplaza entera: al bajar solo quedan los Pokémon.'],
+        ['new', 'El modo de pruebas también abre los aspectos del Vestidor y las formas regionales.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.66',

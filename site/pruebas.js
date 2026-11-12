@@ -1,10 +1,13 @@
 /* Subversión propia: modo de pruebas TEMPORAL (se quitará en unas versiones).
    En la pantalla de elegir Pokémon (al darle a Jugar o Continuar) añade un botón para unir a la Liga a todos los
-   Pokémon del juego y probarlos. Antes guarda una copia de tu Liga real, y el botón «Restaurar mi Liga» la
-   devuelve tal cual. */
+   Pokémon del juego, abrir todos los aspectos del Vestidor y las formas regionales, y probarlos. Antes guarda
+   una copia de tu Liga y tus aspectos reales, y el botón «Restaurar mi Liga» los devuelve tal cual. */
 (() => {
   const KEY = 'pb-pruebas-liga';
   const respaldo = () => { try { return JSON.parse(localStorage.getItem(KEY) || 'null'); } catch { return null; } };
+  // Aspectos del Vestidor de cada miembro (los ids que usa el juego): maestría 1-2, temporada 3-4 y legendarios 5-7.
+  const aspectos = ids => ids.flatMap(m => [`look:${m}:1`, `look:${m}:2`, `tlook:${m}:3`, `tlook:${m}:4`, `look:${m}:5`, `look:${m}:6`, `look:${m}:7`]).concat('skin:spectral');
+  window.PB_PRUEBAS = { activo: () => !!respaldo() };
   const todos = async () => {
     const f = [...document.querySelectorAll('link[rel=modulepreload],script[type=module]')].map(x => x.href || x.src).find(u => /defineProperty-/.test(u));
     const m = await import(f || './assets/defineProperty-5g46wf9l-mw3e1u3x.js');
@@ -34,13 +37,18 @@
     caja.style.cssText = 'display:inline-flex;flex-wrap:wrap;align-items:center';
     caja.append(boton('Desbloquear todos (pruebas)', '#c8306a', async () => {
       const p = meta.profile;
-      if (!respaldo()) localStorage.setItem(KEY, JSON.stringify(p.league || []));
-      p.league = [...new Set([...(p.league || []), ...await todos()])];
+      if (!respaldo()) localStorage.setItem(KEY, JSON.stringify({ league: p.league || [], cosmetics: p.cosmetics || [] }));
+      const ids = await todos();
+      p.league = [...new Set([...(p.league || []), ...ids])];
+      p.cosmetics = [...new Set([...(p.cosmetics || []), ...aspectos(ids)])];
       meta.save();
     }));
     if (respaldo()) {
       caja.append(boton('Restaurar mi Liga', '#3a7aff', async () => {
-        meta.profile.league = respaldo();
+        const r = respaldo();
+        // Copias viejas (solo la Liga, como lista) o nuevas (Liga y aspectos).
+        meta.profile.league = Array.isArray(r) ? r : r.league;
+        if (!Array.isArray(r)) meta.profile.cosmetics = r.cosmetics;
         meta.save();
         localStorage.removeItem(KEY);
       }));

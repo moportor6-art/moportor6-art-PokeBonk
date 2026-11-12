@@ -200,6 +200,12 @@
     return px;
   };
   const NOMBRE = { alola: 'Alola', galar: 'Galar', hisui: 'Hisui', paldea: 'Paldea' };
+  const TIPO_ES = { normal: 'Normal', fire: 'Fuego', water: 'Agua', grass: 'Planta', electric: 'Eléctrico', ice: 'Hielo',
+    fighting: 'Lucha', poison: 'Veneno', ground: 'Tierra', flying: 'Volador', psychic: 'Psíquico', bug: 'Bicho', rock: 'Roca',
+    ghost: 'Fantasma', dragon: 'Dragón', dark: 'Siniestro', steel: 'Acero', fairy: 'Hada' };
+  // Nombre de cada especie (para la vista previa): lo da el juego cuando ya cargó sus datos.
+  const NOMBRE_ES = {};
+  fetch('./data/pokemon.json').then(r => r.json()).then(l => { for (const p of l) if (FORMAS[p.id]) NOMBRE_ES[p.id] = p.name; }).catch(() => {});
   // Región del juego donde sale (y se abre) cada forma.
   const MAPAS_DE = { alola: 'alola', galar: 'galar', hisui: 'sinnoh', paldea: 'paldea' };
   const hecha = (sp, reg) => window.PB_REGIONALES_HECHAS?.[sp + ':' + reg] ?? null;
@@ -297,6 +303,7 @@
       return f ? { k: ':' + p.__regK, sid: f.sid } : null;
     },
     abierta(meta, reg) {
+      if (window.PB_PRUEBAS?.activo()) return true;
       const r = window.PB_REGIONES?.lista?.find(x => x.id === MAPAS_DE[reg]);
       return !!r && (meta?.profile?.counters?.[r.contadores.runs] ?? 0) >= 1;
     },
@@ -332,7 +339,21 @@
       const bloq = regs.filter(r => !X.abierta(meta, r));
       n.textContent = 'Cambia el dibujo, los tipos y los ataques (de su región) en la partida, para toda la línea.' +
         (bloq.length ? ` Se abre al jugar 1 partida en ${bloq.map(r => r === 'hisui' ? 'Sinnoh' : NOMBRE[r]).join(' o ')}.` : '');
-      box.append(t, sel, n);
+      box.append(t, sel);
+      // Vista previa de la forma elegida para esta especie (o la de su línea): retrato y tipos.
+      if (act) {
+        const k = hecha(s, act) ? s : linea.find(x => hecha(x, act));
+        if (k) {
+          const f = hecha(k, act), v = document.createElement('span');
+          v.style.cssText = 'display:inline-flex;align-items:center;gap:6px;font-weight:800';
+          const img = document.createElement('img');
+          img.src = `./assets/portraits/${f.sid}.png`;
+          img.style.cssText = 'width:40px;height:40px;image-rendering:pixelated;border-radius:10px;background:#fff;border:2px solid #3a9ad8';
+          v.append(img, `${NOMBRE_ES[k] ?? ''} de ${NOMBRE[act]} · ${FORMAS[k][act].map(t => TIPO_ES[t]).join(' / ')}`);
+          box.append(v);
+        }
+      }
+      box.append(n);
       return box;
     },
     // Cada 200 ms: tipos de la forma elegida (tras evolucionar o al acabar la mega se vuelven a poner).
@@ -349,6 +370,26 @@
     }
   };
   setInterval(() => { try { X.tick(); } catch {} }, 200);
+
+  // Ficha de la Liga (pantalla de elegir Pokémon): el mismo selector de forma regional, bajo el nombre.
+  setInterval(() => {
+    try {
+      const meta = window.__pbMeta, id = document.querySelector('.ls-hero .ls-id');
+      if (!meta || !id) return;
+      const sp = +((id.querySelector('small')?.textContent ?? '').match(/#(\d+)/)?.[1] ?? 0);
+      const old = id.querySelector('.pb-reg-ficha');
+      if (old?.dataset.sp === String(sp)) return;
+      old?.remove();
+      if (!sp) return;
+      const caja = document.createElement('div');
+      caja.className = 'pb-reg-ficha';
+      caja.dataset.sp = String(sp);
+      caja.style.cssText = 'margin:6px 0;font-size:13px';
+      const pinta = () => { caja.replaceChildren(); const r = X.row(meta, sp, pinta); if (r) caja.append(r); };
+      pinta();
+      if (caja.childNodes.length) id.querySelector('.ls-namerow')?.after(caja);
+    } catch {}
+  }, 500);
 
   // Enemigos: al aparecer (menus-…js), tipos y dibujo de su forma regional en los mapas de su región.
   window.PB_REG_E = (E, i, sp) => {

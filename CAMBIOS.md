@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Forma regional en la Liga, lista y pruebas (Subversión 0.67)
+- `regionales.js`: el selector de forma regional también sale en la ficha de la Liga (`.ls-hero .ls-id`, tras `.ls-namerow`; la especie se lee del «#NNN»), con vista previa (retrato de PMDCollab y tipos). En modo de pruebas (`PB_PRUEBAS.activo()`) todas las formas están abiertas.
+- `liga-scroll.js`: `.ls-roster` se desplaza entera y `.ls-grid` crece a su altura natural (la lista no es virtual: tiene todas las tarjetas).
+- `pruebas.js`: también añade a `profile.cosmetics` los aspectos de cada miembro (`look:<m>:1-2`, `tlook:<m>:3-4`, `look:<m>:5-7`, `skin:spectral`); la copia guarda `{ league, cosmetics }` (se aceptan copias viejas con solo la Liga).
+
 ## Modo de pruebas temporal (Subversión 0.66)
 - `pruebas.js` (cargado en `index.html` antes de `remaster.js`): junto al contador de la Liga (`.ls-count`) de la pantalla de elegir Pokémon, botón «Desbloquear todos (pruebas)» que guarda `profile.league` en `localStorage['pb-pruebas-liga']` y une todos los miembros (`fr` de `defineProperty-…js`); «Restaurar mi Liga» la devuelve. **Temporal: quitar `pruebas.js` y su `<script>` cuando ya no haga falta.**
 
