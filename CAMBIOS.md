@@ -4,7 +4,8 @@
 - `kalos.js`: región `kalos` (#650-#721, tras Teselia) con las 37 familias (4 ataques que aprende la familia, pasiva, evolución, reto), 4 mapas (`novarte`, `reflejos`, `desolacion`, `desenlace`) con guardianes, jefes, tótems e invocadores de Kalos, y santuarios (Xerneas; Diancie; Hoopa y Volcanion; Yveltal y Zygarde). Contadores `kalos`, `kalos_local`, `runs_k`. Dificultad +80% PS / +55% daño (Cueva Desenlace +100% / +65%).
 - `formas.js`: Sylveon (700) como rama de Eevee; se gana en el Bosque Novarte con la línea de Eevee.
 - `tools/megas_reloaded.py`: 11 megas de Kalos del paquete `reloaded_megas_gigamax.zip` (códigos internos 100747...100996), revisadas a ojo. Si la carpeta no trae los archivos de una forma ya convertida, ahora la conserva en vez de quitarla de `megas-reloaded.js`.
-- Sin usar del paquete: Pyroar y Meowstic hembra (el juego solo admite una mega por especie más formas X/Y/Z), los dos «sin confirmar» (100820, 100898) y los Gigamax de Galar (para Galar).
+- Las dos «sin confirmar» de LISTA.md las identificó el usuario: 100820 = Mega Butterfree (12) y 100898 = Mega Floette, el de AZ (670).
+- Sin usar del paquete: Pyroar y Meowstic hembra (el juego solo admite una mega por especie más formas X/Y/Z) y los Gigamax de Galar (para Galar).
 
 ## Teselia (Subversión 0.55)
 - `teselia.js`: región `teselia` (#494-#649, tras Sinnoh) con las 82 familias (4 ataques del juego, pasiva, evolución, reto), 4 mapas (`azulejo`, `resort`, `electrorroca`, `dragospiral`) con guardianes, jefes, tótems e invocadores propios, y santuarios. Contadores `teselia`, `teselia_local`, `runs_u`. Dificultad +60% PS / +40% daño (Torre Dragospiral +80% / +50%).

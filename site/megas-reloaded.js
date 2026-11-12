@@ -359,6 +359,25 @@ window.PB_MEGAS_RELOADED = {
    "rock",
    "fairy"
   ]
+ },
+ "12": {
+  "sid": 16012,
+  "name": "Mega Butterfree",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "bug",
+   "flying"
+  ]
+ },
+ "670": {
+  "sid": 16670,
+  "name": "Mega Floette",
+  "shiny": true,
+  "src": "reloaded",
+  "types": [
+   "fairy"
+  ]
  }
 };
 window.PB_MEGAS_ALT = {

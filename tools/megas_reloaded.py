@@ -66,6 +66,9 @@ MEGAS = {
     701: (100795, 'Mega Hawlucha', ['fighting', 'flying']),
     718: (100996, 'Mega Zygarde', ['dragon', 'ground']),
     719: (100835, 'Mega Diancie', ['rock', 'fairy']),
+    # Confirmadas por el usuario (en LISTA.md salían «sin confirmar»): Butterfree y el Floette de AZ.
+    12: (100820, 'Mega Butterfree', ['bug', 'flying']),
+    670: (100898, 'Mega Floette', ['fairy']),
 }
 # Segundas formas de especies que ya tienen mega: se eligen en el Laboratorio.
 ALT = {

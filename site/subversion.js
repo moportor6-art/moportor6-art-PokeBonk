@@ -17,7 +17,7 @@
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.56`,
-      summary: '¡Kalos! La sexta región: 37 familias jugables, 4 mapas, santuarios y 11 megas.',
+      summary: '¡Kalos! La sexta región: 37 familias jugables, 4 mapas, santuarios y 13 megas.',
       body: [
         `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
         ``,
@@ -26,6 +26,7 @@
         `- **4 mapas nuevos**, tras la Torre Dragospiral: Bosque Novarte, Cueva Reflejos, Hotel Desolación y Cueva Desenlace. Son más difíciles que los de Teselia y los Pokémon de Kalos solo salen en ellos.`,
         `- **Santuarios**: Árbol de la Vida (Xerneas), Cámara de Diamantes (Diancie), Anillo de Hoopa (Hoopa y Volcanion) y el fondo de la Cueva Desenlace (Yveltal y Zygarde).`,
         `- **Megas de Kalos** en el Laboratorio: Chesnaught, Delphox, Greninja, Pyroar, Meowstic, Malamar, Barbaracle, Dragalge, Hawlucha, Zygarde y Diancie.`,
+        `- **Mega Floette** (el Floette de AZ) y **Mega Butterfree**, también en el Laboratorio.`,
         ``,
         PIE
       ].join('\n')
@@ -1410,7 +1411,7 @@
       notes: [
         ['new', 'Kalos: 37 familias jugables, 4 mapas y 4 santuarios con sus legendarios.'],
         ['new', 'Sylveon como nueva evolución de Eevee.'],
-        ['new', 'Megas de Chesnaught, Delphox, Greninja, Pyroar, Meowstic, Malamar, Barbaracle, Dragalge, Hawlucha, Zygarde y Diancie.']
+        ['new', 'Megas de Chesnaught, Delphox, Greninja, Pyroar, Meowstic, Malamar, Barbaracle, Dragalge, Hawlucha, Zygarde, Diancie, Floette y Butterfree.']
       ]
     },
     {
