@@ -1,6 +1,108 @@
-/* Subversión propia: megas de Hoenn montadas con tools/megas_hoenn.py (PMD Sprite Repository).
+/* Subversión propia: megas montadas con tools/megas_hoenn.py (PMD Sprite Repository).
    Las lee mega-dynamax.js. No editar a mano: lo rehace el script. */
 window.PB_MEGAS_EXTRA = {
+ "3": {
+  "sid": 3,
+  "name": "Mega Venusaur",
+  "shiny": true,
+  "sinSprite": true
+ },
+ "9": {
+  "sid": 9,
+  "name": "Mega Blastoise",
+  "shiny": true,
+  "sinSprite": true
+ },
+ "15": {
+  "sid": 15,
+  "name": "Mega Beedrill",
+  "shiny": true,
+  "sinSprite": true
+ },
+ "18": {
+  "sid": 18,
+  "name": "Mega Pidgeot",
+  "shiny": true,
+  "sinSprite": true
+ },
+ "80": {
+  "sid": 15080,
+  "name": "Mega Slowbro",
+  "shiny": true
+ },
+ "127": {
+  "sid": 127,
+  "name": "Mega Pinsir",
+  "shiny": true,
+  "sinSprite": true,
+  "types": [
+   "bug",
+   "flying"
+  ]
+ },
+ "130": {
+  "sid": 130,
+  "name": "Mega Gyarados",
+  "shiny": true,
+  "sinSprite": true,
+  "types": [
+   "water",
+   "dark"
+  ]
+ },
+ "181": {
+  "sid": 181,
+  "name": "Mega Ampharos",
+  "shiny": true,
+  "sinSprite": true,
+  "types": [
+   "electric",
+   "dragon"
+  ]
+ },
+ "212": {
+  "sid": 212,
+  "name": "Mega Scizor",
+  "shiny": true,
+  "sinSprite": true
+ },
+ "214": {
+  "sid": 214,
+  "name": "Mega Heracross",
+  "shiny": true,
+  "sinSprite": true
+ },
+ "428": {
+  "sid": 15428,
+  "name": "Mega Lopunny",
+  "shiny": true,
+  "types": [
+   "normal",
+   "fighting"
+  ]
+ },
+ "445": {
+  "sid": 445,
+  "name": "Mega Garchomp",
+  "shiny": true,
+  "sinSprite": true
+ },
+ "448": {
+  "sid": 15448,
+  "name": "Mega Lucario",
+  "shiny": true
+ },
+ "460": {
+  "sid": 460,
+  "name": "Mega Abomasnow",
+  "shiny": true,
+  "sinSprite": true
+ },
+ "475": {
+  "sid": 15475,
+  "name": "Mega Gallade",
+  "shiny": true
+ },
  "254": {
   "sid": 15254,
   "name": "Mega Sceptile",
