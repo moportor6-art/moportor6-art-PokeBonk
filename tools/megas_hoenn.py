@@ -38,6 +38,20 @@ MEGAS = {
     448: ('Mega Lucario', None, 'mega'),
     460: ('Mega Abomasnow', None, 'mega'),
     475: ('Mega Gallade', None, 'mega'),
+    # Megas nuevas (Leyendas Z-A) y formas de Mundo Misterioso: solo si hay animaciones (SOLO_CON_SPRITE)
+    26: ('Mega Raichu', None, 'mega'),
+    36: ('Mega Clefable', ['fairy', 'flying'], 'mega'),
+    71: ('Mega Victreebel', None, 'mega'),
+    121: ('Mega Starmie', None, 'mega'),
+    149: ('Mega Dragonite', None, 'mega'),
+    154: ('Mega Meganium', ['grass', 'fairy'], 'mega'),
+    160: ('Mega Feraligatr', ['water', 'dragon'], 'mega'),
+    358: ('Mega Chimecho', ['psychic', 'steel'], 'mega'),
+    398: ('Mega Staraptor', ['fighting', 'flying'], 'mega'),
+    478: ('Mega Froslass', None, 'mega'),
+    485: ('Mega Heatran', None, 'mega'),
+    491: ('Mega Darkrai', None, 'mega'),
+    483: ('Dialga Primigenio', None, 'primal'),
     # Hoenn
     254: ('Mega Sceptile', ['grass', 'dragon'], 'mega'),
     257: ('Mega Blaziken', None, 'mega'),
@@ -62,6 +76,7 @@ MEGAS = {
     382: ('Kyogre Primigenio', None, 'primal'),
     383: ('Groudon Primigenio', ['ground', 'fire'], 'primal'),
 }
+SOLO_CON_SPRITE = {26, 36, 71, 121, 149, 154, 160, 358, 398, 478, 485, 491, 483}
 # animación del juego -> nombres de la animación en SpriteCollab, por orden de preferencia
 ANIMS = [('walk', ['Walk']), ('idle', ['Idle', 'Walk']), ('attack', ['Attack', 'Strike', 'Shoot', 'Walk']),
          ('hurt', ['Hurt', 'Idle']), ('faint', ['Sleep', 'Faint', 'Hurt', 'Idle']), ('charge', ['Charge', 'Attack', 'Idle'])]
@@ -81,13 +96,19 @@ def bajar(ruta):
     return None
 
 
-def forma(tracker, pid, clave):
-    """Carpeta de la forma (p. ej. '0001') cuyo nombre lleva 'mega' o 'primal'."""
+def formas(tracker, pid, clave):
+    """Carpetas de las formas (p. ej. '0001') cuyo nombre lleva 'mega' o 'primal', sin colores alternativos."""
     g = tracker.get(f'{pid:04d}', {})
+    out = []
     for k, v in (g.get('subgroups') or {}).items():
-        if clave in str(v.get('name', '')).lower():
-            return k
-    return '0001'
+        n = str(v.get('name', '')).lower()
+        if clave in n and not any(x in n for x in ('altcolor', 'shadow', 'baby', 'alternate')):
+            out.append(k)
+    return out or ['0001']
+
+
+def forma(tracker, pid, clave):
+    return formas(tracker, pid, clave)[0]
 
 
 def anim_data(base):
@@ -181,16 +202,19 @@ def main():
     hechas = {}
     for pid, (nombre, tipos, clave) in MEGAS.items():
         sid = 15000 + pid
-        f = forma(tracker, pid, clave)
-        base = f'sprite/{pid:04d}/{f}/'
-        im, meta = atlas(base)
+        im = meta = None
+        for f in formas(tracker, pid, clave):
+            base = f'sprite/{pid:04d}/{f}/'
+            im, meta = atlas(base)
+            if im is not None:
+                break
         if im is None:
             g = tracker.get(f'{pid:04d}', {}).get('subgroups') or {}
             formas = {k: (v.get('name'), v.get('sprite_complete')) for k, v in g.items()}
             ad = anim_data(base)
             print(f'{nombre}: no hay sprites en {base} | formas: {formas} | animaciones: {sorted(ad) if ad else None}')
             # Sin dibujo de la mega en SpriteCollab: la mega funciona igual con el sprite de su forma normal.
-            if str(pid) in sprites:
+            if str(pid) in sprites and pid not in SOLO_CON_SPRITE:
                 variocolor_base = os.path.exists(os.path.join(site, 'assets', 'pmd-shiny', f'{pid}.png'))
                 hechas[pid] = {'sid': pid, 'name': nombre, 'shiny': variocolor_base, 'sinSprite': True, **({'types': tipos} if tipos else {})}
             continue
