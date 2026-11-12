@@ -4,7 +4,8 @@
    al acabar cada partida, con las mismas reglas que enseña el juego, y se añaden las de Sinnoh:
    Gallade (desde Kirlia), Froslass (desde Snorunt), Leafeon y Glaceon (desde Eevee), la de Kalos: Sylveon, la de Alola: Lunala (desde Cosmoem), y las de Galar e Hisui para líneas antiguas
    (Obstagoon, Perrserker, Cursola, Sirfetch'd, Mr. Rime, Runerigus, Wyrdeer, Kleavor, Ursaluna, Basculegion,
-   Sneasler y Overqwil): sin estar aquí, el juego las haría evolucionar solas al subir maxDex.
+   Sneasler y Overqwil) y de Paldea (Annihilape, Clodsire, Farigiraf, Dudunsparce, Kingambit, Dipplin y
+   Archaludon; Hydrapple sale sola de Dipplin): sin estar aquí, el juego las haría evolucionar solas al subir maxDex.
    - ci: formas nuevas para la lista del juego (defineProperty-…js): forma, miembro de la Liga, desde qué
      especie y cuándo se ofrece (evo = al evolucionar, eevee = con las ramas de Eevee).
    - vu: descripción y meta de cada reto nuevo para la ficha (menus-…js).
@@ -53,7 +54,15 @@
     { form: 901, member: 216, from: 217, at: 'evo', desc: 'Derrota a 5.000 Pokémon de Galar con la línea de Teddiursa.', rule: sum('galar', 5e3) },
     { form: 902, member: 550, from: 550, at: 'evo', desc: 'Gana en la Isla de la Armadura con Basculin.', rule: ganaEn('armadura') },
     { form: 903, member: 215, from: 215, at: 'evo', desc: 'Gana en la Torre Rose con la línea de Sneasel.', rule: ganaEn('torrerose') },
-    { form: 904, member: 211, from: 211, at: 'evo', desc: 'Derrota a 4.000 Pokémon de Galar con Qwilfish.', rule: sum('galar', 4e3) }
+    { form: 904, member: 211, from: 211, at: 'evo', desc: 'Derrota a 4.000 Pokémon de Galar con Qwilfish.', rule: sum('galar', 4e3) },
+    // Paldea
+    { form: 979, member: 56, from: 57, at: 'evo', desc: 'Gana en la Zona Cero con la línea de Mankey.', rule: ganaEn('zonacero') },
+    { form: 980, member: 194, from: 194, at: 'evo', desc: 'Gana en el Desierto Asado con la línea de Wooper.', rule: ganaEn('asado') },
+    { form: 981, member: 203, from: 203, at: 'evo', desc: 'Derrota a 4.000 Pokémon de Paldea con Girafarig.', rule: sum('paldea', 4e3) },
+    { form: 982, member: 206, from: 206, at: 'evo', desc: 'Gana en la Cumbre Glaseada con Dunsparce.', rule: ganaEn('glaseada') },
+    { form: 983, member: 624, from: 625, at: 'evo', desc: 'Derrota a 5.000 Pokémon de Paldea con la línea de Pawniard.', rule: sum('paldea', 5e3) },
+    { form: 1011, member: 840, from: 840, at: 'eevee', desc: 'Gana en el Bosque de Kitakami con la línea de Applin.', rule: ganaEn('kitakami') },
+    { form: 1018, member: 884, from: 884, at: 'evo', desc: 'Gana en la Zona Cero con Duraludon.', rule: ganaEn('zonacero') }
   ];
   for (const n of NUEVAS) REGLAS[n.form] = { member: n.member, rule: n.rule };
 
