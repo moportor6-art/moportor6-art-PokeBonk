@@ -151,6 +151,51 @@ public class MainActivity extends Activity {
         }, "pb-update-check").start();
     }
 
+    // ---------- Subversión propia: cooperativo en la misma Wi-Fi (lan.js) ----------
+    private LanRed lan;
+    private android.net.wifi.WifiManager.MulticastLock lanLock;
+
+    private void lanJs(final String js) {
+        menuHandler.post(() -> { if (web != null) web.evaluateJavascript(js, null); });
+    }
+
+    public final class LanBridge {
+        private LanRed red() {
+            if (lan == null) lan = new LanRed(new LanRed.Salida() {
+                // Ya en el hilo principal (programar): se manda el lote a la página sin esperar otra vuelta.
+                public void entregar(int conn, java.util.List<String> msgs) {
+                    if (web != null) web.evaluateJavascript("window.PB_LAN&&PB_LAN._rxN(" + conn + "," + new org.json.JSONArray(msgs) + ")", null);
+                }
+                public void programar(Runnable r) { menuHandler.post(r); }
+                public void evento(String tipo, int conn, String info) {
+                    lanJs("window.PB_LAN&&PB_LAN._ev(" + JSONObject.quote(tipo) + "," + conn + "," + JSONObject.quote(info == null ? "" : info) + ")");
+                }
+            });
+            return lan;
+        }
+        // La búsqueda por UDP necesita que la Wi-Fi deje pasar la difusión (algunos móviles la filtran sin este permiso).
+        private void bloqueo(boolean on) {
+            try {
+                if (on && lanLock == null) {
+                    android.net.wifi.WifiManager wm = (android.net.wifi.WifiManager) getApplicationContext().getSystemService(WIFI_SERVICE);
+                    lanLock = wm.createMulticastLock("pokebonk-lan");
+                    lanLock.setReferenceCounted(false);
+                    lanLock.acquire();
+                } else if (!on && lanLock != null) {
+                    lanLock.release();
+                    lanLock = null;
+                }
+            } catch (Exception ignored) {
+            }
+        }
+        @JavascriptInterface public String servir(String nombre) { bloqueo(true); return red().servir(nombre); }
+        @JavascriptInterface public String ip() { return LanRed.ip(); }
+        @JavascriptInterface public void conectar(String ip) { red().conectar(ip); }
+        @JavascriptInterface public void enviar(int conn, String texto) { red().enviar(conn, texto); }
+        @JavascriptInterface public void buscar() { bloqueo(true); red().buscar(); }
+        @JavascriptInterface public void cerrar() { if (lan != null) lan.cerrar(); bloqueo(false); }
+    }
+
     public final class MenuBridge {
         // Subversión propia: orientación elegida en Ajustes (landscape, portrait o auto). Se guarda para el próximo arranque.
         @JavascriptInterface public void setOrientation(String mode) {
@@ -511,6 +556,7 @@ public class MainActivity extends Activity {
         // ("tile memory limits exceeded") y dejaba menús y textos sin dibujar (en negro), además de calentar.
         s.setOffscreenPreRaster(false);
         web.addJavascriptInterface(new MenuBridge(), "AndroidMenu");
+        web.addJavascriptInterface(new LanBridge(), "PBLanNative");
 
         web.setWebChromeClient(new WebChromeClient());
         web.setWebViewClient(new WebViewClient() {
@@ -986,6 +1032,8 @@ public class MainActivity extends Activity {
     @Override
     protected void onDestroy() {
         stopHat();
+        if (lan != null) lan.cerrar();
+        if (lanLock != null) try { lanLock.release(); } catch (Exception ignored) {}
         if (web != null) {
             web.destroy();
             web = null;

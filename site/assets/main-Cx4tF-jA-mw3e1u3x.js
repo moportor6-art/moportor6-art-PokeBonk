@@ -763,6 +763,8 @@ var PBLocal = class {
       seed: crypto.getRandomValues(new Uint32Array(1))[0],
       ranked: false,
       boosts: (cfg.boosts ?? []).filter((b) => (bag[b] ?? 0) > 0),
+      // Cooperativo en la Wi-Fi: todos con la misma semilla, sacada del id de la partida.
+      ...(cfg.party && window.PB_LAN ? { party: cfg.party, seed: window.PB_LAN.semilla(cfg.party) } : {}),
       ...(cfg.mode === `expedition` && typeof PB_EXP !== `undefined` ? { exp: PB_EXP.start(this.meta.profile) } : {}),
     };
   }
@@ -946,6 +948,8 @@ var PBLocal = class {
 var pbOffline = () => new Proxy(new PBLocal(), {
   get(t, k) {
     if (k in t || typeof k !== `string` || k === `then`) return t[k];
+    // Subversión 0.70: cooperativo en la misma Wi-Fi (lan.js)
+    if (window.PB_LAN?.api?.[k]) return window.PB_LAN.api[k];
     // the game awaits most calls (and shows the error); some it fires and forgets (reports with obfuscated names that
     // change per build, 0.8.91 `$qn2rj0`): marked handled so those are no unhandled rejection
     return () => {

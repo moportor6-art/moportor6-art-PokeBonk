@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Cooperativo en tu Wi-Fi (Subversión 0.70)
+- `lan.js` (nuevo, en `index.html` tras `legibilidad.js`): el móvil anfitrión imita la API `/coop` del servidor oficial (crear, unirse, sondeo, señales, listo, mapa, empezar, chat, echar, otra vez, salir) y los invitados se la piden por la red local. `PB_LAN.Link` sustituye a la conexión WebRTC (`rQ`) y viaja por la misma conexión (los invitados se hablan a través del anfitrión; las instantáneas binarias en base64). Pantalla «Cooperativo en tu Wi-Fi» con crear sala, salas encontradas y dirección a mano; chapita con la IP en la sala.
+- `android/.../LanRed.java` (nuevo) y `MainActivity.java` (puente `PBLanNative`): servidor TCP 47321, búsqueda por difusión UDP 47322 (con `MulticastLock`) y cliente; mensajes en líneas JSON entregados por lotes con `evaluateJavascript`. Permisos `ACCESS_WIFI_STATE` y `CHANGE_WIFI_MULTICAST_STATE`.
+- Bundles: en `menus-…` `iQ.link` crea `PB_LAN.Link` en modo LAN; el botón Cooperativo del menú sale si hay puente (sin «Necesita una cuenta»); `W$` abre la pantalla LAN; `IY` no cambia la URL en LAN. En `main-…`, el Proxy del backend local responde las llamadas `coop*` con `PB_LAN.api` y `startRun` devuelve la `party` y una semilla común sacada de ella.
+
 ## Repaso visual (Subversión 0.69)
 - `legibilidad.js` (nuevo, en `index.html` tras `liga-scroll.js`): CSS de contraste (`.currency.bonk`, `.ic-buy.poor`, sombra en etiquetas blancas de color, `.rg-realm.locked`), desbordes (`.bd-foot` envuelve, `.ls-move-top` envuelve en vez de partir palabras, número de `.dx-tile`), elegir compañero (`.screen.sp`) en pantallas de hasta 520 px de alto y panel `.rg-side` en hasta 430 px. Los `.tt` que no caben se encogen (`scale`) y se suben (`translate`). El `.hud-tr` se mueve a la izquierda o se encoge si choca con un `.tc-btn`, salvo que el editor del HUD tenga posición guardada para alguno.
 - `guia.js`: la etiqueta del objetivo pasa encima del Pokémon si choca con `.hud-bl`.

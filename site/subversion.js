@@ -4,16 +4,37 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.69';
+  const SUB = '0.70';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.70',
+      date: Date.UTC(2026, 10, 13, 8, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.70`,
+      summary: '¡Cooperativo en tu Wi-Fi! Juega con 1-3 amigos en la misma red, sin internet ni cuenta.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `**Cooperativo en tu Wi-Fi** (menú principal → **Cooperativo**, junto a Supervivencia):`,
+        `- Un móvil pulsa **Crear sala en este móvil**. Los demás abren Cooperativo y tocan su sala cuando aparece en **Unirse**, o escriben la dirección que sale en el anfitrión (por ejemplo 192.168.1.25).`,
+        `- Es el cooperativo original del juego: sala con vuestros Pokémon, el anfitrión elige mapa y dificultad, «¡Estoy listo!», chat y partida compartida en el modo clásico o en Supervivencia. Al terminar, volvéis a la sala.`,
+        `- De 2 a 4 entrenadores. Todos en la misma Wi-Fi y con la misma subversión. No hace falta internet ni cuenta.`,
+        `- Si no aparece la sala, escribe la dirección a mano. Las redes de invitados o públicas a veces no dejan que los móviles se vean entre sí.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.69',
       date: Date.UTC(2026, 10, 13, 6, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.69`,
@@ -1667,6 +1688,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.70',
+      date: '2026-11-13',
+      title: 'Cooperativo en tu Wi-Fi.',
+      notes: [
+        ['coop', 'Nuevo **Cooperativo en tu Wi-Fi**: crea una sala en un móvil y únete desde otros de la misma red, sin internet ni cuenta.'],
+        ['coop', 'Es el cooperativo original (sala, listo, mapa y dificultad, chat, partida compartida y vuelta a la sala) para 2-4 entrenadores.'],
+        ['coop', 'La sala se encuentra sola en la Wi-Fi; si no, se puede escribir la dirección del anfitrión.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.69',
