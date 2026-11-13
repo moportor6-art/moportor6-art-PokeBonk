@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Curanderos en todos los mapas (Subversión 0.71)
+- `curanderos.js` (nuevo, en `index.html` tras `lan.js`): envuelve `PB_REGIONES.remap` para que, en salvajes normales, de vez en cuando salga una especie curandera del juego (`Lh`: 35, 36, 113, 242, 301, 440, 531, 594, 700, 764, 856-858; primero las de la región), con tope de 1-3 vivas y espera de 28→12 s según el avance del mapa. Envuelve `PB_REG_E` para avisar (banner la primera vez, toast después). Cada 200 ms: anillo verde y cruces sobre los curanderos; los Alfas de apoyo curanderos curan al jugador (2 % cada 8 s de juego, +10 % por vínculo, +25 % por evolución).
+- `menus-…`: en `$fjadv2` (pulso de apoyo de curanderos y escuderos) la cura se multiplica por `PB_CURA.mult(run)` (×1 en Bosque Verde, +0,02 por mapa hasta ×1,6; ×1/1,1/1,2 según dificultad) y `PB_CURA.curado` pinta el número verde en cada curado. El escudo de los escuderos no cambia.
+
 ## Cooperativo en tu Wi-Fi (Subversión 0.70)
 - `lan.js` (nuevo, en `index.html` tras `legibilidad.js`): el móvil anfitrión imita la API `/coop` del servidor oficial (crear, unirse, sondeo, señales, listo, mapa, empezar, chat, echar, otra vez, salir) y los invitados se la piden por la red local. `PB_LAN.Link` sustituye a la conexión WebRTC (`rQ`) y viaja por la misma conexión (los invitados se hablan a través del anfitrión; las instantáneas binarias en base64). Pantalla «Cooperativo en tu Wi-Fi» con crear sala, salas encontradas y dirección a mano; chapita con la IP en la sala.
 - `android/.../LanRed.java` (nuevo) y `MainActivity.java` (puente `PBLanNative`): servidor TCP 47321, búsqueda por difusión UDP 47322 (con `MulticastLock`) y cliente; mensajes en líneas JSON entregados por lotes con `evaluateJavascript`. Permisos `ACCESS_WIFI_STATE` y `CHANGE_WIFI_MULTICAST_STATE`.

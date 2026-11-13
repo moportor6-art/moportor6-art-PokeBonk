@@ -33,7 +33,7 @@ Responde siempre en español.
   - `tools/megas_hoenn.py` (acción «Megas», PMDCollab) y `tools/regionales.py` (acción «Regionales», PMDCollab; sids 10000-13999). Los ids >= 20000 son variocolor;
   - `tools/megas_reloaded.py` y `tools/especies_reloaded.py` (Pokémon Reloaded, uso privado con permiso; numeración en `tools/reloaded_numeros.json`).
 - `liga-scroll.js`: desplazamiento natural de la lista de la Liga.
-- `lan.js` + `android/.../LanRed.java` (puente `PBLanNative`): cooperativo en la misma Wi-Fi; `legibilidad.js`: contraste y choques visuales.
+- `lan.js` + `android/.../LanRed.java` (puente `PBLanNative`): cooperativo en la misma Wi-Fi; `legibilidad.js`: contraste y choques visuales. `curanderos.js`: curanderos en todos los mapas y Alfas curanderos.
 - `pruebas.js`: botón TEMPORAL para desbloquear toda la Liga (pedido para pruebas; se quitará cuando el usuario lo diga).
 - Secretos: el keystore y su contraseña solo viven en los secrets de GitHub; nunca en el repo.
 - Créditos que se conservan: Charcher, JayElDragon, @SrBatai, autores de PMDCollab, JPTER78/JayElDragon (PokéSurvivor, con su aviso PolyForm Noncommercial), pokelike.xyz, Khydra, jab_lao, pedrobarretto y Pokémon Reloaded. Nada comercial.

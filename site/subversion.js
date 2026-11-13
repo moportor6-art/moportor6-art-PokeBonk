@@ -4,16 +4,40 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.70';
+  const SUB = '0.71';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.71',
+      date: Date.UTC(2026, 10, 13, 10, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.71`,
+      summary: 'Curanderos en todos los mapas, con aviso, y Alfas de apoyo que te curan.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `**Curanderos salvajes en todos los mapas**`,
+        `- Los curanderos del juego (Clefairy, Chansey, Blissey, Audino, Alomomola, Sylveon, Comfey, la línea de Hatenna...) ya curaban a los salvajes cercanos, pero solo salían en algunos mapas. Ahora pueden salir en cualquiera: primero los de la región, si los hay.`,
+        `- Como mucho 1 a la vez al principio, 2 más adelante y 3 en los mapas finales.`,
+        `- Su cura sube poco a poco con cada mapa (hasta un 60 % más en los últimos) y un poco con la dificultad.`,
+        `- Se ven: anillo verde bajo sus pies (gris si tienen Anticura), cruces verdes encima y números verdes sobre los curados.`,
+        `- **Aviso**: «¡Curandero a la vista!» la primera vez en la partida, y avisos pequeños después. Derrótalos primero; Anticura (ataques Siniestro) los frena.`,
+        ``,
+        `**Alfas de apoyo curanderos**: si uno de esos Pokémon lucha contigo como Alfa de apoyo, te cura un 2 % de tus PS cada 8 s, +10 % por cada nivel de vínculo y +25 % por cada evolución.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.70',
       date: Date.UTC(2026, 10, 13, 8, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.70`,
@@ -1688,6 +1712,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.71',
+      date: '2026-11-13',
+      title: 'Curanderos en todos los mapas.',
+      notes: [
+        ['new', 'Los salvajes curanderos pueden salir en cualquier mapa (1-3 a la vez según el avance), con aviso y marca verde.'],
+        ['balance', 'Su cura sube poco a poco con cada mapa (hasta +60 %) y con la dificultad.'],
+        ['new', 'Los Alfas de apoyo curanderos te curan un 2 % cada 8 s (más con vínculo y evoluciones).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.70',
