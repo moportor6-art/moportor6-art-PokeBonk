@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.75';
+  const SUB = '0.76';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.76',
+      date: Date.UTC(2026, 10, 13, 23, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.76`,
+      summary: 'Escuderos en todos los mapas, el clima afecta a los salvajes, oro por Polvo en el Laboratorio y premios de Pokédex.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Escuderos en todos los mapas** (Metapod, Kakuna, Aron, Bronzor, Shellder, Onix, Beldum, Carbink...), como los curanderos: anillo azul, aviso «¡Escudero a la vista!» al acercarse y +50 % de PS. Sus escudos también crecen con el avance del mapa.`,
+        `- **Clima**: al empezar una zona con clima te dice qué tipos sube y baja. Y ahora también cuenta para los salvajes: los de tipo favorecido pegan un 15 % más y los perjudicados, un 15 % menos.`,
+        `- **Laboratorio**: cambia tu oro guardado por Polvo Estelar (10 ₽ = 1 de Polvo), de 100 en 100 o todo de golpe.`,
+        `- **Pokédex por región**: insignia «Explorador de X» (400 de Polvo) al tener la mitad de su Pokédex en tu Liga, en todas las regiones. Kanto y Johto ganan también «Campeón de X» (1.000 de Polvo y título).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.75',
       date: Date.UTC(2026, 10, 13, 21, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.75`,
@@ -1790,6 +1810,18 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.76',
+      date: '2026-11-13',
+      title: 'Escuderos, clima, oro en el Laboratorio y premios de Pokédex.',
+      notes: [
+        ['new', 'Escuderos en todos los mapas, con aviso y marca azul.'],
+        ['balance', 'El clima de la zona también afecta a los salvajes (±15 % de daño según su tipo), con aviso al empezar.'],
+        ['new', 'En el Laboratorio se cambia el oro guardado por Polvo Estelar (10 ₽ = 1).'],
+        ['new', 'Insignias «Explorador de X» (mitad de la Pokédex regional) en todas las regiones, y «Campeón» para Kanto y Johto.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.75',

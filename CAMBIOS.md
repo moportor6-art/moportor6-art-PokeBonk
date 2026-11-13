@@ -1,5 +1,11 @@
 # Cambios respecto al port original
 
+## Escuderos, clima, oro en el Laboratorio y Pokédex regional (Subversión 0.76)
+- `curanderos.js`: papeles de apoyo en tabla (`ROLES`): curanderos (bit 32) y escuderos (bit 64, especies de `Rh`), cada uno con su tope, espera, marca, aviso y especies por avance o región; escuderos con +50 % de PS. `menus-…` (`$fjadv2`): el escudo de los escuderos también se multiplica por `PB_CURA.mult`.
+- `clima.js` (nuevo): aviso del clima propio de cada zona y ±15 % al daño de los salvajes que aparecen con ese clima según su tipo (tabla igual que la del juego).
+- `oro-guardado.js`: caja en el Laboratorio para cambiar oro guardado por Polvo (10 ₽ = 1).
+- `remaster.js`: insignia `-h` «Explorador de X» (mitad de la Liga regional, 400) en todas las regiones; Kanto (1-151) y Johto (152-251) con `-h` y `-c` «Campeón».
+
 ## Curanderos con escudo y autocuración (Subversión 0.75)
 - `curanderos.js`: tope 2/3/4 curanderos vivos (según avance), espera 18→8 s, probabilidad 10 %. `PB_CURA.pulso`: tras cada pulso de un curandero, +10 % de PS para él (× `mult`) y escudo +8 % de PS máx. (tope 20 %, × `mult`) a hasta 8 salvajes cercanos que no sean jefes ni capturas, con anillo azul.
 - `menus-…` (`$fjadv2`): llama a `PB_CURA.pulso(run, i, cercanos)` tras el pulso de un curandero.

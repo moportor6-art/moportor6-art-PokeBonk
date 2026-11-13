@@ -12,8 +12,14 @@
    PB_REG_E, envueltas aquí). */
 (() => {
   const CURA = new Set([35, 36, 113, 242, 301, 440, 531, 594, 700, 764, 856, 857, 858]); // igual que el juego (Lh)
-  // Orden aproximado de poder: los primeros mapas sacan los básicos.
-  const POR_AVANCE = [[35, 113, 440, 531, 856], [36, 301, 594, 764, 857], [242, 700, 858]];
+  const ESCUDO = new Set([11, 14, 90, 91, 95, 213, 436, 437, 703, 304, 305, 306, 374, 375, 376]); // igual que el juego (Rh)
+  // Dos papeles de apoyo del juego: curanderos (bit 32) y escuderos (bit 64). Orden aproximado de poder por avance.
+  const ROLES = [
+    { bit: 32, set: CURA, k: 'Cura', avance: [[35, 113, 440, 531, 856], [36, 301, 594, 764, 857], [242, 700, 858]], color: 0x5ae88a, hex: '#36c96a',
+      titulo: '¡Curandero a la vista!', texto: n => `${n} cura a los salvajes cercanos (cruz verde): derrótalo primero. Anticura lo frena.`, corto: n => `¡${n} curandero cerca! Cura a los salvajes` },
+    { bit: 64, set: ESCUDO, k: 'Esc', avance: [[11, 14, 304, 436], [90, 95, 213, 305, 374, 437], [91, 306, 376, 703, 375]], color: 0x8ae0ff, hex: '#3aa0e0',
+      titulo: '¡Escudero a la vista!', texto: n => `${n} protege con escudos a los salvajes cercanos (anillo azul): derrótalo primero.`, corto: n => `¡${n} escudero cerca! Da escudos a los salvajes` },
+  ];
   const KJ = ['forest', 'desert', 'coast', 'glacier', 'canela', 'cave', 'encina', 'iris', 'graveyard'];
   const VERDE = 0x5ae88a, RING = 3, CRUZ = 20, CORAZON = 10;
   const R = () => window.PB_REGIONES;
@@ -63,17 +69,17 @@
   window.PB_CURA = C;
 
   // ---------- aparición ----------
-  const vivos = run => {
+  const vivos = (run, bit) => {
     const E = run.enemies; let n = 0;
-    for (let i = 0; i < E.n; i++) if (E.alive[i] && !(E.dying?.[i] > 0) && (E.flags[i] & 32)) n++;
+    for (let i = 0; i < E.n; i++) if (E.alive[i] && !(E.dying?.[i] > 0) && (E.flags[i] & bit)) n++;
     return n;
   };
-  const elegir = run => {
+  const elegir = (run, rol) => {
     const reg = R()?.regionMapa?.(run);
-    if (reg) { const suyos = [...CURA].filter(s => s >= reg.min && s <= reg.max); if (suyos.length) return suyos[Math.random() * suyos.length | 0]; }
+    if (reg) { const suyos = [...rol.set].filter(s => s >= reg.min && s <= reg.max); if (suyos.length) return suyos[Math.random() * suyos.length | 0]; }
     const k = run.__pbCuraK ??= avance(run);
     const nivel = k < 9 ? 0 : k < 25 ? 1 : 2;
-    const l = POR_AVANCE[Math.random() < 0.7 ? nivel : Math.max(0, nivel - 1)];
+    const l = rol.avance[Math.random() < 0.7 ? nivel : Math.max(0, nivel - 1)];
     return l[Math.random() * l.length | 0];
   };
   const envolverRemap = () => {
@@ -85,15 +91,19 @@
       try {
         // Solo salvajes normales: ni jefes, élites, Alfas, capturas, tesoros, hordas, objetos, remotos ni clásicos.
         if (flags & (1 | 2 | 4 | 128 | 512 | 1024 | 4096 | 8192 | 16384 | 32768 | 65536 | 131072)) return r;
-        if (run.mode === 'duel' || CURA.has(r ?? id)) return r;
+        if (run.mode === 'duel' || CURA.has(r ?? id) || ESCUDO.has(r ?? id)) return r;
         if ((run.stageTime ?? 99) < 25) return r; // no en el arranque de la zona (lo taparía su aviso)
         const k = run.__pbCuraK ??= avance(run);
         const tope = 2 + (k >= 10 ? 1 : 0) + (k >= 25 ? 1 : 0);
         const espera = Math.max(8, 18 - k * 0.3);
-        if ((run.time ?? 0) - (run.__pbCuraT ?? -999) < espera) return r;
-        if (Math.random() > 0.1 || vivos(run) >= tope) return r;
-        run.__pbCuraT = run.time ?? 0;
-        return elegir(run);
+        for (const rol of ROLES) {
+          const T = '__pb' + rol.k + 'T';
+          if ((run.time ?? 0) - (run[T] ?? -999) < espera) continue;
+          if (Math.random() > 0.1 || vivos(run, rol.bit) >= tope) continue;
+          run[T] = run.time ?? 0;
+          return elegir(run, rol);
+        }
+        return r;
       } catch { return r; }
     };
     Rg.__pbCura = true;
@@ -105,16 +115,18 @@
   const prevE = window.PB_REG_E;
   window.PB_REG_E = (E, i, sp) => {
     try { prevE?.(E, i, sp); } catch {}
-    try { if ((E.flags[i] & 32) && !(E.flags[i] & (1 | 2 | 4 | 65536))) { E.maxHp[i] *= 2; E.hp[i] *= 2; } } catch {}
+    // Escuderos normales: +50 % de PS.
+    try { if ((E.flags[i] & 96) && !(E.flags[i] & (1 | 2 | 4 | 65536))) { const f = E.flags[i] & 32 ? 2 : 1.5; E.maxHp[i] *= f; E.hp[i] *= f; } } catch {}
   };
   // Aviso cuando un curandero se acerca (aparecen lejos, en el borde): grande la primera vez, pequeño después.
-  const avisar = (run, sp) => {
-    if (!run.__pbCuraVisto) {
-      run.__pbCuraVisto = true;
-      run.ui.banner('¡Curandero a la vista!', `${nombre(sp)} cura a los salvajes cercanos (cruz verde): derrótalo primero. Anticura lo frena.`, '#36c96a', { species: sp });
+  const avisar = (run, sp, rol) => {
+    const V = '__pb' + rol.k + 'Visto';
+    if (!run[V]) {
+      run[V] = true;
+      run.ui.banner(rol.titulo, rol.texto(nombre(sp)), rol.hex, { species: sp });
       try { run.cry(sp); } catch {}
-    } else run.ui.toast(`¡${nombre(sp)} curandero cerca! Cura a los salvajes`, null);
-    run.__pbCuraAviso = run.time ?? 0;
+    } else run.ui.toast(rol.corto(nombre(sp)), null);
+    run['__pb' + rol.k + 'Aviso'] = run.time ?? 0;
   };
 
   // ---------- marcas, y Alfas aliados curanderos ----------
@@ -123,15 +135,17 @@
     if (!run || run.state !== 'play' || !run.enemies) return;
     try {
       const E = run.enemies, t = run.time ?? 0, pp = run.player.pos;
-      let cerca = 0;
-      for (let i = 0; i < E.n; i++) {
-        if (!E.alive[i] || E.dying?.[i] > 0 || !(E.flags[i] & 32)) continue;
-        if (!cerca && Math.hypot(E.x[i] - pp.x, E.z[i] - pp.z) < 20) cerca = E.species[i];
-        const sy = run.terrain.surface(E.x[i], E.z[i]);
-        run.vfx.ground.spawn({ x: E.x[i], y: sy + 0.08, z: E.z[i], life: 0.22, size: 2.2, endSize: 2.2, color: E.healBlock?.[i] > 0 ? 0x8a8a8a : VERDE, shape: RING, glow: 0, rot: 0 });
-        if (((t * 5) | 0) % 3 === 0) run.vfx.burst(E.x[i], E.y[i] + (E.hgt?.[i] ?? 1) + 0.7, E.z[i], VERDE, 1, 0.4, CRUZ, 0.6, 0.7);
+      for (const rol of ROLES) {
+        let cerca = 0;
+        for (let i = 0; i < E.n; i++) {
+          if (!E.alive[i] || E.dying?.[i] > 0 || !(E.flags[i] & rol.bit)) continue;
+          if (!cerca && Math.hypot(E.x[i] - pp.x, E.z[i] - pp.z) < 20) cerca = E.species[i];
+          const sy = run.terrain.surface(E.x[i], E.z[i]);
+          run.vfx.ground.spawn({ x: E.x[i], y: sy + 0.08, z: E.z[i], life: 0.22, size: 2.2, endSize: 2.2, color: E.healBlock?.[i] > 0 ? 0x8a8a8a : rol.color, shape: RING, glow: 0, rot: 0 });
+          if (((t * 5) | 0) % 3 === 0) run.vfx.burst(E.x[i], E.y[i] + (E.hgt?.[i] ?? 1) + 0.7, E.z[i], rol.color, 1, 0.4, rol.bit === 32 ? CRUZ : 14, 0.6, 0.7);
+        }
+        if (cerca && (run.stageTime ?? 99) > 6 && t - (run['__pb' + rol.k + 'Aviso'] ?? -999) > 45) avisar(run, cerca, rol);
       }
-      if (cerca && (run.stageTime ?? 99) > 6 && t - (run.__pbCuraAviso ?? -999) > 45) avisar(run, cerca);
       // Alfa de apoyo curandero: 2 % de tus PS cada 8 s (+10 % por vínculo, +25 % por evolución).
       const p = run.player;
       for (const a of run.allies?.list ?? []) {

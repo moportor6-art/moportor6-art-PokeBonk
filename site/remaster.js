@@ -160,6 +160,12 @@
   // Maestro (que pide insignias de juegos distintos). «Campeón de X» además se enseña como título.
   function datosRegiones(pf) {
     const out = {}, liga = new Set(pf.league || []), c = pf.counters || {}, b = pf.biomes || {};
+    // Kanto y Johto (las del juego original): solo cuenta su Liga (0.76).
+    for (const [id, a, z] of [['kanto', 1, 151], ['johto', 152, 251]]) {
+      let n = 0;
+      for (let i = a; i <= z; i++) if (liga.has(i)) n++;
+      out[id] = { liga: n, ligaT: z - a + 1 };
+    }
     for (const r of window.PB_REGIONES?.lista ?? []) {
       const ids = r.liga.map(e => e.id), ley = r.liga.filter(e => e.rank === 'legendary').map(e => e.id);
       out[r.id] = {
@@ -185,7 +191,14 @@
     INSIGNIAS.push([g, r.id + '-1', 'Viajero de ' + r.name, (d) => x(d).runs >= 1, 'Juega 1 partida en un mapa de ' + r.name, 200, 'region']);
     INSIGNIAS.push([g, r.id + '-m', 'Conquistador de ' + r.name, (d) => x(d).mapas >= x(d).mapasT && x(d).mapasT > 0, 'Completa sus ' + r.mapas.length + ' mapas', 500, 'region']);
     if (ny) INSIGNIAS.push([g, r.id + '-l', 'Señor de las leyendas de ' + r.name, (d) => x(d).ley >= ny, 'Ten en tu Liga a sus ' + ny + ' legendarios y singulares', 700, 'region']);
+    INSIGNIAS.push([g, r.id + '-h', 'Explorador de ' + r.name, (d) => x(d).liga >= Math.ceil(nl / 2), 'Ten en tu Liga a la mitad de su Pokédex: ' + Math.ceil(nl / 2) + ' miembros', 400, 'region']);
     INSIGNIAS.push([g, r.id + '-c', 'Campeón de ' + r.name, (d) => x(d).liga >= nl, 'Completa su Liga: ' + nl + ' miembros (da el título)', 1000, 'region']);
+  }
+  // Pokédex de Kanto y Johto (0.76): mitad y completa, con título como las demás.
+  for (const [id, name, n] of [['kanto', 'Kanto', 151], ['johto', 'Johto', 100]]) {
+    const g = 'Regiones · ' + name, x = (d) => d.reg?.[id] ?? {};
+    INSIGNIAS.push([g, id + '-h', 'Explorador de ' + name, (d) => x(d).liga >= Math.ceil(n / 2), 'Ten en tu Liga a la mitad de su Pokédex: ' + Math.ceil(n / 2) + ' miembros', 400, 'region']);
+    INSIGNIAS.push([g, id + '-c', 'Campeón de ' + name, (d) => x(d).liga >= n, 'Completa su Liga: ' + n + ' miembros (da el título)', 1000, 'region']);
   }
   // Progreso para enseñar junto a la insignia (p. ej. «12/82»).
   const progreso = (id, d) => {
@@ -194,6 +207,7 @@
     if (k === 'm') return ` (${x.mapas}/${x.mapasT})`;
     if (k === 'l') return ` (${x.ley}/${x.leyT})`;
     if (k === 'c') return ` (${x.liga}/${x.ligaT})`;
+    if (k === 'h') return ` (${Math.min(x.liga, Math.ceil(x.ligaT / 2))}/${Math.ceil(x.ligaT / 2)})`;
     return '';
   };
   const JUEGOS_P = [...new Set(INSIGNIAS.map(i => i[0]))];
