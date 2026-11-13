@@ -4,16 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.71';
+  const SUB = '0.72';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.72',
+      date: Date.UTC(2026, 10, 13, 11, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.72`,
+      summary: 'El recuadro de Forma regional ya se lee bien con el tema oscuro.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Forma regional** (ficha de la Liga y Laboratorio): con el tema oscuro, el texto salía casi transparente sobre el fondo claro. Ahora es oscuro y se lee bien, también el nombre y los tipos de la forma elegida.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.71',
       date: Date.UTC(2026, 10, 13, 10, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.71`,
@@ -1712,6 +1729,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.72',
+      date: '2026-11-13',
+      title: 'Forma regional legible en tema oscuro.',
+      notes: [
+        ['fix', 'El recuadro de Forma regional ya no sale con el texto casi invisible en el tema oscuro.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.71',

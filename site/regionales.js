@@ -315,7 +315,7 @@
       const regs = [...new Set(linea.flatMap(formasDe))];
       if (!regs.length) return null;
       const box = document.createElement('div');
-      box.style.cssText = 'flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 10px;border-radius:12px;background:linear-gradient(90deg,#e6f6ff,#f3ffe6)';
+      box.style.cssText = 'flex-basis:100%;display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:8px 10px;border-radius:12px;background:linear-gradient(90deg,#e6f6ff,#f3ffe6);color:#2a2340;text-shadow:none';
       const t = document.createElement('span');
       t.style.cssText = 'font-weight:900;color:#1a6a8a';
       t.textContent = 'Forma regional:';
@@ -335,7 +335,7 @@
         redraw?.();
       });
       const n = document.createElement('small');
-      n.style.cssText = 'flex-basis:100%;font-weight:700;opacity:.75';
+      n.style.cssText = 'flex-basis:100%;font-weight:700;color:#4a4366;line-height:1.35';
       const bloq = regs.filter(r => !X.abierta(meta, r));
       n.textContent = 'Cambia el dibujo, los tipos y los ataques (de su región) en la partida, para toda la línea.' +
         (bloq.length ? ` Se abre al jugar 1 partida en ${bloq.map(r => r === 'hisui' ? 'Sinnoh' : NOMBRE[r]).join(' o ')}.` : '');
@@ -345,7 +345,7 @@
         const k = hecha(s, act) ? s : linea.find(x => hecha(x, act));
         if (k) {
           const f = hecha(k, act), v = document.createElement('span');
-          v.style.cssText = 'display:inline-flex;align-items:center;gap:6px;font-weight:800';
+          v.style.cssText = 'display:inline-flex;align-items:center;gap:6px;font-weight:800;color:#1a5a7a';
           const img = document.createElement('img');
           img.src = `./assets/portraits/${f.sid}.png`;
           img.style.cssText = 'width:40px;height:40px;image-rendering:pixelated;border-radius:10px;background:#fff;border:2px solid #3a9ad8';

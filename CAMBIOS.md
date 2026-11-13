@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Forma regional legible en tema oscuro (Subversión 0.72)
+- `regionales.js` (`row`): el recuadro fija su color de texto (`#2a2340`, nota `#4a4366` sin opacidad, vista previa `#1a5a7a`) en vez de heredar el claro del panel oscuro.
+
 ## Curanderos en todos los mapas (Subversión 0.71)
 - `curanderos.js` (nuevo, en `index.html` tras `lan.js`): envuelve `PB_REGIONES.remap` para que, en salvajes normales, de vez en cuando salga una especie curandera del juego (`Lh`: 35, 36, 113, 242, 301, 440, 531, 594, 700, 764, 856-858; primero las de la región), con tope de 1-3 vivas y espera de 28→12 s según el avance del mapa. Envuelve `PB_REG_E` para avisar (banner la primera vez, toast después). Cada 200 ms: anillo verde y cruces sobre los curanderos; los Alfas de apoyo curanderos curan al jugador (2 % cada 8 s de juego, +10 % por vínculo, +25 % por evolución).
 - `menus-…`: en `$fjadv2` (pulso de apoyo de curanderos y escuderos) la cura se multiplica por `PB_CURA.mult(run)` (×1 en Bosque Verde, +0,02 por mapa hasta ×1,6; ×1/1,1/1,2 según dificultad) y `PB_CURA.curado` pinta el número verde en cada curado. El escudo de los escuderos no cambia.
