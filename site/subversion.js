@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.77';
+  const SUB = '0.78';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.78',
+      date: Date.UTC(2026, 10, 14, 1, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.78`,
+      summary: 'Medallas oficiales en los gimnasios, y cada una mejora tus estadísticas para siempre.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Medallas oficiales**: en la sección Gimnasio ves las medallas de la región (Roca, Cascada, Trueno...), a color las que tienes y en gris las que faltan. Alola no tiene medallas: sus kahunas muestran el icono de su tipo.`,
+        `- **Cada medalla mejora tus estadísticas para siempre** (en todas las partidas menos los duelos), según su tipo: Roca +7,5 PS, Agua +7,5 % curación, Eléctrico +2,5 % velocidad de ataque, Planta +0,25 regeneración, Dragón +2,5 % daño... Toca una medalla para ver la suya.`,
+        `- Con todas las medallas de una región, además, +3 % de daño.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.77',
       date: Date.UTC(2026, 10, 14, 0, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.77`,
@@ -1836,6 +1855,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.78',
+      date: '2026-11-14',
+      title: 'Medallas oficiales con bonificaciones.',
+      notes: [
+        ['new', 'Las medallas de gimnasio usan los sprites oficiales.'],
+        ['balance', 'Cada medalla da una mejora permanente según su tipo; cada región completa, +3 % de daño.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.77',

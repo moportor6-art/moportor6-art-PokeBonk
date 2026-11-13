@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Medallas oficiales con bonificaciones (Subversión 0.78)
+- `assets/medallas/<lider>.png` (64): sprites de PokeAPI/sprites (`sprites/badges`); Alola usa `ui/types/<tipo>.png`. Créditos en `remaster.js`.
+- `gimnasios.js`: tabla `BONO` (la de los Alfas de apoyo por tipo, a la mitad); al empezar cada partida (menos duelos) añade a `run.tempMods` una por medalla y +3 % de daño por región completa, y recalcula. La sección Gimnasio enseña las medallas (gris las que faltan, con su bono de título).
+
 ## Gimnasios y rival (Subversión 0.77)
 - `gimnasios.js` (nuevo): 68 líderes (8 por región; 4 kahunas en Alola) con tipo y equipo. Sección «Gimnasio» en Preparar partida (líderes en orden); en la partida, `PB_GYM.jefe` cambia los 3 guardianes por su equipo (sin captura) y el 65 % de los salvajes normales pasa a su equipo (envolviendo `PB_REGIONES.remap`). Medallas en `profile.pbMedallas`; 300 de Polvo cada una y 1.000 al completar la región.
 - `rival.js` (nuevo): Azul aparece una vez en la zona 2 (min. 4) como élite con unas 3-7 veces la vida de un élite; su inicial (Bulbasaur/Charmander/Squirtle) le gana al tipo de tu Pokémon y evoluciona con los encuentros (`profile.pbRival`). Derrotarlo: +150 ₽ y +100 de Polvo.

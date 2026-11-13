@@ -5,6 +5,9 @@
    - los tres guardianes son el equipo del líder (el último, su as) y no se pueden capturar;
    - la mayoría de los salvajes normales son de su equipo y su tipo.
    Al ganar la partida: medalla + 300 de Polvo (y 1.000 más al completar las de la región).
+   Cada medalla da para siempre una bonificación de estadística según su tipo (la mitad de la del Alfa de apoyo de ese
+   tipo, misma tabla del juego), y cada región completa, +3 % de daño. Sprites de las medallas: PokeAPI/sprites
+   (assets/medallas/<lider>.png; Alola no tiene medallas: sus kahunas muestran el icono de su tipo).
    Las medallas se guardan en profile.pbMedallas = { region: [idLider, ...] }.
    Gancho: main-…js (spawnBoss → PB_GYM.jefe). Las apariciones, envolviendo PB_REGIONES.remap. */
 (() => {
@@ -56,7 +59,25 @@
   };
   const siguiente = reg => LIDERES[reg]?.find(l => !medallas(reg).includes(l.id));
 
-  const G = { LIDERES, sel: null, medallas };
+  // Bonificación por medalla: la del Alfa de apoyo de su tipo (tabla del juego), a la mitad.
+  const BONO = { normal: ['gold', 'mul', 1.1, '+5 % Pokédólares'], fire: ['statusDamage', 'mul', 1.15, '+7,5 % daño de estados'], water: ['healing', 'mul', 1.15, '+7,5 % curación'],
+    grass: ['regen', 'add', 0.5, '+0,25 regeneración'], electric: ['attackSpeed', 'mul', 1.05, '+2,5 % velocidad de ataque'], ice: ['duration', 'mul', 1.1, '+5 % duración'],
+    fighting: ['eliteDamage', 'mul', 1.1, '+5 % daño a élites'], poison: ['statusChance', 'mul', 1.12, '+6 % probabilidad de estados'], ground: ['armor', 'add', 4, '+2 armadura'],
+    flying: ['moveSpeed', 'mul', 1.05, '+2,5 % velocidad'], psychic: ['xpGain', 'mul', 1.08, '+4 % experiencia'], bug: ['pickupRange', 'add', 1, '+0,5 recogida'],
+    rock: ['maxHp', 'add', 15, '+7,5 PS máx.'], ghost: ['evasion', 'add', 0.03, '+1,5 % evasión'], dragon: ['damage', 'mul', 1.05, '+2,5 % daño'], dark: ['critChance', 'add', 0.04, '+2 % crítico'],
+    steel: ['area', 'mul', 1.08, '+4 % área'], fairy: ['luck', 'add', 8, '+4 suerte'] };
+  const modDe = tipo => { const [stat, k, v] = BONO[tipo]; return k === 'add' ? { stat, add: v / 2 } : { stat, mul: 1 + (v - 1) / 2 }; };
+  const todasMods = () => {
+    const out = [];
+    for (const reg of Object.keys(LIDERES)) {
+      const t = medallas(reg);
+      for (const l of LIDERES[reg]) if (t.includes(l.id)) out.push(modDe(l.tipo));
+      if (LIDERES[reg].every(l => t.includes(l.id))) out.push({ stat: 'damage', mul: 1.03 });
+    }
+    return out;
+  };
+  const img = (reg, l) => reg === 'alola' ? `./assets/ui/types/${l.tipo}.png` : `./assets/medallas/${l.id}.png`;
+  const G = { LIDERES, sel: null, medallas, mods: todasMods };
   window.PB_GYM = G;
   const lider = run => run?.__gym ? LIDERES[run.__gym.reg]?.find(l => l.id === run.__gym.id) : null;
   // Guardián de la zona: 1 → primero del equipo, 2 → el del medio, 3 o más → su as.
@@ -95,6 +116,12 @@
     try {
       if (run !== ultima && run.state === 'play') {
         ultima = run;
+        // Bonificaciones de las medallas (no en duelos).
+        if (run.mode !== 'duel' && !run.__pbMed) {
+          run.__pbMed = true;
+          const m = todasMods();
+          if (m.length) { run.tempMods.push(...m); run.player.recompute(); }
+        }
         const s = G.sel; G.sel = null;
         if (s && !run.coop && !run.endless && !run.tower && !run.expedition && run.mode !== 'duel' && encaja(run, s.reg)) {
           run.__gym = s;
@@ -116,7 +143,7 @@
         p.stardust = (p.stardust ?? 0) + polvo;
         p.totalStardust = (p.totalStardust ?? 0) + polvo;
         try { m.save(); } catch {}
-        setTimeout(() => { try { run.ui.toast(`¡Medalla de ${l.nombre} conseguida! +${polvo} de Polvo (${lista.length}/${LIDERES[reg].length} de ${REGION[reg]})`, null); } catch {} }, 1500);
+        setTimeout(() => { try { run.ui.toast(`¡Medalla de ${l.nombre} conseguida! ${BONO[l.tipo][3]} para siempre y +${polvo} de Polvo (${lista.length}/${LIDERES[reg].length} de ${REGION[reg]})`, null); } catch {} }, 1500);
       }
     } catch {}
   }, 500);
@@ -127,8 +154,8 @@
 .pb-gym>b{font:900 12px var(--font-title,system-ui);letter-spacing:2px;opacity:.85}
 .pb-gym select{padding:9px 10px;border-radius:12px;border:2px solid #d9d3ee;font:800 14px system-ui,sans-serif;color:#2a2340;background:#fff}
 .pb-gym small{font:700 12px system-ui,sans-serif;opacity:.85;line-height:1.35}
-.pb-gym .pb-med{display:flex;gap:4px;flex-wrap:wrap}.pb-gym .pb-med span{padding:2px 8px;border-radius:99px;font:800 11px system-ui,sans-serif;background:#f1ecff;color:#6b6589}
-.pb-gym .pb-med span.si{background:#ffd95a;color:#5b3a00}`;
+.pb-gym .pb-med{display:flex;gap:4px;flex-wrap:wrap}.pb-gym .pb-med img{width:30px;height:30px;object-fit:contain;filter:grayscale(1) brightness(.6) opacity(.45)}
+.pb-gym .pb-med img.si{filter:drop-shadow(0 1px 1px rgba(0,0,0,.5))}`;
   document.head.append(st);
   const regionElegida = () => {
     const t = document.querySelector('.rg .rg-realm.on')?.textContent ?? '';
@@ -159,13 +186,13 @@
     }
     const nota = document.createElement('small');
     const med = document.createElement('div'); med.className = 'pb-med';
-    for (const l of LIDERES[reg]) { const s = document.createElement('span'); s.textContent = TIPO[l.tipo]; s.title = l.nombre; if (tengo.includes(l.id)) s.className = 'si'; med.append(s); }
+    for (const l of LIDERES[reg]) { const s = document.createElement('img'); s.src = img(reg, l); s.alt = s.title = `${l.nombre} · ${TIPO[l.tipo]}: ${BONO[l.tipo][3]}`; if (tengo.includes(l.id)) s.className = 'si'; med.append(s); }
     const pon = () => {
       const l = LIDERES[reg].find(x => x.id === sel.value);
       G.sel = l ? { reg, id: l.id } : null;
       nota.textContent = l
-        ? `Sus 3 guardianes: ${[0, Math.floor((l.equipo.length - 1) / 2), l.equipo.length - 1].map(i => nombre(l.equipo[i])).join(', ')}. Gana la partida para llevarte la medalla${tengo.includes(l.id) ? ' (ya la tienes: es una revancha)' : ' y 300 de Polvo'}.`
-        : `Medallas de ${REGION[reg]}: ${tengo.length}/${LIDERES[reg].length}. Vence a los líderes en orden${sig ? `; el siguiente es ${sig.nombre}` : ''}. No en cooperativo.`;
+        ? `Sus 3 guardianes: ${[0, Math.floor((l.equipo.length - 1) / 2), l.equipo.length - 1].map(i => nombre(l.equipo[i])).join(', ')}. Gana la partida para llevarte la medalla${tengo.includes(l.id) ? ' (ya la tienes: es una revancha)' : ` (${BONO[l.tipo][3]} para siempre) y 300 de Polvo`}.`
+        : `Medallas de ${REGION[reg]}: ${tengo.length}/${LIDERES[reg].length}. Cada una da una mejora permanente (toca su icono) y la región completa, +3 % de daño. Vence a los líderes en orden${sig ? `; el siguiente es ${sig.nombre}` : ''}. No en cooperativo.`;
     };
     sel.onchange = pon;
     pon();
