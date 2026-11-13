@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.72';
+  const SUB = '0.73';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.73',
+      date: Date.UTC(2026, 10, 13, 12, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.73`,
+      summary: 'Zonas de 15 minutos en todos los mapas del modo clásico.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Zonas de 15 minutos** (antes 10) en todos los mapas del modo clásico, de todas las regiones. El reloj empieza en 15:00 y el «¡ENJAMBRE FINAL!» llega al acabarse.`,
+        `- Los primeros 10 minutos siguen igual. Los 5 nuevos traen su propio ritmo: cartas cada minuto, 2 Alfas más, horda y estampida, oleada de élites (2 en Pesadilla), tótem, invocador y un evento. Más tiempo para prepararte, pero también más presión.`,
+        `- Los duelos siguen con su tiempo. Supervivencia, la Expedición y las torres no cambian.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.72',
       date: Date.UTC(2026, 10, 13, 11, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.72`,
@@ -1729,6 +1748,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.73',
+      date: '2026-11-13',
+      title: 'Zonas de 15 minutos.',
+      notes: [
+        ['balance', 'Cada zona del modo clásico dura 15 minutos (antes 10) en todos los mapas.'],
+        ['balance', 'Los 5 minutos nuevos tienen su propio guion de eventos: más Alfas, hordas, élites, tótem e invocador.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.72',

@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Zonas de 15 minutos (Subversión 0.73)
+- `zona.js` (nuevo, en `index.html` tras `curanderos.js`): `PB_ZONA(run)` = 900 s (600 en duelos) y `PB_ZONA_EXTRA` añade al guion del director los eventos de 600-900 s con su generador con semilla.
+- `main-…`: el enjambre final (`stageTime>=600`) y el reloj (`600-stageTime`) usan `PB_ZONA`. `menus-…`: el guion llama a `PB_ZONA_EXTRA` antes de ordenarse; los límites de reintento (570/540) son `PB_ZONA-30/-60`; la guía muestra 15:00 y «15 minutos».
+
 ## Forma regional legible en tema oscuro (Subversión 0.72)
 - `regionales.js` (`row`): el recuadro fija su color de texto (`#2a2340`, nota `#4a4366` sin opacidad, vista previa `#1a5a7a`) en vez de heredar el claro del panel oscuro.
 
