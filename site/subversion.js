@@ -4,16 +4,42 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.76';
+  const SUB = '0.77';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.77',
+      date: Date.UTC(2026, 10, 14, 0, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.77`,
+      summary: '¡Gimnasios con medallas en todas las regiones y tu rival Azul!',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `**Gimnasios** (Elige mapa → Preparar partida → baja hasta **Gimnasio**)`,
+        `- Elige un líder de la región del mapa: 8 en Kanto, Johto, Hoenn, Sinnoh, Teselia, Kalos, Galar y Paldea, y los 4 kahunas de Alola. Se vencen en orden.`,
+        `- En esa partida, los 3 guardianes son el equipo del líder (el último, su as, y no se capturan) y la mayoría de los salvajes son de su tipo.`,
+        `- Gana la partida y te llevas su **medalla** y 300 de Polvo. Con todas las de una región, 1.000 más. Después puedes repetirlos como revancha.`,
+        `- No en cooperativo.`,
+        ``,
+        `**Tu rival, Azul**`,
+        `- A mitad de la zona 2 aparece con su inicial de Kanto: el que le gana al tipo de tu Pokémon, y se queda con él.`,
+        `- Evoluciona según las veces que os habéis visto (3 y 7), y es más duro cuanto más avanzas.`,
+        `- Derrótalo: +150 ₽ en la partida y +100 de Polvo. No sale en gimnasios ni en cooperativo.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.76',
       date: Date.UTC(2026, 10, 13, 23, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.76`,
@@ -1810,6 +1836,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.77',
+      date: '2026-11-14',
+      title: 'Gimnasios y rival.',
+      notes: [
+        ['new', 'Gimnasios: 68 líderes y kahunas en 9 regiones, con medallas y Polvo.'],
+        ['new', 'Tu rival Azul aparece en la zona 2 y evoluciona con cada encuentro.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.76',
