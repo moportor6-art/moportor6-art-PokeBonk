@@ -44,6 +44,22 @@
       } catch {}
     },
   };
+  // Tras cada pulso de un curandero (i = índice, cerca = salvajes a su alrededor):
+  // se cura a sí mismo un poco más y deja un escudo pequeño a los de alrededor (la mitad que un escudero).
+  C.pulso = (run, i, cerca) => {
+    const E = run.enemies, m = C.mult(run);
+    if (E.hp[i] < E.maxHp[i]) {
+      const cant = Math.min(E.maxHp[i] - E.hp[i], E.maxHp[i] * 0.1 * m);
+      E.hp[i] += cant; C.curado(run, i, cant);
+    }
+    let n = 0;
+    for (const j of cerca) {
+      if (j === i || n >= 8 || E.healBlock[j] > 0 || (E.flags[j] & (4 | 128))) continue;
+      const tope = E.maxHp[j] * 0.2 * m;
+      if (E.shield[j] < tope) { E.shield[j] = Math.min(tope, E.shield[j] + E.maxHp[j] * 0.08 * m); n++; }
+    }
+    if (n) run.vfx.ring(E.x[i], E.y[i] + 0.2, E.z[i], 5, 0x8ae0ff, 0.5);
+  };
   window.PB_CURA = C;
 
   // ---------- aparición ----------
@@ -72,10 +88,10 @@
         if (run.mode === 'duel' || CURA.has(r ?? id)) return r;
         if ((run.stageTime ?? 99) < 25) return r; // no en el arranque de la zona (lo taparía su aviso)
         const k = run.__pbCuraK ??= avance(run);
-        const tope = 1 + (k >= 10 ? 1 : 0) + (k >= 25 ? 1 : 0);
-        const espera = Math.max(12, 28 - k * 0.5);
+        const tope = 2 + (k >= 10 ? 1 : 0) + (k >= 25 ? 1 : 0);
+        const espera = Math.max(8, 18 - k * 0.3);
         if ((run.time ?? 0) - (run.__pbCuraT ?? -999) < espera) return r;
-        if (Math.random() > 0.06 || vivos(run) >= tope) return r;
+        if (Math.random() > 0.1 || vivos(run) >= tope) return r;
         run.__pbCuraT = run.time ?? 0;
         return elegir(run);
       } catch { return r; }

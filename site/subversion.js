@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.74';
+  const SUB = '0.75';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.75',
+      date: Date.UTC(2026, 10, 13, 21, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.75`,
+      summary: 'Más curanderos, que además dan escudo a sus compañeros y se curan a sí mismos.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Más curanderos**, en todos los mapas: hasta 2 a la vez al principio, 3 en los mapas intermedios y 4 en los finales, y salen más seguido.`,
+        `- En cada pulso, además de curar a los de alrededor, **se curan a sí mismos** un 10 % extra y dejan un **escudo** pequeño a los salvajes cercanos (la mitad que un escudero), con un anillo azul. Todo crece con el avance del mapa.`,
+        `- Anticura sigue frenándolos: ni curan, ni se curan, ni dan escudo.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.74',
       date: Date.UTC(2026, 10, 13, 20, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.74`,
@@ -1771,6 +1790,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.75',
+      date: '2026-11-13',
+      title: 'Curanderos más numerosos, con escudo y autocuración.',
+      notes: [
+        ['balance', 'Hasta 2-4 curanderos a la vez según el avance, y salen más seguido.'],
+        ['new', 'Los curanderos se curan a sí mismos y dan un escudo pequeño a los salvajes cercanos.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.74',

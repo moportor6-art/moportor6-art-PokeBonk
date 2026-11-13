@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Curanderos con escudo y autocuración (Subversión 0.75)
+- `curanderos.js`: tope 2/3/4 curanderos vivos (según avance), espera 18→8 s, probabilidad 10 %. `PB_CURA.pulso`: tras cada pulso de un curandero, +10 % de PS para él (× `mult`) y escudo +8 % de PS máx. (tope 20 %, × `mult`) a hasta 8 salvajes cercanos que no sean jefes ni capturas, con anillo azul.
+- `menus-…` (`$fjadv2`): llama a `PB_CURA.pulso(run, i, cercanos)` tras el pulso de un curandero.
+
 ## Oro ahorrado solo fuera de la partida y curanderos más visibles (Subversión 0.74)
 - `oro-guardado.js`: `take()` devuelve 0 (el ahorro no entra en la partida); `put(g)` suma lo de la partida a la hucha; `set(v)` para gastar fuera. `megas-tienda.js` usa `set`.
 - `curanderos.js`: sin curanderos inyectados antes de 25 s de zona; los curanderos normales (no élites, Alfas, jefes ni remotos) con el doble de PS; el aviso (banner la primera vez, toast cada 45 s como mucho) salta cuando uno está a menos de 20 de distancia.
