@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Repaso visual (Subversión 0.69)
+- `legibilidad.js` (nuevo, en `index.html` tras `liga-scroll.js`): CSS de contraste (`.currency.bonk`, `.ic-buy.poor`, sombra en etiquetas blancas de color, `.rg-realm.locked`), desbordes (`.bd-foot` envuelve, `.ls-move-top` envuelve en vez de partir palabras, número de `.dx-tile`), elegir compañero (`.screen.sp`) en pantallas de hasta 520 px de alto y panel `.rg-side` en hasta 430 px. Los `.tt` que no caben se encogen (`scale`) y se suben (`translate`). El `.hud-tr` se mueve a la izquierda o se encoge si choca con un `.tc-btn`, salvo que el editor del HUD tenga posición guardada para alguno.
+- `guia.js`: la etiqueta del objetivo pasa encima del Pokémon si choca con `.hud-bl`.
+- `scroll-bars.js`: la barra se oculta si el punto de arriba o el del centro de su zona están tapados.
+
 ## Regiones deslizables e iconos de evolución (Subversión 0.68)
 - `liga-scroll.js`: en Elige mapa, `.rg-realms` (regiones) y `.rg-regions` (mapas) llevan `touch-action:none` y un arrastre propio con eventos de puntero (dedo y ratón; a partir de 8 px, y entonces el toque no cuenta como pulsación), más la rueda en horizontal; al abrir se centra `.rg-realm.on`.
 - `liga-scroll.js`: en la ficha de la Liga, cada `.ls-evo-mon` (especie leída de `portraits/<id>.png`) lleva el icono `botones/mega.png` si está en `PB_MEGA.MEGAS` y `botones/dmax.png` si está en `PB_MEGA.GMAX`, con el nombre de las formas como título.

@@ -4,16 +4,37 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.68';
+  const SUB = '0.69';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.69',
+      date: Date.UTC(2026, 10, 13, 6, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.69`,
+      summary: 'Repaso visual: textos más legibles y menos cosas montadas unas sobre otras.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Elegir compañero**: las tarjetas ya no tapan a los Pokémon y el botón «¡Elijo a…!» cabe en pantallas bajas.`,
+        `- **Más legible**: el contador de Bonkoins, el botón «Te faltan…» de la Tienda, las etiquetas de tipo y dificultad y las regiones bloqueadas se leen mejor.`,
+        `- **Nada cortado**: el botón «Editar» de Builds, los nombres largos de ataque (Lanzallamas) y los tooltips altos (se encogen para verse enteros).`,
+        `- **En partida**: el minimapa se aparta de los botones de la derecha si chocan, y el aviso del objetivo («Super Ball gratis») sube si tapa los ataques. Si moviste algo con el editor del HUD, se respeta.`,
+        `- Las barras de desplazamiento ya no se pintan encima de tooltips ni ventanas.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.68',
       date: Date.UTC(2026, 10, 13, 5, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.68`,
@@ -1646,6 +1667,19 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.69',
+      date: '2026-11-13',
+      title: 'Repaso visual de menús y HUD.',
+      notes: [
+        ['fix', 'Elegir compañero: las tarjetas no tapan a los Pokémon y el botón cabe en pantallas bajas.'],
+        ['fix', 'Textos claros sobre fondo claro (Bonkoins, Tienda, etiquetas, regiones bloqueadas).'],
+        ['fix', 'Botón «Editar» de Builds, nombres largos de ataque y tooltips altos ya no se cortan.'],
+        ['fix', 'En partida, el minimapa y el aviso del objetivo dejan de montarse sobre los botones y los ataques.'],
+        ['fix', 'Las barras de desplazamiento no se dibujan encima de tooltips y ventanas.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.68',

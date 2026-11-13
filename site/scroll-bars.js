@@ -23,9 +23,12 @@
   };
   // La barra solo se ve si la zona está realmente a la vista (no tapada por otro menú).
   const onTop = (el, r) => {
-    const x = Math.min(innerWidth - 1, Math.max(0, r.right - W - 4)), y = Math.min(innerHeight - 1, Math.max(0, r.top + r.height / 2));
-    const hit = document.elementFromPoint(x, y);
-    return !!hit && (hit === el || el.contains(hit) || hit.closest('#pb-scrollbars'));
+    // Se mira arriba y en el centro: así tampoco se pinta encima de un tooltip o ventana que tape solo una parte.
+    const x = Math.min(innerWidth - 1, Math.max(0, r.right - W - 4)), t = Math.max(0, r.top);
+    return [t + 14, (t + Math.min(innerHeight, r.bottom)) / 2].every(y => {
+      const hit = document.elementFromPoint(x, Math.min(innerHeight - 1, y));
+      return !!hit && (hit === el || el.contains(hit) || hit.closest('#pb-scrollbars'));
+    });
   };
 
   function make(el) {
