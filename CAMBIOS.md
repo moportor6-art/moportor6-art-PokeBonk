@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Oro ahorrado solo fuera de la partida y curanderos más visibles (Subversión 0.74)
+- `oro-guardado.js`: `take()` devuelve 0 (el ahorro no entra en la partida); `put(g)` suma lo de la partida a la hucha; `set(v)` para gastar fuera. `megas-tienda.js` usa `set`.
+- `curanderos.js`: sin curanderos inyectados antes de 25 s de zona; los curanderos normales (no élites, Alfas, jefes ni remotos) con el doble de PS; el aviso (banner la primera vez, toast cada 45 s como mucho) salta cuando uno está a menos de 20 de distancia.
+
 ## Zonas de 15 minutos (Subversión 0.73)
 - `zona.js` (nuevo, en `index.html` tras `curanderos.js`): `PB_ZONA(run)` = 900 s (600 en duelos) y `PB_ZONA_EXTRA` añade al guion del director los eventos de 600-900 s con su generador con semilla.
 - `main-…`: el enjambre final (`stageTime>=600`) y el reloj (`600-stageTime`) usan `PB_ZONA`. `menus-…`: el guion llama a `PB_ZONA_EXTRA` antes de ordenarse; los límites de reintento (570/540) son `PB_ZONA-30/-60`; la guía muestra 15:00 y «15 minutos».

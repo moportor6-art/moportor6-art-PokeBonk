@@ -1,5 +1,6 @@
-/* Subversión propia: los Pokédólares (monedas de oro) que sobran al terminar una partida
-   se guardan y se suman al empezar la siguiente.
+/* Subversión propia: los Pokédólares (monedas de oro) que sobran al terminar una partida se guardan.
+   Desde la 0.74 el ahorro NO entra en la partida siguiente (cada partida empieza con 0 ₽): solo se gasta fuera,
+   en la tienda de Megas. Lo de cada partida se va sumando a la hucha.
    No se usa en Duelos ni en Cooperativo, para no dar ventaja frente a otros jugadores. */
 (() => {
   const BANK = 'pb-oro-guardado';
@@ -11,9 +12,11 @@
   if (pend > 0) { set(BANK, num(BANK) + pend); set(PEND, 0); }
   window.PB_GOLD = {
     saved: () => num(BANK),
-    // Al empezar: saca todo lo guardado para usarlo en esta partida.
-    take() { const b = num(BANK); set(PEND, b); set(BANK, 0); return b; },
-    // Al terminar: lo que sobra queda guardado para la próxima.
-    put(g) { set(BANK, g); set(PEND, 0); }
+    // Al empezar: el ahorro se queda en la hucha (antes se llevaba a la partida).
+    take() { return 0; },
+    // Al terminar: lo que sobra de la partida se suma a la hucha.
+    put(g) { set(BANK, num(BANK) + Math.max(0, Math.floor(g || 0))); set(PEND, 0); },
+    // Para gastar fuera de la partida (tienda de Megas).
+    set(v) { set(BANK, v); }
   };
 })();

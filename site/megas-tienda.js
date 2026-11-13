@@ -102,7 +102,7 @@
       if ((pr.stardust ?? 0) < p.polvo || oro < p.oro) return false;
       const fam = meta.family(s);
       pr.stardust -= p.polvo;
-      window.PB_GOLD.put(oro - p.oro);
+      window.PB_GOLD.set(oro - p.oro);
       pr.pbMegas ??= [];
       pr.pbMegas.includes(fam) || pr.pbMegas.push(fam);
       try { meta.save(); } catch {}

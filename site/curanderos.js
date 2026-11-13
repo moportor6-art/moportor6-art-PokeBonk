@@ -70,6 +70,7 @@
         // Solo salvajes normales: ni jefes, élites, Alfas, capturas, tesoros, hordas, objetos, remotos ni clásicos.
         if (flags & (1 | 2 | 4 | 128 | 512 | 1024 | 4096 | 8192 | 16384 | 32768 | 65536 | 131072)) return r;
         if (run.mode === 'duel' || CURA.has(r ?? id)) return r;
+        if ((run.stageTime ?? 99) < 25) return r; // no en el arranque de la zona (lo taparía su aviso)
         const k = run.__pbCuraK ??= avance(run);
         const tope = 1 + (k >= 10 ? 1 : 0) + (k >= 25 ? 1 : 0);
         const espera = Math.max(12, 28 - k * 0.5);
@@ -84,22 +85,20 @@
   };
   if (!envolverRemap()) { const t = setInterval(() => { if (envolverRemap()) clearInterval(t); }, 300); }
 
-  // Aviso al aparecer un curandero (los naturales del mapa también).
+  // Curanderos normales (no élites ni jefes): el doble de PS, para que les dé tiempo a curar.
   const prevE = window.PB_REG_E;
   window.PB_REG_E = (E, i, sp) => {
     try { prevE?.(E, i, sp); } catch {}
-    try {
-      if (!(E.flags[i] & 32)) return;
-      const run = E.run;
-      if (!run.__pbCuraVisto) {
-        run.__pbCuraVisto = true;
-        run.ui.banner('¡Curandero a la vista!', `${nombre(sp)} cura a los salvajes cercanos (cruz verde): derrótalo primero. Anticura lo frena.`, '#36c96a', { species: sp });
-        try { run.cry(sp); } catch {}
-      } else if ((run.time ?? 0) - (run.__pbCuraAviso ?? -999) > 40) {
-        run.ui.toast(`${nombre(sp)} curandero cerca: cura a los salvajes`, null);
-      }
-      run.__pbCuraAviso = run.time ?? 0;
-    } catch {}
+    try { if ((E.flags[i] & 32) && !(E.flags[i] & (1 | 2 | 4 | 65536))) { E.maxHp[i] *= 2; E.hp[i] *= 2; } } catch {}
+  };
+  // Aviso cuando un curandero se acerca (aparecen lejos, en el borde): grande la primera vez, pequeño después.
+  const avisar = (run, sp) => {
+    if (!run.__pbCuraVisto) {
+      run.__pbCuraVisto = true;
+      run.ui.banner('¡Curandero a la vista!', `${nombre(sp)} cura a los salvajes cercanos (cruz verde): derrótalo primero. Anticura lo frena.`, '#36c96a', { species: sp });
+      try { run.cry(sp); } catch {}
+    } else run.ui.toast(`¡${nombre(sp)} curandero cerca! Cura a los salvajes`, null);
+    run.__pbCuraAviso = run.time ?? 0;
   };
 
   // ---------- marcas, y Alfas aliados curanderos ----------
@@ -107,13 +106,16 @@
     const run = window.__pbRun;
     if (!run || run.state !== 'play' || !run.enemies) return;
     try {
-      const E = run.enemies, t = run.time ?? 0;
+      const E = run.enemies, t = run.time ?? 0, pp = run.player.pos;
+      let cerca = 0;
       for (let i = 0; i < E.n; i++) {
         if (!E.alive[i] || E.dying?.[i] > 0 || !(E.flags[i] & 32)) continue;
+        if (!cerca && Math.hypot(E.x[i] - pp.x, E.z[i] - pp.z) < 20) cerca = E.species[i];
         const sy = run.terrain.surface(E.x[i], E.z[i]);
         run.vfx.ground.spawn({ x: E.x[i], y: sy + 0.08, z: E.z[i], life: 0.22, size: 2.2, endSize: 2.2, color: E.healBlock?.[i] > 0 ? 0x8a8a8a : VERDE, shape: RING, glow: 0, rot: 0 });
         if (((t * 5) | 0) % 3 === 0) run.vfx.burst(E.x[i], E.y[i] + (E.hgt?.[i] ?? 1) + 0.7, E.z[i], VERDE, 1, 0.4, CRUZ, 0.6, 0.7);
       }
+      if (cerca && (run.stageTime ?? 99) > 6 && t - (run.__pbCuraAviso ?? -999) > 45) avisar(run, cerca);
       // Alfa de apoyo curandero: 2 % de tus PS cada 8 s (+10 % por vínculo, +25 % por evolución).
       const p = run.player;
       for (const a of run.allies?.list ?? []) {
