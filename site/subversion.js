@@ -4,16 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.86';
+  const SUB = '0.87';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.87',
+      date: Date.UTC(2026, 10, 14, 20, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.87`,
+      summary: 'Modo historia: el Laboratorio ya no vuelve arriba al mejorar.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Laboratorio del modo historia** (PokéBonk Lite): al comprar una mejora, la lista se queda donde estabas, así puedes mejorar la misma habilidad varias veces seguidas sin volver a bajar.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.86',
       date: Date.UTC(2026, 10, 14, 7, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.86`,
@@ -2017,6 +2034,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.87',
+      date: '2026-11-14',
+      title: 'Laboratorio de la historia.',
+      notes: [
+        ['fix', 'Lite: el Laboratorio del modo historia conserva la posición de la lista al mejorar.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.86',

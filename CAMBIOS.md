@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Laboratorio de la historia (Subversión 0.87)
+- `historia.js` (`laboratorio`): al repintar tras una compra se restaura el desplazamiento de la capa, la caja y la lista.
+
 ## Mega y Dynamax más fuertes en la Lite (Subversión 0.86)
 - `mega-dynamax.js`: en la Lite, recarga de 25 bajas y cada mejora de `MEGA_MODS`/`DMAX_MODS` ×1,3 (`K`).
 

@@ -480,7 +480,8 @@
   const laboratorio = (reg, sp, run, volver) => {
     const L = window.PB_LAB, m = meta();
     if (!L || !m) return;
-    const pintar = () => {
+    // «pos»: desplazamiento a conservar al repintar tras una compra (antes volvía arriba de todo).
+    const pintar = pos => {
       const c = abrir(reg);
       if (run) c.style.zIndex = 100060;
       const b = document.createElement('div'); b.className = 'hb';
@@ -498,7 +499,7 @@
           if (m.snap) { m.snap.lab = structuredClone(m.profile.lab); m.snap.stardust = Math.max(0, (m.snap.stardust ?? 0) - cost); }
           if (run && run.state !== 'over') { try { ESPECIALES[d.id]?.(run); run.player.recompute(); } catch {} }
           guardar();
-          pintar();
+          pintar([c.scrollTop, b.scrollTop, l.scrollTop]);
         };
         l.append(x);
       }
@@ -506,6 +507,7 @@
       b.querySelector('.vol').onclick = b.querySelector('.hx').onclick = salir;
       teclas = { ok: () => {}, salir };
       c.append(b);
+      if (pos) [c.scrollTop, b.scrollTop, l.scrollTop] = pos;
     };
     pintar();
   };
