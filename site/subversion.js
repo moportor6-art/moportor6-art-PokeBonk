@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.88';
+  const SUB = '0.89';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.89',
+      date: Date.UTC(2026, 10, 14, 22, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.89`,
+      summary: 'PokéBonk Lite: tu Pokémon se defiende según su Defensa real y su nivel.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Defensa real**: armadura extra igual a (Defensa + Defensa Especial de tu Pokémon) ÷ 8, según la etapa en la que estás (al evolucionar, ganas defensa).`,
+        `- **Crece con el nivel**: +0,5 de armadura por nivel.`,
+        `- Ejemplos al empezar: Pikachu 7 → 19, Blastoise 25 → 51, Steelix 81 → 115. Todo lo demás (objetos, Mega, habilidades, Laboratorio) sigue sumando igual.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.88',
       date: Date.UTC(2026, 10, 14, 20, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.88`,
@@ -2053,6 +2073,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.89',
+      date: '2026-11-14',
+      title: 'Defensa real (Lite).',
+      notes: [
+        ['balance', 'Lite: armadura extra por la Defensa y Def. Esp. reales de tu Pokémon y +0,5 por nivel.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.88',

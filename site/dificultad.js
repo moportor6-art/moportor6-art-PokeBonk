@@ -8,6 +8,7 @@
      en el suelo y salen el doble (uno extra cada 2,5-4 min desde el minuto 2);
    - presión adaptativa: cada 30 s, si vas sobrado (más del 80 % de PS y matando rápido) sube un 10 % (hasta ×3);
      si vas por debajo del 30 % de PS, baja.
+   - defensa: armadura extra por la Defensa y Def. Esp. reales del Pokémon (/8) y +0,5 por nivel (0.89, todos los modos);
    - precios: mejoras del Laboratorio y Poké Balls del mapa un 40 % más baratas (0.88, todos los modos).
    Ganchos: PB_REG_E (aparición, encadenado) y run.director.fire('alpha') del juego. */
 (() => {
@@ -72,6 +73,34 @@
     ia.chestCost = () => Math.max(1, Math.round(c() * BARATO));
     ia.__pbBarato = true;
   }, 200);
+
+  // Defensa (0.89, todos los modos de la Lite): armadura extra = (Defensa + Def. Esp. reales de la etapa actual) / 8
+  // + 0,5 por nivel. El juego solo daba 5-16 de armadura base, casi igual para todos.
+  const STATS = new Map();
+  fetch('./data/pokemon.json').then(r => r.json()).then(l => { for (const x of l) STATS.set(x.id, x.stats); }).catch(() => {});
+  const extraDef = pl => {
+    const st = STATS.get(pl.speciesId);
+    return (st ? (st.def + st.spd) / 8 : 0) + 0.5 * (pl.level ?? 1);
+  };
+  setInterval(() => {
+    const pl = window.__pbRun?.player;
+    if (!pl || pl.__pbDef || typeof pl.recompute !== 'function') return;
+    const rc = pl.recompute;
+    pl.recompute = function (...a) {
+      const r = rc.apply(this, a);
+      try { if (this.stats) this.stats.armor += extraDef(this); } catch {}
+      return r;
+    };
+    pl.__pbDef = { nivel: pl.level, sp: pl.speciesId };
+    try { pl.recompute(); } catch {}
+  }, 200);
+  // Al subir de nivel o evolucionar, recalcula si el juego no lo hizo.
+  setInterval(() => {
+    const pl = window.__pbRun?.player, d = pl?.__pbDef;
+    if (!d || (d.nivel === pl.level && d.sp === pl.speciesId)) return;
+    d.nivel = pl.level; d.sp = pl.speciesId;
+    try { pl.recompute(); } catch {}
+  }, 500);
 
   const aviso = (run, t) => { try { run.ui.toast(t, null); } catch {} };
   setInterval(() => {

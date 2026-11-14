@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Defensa real en la Lite (Subversión 0.89)
+- `dificultad.js`: envuelve `player.recompute` y suma a `stats.armor` (def + spd de `data/pokemon.json` de la especie actual) / 8 + 0,5·nivel; recalcula al subir de nivel o evolucionar. El juego solo daba armadura relativa a las propias estadísticas de la línea final (5-16 de base).
+
 ## Precios más bajos en la Lite (Subversión 0.88)
 - `dificultad.js`: envuelve `cost` de cada mejora de `PB_LAB.defs` y `run.interactables.chestCost` (×0,6, en todos los modos de la Lite).
 
