@@ -1963,7 +1963,7 @@
       date: '2026-11-14',
       title: 'Curanderos y escuderos más duros.',
       notes: [
-        ['change', 'Más curanderos y escuderos desde el principio, con más curación, escudos más grandes y más PS.']
+        ['balance', 'Más curanderos y escuderos desde el principio, con más curación, escudos más grandes y más PS.']
       ]
     },
     {
