@@ -1,0 +1,346 @@
+.editor-map-beta-tag {
+	position: absolute;
+	top: 12px;
+	right: 10px;
+	color: var(--white);
+	font-size: 9px;
+}
+
+.editor-map-disclaimer {
+	position: absolute;
+	top: 27px;
+	right: 22px;
+	width: 130px;
+	color: var(--white);
+	font-size: 6px;
+	line-height: 8px;
+	text-align: center;
+}
+
+.editor-map-selector {
+	position: absolute;
+	top: 20px;
+	left: 70px;
+	width: 150px;
+	height: 120px;
+	
+	background-size: cover;
+	outline: 1px solid black;
+}
+
+.editor-map-selector-right, .editor-map-selector-left {
+	position: absolute;
+	height: 100%;
+	width: 25px;
+	background-color: var(--buttonRed);
+	color: var(--white);
+	text-align: center;
+	line-height: 122px;
+	cursor: pointer;
+	outline: 1px solid black;
+}
+
+.editor-map-selector-left { left: -25px; border-radius: 5px 0px 0px 5px; }
+.editor-map-selector-right { right: -25px; border-radius: 0px 5px 5px 0px; }
+.editor-map-selector-right:hover, .editor-map-selector-left:hover { filter: brightness(1.2); }
+
+.editor-wave-pause {
+	position: absolute;
+	top: 134px;
+	right: 20px;
+	width: 100px;
+	height: 20px;
+	background: var(--buttonRed);
+	font-size: 10px;
+	line-height: 22px;
+	text-align: center;
+	color: var(--white);
+	border-radius: 5px 5px 0 0;
+	outline: 1px solid black;
+
+	cursor: pointer;
+}
+
+.editor-wave-pause:hover {
+	filter: brightness(1.2);
+}
+
+.editor-wave-time-line {
+	position: absolute;
+	top: 155px;
+	left: 20px;
+	right: 20px;
+	height: 120px;
+	padding: 10px 18px;
+
+	background: rgba(0, 0, 0, 0.4);
+	outline: 1px solid black;
+
+	display: flex;
+	flex-wrap: nowrap;
+	overflow-x: scroll;
+	overflow-y: hidden;
+
+	justify-content: flex-start;
+	align-items: center;
+	gap: 35px;
+}
+
+.editor-wave-time-line::-webkit-scrollbar { width: 12px; }
+.editor-wave-time-line::-webkit-scrollbar-track { 
+	outline: 1px solid black;
+	background: var(--scrollBarColor1); 
+}
+.editor-wave-time-line::-webkit-scrollbar-thumb { 
+    background: var(--scrollBarColor2); 
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.2);
+}
+.editor-wave-time-line::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollBarColor2); 
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.editor-wave-time-line-slot {
+	position: relative;
+	width: 70px;
+	height: 70px;
+	background-repeat: no-repeat;
+	background-position: center;
+	cursor: pointer;
+	outline: 2px solid var(--white);
+}
+
+.editor-wave-time-line-slot-sprite {
+	width: 70px;
+	height: 70px;
+
+	background-repeat: no-repeat;
+	background-position: center;
+
+	text-align: center;
+	color: var(--white);
+	line-height: 72px;
+	font-size: 10px;
+}
+
+.editor-wave-time-line-slot-amount {
+	position: absolute;
+	bottom: 4px;
+	width: 100%;
+	text-align: center;
+	color: var(--white);
+	font-size: 10px;
+}
+
+.editor-wave-time-line-slot-more, .editor-wave-time-line-slot-less  {
+	position: absolute;
+	width: 100%;
+	height: 20px;
+	color: var(--white);
+	text-align: center;
+	line-height: 22px;
+	font-weight: bold;
+}
+
+.editor-wave-time-line-slot-more {
+	top: -24px;
+	background: var(--buttonGreen);
+}
+
+.editor-wave-time-line-slot-less {
+	bottom: -24px;
+	background: var(--buttonRed);
+}
+
+.editor-enemy-container {
+	position: absolute;
+	bottom: 60px;
+	left: 20px;
+	right: 20px;
+	height: 240px;
+
+	padding: 8px 5px;
+	background: rgba(0, 0, 0, 0.4);
+	outline: 1px solid black;
+
+	display: flex;
+	flex-wrap: wrap;
+	overflow-y: auto;
+	justify-content: center;
+	gap: 9px;
+}
+
+.editor-enemy-container::-webkit-scrollbar { width: 12px; }
+.editor-enemy-container::-webkit-scrollbar-track { 
+	outline: 1px solid black;
+	background: var(--scrollBarColor1); 
+}
+.editor-enemy-container::-webkit-scrollbar-thumb { 
+    background: var(--scrollBarColor2); 
+    box-shadow: inset 0 2px 0 rgba(255,255,255,0.2);
+}
+.editor-enemy-container::-webkit-scrollbar-thumb:hover {
+    background: var(--scrollBarColor2); 
+    box-shadow: inset 0 0 10px rgba(255, 255, 255, 0.2);
+}
+
+.editor-enemy {
+	position: relative;
+	width: 50px;
+	height: 50px;
+	background-repeat: no-repeat;
+	background-position: center;
+	cursor: pointer;
+}
+
+.editor-enemy:hover {
+	filter: brightness(1.2) drop-shadow(0 0 2px black);
+}
+
+.editor-wave-bonus-container {
+	position: absolute;
+	top: 30px;
+	left: 290px;
+	width: 250px;
+	height: 100px;
+	
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.editor-wave-bonus-option-row {
+	position: relative;
+	width: 100%;
+	height: 33px;
+
+	line-height: 35px;
+	font-size: 12px;
+	color: var(--white);
+
+	display: flex;
+	flex-wrap: wrap;
+}
+
+.editor-wave-bonus-option-label {
+	position: relative;
+	width: 50%;
+	height: 100%;
+}
+
+.editor-wave-bonus-option-left, .editor-wave-bonus-option-right {
+	position: relative;
+	width: 5%;
+	height: 100%;
+	cursor: pointer;
+}
+
+.editor-wave-bonus-option-value {
+	position: relative;
+	width: 40%;
+	height: 100%;
+	text-align: center;
+}
+
+.editor-wave-bonus-option-left:hover, .editor-wave-bonus-option-right:hover {
+	filter: brightness(1.2);
+}
+
+.editor-map-import-code {
+	position: absolute;
+	left: 130px;
+	bottom: 15px;
+	width: 300px;
+	height: 30px;
+	background: var(--white);
+	outline: 1px solid black;
+	line-height: 34px;
+	font-size: 8px;
+}
+
+.editor-map-copy-button {
+	position: absolute;
+	left: 20px;
+	bottom: 15px;
+	width: 110px;
+	height: 30px;
+	background: var(--buttonRed);
+	outline: 1px solid black;
+	text-align: center;
+	line-height: 32px;
+	color: var(--white);
+	font-size: 12px;
+
+	border-radius: 5px 0 0 5px;
+	cursor: pointer;
+}
+
+.editor-map-load-button {
+	position: absolute;
+	left: 430px;
+	bottom: 15px;
+	width: 110px;
+	height: 30px;
+	background: var(--buttonBlue);
+	text-align: center;
+	line-height: 32px;
+	outline: 1px solid black;
+	color: var(--white);
+	font-size: 12px;
+
+	cursor: pointer;
+}
+
+.editor-map-load-button:hover, .editor-map-copy-button:hover {
+	filter: brightness(1.2);
+}
+
+.editor-wave-play-button {
+	position: absolute;
+	right: 20px;
+	bottom: 15px;
+	width: 160px;
+	height: 30px;
+	color: var(--white);
+	text-align: center;
+	line-height: 32px;
+	background: var(--buttonGreen);
+	font-weight: bold;
+	outline: 1px solid black;
+	cursor: pointer;
+	font-size: 12px;
+	border-radius: 0 5px 5px 0;
+}
+
+.editor-wave-play-button:hover {
+	filter: brightness(1.2);
+}
+
+.editor-wave-time-line-slot {
+    position: relative;
+}
+
+.editor-wave-time-line-slot-move-left,
+.editor-wave-time-line-slot-move-right {
+    position: absolute;
+    width: 9px;
+    background: var(--blue);
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--white);
+    font-size: 7px;
+    text-align: center;
+    line-height: 70px;
+    z-index: 2;
+    cursor: pointer;
+    height: 100%;
+    user-select: none;
+    outline: 1px solid black;
+}
+
+.editor-wave-time-line-slot-move-left {
+    left: -13px;
+}
+
+.editor-wave-time-line-slot-move-right {
+    right: -13px;
+}
