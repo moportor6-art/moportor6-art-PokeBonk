@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Avisos sin pisarse (Subversión 0.82)
+- `legibilidad.js` (`apilar`, cada 250 ms): la racha y `.pb-mx` se apartan a la derecha de `.hud-party` (los botones, una sola vez por partida y no si el editor del HUD los movió); `.pb-fiebre` va debajo de `.bossbar`/`.minibars`/`.djh` y empuja `.toasts` por debajo.
+- `guia.js`: la etiqueta del objetivo prueba debajo, encima y a los lados del Pokémon y elige el primer hueco libre.
+
 ## HUD y pausa en el móvil (Subversión 0.81)
 - `legibilidad.js`: `--sl`/`--sr` = el mayor de los dos márgenes seguros (al girar el móvil 180° la cámara cambia de lado y desplazaba el HUD); el minimapa solo se aparta más durante la partida, nunca vuelve atrás.
 - `mega-dynamax.js`: los botones usan `--sl`; un botón oculto guarda su hueco (`visibility`), así el otro no se mueve.

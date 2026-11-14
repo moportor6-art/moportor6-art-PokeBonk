@@ -92,9 +92,16 @@
       G.lb.append(t.label);
       const sm = document.createElement('small'); sm.textContent = `${Math.round(t.d)} m`; G.lb.append(sm);
       G.lb.style.left = a.x + 'px'; G.lb.style.top = (document.documentElement.classList.contains('pb-portrait') ? a.y - 120 : a.y + 92) + 'px';
-      // Si debajo choca con los ataques o las barras de abajo, va encima del Pokémon.
-      const lr = G.lb.getBoundingClientRect(), choca = [...document.querySelectorAll('.hud-bl .slots, .hud-bl .slot')].some(e => { const q = e.getBoundingClientRect(); return q.width && lr.left < q.right && lr.right > q.left && lr.top < q.bottom && lr.bottom > q.top; });
-      if (choca) G.lb.style.top = (a.y - 92 - lr.height) + 'px';
+      // Si choca con algo del HUD (ataques, barra del jefe, avisos, racha, aliados, botones…), prueba encima del
+      // Pokémon y luego a sus lados; si todo choca, se queda donde menos tapa (debajo).
+      const lr0 = G.lb.getBoundingClientRect(), w = lr0.width, h = lr0.height;
+      const obst = [...document.querySelectorAll('.hud-bl .slots, .hud-bl .slot, #hud .bossbar, #hud .minibars, #hud .toasts > *, .pb-fiebre > *, #hud .hud-top, #hud .streak, #hud .hud-party > *, .tc .tc-btn, .pb-mx button, #hud .hud-tl, #hud .hud-tr')]
+        .map(e => e.getBoundingClientRect()).filter(q => q.width && q.height);
+      const libre = (x, y) => x - w / 2 > 4 && x + w / 2 < innerWidth - 4 && y > 4 && y + h < innerHeight - 4 && !obst.some(q => x - w / 2 < q.right && x + w / 2 > q.left && y < q.bottom && y + h > q.top);
+      const ab = document.documentElement.classList.contains('pb-portrait');
+      const ops = [[a.x, ab ? a.y - 120 : a.y + 92], [a.x, ab ? a.y + 92 : a.y - 92 - h], [a.x + 70 + w / 2, a.y - h / 2], [a.x - 70 - w / 2, a.y - h / 2]];
+      const ok = ops.find(([x, y]) => libre(x, y));
+      if (ok) { G.lb.style.left = ok[0] + 'px'; G.lb.style.top = ok[1] + 'px'; }
       // marcador encima del objetivo si se ve en pantalla
       const c = ui.project(r, t.e.x, (t.e.y ?? p.y) + 3, t.e.z);
       const onScreen = c.vis && c.x > 0 && c.y > 0 && c.x < innerWidth && c.y < innerHeight && t.d > 3;

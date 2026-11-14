@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.81';
+  const SUB = '0.82';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.82',
+      date: Date.UTC(2026, 10, 14, 4, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.82`,
+      summary: 'Los avisos de la partida ya no se pisan entre sí.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Racha (×N)**: si choca con las tarjetas de tus aliados de la izquierda, se pone a su derecha.`,
+        `- **Botones MEGA y DYNAMAX**: si pisan las tarjetas de aliados, se apartan a su derecha y se quedan ahí toda la partida (si los colocaste con el editor del HUD, no se tocan).`,
+        `- **Fiebre del oro / del polvo**: su cartel va debajo de la barra del jefe, y los avisos («¡Ultimate lista!»…) debajo de él.`,
+        `- **Guía («Super Ball gratis»)**: si debajo de tu Pokémon choca con algo, prueba encima y a los lados.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.81',
       date: Date.UTC(2026, 10, 14, 3, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.81`,
@@ -1918,6 +1938,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.82',
+      date: '2026-11-14',
+      title: 'Avisos sin pisarse.',
+      notes: [
+        ['fix', 'Racha, botones Mega/Dynamax, fiebres, avisos y guía ya no se montan unos sobre otros.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.81',

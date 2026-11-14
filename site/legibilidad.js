@@ -79,4 +79,56 @@
     if (falta > 0) { tr.style.transformOrigin = 'top left'; tr.style.scale = String(Math.max(0.6, (r.width - falta) / r.width)); }
   };
   setInterval(() => { try { minimapa(); } catch {} }, 400);
+
+  // Avisos que se pisan (0.82):
+  // - la racha (×N) y los botones MEGA/DYNAMAX contra la lista de aliados de la izquierda: se apartan a su derecha;
+  // - el cartel de las fiebres (fiebres.js, «+749 ₽ ×1,9 · 4 s») va debajo de la barra del jefe y empuja los avisos
+  //   (toasts) por debajo de él.
+  const vis = e => {
+    if (!e) return null;
+    const r = e.getBoundingClientRect(), c = getComputedStyle(e);
+    return r.width && r.height && c.visibility !== 'hidden' && c.display !== 'none' && +c.opacity > 0.05 ? r : null;
+  };
+  const choca = (a, b) => a && b && a.left < b.right && a.right > b.left && a.top < b.bottom && a.bottom > b.top;
+  const fijoMx = { run: null, dx: 0 };
+  const apilar = () => {
+    const tarjetas = [...document.querySelectorAll('#hud .hud-party > *')].map(vis).filter(Boolean);
+    const derecha = (el, otros, fijo) => {
+      // Mueve el elemento a la derecha de lo que pise (tarjetas de aliados, botones MEGA/DYNAMAX). Con «fijo», en la
+      // misma partida no vuelve atrás (que los botones no bailen cada vez que entra o sale un aliado).
+      el.style.translate = '';
+      let a = vis(el), dx = 0;
+      for (let k = 0; a && k < 4; k++) {
+        const b = otros.filter(t => choca({ left: a.left + dx, right: a.right + dx, top: a.top, bottom: a.bottom }, t));
+        if (!b.length) break;
+        dx = Math.ceil(Math.max(...b.map(t => t.right)) - a.left + 10);
+      }
+      if (fijo) { if (fijo.run !== window.__pbRun) { fijo.run = window.__pbRun; fijo.dx = 0; } dx = fijo.dx = Math.max(dx, fijo.dx); }
+      if (dx) el.style.translate = `${dx}px 0`;
+    };
+    // MEGA/DYNAMAX (si no los colocó el jugador con el editor del HUD) contra las tarjetas de aliados.
+    const mx = document.querySelector('.pb-mx'), L = window.PB_HUD?.layout ?? {};
+    if (mx && !L['.pb-mx .mg'] && !L['.pb-mx .dx']) derecha(mx, tarjetas, fijoMx); else if (mx) mx.style.translate = '';
+    const st = document.querySelector('#hud .streak');
+    if (st) derecha(st, [...tarjetas, ...[...document.querySelectorAll('.pb-mx button')].map(vis).filter(Boolean)]);
+    const fi = document.querySelector('.pb-fiebre'), to = document.querySelector('#hud .toasts');
+    if (to) to.style.translate = '';
+    if (fi) {
+      fi.style.translate = '';
+      const f = [...fi.children].map(vis).filter(Boolean);
+      if (f.length) {
+        const top = Math.min(...f.map(r => r.top)), izq = Math.min(...f.map(r => r.left)), der = Math.max(...f.map(r => r.right));
+        let bajo = 0;
+        for (const e of document.querySelectorAll('#hud .bossbar, #hud .minibars, #hud .djh, #hud .hud-top')) {
+          const r = vis(e);
+          if (r && r.left < der && r.right > izq && r.top < top + 40) bajo = Math.max(bajo, r.bottom);
+        }
+        const dy = bajo + 6 > top ? Math.ceil(bajo + 6 - top) : 0;
+        if (dy) fi.style.translate = `0 ${dy}px`;
+        const fin = Math.max(...f.map(r => r.bottom)) + dy, t = vis(to);
+        if (t && t.left < der && t.right > izq && t.top < fin + 6) to.style.translate = `0 ${Math.ceil(fin + 6 - t.top)}px`;
+      }
+    }
+  };
+  setInterval(() => { try { apilar(); } catch {} }, 250);
 })();
