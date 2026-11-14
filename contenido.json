@@ -1,0 +1,623 @@
+{
+ "formato": 1,
+ "version": 128,
+ "sub": "0.80",
+ "shell": {
+  "android": "9b17d5850ea6cedf",
+  "android-lite": "4fcedf032e4c57c8",
+  "windows": "64bf0e7140a74631",
+  "windows-lite": "410beb131686e56f"
+ },
+ "modulos": {
+  "pokebonk": {
+   "nombre": "PokéBonk (juego principal)",
+   "hash": "cec5f9f5c0845106a6d20576e6a28daf658d84aec5e3ca2f38ed219878422189",
+   "archivos": 8416,
+   "bytes": 229288069
+  },
+  "pokeisaac": {
+   "nombre": "PokéIsaac",
+   "hash": "71e7112d6711efdfe856dc30bc20a397592a5c3408399a3621e9b24819308302",
+   "archivos": 5679,
+   "bytes": 82367848
+  },
+  "pokemonsurvivors": {
+   "nombre": "Pokémon Survivors",
+   "hash": "7ef9241dd4de04c0cd49b4e734c7ffb4ce66e451ffe899711fa393f81a0bc53c",
+   "archivos": 7244,
+   "bytes": 65404423
+  },
+  "pokesurvivor": {
+   "nombre": "PokéSurvivor",
+   "hash": "d5eb83edadaeddfca4d4863752a6371713fb2fa069ffc8431c1d9338377c4238",
+   "archivos": 10,
+   "bytes": 187901432
+  },
+  "pokepath": {
+   "nombre": "PokéBonk TD",
+   "hash": "0d884a5a8ade40b54255358b16d48ff73111f852c0f52f998ded5d7f93deac70",
+   "archivos": 3684,
+   "bytes": 41183181
+  },
+  "pokeplunder": {
+   "nombre": "PokéPlunder",
+   "hash": "0303453dd6fb1e11bc32338bdf721833b84a354e59c478bacc31ba72641e738e",
+   "archivos": 665,
+   "bytes": 29735389
+  },
+  "pokeoverlord": {
+   "nombre": "Pokémon Overlord",
+   "hash": "df0eb363ae033074c26b929c949b44de00c97c40db2984aeb6762f69b23b2666",
+   "archivos": 11,
+   "bytes": 103109162
+  },
+  "pokelike": {
+   "nombre": "Pokelike",
+   "hash": "f2d686b88f934b67049bf44f9a3b9ad75285865e60f5e12be824493d4dee960c",
+   "archivos": 1999,
+   "bytes": 134464577
+  }
+ },
+ "tag": "v128",
+ "base": "https://raw.githubusercontent.com/moportor6-art/moportor6-art-PokeBonk/contenido-v128/",
+ "cambios": [
+  {
+   "oficial": "0.9.9",
+   "sub": "0.80",
+   "date": "2026-11-14",
+   "title": "PokéBonk Lite: Modo historia y versión de Windows.",
+   "notes": [
+    [
+     "new",
+     "Modo historia (Lite): las 9 regiones en orden, con profesores, líderes, Liga y campeones, diálogos con retrato y 3 ranuras de guardado."
+    ],
+    [
+     "new",
+     "En la historia, «Guardar y salir» pasa al Laboratorio el Polvo ganado, y hay Laboratorio en la pausa con mejoras al momento."
+    ],
+    [
+     "new",
+     "PokéBonk Lite también para Windows (instalador aparte)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.79",
+   "date": "2026-11-14",
+   "title": "Edición PokéBonk Lite.",
+   "notes": [
+    [
+     "new",
+     "Nueva edición PokéBonk Lite: solo PokéBonk, sin la Sala de juegos, mucho más ligera."
+    ],
+    [
+     "new",
+     "Se instala junto a la completa y se actualiza sola sin bajar los otros juegos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.78",
+   "date": "2026-11-14",
+   "title": "Medallas oficiales con bonificaciones.",
+   "notes": [
+    [
+     "new",
+     "Las medallas de gimnasio usan los sprites oficiales."
+    ],
+    [
+     "balance",
+     "Cada medalla da una mejora permanente según su tipo; cada región completa, +3 % de daño."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.77",
+   "date": "2026-11-14",
+   "title": "Gimnasios y rival.",
+   "notes": [
+    [
+     "new",
+     "Gimnasios: 68 líderes y kahunas en 9 regiones, con medallas y Polvo."
+    ],
+    [
+     "new",
+     "Tu rival Azul aparece en la zona 2 y evoluciona con cada encuentro."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.76",
+   "date": "2026-11-13",
+   "title": "Escuderos, clima, oro en el Laboratorio y premios de Pokédex.",
+   "notes": [
+    [
+     "new",
+     "Escuderos en todos los mapas, con aviso y marca azul."
+    ],
+    [
+     "balance",
+     "El clima de la zona también afecta a los salvajes (±15 % de daño según su tipo), con aviso al empezar."
+    ],
+    [
+     "new",
+     "En el Laboratorio se cambia el oro guardado por Polvo Estelar (10 ₽ = 1)."
+    ],
+    [
+     "new",
+     "Insignias «Explorador de X» (mitad de la Pokédex regional) en todas las regiones, y «Campeón» para Kanto y Johto."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.75",
+   "date": "2026-11-13",
+   "title": "Curanderos más numerosos, con escudo y autocuración.",
+   "notes": [
+    [
+     "balance",
+     "Hasta 2-4 curanderos a la vez según el avance, y salen más seguido."
+    ],
+    [
+     "new",
+     "Los curanderos se curan a sí mismos y dan un escudo pequeño a los salvajes cercanos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.74",
+   "date": "2026-11-13",
+   "title": "Oro ahorrado solo fuera de la partida; curanderos más visibles.",
+   "notes": [
+    [
+     "balance",
+     "El oro que sobra se acumula para la tienda de Megas, pero ya no se suma al empezar la partida siguiente."
+    ],
+    [
+     "balance",
+     "Los curanderos tienen el doble de PS y no salen en los primeros 25 s."
+    ],
+    [
+     "fix",
+     "El aviso de curandero sale cuando se acerca uno, no al aparecer lejos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.73",
+   "date": "2026-11-13",
+   "title": "Zonas de 15 minutos.",
+   "notes": [
+    [
+     "balance",
+     "Cada zona del modo clásico dura 15 minutos (antes 10) en todos los mapas."
+    ],
+    [
+     "balance",
+     "Los 5 minutos nuevos tienen su propio guion de eventos: más Alfas, hordas, élites, tótem e invocador."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.72",
+   "date": "2026-11-13",
+   "title": "Forma regional legible en tema oscuro.",
+   "notes": [
+    [
+     "fix",
+     "El recuadro de Forma regional ya no sale con el texto casi invisible en el tema oscuro."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.71",
+   "date": "2026-11-13",
+   "title": "Curanderos en todos los mapas.",
+   "notes": [
+    [
+     "new",
+     "Los salvajes curanderos pueden salir en cualquier mapa (1-3 a la vez según el avance), con aviso y marca verde."
+    ],
+    [
+     "balance",
+     "Su cura sube poco a poco con cada mapa (hasta +60 %) y con la dificultad."
+    ],
+    [
+     "new",
+     "Los Alfas de apoyo curanderos te curan un 2 % cada 8 s (más con vínculo y evoluciones)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.70",
+   "date": "2026-11-13",
+   "title": "Cooperativo en tu Wi-Fi.",
+   "notes": [
+    [
+     "coop",
+     "Nuevo **Cooperativo en tu Wi-Fi**: crea una sala en un móvil y únete desde otros de la misma red, sin internet ni cuenta."
+    ],
+    [
+     "coop",
+     "Es el cooperativo original (sala, listo, mapa y dificultad, chat, partida compartida y vuelta a la sala) para 2-4 entrenadores."
+    ],
+    [
+     "coop",
+     "La sala se encuentra sola en la Wi-Fi; si no, se puede escribir la dirección del anfitrión."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.69",
+   "date": "2026-11-13",
+   "title": "Repaso visual de menús y HUD.",
+   "notes": [
+    [
+     "fix",
+     "Elegir compañero: las tarjetas no tapan a los Pokémon y el botón cabe en pantallas bajas."
+    ],
+    [
+     "fix",
+     "Textos claros sobre fondo claro (Bonkoins, Tienda, etiquetas, regiones bloqueadas)."
+    ],
+    [
+     "fix",
+     "Botón «Editar» de Builds, nombres largos de ataque y tooltips altos ya no se cortan."
+    ],
+    [
+     "fix",
+     "En partida, el minimapa y el aviso del objetivo dejan de montarse sobre los botones y los ataques."
+    ],
+    [
+     "fix",
+     "Las barras de desplazamiento no se dibujan encima de tooltips y ventanas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.68",
+   "date": "2026-11-13",
+   "title": "Regiones deslizables e iconos de mega y Gigamax.",
+   "notes": [
+    [
+     "fix",
+     "En Elige mapa, las filas de regiones y de mapas se pueden deslizar en el móvil."
+    ],
+    [
+     "new",
+     "Icono MEGA o DYNAMAX en las fases de la cadena de evolución que los tienen."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.67",
+   "date": "2026-11-12",
+   "title": "Forma regional en la Liga y lista más cómoda.",
+   "notes": [
+    [
+     "new",
+     "Selector de forma regional (con retrato y tipos) en la ficha de la Liga."
+    ],
+    [
+     "better",
+     "La lista de la Liga se desplaza entera: al bajar solo quedan los Pokémon."
+    ],
+    [
+     "new",
+     "El modo de pruebas también abre los aspectos del Vestidor y las formas regionales."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.66",
+   "date": "2026-11-12",
+   "title": "Modo de pruebas temporal.",
+   "notes": [
+    [
+     "new",
+     "Botón temporal para desbloquear todos los Pokémon de la Liga, con copia y botón para restaurar tu Liga."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.65",
+   "date": "2026-11-12",
+   "title": "Colores de las fusiones regionales y retrato regional.",
+   "notes": [
+    [
+     "better",
+     "13 fusiones regionales con los colores, partículas y estado de su tipo."
+    ],
+    [
+     "fix",
+     "El marcador de la partida enseña el retrato y los tipos de la forma regional."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.64",
+   "date": "2026-11-12",
+   "title": "Fusiones de firma para las formas regionales.",
+   "notes": [
+    [
+     "new",
+     "37 fusiones de firma nuevas, una por línea con forma regional."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.63",
+   "date": "2026-11-12",
+   "title": "Ataques propios para las formas regionales.",
+   "notes": [
+    [
+     "new",
+     "Kit propio de 4 ataques para cada línea con forma regional, con sus tipos y ataques característicos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.62",
+   "date": "2026-11-12",
+   "title": "Formas regionales.",
+   "notes": [
+    [
+     "new",
+     "54 formas regionales (Alola, Galar, Hisui y Paldea): elígelas en el Laboratorio y enfréntalas en los mapas de su región."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.61",
+   "date": "2026-11-12",
+   "title": "Pasaporte por regiones y tour nuevo.",
+   "notes": [
+    [
+     "new",
+     "Pasaporte: 4 insignias por región (con el título de Campeón) y 4 de Retos."
+    ],
+    [
+     "better",
+     "El Desafío del Alfa usa también los mapas de las regiones nuevas."
+    ],
+    [
+     "better",
+     "Tour de bienvenida actualizado: regiones, Liga, megas, formas especiales y Retos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.60",
+   "date": "2026-11-12",
+   "title": "Retos: Torre Mega y Dominio Gigamax.",
+   "notes": [
+    [
+     "new",
+     "Torre Mega: enemigos megaevolucionados y Mega Rayquaza, Mega Mewtwo y Mega Zygarde en la cima."
+    ],
+    [
+     "new",
+     "Dominio Gigamax: enemigos Gigamax y Eternatus Eternamax, Urshifu y Melmetal en el núcleo."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.59",
+   "date": "2026-11-12",
+   "title": "Paldea, la novena región.",
+   "notes": [
+    [
+     "new",
+     "Paldea: 72 familias jugables (con los Pokémon paradoja), 4 mapas y 4 santuarios con sus legendarios."
+    ],
+    [
+     "new",
+     "7 evoluciones de Paldea para líneas antiguas, con reto."
+    ],
+    [
+     "new",
+     "Mega Scovillain en el Laboratorio."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.58",
+   "date": "2026-11-12",
+   "title": "Galar, la octava región.",
+   "notes": [
+    [
+     "new",
+     "Galar: 48 familias jugables, 4 mapas y 4 santuarios con sus legendarios."
+    ],
+    [
+     "new",
+     "12 evoluciones de Galar e Hisui para líneas antiguas, con reto."
+    ],
+    [
+     "new",
+     "17 Gigamax de Galar (con Eternatus Eternamax) y Mega Falinks."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.57",
+   "date": "2026-11-12",
+   "title": "Alola, la séptima región.",
+   "notes": [
+    [
+     "new",
+     "Alola: 55 familias jugables (con los Ultraentes), 4 mapas y 4 santuarios con sus legendarios."
+    ],
+    [
+     "new",
+     "Lunala como evolución alternativa de Cosmoem."
+    ],
+    [
+     "new",
+     "Mega Crabominable, Mega Drampa y Melmetal Gigamax."
+    ],
+    [
+     "new",
+     "Mega Zoroark y formas extra opcionales: Mega Raichu (Reloaded), Mega Tyranitar Negro y Mega Steelix de Hielo."
+    ],
+    [
+     "better",
+     "Botones de MEGA y DYNAMAX con su propio diseño."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.56",
+   "date": "2026-11-12",
+   "title": "Kalos, la sexta región.",
+   "notes": [
+    [
+     "new",
+     "Kalos: 37 familias jugables, 4 mapas y 4 santuarios con sus legendarios."
+    ],
+    [
+     "new",
+     "Sylveon como nueva evolución de Eevee."
+    ],
+    [
+     "new",
+     "Megas de Chesnaught, Delphox, Greninja, Pyroar, Meowstic, Malamar, Barbaracle, Dragalge, Hawlucha, Zygarde, Diancie, Floette y Butterfree."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.55",
+   "date": "2026-11-12",
+   "title": "Teselia, la quinta región.",
+   "notes": [
+    [
+     "new",
+     "Teselia: 82 familias jugables, 4 mapas y 4 santuarios con sus legendarios."
+    ],
+    [
+     "new",
+     "Megas de Emboar, Excadrill, Audino, Scolipede, Scrafty, Eelektross, Chandelure y Golurk; Garbodor Gigamax."
+    ],
+    [
+     "fix",
+     "Los guardianes de los mapas de Sinnoh ya son de Sinnoh."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.54",
+   "date": "2026-11-12",
+   "title": "Pestaña «Megas y Gigamax» en la Pokédex.",
+   "notes": [
+    [
+     "new",
+     "Pokédex: pestaña con todas las megas y Gigamax, con filtros y variocolor; las que no tienes se ven en gris."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.53",
+   "date": "2026-11-12",
+   "title": "Megas con dibujo propio, formas X/Y/Z y Gigamax.",
+   "notes": [
+    [
+     "new",
+     "16 megas ya tienen su dibujo y 10 megas nuevas de Leyendas Z-A (sprites de Pokémon Reloaded)."
+    ],
+    [
+     "new",
+     "Mega Raichu X y Y, Mega Charizard Y, Mega Mewtwo X y megas Z de Absol, Garchomp y Lucario, a elegir en el Laboratorio."
+    ],
+    [
+     "new",
+     "Aspecto Gigamax con el Dynamax para 12 Pokémon."
+    ],
+    [
+     "fix",
+     "Las megas sin dibujo propio ya no entran."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.52",
+   "date": "2026-11-12",
+   "title": "Comprar megas en el Laboratorio.",
+   "notes": [
+    [
+     "new",
+     "Las megas se compran en el Laboratorio: 3,000 Polvo + 2,000 oro (legendarias: 5,000 + 3,000)."
+    ],
+    [
+     "new",
+     "El oro guardado de las partidas se ve en el Laboratorio."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.51",
+   "date": "2026-11-12",
+   "title": "Combates por fases de Kyogre y Rayquaza.",
+   "notes": [
+    [
+     "new",
+     "Kyogre: Surf, Hidrobomba, Salpicar, Rayo Hielo; lluvia con rayos en la fase 2; Pulso Primigenio en la fase 3."
+    ],
+    [
+     "new",
+     "Rayquaza: Pulso Dragón, Ciclón, Velocidad Extrema, Hiperrayo; Enfado y Cometa Draco en la fase 2; Ascenso del Dragón en la fase 3."
+    ]
+   ]
+  }
+ ],
+ "completo": {
+  "android": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v128/PokeBonk.apk",
+   "bytes": 831285971,
+   "sha256": "ac7cdfc1a56f6f0301ae3db833a67e55692c8a218c13ed95971dc66f56c08f82"
+  },
+  "windows": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v128/PokeBonk-Windows-Instalador.exe",
+   "bytes": 811635404,
+   "sha256": "22ac619b3931ca9d083800d202b232c9f40d17af452c35579ecb9600047f5cb0"
+  },
+  "android-lite": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v128/PokeBonk-Lite.apk",
+   "bytes": 217690306,
+   "sha256": "b434b5cfb291a1f1686542799b43db098b0848386af0718cf818d6972ae76570"
+  },
+  "windows-lite": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v128/PokeBonk-Lite-Windows-Instalador.exe",
+   "bytes": 303958414,
+   "sha256": "b0deb5a7ba99ff6468a4d891b29c88548c3cb48b4d9e2c51b925c29915911649"
+  }
+ }
+}

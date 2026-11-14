@@ -1,0 +1,805 @@
+:root {
+    --black: #282a35;
+    --grey: #bcba90;
+    --red: #a33635;
+    --orange: #c96937;
+    --blue: #2968d3;
+    --green: #70ac4c;
+    --white: #d4d4d4;
+    --yellow: #eae174;  
+    --empty: #4a4a4a;
+
+    --tierPokemon: #5c8b6a; /*verde*/ 
+    --tierCommon: #4465e9; /*azul claro*/ 
+    --tierUncommon: #2b4195; /*azul oscuro*/ 
+    --tierLuxury: #b89f00;  /*amarillo*/ 
+    --tierEpic: #b56414;  /*rojo*/ 
+    --tierLegendary: #ba3a4b; /*doraeo*/  
+    --tierMega: #dccac2;  /*cyan*/ 
+    --tierAdmin: #ae3ec9;  /*morado*/ 
+}
+
+[data-theme="original"] {
+    --stars: #ebbe35;
+    --money: var(--green);
+    --barBackground: #3d3d3f;
+    --barShadow1: #5a5a5c;
+    --barShadow2: #2a2a2b;
+    --heartImage: url("../assets/images/icons/heart.png");
+    --heartOffImage: url("../assets/images/icons/no-heart.png");
+
+    --waveSelectorRed1: #c33e3e;
+    --waveSelectorRed2: #ef7d7d;
+    --waveSelectorRed3: #7a2222;
+    --waveSelectorBlue1: #3e8ec3;
+    --waveSelectorBlue2: #7dbcef;
+    --waveSelectorBlue3: #225a7a;
+    --waveSelectorRepeat1: #8e44ad;
+    --waveSelectorRepeat2: #bb8fce;
+    --waveSelectorRepeat3: #5b2c6f;
+    --waveSelectorMirror1: #c9aa0a;
+    --waveSelectorMirror2: #edd766;
+    --waveSelectorMirror3: #7a6705;
+    --waveSelectorOff1: #9e9e9e;
+    --waveSelectorOff2: #b5b5b5;
+    --waveSelectorOff3: #7d7d7d;
+
+    --uiPokemonButton1a: rgba(178, 61, 39, 1);
+    --uiPokemonButton1b: rgba(157, 56, 41, 1);
+    --uiPokemonButton2a: rgba(81, 98, 171, 1);
+    --uiPokemonButton2b: rgba(61, 78, 142, 1);
+    --uiPokemonButton3a: rgba(89, 174, 75, 1);
+    --uiPokemonButton3b: rgba(50, 137, 45, 1);
+    --uiPokemonButton4a: rgba(251,205,43,1);
+    --uiPokemonButton4b: rgba(217,175,30,1);
+    --uiPokemonButton5a: rgba(54, 54, 54, 1);
+    --uiPokemonButton5b: rgba(26, 26, 26, 1);
+
+    --uiBackground1: #2a2b2d;
+    --uiBackground2: #333335;
+    --uiBackground3: #2a2b2d;
+    --uiBackground4: #3d3d3f;
+    --uiAlterDamage: #3d3d3f;
+
+    --rocket1: #6B7280;
+    --rocket2: rgba(34, 197, 94, 1);
+    --rocket3: rgba(59, 130, 246, 1);
+    --rocket4: rgba(245, 158, 11, 1);
+    --rocket5: rgba(239, 68, 68, 1);
+    --rocket6a: rgba(184, 48, 175);
+    --rocket6b: rgba(184, 22, 173, 1);
+
+    --nextWave: #a33635;
+    --autoWave1: #2c70e3;
+    --autoWave2: #70ac4c;
+
+    --waveBackground: #3d3d3f;
+    --arrowHover: #a33635;
+
+    --uiSection: #c73838;
+    --uiSectionInvert: invert(0.9);
+    --uiMusic: #444;
+
+    --save: #70ac4c;
+    --import: #2d70e3;
+
+    --scrollBarColor1: #222;
+    --scrollBarColor2: #a33635;
+
+    --sceneBackground: #2a2b2d;
+    --sceneHeader: #a33635;
+
+    --profile1: #2a2a2b;
+    --profile2: #3d3d3f;
+    --profile3: #333335;
+    --profile4: #444;
+
+    --descriptionBackground: rgba(30, 30, 30, 0.9);
+    --tooltip: rgba(0, 0, 0, 0.9);
+
+    /*MENU*/
+    --menuButton1: #3d3d3f;
+    --menuButton2: #2f2f31;
+    --menuButtonOff: #a33635;
+    --menuButtonOn: #70ac4c;
+    --menuSection: #3d3d3f;
+    --menuReedem: rgba(48, 48, 51, 1);
+    --menuTitle: #a33635;
+    --menuColorText: #c88d30;
+    --slider: #222;
+    --sliderGrab: #a33635;
+    --link: #8a47a6;
+
+    /*MAP*/
+    --map1: #252527;
+    --map2: #3d3d3f;
+    --mapTitle: var(--red);
+    --mapTitleSecret: var(--blue);
+
+    --buttonRed: var(--red);
+    --buttonBlue: var(--blue);
+    --buttonGreen: var(--green);
+
+    /*DEX*/
+    --dexTab1: #2a2b2d;
+    --dexTab2: #a33635;
+    --dexTab3: #822b2a;
+    --dexColor: #343435;
+
+    --shopPool1: #4465e9;
+    --shopPool2: #f1ac4b;
+    --shopPool3: #ae3ec9;
+    --shopPool4: #5c9e6f;
+
+    --challengeColor1: #a33635;
+}
+
+[data-theme="classic"] {
+    --stars: #ebbe35;
+    --money: var(--green);
+    --barBackground: #233142;
+    --barShadow1: #2d3947;
+    --barShadow2: #223042;
+    --heartImage: url("../assets/images/icons/heart.png");
+    --heartOffImage: url("../assets/images/icons/no-heart.png");
+
+    --waveSelectorRed1: #c33e3e;
+    --waveSelectorRed2: #ef7d7d;
+    --waveSelectorRed3: #7a2222;
+    --waveSelectorBlue1: #3e8ec3;
+    --waveSelectorBlue2: #7dbcef;
+    --waveSelectorBlue3: #225a7a;
+    --waveSelectorRepeat1: #8e44ad;
+    --waveSelectorRepeat2: #bb8fce;
+    --waveSelectorRepeat3: #5b2c6f;
+    --waveSelectorMirror1: #c9aa0a;
+    --waveSelectorMirror2: #edd766;
+    --waveSelectorMirror3: #7a6705;
+    --waveSelectorOff1: #9e9e9e;
+    --waveSelectorOff2: #b5b5b5;
+    --waveSelectorOff3: #7d7d7d;
+
+    --uiPokemonButton1a: rgba(178, 61, 39, 1);
+    --uiPokemonButton1b: rgba(157, 56, 41, 1);
+    --uiPokemonButton2a: rgba(81, 98, 171, 1);
+    --uiPokemonButton2b: rgba(61, 78, 142, 1);
+    --uiPokemonButton3a: rgba(89, 174, 75, 1);
+    --uiPokemonButton3b: rgba(50, 137, 45, 1);
+    --uiPokemonButton4a: rgba(251,205,43,1);
+    --uiPokemonButton4b: rgba(217,175,30,1);
+    --uiPokemonButton5a: #2a384a;
+    --uiPokemonButton5b: #16212e;
+
+    --uiBackground1: #2a384a;
+    --uiBackground2: #192635;
+    --uiBackground3: #2a384a;
+    --uiBackground4: #212f40;
+    --uiAlterDamage: #16212e;
+
+    --rocket1: #6B7280;
+    --rocket2: rgba(34, 197, 94, 1);
+    --rocket3: rgba(59, 130, 246, 1);
+    --rocket4: rgba(245, 158, 11, 1);
+    --rocket5: rgba(239, 68, 68, 1);
+    --rocket6a: rgba(184, 48, 175);
+    --rocket6b: rgba(184, 22, 173, 1);
+
+    --nextWave: #a33635;
+    --autoWave1: #2c70e3;
+    --autoWave2: #70ac4c;
+
+    --waveBackground: #304459;
+    --arrowHover: #a33635;
+
+    --uiSection: #425e7c;
+    --uiSectionInvert: invert(0.9);
+    --uiMusic: #354b63;
+
+    --save: #70ac4c;
+    --import: #2d70e3;
+
+    --scrollBarColor1: #131c28;
+    --scrollBarColor2: #a33635;
+
+    --sceneBackground: #1f2f42;
+    --sceneHeader: #a33635;
+
+    --profile1: #1c2a3b;
+    --profile2: #192635;
+    --profile3: #16212e;
+    --profile4: #354b63;
+
+    --descriptionBackground: #192635;
+    --tooltip: rgba(0, 0, 0, 0.9);
+
+    /*MENU*/
+    --menuButton1: #2b3b4f;
+    --menuButton2: #293a4f;
+    --menuButtonOff: #a33635;
+    --menuButtonOn: #70ac4c;
+    --menuSection: #192635;
+    --menuReedem: #1f2f42;
+    --menuTitle: #a33635;
+    --menuColorText: #c88d30;
+    --slider: #2d3947;
+    --sliderGrab: #a33635;
+    --link: #8a47a6;
+
+    /*MAP*/
+    --map1: #192635;
+    --map2: #626d7b;
+    --mapTitle: var(--red);
+    --mapTitleSecret: var(--blue);
+
+    --buttonRed: var(--red);
+    --buttonBlue: var(--blue);
+    --buttonGreen: var(--green);
+
+    /*DEX*/
+    --dexTab1: #1f2f42;
+    --dexTab2: #a33635;
+    --dexTab3: #822b2a;
+    --dexColor: #354457;
+
+    --shopPool1: #4465e9;
+    --shopPool2: #f1ac4b;
+    --shopPool3: #ae3ec9;
+    --shopPool4: #5c9e6f;
+
+    --challengeColor1: #a33635;
+}
+
+[data-theme="halloween"] {
+    --stars: #ed8040;
+    --money: #49a662;
+    --barBackground: #352f2b;
+    --barShadow1: #372c2a;
+    --barShadow2: #372c2a;
+    --heartImage: url("../assets/images/icons/candy.png");
+    --heartOffImage: url("../assets/images/icons/no-candy.png");
+
+    --waveSelectorRed1: #8f3c3c;
+    --waveSelectorRed2: #a85959;
+    --waveSelectorRed3: #702a2a;
+    --waveSelectorBlue1: #1b618f;
+    --waveSelectorBlue2: #3b83b3;
+    --waveSelectorBlue3: #0e4469;
+    --waveSelectorRepeat1: #e87c23;
+    --waveSelectorRepeat2: #e08941;
+    --waveSelectorRepeat3: #a8652d;
+    --waveSelectorMirror1: #8a44b3;
+    --waveSelectorMirror2: #8741b0;
+    --waveSelectorMirror3: #5e2182;
+    --waveSelectorOff1: #9e9e9e;
+    --waveSelectorOff2: #b5b5b5;
+    --waveSelectorOff3: #7d7d7d;
+
+    --uiPokemonButton1a: #a52330;
+    --uiPokemonButton1b: #95202b;
+    --uiPokemonButton2a: #6a34e0;
+    --uiPokemonButton2b: #5f2fca;
+    --uiPokemonButton3a: #49ab62;
+    --uiPokemonButton3b: #429a58;
+    --uiPokemonButton4a: #947c5f;
+    --uiPokemonButton4b: #9e8a72;
+    --uiPokemonButton5a: #352f2b;
+    --uiPokemonButton5b: #2c2623;
+
+    --uiBackground1: #2c2623;
+    --uiBackground2: #2c2623;
+    --uiBackground3: #352f2b;
+    --uiBackground4: #2c2623;
+    --uiAlterDamage: #352f2b;
+
+    --rocket1: #b0b2b8;
+    --rocket2: #46b074;
+    --rocket3: #8646b0;
+    --rocket4: #ca5623;
+    --rocket5: #36302e;
+    --rocket6a: #d90963;
+    --rocket6b: #e82378;
+
+    --nextWave: #a52330;
+    --autoWave1: #41779c;
+    --autoWave2: #62874d;
+
+    --waveBackground: #483f39;
+    --arrowHover: #e48a1a;
+
+    --uiSection: #a52330;
+    --uiSectionInvert: invert(0.9);
+    --uiMusic: #e48a1a;
+
+    --save: #e09834;
+    --import: #6a34e0;
+
+    --scrollBarColor1: #483f39;
+    --scrollBarColor2: #e48a1a;
+
+    --sceneBackground: #24211f;
+    --sceneHeader: #e48a1a;
+
+    --profile1: #2c2623;
+    --profile2: #2c2623;
+    --profile3: #352f2b;
+    --profile4: #352f2b;
+
+    --descriptionBackground: #2c2623;
+    --tooltip: rgba(0, 0, 0, 0.9);
+
+    /*MENU*/
+    --menuButton1: #2c2623;
+    --menuButton2: #352f2b;
+    --menuButtonOff: #c98a3c;
+    --menuButtonOn: #37631e;
+    --menuSection: #413c39;
+    --menuReedem: #676361;
+    --menuTitle: #e48a1a;
+    --menuColorText: #ed8040;
+    --slider: #2c2623;
+    --sliderGrab: #6a34e0;
+    --link: #6e4d87;
+
+    /*MAP*/
+    --map1: #352f2b;
+    --map2: #c7bca4;
+    --mapTitle: var(--red);
+    --mapTitleSecret: var(--blue);
+
+    --buttonRed: var(--red);
+    --buttonBlue: var(--blue);
+    --buttonGreen: var(--green);
+
+    /*DEX*/
+    --dexTab1: #2c2623;
+    --dexTab2: #cd7c17;
+    --dexTab3: #e48a1a;
+    --dexColor: #352f2b;
+
+    --shopPool1: #4465e9;
+    --shopPool2: #f1ac4b;
+    --shopPool3: #ae3ec9;
+    --shopPool4: #5c9e6f;
+
+    --challengeColor1: #e48a1a;
+    --ribbonFilter: brightness(0.8) hue-rotate(-90deg);
+
+    --white: #c7bca4;
+    --red: #a52330;
+    --green: #62874d;
+    --blue: #6e4aba;
+}
+
+[data-theme="monochrome"] {
+    --stars: #ebbe35;
+    --money: #487a57;
+    --barBackground: #111;
+    --barShadow1: #222;
+    --barShadow2: #000;
+    --heartImage: url("../assets/images/icons/heart.png");
+    --heartOffImage: url("../assets/images/icons/no-heart.png");
+
+    --waveSelectorRed1: #4f4f4f;
+    --waveSelectorRed2: #424242;
+    --waveSelectorRed3: #303030;
+    --waveSelectorBlue1: #818282;
+    --waveSelectorBlue2: #999999;
+    --waveSelectorBlue3: #616161;
+    --waveSelectorRepeat1: #58465e;
+    --waveSelectorRepeat2: #69596e;
+    --waveSelectorRepeat3: #4f3f55;
+    --waveSelectorMirror1: #7c7d50;
+    --waveSelectorMirror2: #898a62;
+    --waveSelectorMirror3: #707148;
+    --waveSelectorOff1: #9e9e9e;
+    --waveSelectorOff2: #b5b5b5;
+    --waveSelectorOff3: #7d7d7d;
+
+    --uiPokemonButton1a: rgba(170, 170, 170, 1);
+    --uiPokemonButton1b: rgba(170, 170, 170, 1);
+    --uiPokemonButton2a: rgba(140, 140, 140, 1);
+    --uiPokemonButton2b: rgba(140, 140, 140, 1);
+    --uiPokemonButton3a: rgba(100, 100, 100, 1);
+    --uiPokemonButton3b: rgba(100, 100, 100, 1);
+    --uiPokemonButton4a: rgba(70, 70, 70, 1);
+    --uiPokemonButton4b: rgba(70, 70, 70, 1);
+    --uiPokemonButton5a: rgba(30, 30, 30, 1);
+    --uiPokemonButton5b: rgba(30, 30, 30, 1);
+
+    --uiBackground1: #1a1a1a;
+    --uiBackground2: #1a1a1a;
+    --uiBackground3: #111;
+    --uiBackground4: #1a1a1a;
+    --uiAlterDamage: #1e1e1e;
+
+    --rocket1: #999;
+    --rocket2: #bababa;
+    --rocket3: #878787;
+    --rocket4: #616161;
+    --rocket5: #383838;
+    --rocket6a: #1d1d1d;
+    --rocket6b: #1d1d1d;
+
+    --nextWave: #5e4646;
+    --autoWave1: #46555e;
+    --autoWave2: #475e46;
+
+    --waveBackground: #111;
+    --arrowHover: #666;
+
+    --uiSection: #cacdcf;
+    --uiSectionInvert: invert(0.1);
+    --uiMusic: #222;
+
+    --save: #639154;
+    --import: #547391;
+
+    --scrollBarColor1: #111;
+    --scrollBarColor2: #999;
+
+    --sceneBackground: #1a1a1a;
+    --sceneHeader: #777;
+
+    --profile1: #1a1a1a;
+    --profile2: #222;
+    --profile3: #1a1a1a;
+    --profile4: #222;
+
+    --descriptionBackground: rgba(30, 30, 30, 0.9);
+    --tooltip: rgba(0, 0, 0, 0.9);
+
+    /*MENU*/
+    --menuButton1: #222;
+    --menuButton2: #222;
+    --menuButtonOff: #444;
+    --menuButtonOn: #999;
+    --menuSection: #111;
+    --menuReedem: rgba(48, 48, 51, 1);
+    --menuTitle: #777;
+    --menuColorText: #c88d30;
+    --slider: #222;
+    --sliderGrab: #cacdcf;
+    --link: #666;
+
+    /*MAP*/
+    --map1: #111;
+    --map2: #9b9b9b;
+    --mapTitle: #423333;
+    --mapTitleSecret: #333642;
+
+    --buttonRed: #423333;
+    --buttonBlue: #333642;
+    --buttonGreen: #334235;
+
+    /*DEX*/
+    --dexTab1: #1a1a1a;
+    --dexTab2: #333;
+    --dexTab3: #333;
+    --dexColor: #242424;
+
+    --shopPool1: #303340;
+    --shopPool2: #36312a;
+    --shopPool3: #352a38;
+    --shopPool4: #2a362d;
+
+    --challengeColor1: #cacdcf;
+    --white: #cacdcf;
+
+    --heartFilter: invert(50%) brightness(1.4);
+    --starFilter: grayscale(1) brightness(1.4);
+    --ribbonFilter: brightness(0.5) hue-rotate(-60deg);
+
+    --tierPokemon: #2b4031; 
+    --tierCommon: #384166; 
+    --tierUncommon: #273052; 
+    --tierLuxury: #474327;   
+    --tierEpic: #4f3011;  
+    --tierLegendary: #47181e;  
+    --tierMega: #5c5c5c;   
+    --tierAdmin: #562961; 
+}
+
+@font-face {
+    font-family: 'PressStart2P';
+    src: url('./src/assets/fonts/PressStart2P.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'Rubik';
+    src: url('./src/assets/fonts/Rubik.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}
+
+@font-face {
+    font-family: 'PixelMPlus';
+    src: url('./src/assets/fonts/PixelMPlus.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    size-adjust: 120%;
+}
+
+@font-face {
+    font-family: 'NGC';
+    src: url('./src/assets/fonts/NGC.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    size-adjust: 120%;
+}
+
+@font-face {
+    font-family: 'Lexend';
+    src: url('./src/assets/fonts/Lexend.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    size-adjust: 120%;
+}
+
+@font-face {
+    font-family: 'Unown';
+    src: url('./src/assets/fonts/Unown.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    size-adjust: 135%;
+}
+
+@font-face {
+    font-family: 'DynaPuff';
+    src: url('./src/assets/fonts/DynaPuff.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    size-adjust: 120%;
+}
+
+@font-face {
+    font-family: 'Braile';
+    src: url('./src/assets/fonts/Braile.ttf') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+    size-adjust: 120%;
+}
+
+html, body {
+    position: relative;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    width: 100%;
+    height: 100%;
+}
+
+body {
+    user-select: none;
+    font-family: "Lexend", sans-serif;
+    font-weight: 400;
+    font-style: normal;
+    background: #111;
+}
+
+input {
+    all: unset;
+    box-sizing: border-box;
+}
+
+body.is-dragging-start,
+body.is-dragging-start * {
+  cursor: grab !important;
+}
+
+body.is-dragging,
+body.is-dragging * {
+  cursor: grabbing !important;
+}
+
+#view-port {
+    position: fixed;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+#screen-root {
+    position: absolute;
+    width: 1238px;
+    height: 674px;
+}
+
+#screen {
+    position: absolute;
+    width: 1238px;
+    height: 674px;
+    background: #2a2b2d;
+
+    overflow: hidden;
+}
+
+canvas {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: block;
+    outline: 1px solid black;
+    touch-action: none;
+}
+
+.stroke {
+    text-shadow:
+    -1px -1px 0 #000,
+     0   -1px 0 #000,
+     1px -1px 0 #000,
+     1px  0   0 #000,
+     1px  1px 0 #000,
+     0    1px 0 #000,
+    -1px  1px 0 #000,
+    -1px  0   0 #000;
+}
+
+.notification-container {
+    position: absolute;
+    bottom: 0;
+    left: 213px;
+    right: 213px;
+    height: 46px;
+    line-height: 56px;
+    color: var(--white);
+    background: rgba(0, 0, 0, 0.8);
+    text-align: center;
+}
+
+.link-red {
+    cursor: pointer;
+    font-weight: 800;
+    color: var(--link);
+    text-decoration: none;
+    padding-bottom: 2px;
+
+}
+
+.link-red:hover {
+    filter: brightness(1.2);
+}
+
+.link-blue {
+    cursor: pointer;
+    font-weight: 800;
+    color: var(--blue);
+    text-decoration: none;
+}
+
+.pos-right {
+    position: absolute;
+    right: 0px;
+}
+
+.tooltip {
+    position: absolute;
+    max-width: 310px;
+    min-width: 180px;
+    height: auto;
+
+    background: var(--tooltip);
+
+    color: var(--white);
+    padding: 10px;
+    
+    border: 2px solid var(--white);
+    box-shadow: 4px 4px 0 rgba(0, 0, 0, 1); 
+
+    transition: opacity 0.15s;
+    pointer-events: none;
+    display: none;
+    z-index: 9999;
+}
+
+.tooltip-content {
+    display: flex;
+    flex-direction: column; 
+    gap: 4px;
+}
+
+.tooltip-name {
+    width: 100%;
+    color: var(--white);
+    font-size: 11px;
+    font-weight: bold;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    text-align: left; 
+    border-bottom: 2px solid var(--white);
+    padding-bottom: 4px;
+    margin-bottom: 4px;
+    text-shadow: 1px 1px 0px #000;
+}
+
+body[data-font="Lexend"] .tooltip-name { font-size: 13px; }
+
+.tooltip-description {
+    width: 100%;
+    font-size: 10px; 
+    line-height: 1.8;
+    color: var(--white);
+    text-align: left;
+    text-shadow: 1px 1px 0px #000;
+}
+
+.loading-text {
+    position: absolute;
+    width: 100%;
+    top: 80%; 
+    transform: translateY(-50%);
+    text-align: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    pointer-events: none;
+}
+
+.loading-bar-bg {
+    position: absolute;
+    left: 50%;
+    top: 84%;
+    transform: translate(-50%, -50%);
+    width: 400px; 
+    height: 20px; 
+    
+    background-color: rgba(0, 0, 0, 0.1);
+    border: 1px solid #000;
+    
+    box-shadow: inset 0 0 1px rgba(0,0,0,0.8);
+    overflow: hidden;
+    pointer-events: none;
+}
+
+.loading-bar {
+    height: 100%;
+    width: 0%;
+    background-color: var(--red);
+    
+    box-shadow: inset 0 1px 0 rgba(255,255,255,0.2);
+    
+    border-right: 1px solid #000;
+    transition: width 0.4s ease;
+    pointer-events: none;
+}
+
+.loading-title {
+    position: absolute;
+    width: 100%;
+    top: 70px;
+    text-align: center;
+    font-size: 42px;
+    color: var(--white);
+    font-family: "PressStart2P";
+    filter: drop-shadow(2px 2px black);
+}
+
+.loading-subtitle {
+    position: absolute;
+    width: 100%;
+    top: 115px;
+    text-align: center;
+    font-size: 20.5px;
+    color: var(--red);
+    font-family: "PressStart2P";
+    filter: drop-shadow(2px 2px black);
+}
+
+.loading-pun {
+    position: absolute;
+    width: 100%;
+    top: 89%; 
+    transform: translateY(-50%);
+    text-align: center;
+    font-size: 10px;
+    font-weight: bold;
+    color: var(--white);
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    pointer-events: none;
+}
