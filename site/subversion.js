@@ -4,16 +4,37 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.89';
+  const SUB = '0.90';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.90',
+      date: Date.UTC(2026, 10, 14, 23, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.90`,
+      summary: 'PokéBonk Lite: Chirrido, Sonido Metálico, Rocío Ácido y Patada Trueno bajan las defensas de los salvajes.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**: al llegar al **nivel 12**, tu Pokémon aprende un movimiento según su tipo. **No ocupa hueco** de movimiento ni de vitaminas y lo usa solo **cada 15 s** sobre todos los salvajes cercanos (también Alfas y jefes): durante **8 s** reciben más daño de todo.`,
+        `- **Chirrido** (Normal, Volador, Siniestro, Fantasma, Hada): ×1,35 de daño recibido y el mayor alcance.`,
+        `- **Sonido Metálico** (Acero, Eléctrico, Hielo, Roca, Dragón, Psíquico): ×1,3 y **rompe los escudos** de los escuderos.`,
+        `- **Rocío Ácido** (Veneno, Agua, Planta, Bicho): ×1,4 y los **envenena**.`,
+        `- **Patada Trueno** (Lucha, Fuego, Tierra): ×1,3 y una **patada** a los que estén pegados a ti (daño y aturdimiento).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.89',
       date: Date.UTC(2026, 10, 14, 22, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.89`,
@@ -2073,6 +2094,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.90',
+      date: '2026-11-14',
+      title: 'Movimientos que bajan defensas (Lite).',
+      notes: [
+        ['new', 'Lite: Chirrido, Sonido Metálico, Rocío Ácido o Patada Trueno según tu tipo, desde el nivel 12, sin ocupar hueco.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.89',

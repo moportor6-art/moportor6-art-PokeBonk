@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Movimientos que bajan defensas en la Lite (Subversión 0.90)
+- `site/debilitar.js` (nuevo, solo Lite): desde el nivel 12 aprende un movimiento según el primer tipo (Chirrido, Sonido Metálico, Rocío Ácido, Patada Trueno); cada 15 s marca a los salvajes cercanos 8 s y `run.combat.hit` (envuelto) multiplica su daño recibido (×1,3-×1,4); Sonido Metálico quita `E.shield`, Rocío Ácido envenena y Patada Trueno golpea y aturde a los pegados.
+- `index.html`: carga `debilitar.js` tras `dificultad.js`.
+
 ## Defensa real en la Lite (Subversión 0.89)
 - `dificultad.js`: envuelve `player.recompute` y suma a `stats.armor` (def + spd de `data/pokemon.json` de la especie actual) / 8 + 0,5·nivel; recalcula al subir de nivel o evolucionar. El juego solo daba armadura relativa a las propias estadísticas de la línea final (5-16 de base).
 
