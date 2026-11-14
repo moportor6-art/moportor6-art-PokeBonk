@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Dificultad Remaster, solo Lite (Subversión 0.84)
+- `site/dificultad.js` (nuevo, solo con `PB_EDICION === 'lite'`, modo `standard` sin torre/sin fin/expedición): en `PB_REG_E` multiplica PS (×2·(1+0,08·min)) y daño (×1,8·(1+0,06·min)) de normales, élites y Alfas, ×(1+0,03·índice de mapa en el orden de la Liga) y ×presión; Alfas ×40/22 PS y ×3/1,8 daño con escolta de 3-5; 4 % de élites en tier 0; Alfa extra con `director.fire('alpha')` cada 2,5-4 min desde el minuto 2; embestida (`kx/kz`) con aviso en el suelo; presión adaptativa cada 30 s (×1,1 hasta ×3, o ÷1,1).
+- `index.html`: carga `dificultad.js` tras `clima.js`.
+
 ## Curanderos y escuderos más duros (Subversión 0.83)
 - `curanderos.js`: `mult` = min(2,4; 1,6 + 0,03·avance)·(1 + 0,15·tier); autocuración 15 %; escudo tope 40 % (+15 % por pulso, hasta 12 salvajes); aparecen desde los 12 s de zona, prob. 0,25, espera 9→4 s, tope 4/5/7 vivos por tipo; PS ×3 curanderos, ×2,5 escuderos.
 

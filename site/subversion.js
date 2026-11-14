@@ -4,16 +4,38 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.83';
+  const SUB = '0.84';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.84',
+      date: Date.UTC(2026, 10, 14, 6, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.84`,
+      summary: 'PokéBonk Lite: nueva «Dificultad Remaster», mucho más dura y progresiva por mapa.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**, en las partidas normales y en el modo historia:`,
+        `- **Salvajes más duros**: PS ×2 desde el principio (+8 % por minuto de zona) y daño ×1,8 (+6 % por minuto).`,
+        `- **Cada mapa, más difícil que el anterior**: +3 % por mapa en el orden de la Liga (de Bosque Verde a Paldea), encima de la dificultad de cada región.`,
+        `- **Élites también en Normal** (4 % de los salvajes).`,
+        `- **Alfas temibles**: PS ×40 y daño ×3 respecto a un salvaje, llegan con 3-5 de escolta, **embisten** (aviso rojo en el suelo: ¡apártate!) y salen el doble desde el minuto 2. Se siguen pudiendo capturar.`,
+        `- **Presión adaptativa**: cada 30 s, si vas sobrado sube un 10 % (hasta ×3); si vas muy herido, baja.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.83',
       date: Date.UTC(2026, 10, 14, 5, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.83`,
@@ -1957,6 +1979,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.84',
+      date: '2026-11-14',
+      title: 'Dificultad Remaster (Lite).',
+      notes: [
+        ['balance', 'Lite: salvajes y Alfas mucho más duros, élites en Normal, embestidas de Alfa con escolta y presión adaptativa.'],
+        ['balance', 'Lite: cada mapa es un poco más difícil que el anterior, de Kanto a Paldea.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.83',
