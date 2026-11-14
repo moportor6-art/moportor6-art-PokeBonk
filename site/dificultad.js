@@ -8,6 +8,7 @@
      en el suelo y salen el doble (uno extra cada 2,5-4 min desde el minuto 2);
    - presión adaptativa: cada 30 s, si vas sobrado (más del 80 % de PS y matando rápido) sube un 10 % (hasta ×3);
      si vas por debajo del 30 % de PS, baja.
+   - precios: mejoras del Laboratorio y Poké Balls del mapa un 40 % más baratas (0.88, todos los modos).
    Ganchos: PB_REG_E (aparición, encadenado) y run.director.fire('alpha') del juego. */
 (() => {
   if (window.PB_EDICION !== 'lite') return;
@@ -50,6 +51,27 @@
       E.maxHp[i] *= hp; E.hp[i] *= hp; E.dmg[i] *= dmg;
     } catch {}
   };
+
+  // Precios (0.88): mejoras del Laboratorio y Poké Balls del mapa un 40 % más baratas (en todos los modos de la Lite).
+  const BARATO = 0.6;
+  const labBarato = () => {
+    const defs = window.PB_LAB?.defs;
+    if (!defs?.length) return setTimeout(labBarato, 500);
+    for (const d of defs) {
+      if (d.__pbBarato) continue;
+      const c = d.cost;
+      d.cost = lv => Math.max(1, Math.round(c(lv) * BARATO));
+      d.__pbBarato = true;
+    }
+  };
+  labBarato();
+  setInterval(() => {
+    const ia = window.__pbRun?.interactables;
+    if (!ia || ia.__pbBarato || typeof ia.chestCost !== 'function') return;
+    const c = ia.chestCost.bind(ia);
+    ia.chestCost = () => Math.max(1, Math.round(c() * BARATO));
+    ia.__pbBarato = true;
+  }, 200);
 
   const aviso = (run, t) => { try { run.ui.toast(t, null); } catch {} };
   setInterval(() => {

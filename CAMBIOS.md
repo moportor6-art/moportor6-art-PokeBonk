@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Precios más bajos en la Lite (Subversión 0.88)
+- `dificultad.js`: envuelve `cost` de cada mejora de `PB_LAB.defs` y `run.interactables.chestCost` (×0,6, en todos los modos de la Lite).
+
 ## Laboratorio de la historia (Subversión 0.87)
 - `historia.js` (`laboratorio`): al repintar tras una compra se restaura el desplazamiento de la capa, la caja y la lista.
 

@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.87';
+  const SUB = '0.88';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.88',
+      date: Date.UTC(2026, 10, 14, 20, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.88`,
+      summary: 'PokéBonk Lite: Laboratorio y Poké Balls del mapa un 40 % más baratos.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**, para compensar la Dificultad Remaster:`,
+        `- **Mejoras del Laboratorio un 40 % más baratas** (en el menú y en el Laboratorio del modo historia).`,
+        `- **Poké Balls del mapa un 40 % más baratas** (sigue sumándose el descuento de la Pepita Grande).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.87',
       date: Date.UTC(2026, 10, 14, 20, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.87`,
@@ -2034,6 +2053,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.88',
+      date: '2026-11-14',
+      title: 'Precios más bajos (Lite).',
+      notes: [
+        ['balance', 'Lite: Laboratorio y Poké Balls del mapa un 40 % más baratos.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.87',
