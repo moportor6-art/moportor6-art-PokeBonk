@@ -8,13 +8,14 @@
      Las bajas cuentan desde que acaba el Dynamax anterior. Dura DMAX_SECS segundos de juego.
    No se usa en Duelos. Sprites de megas: PMD Sprite Repository (PMDCollab), uso no comercial con crédito. */
 (() => {
-  // PokéBonk Lite (0.85, con su Dificultad Remaster): carga fija de 50 bajas y 3 minutos por transformación.
+  // PokéBonk Lite (0.85, con su Dificultad Remaster): carga fija de 25 bajas (0.86), 3 minutos por transformación y
+  // sus estadísticas un 30 % más fuertes (×1,3 sobre cada mejora).
   const LITE = window.PB_EDICION === 'lite';
-  const MEGA_KILLS_EARLY = LITE ? 50 : 150;
-  const MEGA_KILLS_LATE = LITE ? 50 : 300;
+  const MEGA_KILLS_EARLY = LITE ? 25 : 150;
+  const MEGA_KILLS_LATE = LITE ? 25 : 300;
   const MEGA_SECS = LITE ? 180 : 40;
-  const DMAX_KILLS_EARLY = LITE ? 50 : 100;
-  const DMAX_KILLS_LATE = LITE ? 50 : 300;
+  const DMAX_KILLS_EARLY = LITE ? 25 : 100;
+  const DMAX_KILLS_LATE = LITE ? 25 : 300;
   const DMAX_EARLY_SECS = 300;
   const DMAX_SECS = LITE ? 180 : 20;
 
@@ -43,12 +44,13 @@
   for (const [k, l] of Object.entries(window.PB_MEGAS_ALT2 ?? {})) if (MEGAS[k]) (ALT[k] ??= []).push(...l);
   // Aspecto Gigamax durante el Dynamax.
   const GMAX = window.PB_GMAX ?? {};
+  const K = LITE ? 1.3 : 1;
   const MEGA_MODS = [
-    { stat: 'damage', mul: 1.25 }, { stat: 'maxHp', mul: 1.15 },
-    { stat: 'attackSpeed', mul: 1.1 }, { stat: 'armor', add: 10 }
+    { stat: 'damage', mul: 1.25 * K }, { stat: 'maxHp', mul: 1.15 * K },
+    { stat: 'attackSpeed', mul: 1.1 * K }, { stat: 'armor', add: 10 * K }
   ];
   const DMAX_MODS = [
-    { stat: 'damage', mul: 1.5 }, { stat: 'maxHp', mul: 1.5 }, { stat: 'area', mul: 1.3 }
+    { stat: 'damage', mul: 1.5 * K }, { stat: 'maxHp', mul: 1.5 * K }, { stat: 'area', mul: 1.3 * K }
   ];
 
   const M = {
@@ -139,7 +141,7 @@
       return Math.max(0, (r?.stats?.kills ?? 0) - (s?.dmaxBase ?? 0));
     },
 
-    // Empieza una recarga nueva: 100 bajas en los primeros 5 minutos, 300 después (en la Lite, siempre 50).
+    // Empieza una recarga nueva: 100 bajas en los primeros 5 minutos, 300 después (en la Lite, siempre 25).
     dmaxReset() {
       const r = M.run, s = M.st;
       s.dmaxBase = r.stats?.kills ?? 0;

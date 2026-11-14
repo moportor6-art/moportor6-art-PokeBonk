@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Mega y Dynamax más fuertes en la Lite (Subversión 0.86)
+- `mega-dynamax.js`: en la Lite, recarga de 25 bajas y cada mejora de `MEGA_MODS`/`DMAX_MODS` ×1,3 (`K`).
+
 ## Mega y Dynamax en la Lite (Subversión 0.85)
 - `mega-dynamax.js`: con `PB_EDICION === 'lite'`, recarga fija de 50 bajas (mega y Dynamax) y 180 s de duración; la completa sigue con 150/100 → 300 bajas y 40/20 s.
 
