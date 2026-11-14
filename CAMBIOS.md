@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Mega y Dynamax en la Lite (Subversión 0.85)
+- `mega-dynamax.js`: con `PB_EDICION === 'lite'`, recarga fija de 50 bajas (mega y Dynamax) y 180 s de duración; la completa sigue con 150/100 → 300 bajas y 40/20 s.
+
 ## Dificultad Remaster, solo Lite (Subversión 0.84)
 - `site/dificultad.js` (nuevo, solo con `PB_EDICION === 'lite'`, modo `standard` sin torre/sin fin/expedición): en `PB_REG_E` multiplica PS (×2·(1+0,08·min)) y daño (×1,8·(1+0,06·min)) de normales, élites y Alfas, ×(1+0,03·índice de mapa en el orden de la Liga) y ×presión; Alfas ×40/22 PS y ×3/1,8 daño con escolta de 3-5; 4 % de élites en tier 0; Alfa extra con `director.fire('alpha')` cada 2,5-4 min desde el minuto 2; embestida (`kx/kz`) con aviso en el suelo; presión adaptativa cada 30 s (×1,1 hasta ×3, o ÷1,1).
 - `index.html`: carga `dificultad.js` tras `clima.js`.

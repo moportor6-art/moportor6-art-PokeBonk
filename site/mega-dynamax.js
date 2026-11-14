@@ -8,13 +8,15 @@
      Las bajas cuentan desde que acaba el Dynamax anterior. Dura DMAX_SECS segundos de juego.
    No se usa en Duelos. Sprites de megas: PMD Sprite Repository (PMDCollab), uso no comercial con crédito. */
 (() => {
-  const MEGA_KILLS_EARLY = 150;
-  const MEGA_KILLS_LATE = 300;
-  const MEGA_SECS = 40;
-  const DMAX_KILLS_EARLY = 100;
-  const DMAX_KILLS_LATE = 300;
+  // PokéBonk Lite (0.85, con su Dificultad Remaster): carga fija de 50 bajas y 3 minutos por transformación.
+  const LITE = window.PB_EDICION === 'lite';
+  const MEGA_KILLS_EARLY = LITE ? 50 : 150;
+  const MEGA_KILLS_LATE = LITE ? 50 : 300;
+  const MEGA_SECS = LITE ? 180 : 40;
+  const DMAX_KILLS_EARLY = LITE ? 50 : 100;
+  const DMAX_KILLS_LATE = LITE ? 50 : 300;
   const DMAX_EARLY_SECS = 300;
-  const DMAX_SECS = 20;
+  const DMAX_SECS = LITE ? 180 : 20;
 
   // especie base -> mega (sid = id del sprite; shiny = tiene hoja variocolor propia;
   // types = tipos de la mega si cambian. Las demás conservan los tipos del Pokémon base, como en los juegos)
@@ -137,7 +139,7 @@
       return Math.max(0, (r?.stats?.kills ?? 0) - (s?.dmaxBase ?? 0));
     },
 
-    // Empieza una recarga nueva: 100 bajas en los primeros 5 minutos, 300 después.
+    // Empieza una recarga nueva: 100 bajas en los primeros 5 minutos, 300 después (en la Lite, siempre 50).
     dmaxReset() {
       const r = M.run, s = M.st;
       s.dmaxBase = r.stats?.kills ?? 0;

@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.84';
+  const SUB = '0.85';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.85',
+      date: Date.UTC(2026, 10, 14, 7, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.85`,
+      summary: 'PokéBonk Lite: Mega y Dynamax cada 50 bajas y 3 minutos por transformación.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**, para equilibrar la Dificultad Remaster:`,
+        `- **Megaevolución y Dynamax** se cargan con **50 bajas fijas** (antes 100-150 al principio y 300 después).`,
+        `- Cada transformación dura **3 minutos** (antes 40 s la mega y 20 s el Dynamax).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.84',
       date: Date.UTC(2026, 10, 14, 6, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.84`,
@@ -1979,6 +1998,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.85',
+      date: '2026-11-14',
+      title: 'Mega y Dynamax más a mano (Lite).',
+      notes: [
+        ['balance', 'Lite: Mega y Dynamax cada 50 bajas y 3 minutos por transformación.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.84',
