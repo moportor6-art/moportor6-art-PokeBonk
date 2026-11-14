@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.78';
+  const SUB = '0.79';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.79',
+      date: Date.UTC(2026, 10, 14, 2, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.79`,
+      summary: 'Nueva edición PokéBonk Lite: solo PokéBonk, mucho más ligera.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **PokéBonk Lite** (archivo **PokeBonk-Lite.apk** en cada release): el mismo PokéBonk Remaster con todo lo nuestro, pero sin la Sala de juegos (PokéIsaac, PokéSurvivor, Pokémon Survivors, PokéBonk TD, PokéPlunder, Pokémon Overlord y Pokelike). Pesa mucho menos.`,
+        `- Es otra app («PokéBonk Lite»): se puede tener instalada junto a la completa, con sus propias partidas. Se actualiza sola igual que la completa, sin bajar los otros juegos.`,
+        `- La edición completa sigue saliendo como siempre (PokeBonk.apk y Windows).`,
+        `- El cooperativo por Wi-Fi funciona entre Lite y completa si son de la misma versión.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.78',
       date: Date.UTC(2026, 10, 14, 1, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.78`,
@@ -1855,6 +1875,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.79',
+      date: '2026-11-14',
+      title: 'Edición PokéBonk Lite.',
+      notes: [
+        ['new', 'Nueva edición PokéBonk Lite: solo PokéBonk, sin la Sala de juegos, mucho más ligera.'],
+        ['new', 'Se instala junto a la completa y se actualiza sola sin bajar los otros juegos.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.78',

@@ -197,6 +197,8 @@ public class MainActivity extends Activity {
     }
 
     public final class MenuBridge {
+        // Edición del juego (edicion.js): PokéBonk Lite es el paquete «.lite».
+        @JavascriptInterface public String edicion() { return getPackageName().endsWith(".lite") ? "lite" : "completa"; }
         // Subversión propia: orientación elegida en Ajustes (landscape, portrait o auto). Se guarda para el próximo arranque.
         @JavascriptInterface public void setOrientation(String mode) {
             final String m = mode == null ? "landscape" : mode;

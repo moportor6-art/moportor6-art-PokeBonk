@@ -61,7 +61,8 @@ import java.util.concurrent.atomic.AtomicLong;
  *    instalador de Android (PackageInstaller). Se comprueba su SHA-256 antes de instalarlo.
  */
 final class Actualizador {
-    static final String PLAT = "android";
+    // "android-lite" en PokéBonk Lite (paquete .lite): su APK completo es otro y no lleva los otros juegos.
+    static String PLAT = "android";
     static final long LIMITE = 95L * 1024 * 1024;   // más que esto va partido en el contenido publicado
     static final long TROZO = 90L * 1024 * 1024;
     interface Emisor { void emitir(JSONObject ev); }
@@ -82,6 +83,7 @@ final class Actualizador {
         this.act = act;
         this.repo = repo;
         this.emisor = emisor;
+        if (act.getPackageName().endsWith(".lite")) PLAT = "android-lite";
         this.dir = new File(act.getFilesDir(), "contenido");
         this.estFile = new File(dir, "estado.json");
         try { base = new JSONObject(new String(leerAsset("site/contenido.json"), StandardCharsets.UTF_8)); } catch (Exception e) { base = null; }
@@ -323,6 +325,8 @@ final class Actualizador {
                 String m = it.next();
                 JSONObject info = mm.getJSONObject(m);
                 if (info.optString("hash").equals(hashActual(m))) continue;
+                // Lite: los módulos que no trae (los otros juegos) no se bajan.
+                if (PLAT.endsWith("-lite") && listaBase(m).length() == 0 && (est.optJSONObject("modulos") == null || !est.optJSONObject("modulos").has(m))) continue;
                 byte[] lb = bajar(url(raizArch, "contenido/" + m + ".json"));
                 if (!sha(lb).equals(info.optString("hash"))) throw new Exception("La lista de " + info.optString("nombre") + " no coincide con el manifiesto.");
                 JSONObject nueva = new JSONObject(new String(lb, StandardCharsets.UTF_8)).getJSONObject("archivos");

@@ -156,6 +156,11 @@
     ['PokéPlunder', 'pd10', 'Saqueador', (d) => d.plunder.battles >= 10, 'Gana 10 combates', 150],
     ['PokéPlunder', 'pdw', 'Botín completo', (d) => d.plunder.wins >= 1, 'Gana 1 partida', 500]
   ];
+  // PokéBonk Lite (edicion.js): sin los otros juegos, sus insignias no se pueden conseguir.
+  if (window.PB_EDICION === 'lite') {
+    const fuera = new Set(['Pokelike', 'PokéBonk TD', 'PokéIsaac', 'PokéPlunder', 'PokéSurvivor', 'Pokémon Overlord', 'Pokémon Survivors']);
+    for (let i = INSIGNIAS.length - 1; i >= 0; i--) if (fuera.has(INSIGNIAS[i][0])) INSIGNIAS.splice(i, 1);
+  }
   // Insignias de las regiones nuevas y de los Retos (PokéBonk). Llevan 'region' al final: no cuentan para el
   // Maestro (que pide insignias de juegos distintos). «Campeón de X» además se enseña como título.
   function datosRegiones(pf) {
@@ -212,6 +217,7 @@
   };
   const JUEGOS_P = [...new Set(INSIGNIAS.map(i => i[0]))];
   const MAESTRO = { id: 'maestro', name: 'Maestro de PokéBonk Remaster', need: 5, dust: 1500 };
+  if (window.PB_EDICION === 'lite') MAESTRO.need = 1; // en la Lite solo hay un juego
   const juegosConInsignia = () => new Set(INSIGNIAS.filter(i => !i[6] && st.badges[i[1]]).map(i => i[0])).size;
 
 

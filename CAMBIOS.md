@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Edición PokéBonk Lite (Subversión 0.79)
+- `.github/workflows/compilar.yml`: trabajo `lite` (sin los otros juegos, `config.json` con paquete `….lite` y nombre «PokéBonk Lite») que publica `PokeBonk-Lite.apk` en la release; `contenido` lo espera y lo añade al manifiesto.
+- `site/edicion.js` (nuevo): `PB_EDICION` = 'lite' o 'completa' según el paquete (`AndroidMenu.edicion()` en `MainActivity`). En la Lite: `pokeisaac-boton.js` no pone la Sala de juegos y `remaster.js` quita las insignias de los otros juegos (Maestro pide 1 juego).
+- `Actualizador.java`: en el paquete `.lite` usa la plataforma `android-lite` (su APK completo) y no baja los módulos de otros juegos. `tools/contenido.py`: huella `android-lite` (sin `config.json`) y `--apk-lite`.
+
 ## Medallas oficiales con bonificaciones (Subversión 0.78)
 - `assets/medallas/<lider>.png` (64): sprites de PokeAPI/sprites (`sprites/badges`); Alola usa `ui/types/<tipo>.png`. Créditos en `remaster.js`.
 - `gimnasios.js`: tabla `BONO` (la de los Alfas de apoyo por tipo, a la mitad); al empezar cada partida (menos duelos) añade a `run.tempMods` una por medalla y +3 % de daño por región completa, y recalcula. La sección Gimnasio enseña las medallas (gris las que faltan, con su bono de título).

@@ -72,6 +72,7 @@
   window.PB_GAMES = { open, list: JUEGOS };
 
   const place = () => {
+    if (window.PB_EDICION === 'lite') return; // PokéBonk Lite: sin Sala de juegos
     const small = document.querySelector('.jay-sidebar .mm-small');
     if (!small || small.querySelector('.pb-isaac')) return;
     const b = document.createElement('button');

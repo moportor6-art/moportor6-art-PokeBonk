@@ -11,7 +11,7 @@ set -euo pipefail
 TAG="$1"; SITIO="$2"; COMPLETOS="$3"
 REPO="${GITHUB_REPOSITORY}"
 
-python3 tools/contenido.py publicar "$SITIO" pub --tag "$TAG" --repo "$REPO" --apk "$COMPLETOS/PokeBonk.apk" --exe "$COMPLETOS/PokeBonk-Windows-Instalador.exe"
+python3 tools/contenido.py publicar "$SITIO" pub --tag "$TAG" --repo "$REPO" --apk "$COMPLETOS/PokeBonk.apk" --exe "$COMPLETOS/PokeBonk-Windows-Instalador.exe" --apk-lite "$COMPLETOS/PokeBonk-Lite.apk"
 echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/k.jks"
 keytool -importkeystore -noprompt -srckeystore "$RUNNER_TEMP/k.jks" -srcstorepass "$KEYSTORE_PASSWORD" -srcalias pokebonk \
   -destkeystore "$RUNNER_TEMP/k.p12" -deststoretype PKCS12 -deststorepass "$KEYSTORE_PASSWORD" -destkeypass "$KEYSTORE_PASSWORD"

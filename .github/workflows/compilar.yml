@@ -371,6 +371,78 @@ jobs:
           name: PokeBonk-apk
           path: dist/PokeBonk.apk
 
+  # PokéBonk Lite: solo PokéBonk, sin los otros juegos (que siguen en el repositorio). Otro paquete (.lite), así se
+  # puede tener instalada junto a la completa; edicion.js oculta la Sala de juegos y sus insignias.
+  lite:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Quitar los otros juegos
+        shell: bash
+        run: |
+          rm -rf site/pokeisaac site/pokelike site/pokepath site/pokemonsurvivors site/pokeplunder site/pokeoverlord site/pokesurvivor
+          du -sh site
+
+      - name: Paquete y nombre de la Lite
+        run: |
+          jq '.package += ".lite" | .appName = "PokéBonk Lite"' config.json > c.json && mv c.json config.json
+          cat config.json
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+
+      - name: Instalar build-tools y plataforma Android 35
+        run: |
+          SDK="${ANDROID_SDK_ROOT:-$ANDROID_HOME}"
+          echo "ANDROID_SDK_ROOT=$SDK" >> "$GITHUB_ENV"
+          SM=$(ls "$SDK"/cmdline-tools/*/bin/sdkmanager | head -n1)
+          yes | "$SM" --licenses > /dev/null || true
+          "$SM" "build-tools;35.0.0" "platforms;android-35"
+
+      - name: Número de versión
+        id: ver
+        run: |
+          TAG="${GITHUB_REF_NAME}"
+          NUM=$(echo "$TAG" | grep -oE '[0-9]+' | tail -n1)
+          if [ -z "$NUM" ]; then NUM=$(jq .versionCode config.json); fi
+          echo "code=$NUM" >> "$GITHUB_OUTPUT"
+
+      - name: Clave de firma (secreto KEYSTORE_BASE64)
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then echo "Falta el secreto KEYSTORE_BASE64"; exit 1; fi
+          echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/clave.keystore"
+
+      - name: Manifiesto del actualizador
+        run: python3 tools/contenido.py base site --version ${{ steps.ver.outputs.code }}
+
+      - name: Compilar
+        env:
+          KEYSTORE_FILE: ${{ runner.temp }}/clave.keystore
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          set -o pipefail
+          if ! python3 build.py --version-code ${{ steps.ver.outputs.code }} 2>&1 | tee build.log; then
+            tail -n 25 build.log | while IFS= read -r l; do echo "::error::$l"; done
+            exit 1
+          fi
+          mv dist/PokeBonk.apk dist/PokeBonk-Lite.apk
+          ls -la dist
+
+      - name: Publicar en la release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dist/PokeBonk-Lite.apk
+          name: PokeBonk ${{ github.ref_name }}
+          prerelease: true
+
   # Versión de Windows: el mismo juego dentro de Electron. Solo al publicar una etiqueta o a mano.
   windows:
     needs: survivor
@@ -521,7 +593,7 @@ jobs:
   # Actualizador: publica el contenido de esta versión archivo por archivo (rama y etiqueta contenido-vN) y su
   # manifiesto firmado con la clave del APK, con el APK y el instalador completos para cuando cambie la app.
   contenido:
-    needs: [apk, windows]
+    needs: [apk, windows, lite]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
@@ -548,7 +620,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p completos
-          for i in 1 2 3; do gh release download "$GITHUB_REF_NAME" -D completos -p PokeBonk.apk -p PokeBonk-Windows-Instalador.exe --clobber && break; sleep 20; done
+          for i in 1 2 3; do gh release download "$GITHUB_REF_NAME" -D completos -p PokeBonk.apk -p PokeBonk-Windows-Instalador.exe -p PokeBonk-Lite.apk --clobber && break; sleep 20; done
           ls -la completos
 
       - name: Publicar (manifiesto firmado, rama contenido y etiqueta contenido-vN)
