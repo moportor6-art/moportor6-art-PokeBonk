@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Naturalezas en la Lite (Subversión 0.91)
+- `site/naturalezas.js` (nuevo, solo Lite): 25 naturalezas en `profile.pbNat[especie inicial]`; se ofrecen 3 (por `cls` de `player.moves` y por Def+DefEsp frente a At+AtEsp) un nivel antes de la primera evolución (misma cuenta que `runEvolution`) o en el 16, con `run.state='modal'` y `run.resume()`; `player.recompute` envuelto multiplica `physical`/`special`/`armor`/`maxHp`/`moveSpeed`+`attackSpeed` (×1,15 / ×0,9, neutras ×1,04). Ficha en la pausa y caja en el Laboratorio para olvidarla (300 de Polvo).
+- `index.html`: carga `naturalezas.js` tras `debilitar.js`.
+
 ## Movimientos que bajan defensas en la Lite (Subversión 0.90)
 - `site/debilitar.js` (nuevo, solo Lite): desde el nivel 12 aprende un movimiento según el primer tipo (Chirrido, Sonido Metálico, Rocío Ácido, Patada Trueno); cada 15 s marca a los salvajes cercanos 8 s y `run.combat.hit` (envuelto) multiplica su daño recibido (×1,3-×1,4); Sonido Metálico quita `E.shield`, Rocío Ácido envenena y Patada Trueno golpea y aturde a los pegados.
 - `index.html`: carga `debilitar.js` tras `dificultad.js`.

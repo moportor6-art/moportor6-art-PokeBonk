@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.90';
+  const SUB = '0.91';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.91',
+      date: Date.UTC(2026, 10, 15, 0, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.91`,
+      summary: 'PokéBonk Lite: naturalezas que se eligen antes de la primera evolución.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**: **naturalezas** (las 25 clásicas).`,
+        `- Un nivel antes de su **primera evolución** (nivel 16 si no evoluciona), la partida se detiene y eliges entre **3**, sugeridas por tus **ataques equipados** (físicos, especiales o mezcla) y por si tu Pokémon es más **defensivo** que atacante. La primera es la recomendada.`,
+        `- **+15 %** a una estadística y **−10 %** a otra (las neutras, +4 % a todo): Ataque = daño físico, At. Esp. = daño especial, Defensa = armadura, Def. Esp. = PS, Velocidad = movimiento y ataque.`,
+        `- Es **para siempre** en ese Pokémon (también tu compañero del modo historia). Se ve en la pausa y en el Laboratorio, donde puedes **olvidarla por 300 de Polvo** para elegir otra.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.90',
       date: Date.UTC(2026, 10, 14, 23, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.90`,
@@ -2094,6 +2114,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.91',
+      date: '2026-11-15',
+      title: 'Naturalezas (Lite).',
+      notes: [
+        ['new', 'Lite: naturalezas según tus ataques y tu forma de luchar, elegidas antes de la primera evolución y para siempre.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.90',
