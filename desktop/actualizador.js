@@ -18,7 +18,8 @@ const fs = require('fs');
 const crypto = require('crypto');
 
 const REPO = 'moportor6-art/moportor6-art-PokeBonk';
-const PLAT = 'windows';
+// PokeBonk Lite: su instalador completo es otro y no lleva los otros juegos.
+const PLAT = /lite/i.test(app.getName()) ? 'windows-lite' : 'windows';
 const LIMITE = 95 * 1024 * 1024; // más que esto va partido en el contenido publicado
 const TROZO = 90 * 1024 * 1024;
 
@@ -101,6 +102,8 @@ module.exports = function crearActualizador({ siteRoot, log, emitir }) {
     try { return JSON.parse(fs.readFileSync(f, 'utf8')).archivos; } catch { return {}; }
   };
   const listaBase = (m) => { try { return JSON.parse(fs.readFileSync(path.join(siteRoot, 'contenido', m + '.json'), 'utf8')).archivos; } catch { return {}; } };
+  // En la Lite, los módulos de los otros juegos no vienen (lista base vacía) y no se bajan.
+  const fuera = (m) => PLAT.endsWith('-lite') && !Object.keys(listaBase(m)).length && !est.modulos?.[m];
   const hashActual = (m) => est.modulos?.[m] || base?.modulos?.[m]?.hash;
   const versionActual = () => est.dir ? est.version : base?.version;
   const subActual = () => est.dir ? est.sub : base?.sub;
@@ -129,6 +132,7 @@ module.exports = function crearActualizador({ siteRoot, log, emitir }) {
       p.modulos = [];
       for (const [m, info] of Object.entries(man.modulos || {})) {
         if (info.hash === hashActual(m)) continue;
+        if (fuera(m)) continue;
         const lista = await bajar(url(p.raiz, `contenido/${m}.json`));
         if (sha(lista) !== info.hash) throw new Error(`La lista de ${info.nombre} no coincide con el manifiesto.`);
         const nueva = JSON.parse(lista.toString('utf8')).archivos;
@@ -210,7 +214,7 @@ module.exports = function crearActualizador({ siteRoot, log, emitir }) {
       try { await Promise.all(Array.from({ length: 6 }, trabajador)); }
       catch (e) { roto = true; setTimeout(() => fs.rmSync(tmp, { recursive: true, force: true }), 3000); throw e; }
       fs.renameSync(tmp, path.join(DIR, nuevoDir));
-      const todos = Object.keys(plan.man.modulos).every(m => (modulos[m] || base.modulos?.[m]?.hash) === plan.man.modulos[m].hash);
+      const todos = Object.keys(plan.man.modulos).every(m => fuera(m) || (modulos[m] || base.modulos?.[m]?.hash) === plan.man.modulos[m].hash);
       est = {
         ...est,
         anterior: { dir: est.dir, modulos: est.modulos || {}, borrados: est.borrados || [], version: est.version, sub: est.sub },

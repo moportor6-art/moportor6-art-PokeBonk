@@ -795,7 +795,7 @@ var PBLocal = class {
     // Tier multipliers are the real ones shown in the region screen (x1 / x1.75 / x2.5).
     let stardust = Math.round((20 + res.kills / 10 + (res.stage - 1) * 30 + (res.victory ? 150 : 0)) * [1, 1.75, 2.5][res.tier]);
     stardust = Math.round(stardust * (res.pbMul ?? 1)); // bono de forastero en Hoenn (subversión)
-    stardust += Math.max(0, Math.round(res.pbDust ?? 0)); // Fiebre del Polvo Estelar (subversión)
+    stardust = Math.max(0, stardust + Math.round(res.pbDust ?? 0)); // Fiebre del Polvo Estelar (subversión); negativo = Polvo ya adelantado al «Guardar y salir» del modo historia (historia.js)
     p.stardust += stardust;
     p.totalStardust += stardust;
     let medal = 0, medalDust = 0, pb = false, prevBest = null;

@@ -8,5 +8,7 @@ contextBridge.exposeInMainWorld('pokebonkDesktop', {
   // Aviso de versión nueva (updater.js): abre la descarga del instalador en el navegador.
   openUpdate: (url) => ipcRenderer.invoke('pb-open-update', url),
   // Actualizador (0.28): estado, buscar, aplicar, completo, confirmar, reiniciar, restaurar.
-  actualizacion: (accion, datos) => ipcRenderer.invoke('pb-act', accion, datos)
+  actualizacion: (accion, datos) => ipcRenderer.invoke('pb-act', accion, datos),
+  // Edición: 'lite' en PokeBonk Lite (otro nombre de programa), si no 'completa'.
+  edicion: () => ipcRenderer.sendSync('pb-edicion')
 });

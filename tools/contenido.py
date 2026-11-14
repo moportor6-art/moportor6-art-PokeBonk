@@ -64,6 +64,7 @@ def shells():
         'android': huella(['android', 'build.py', 'config.json']),
         'android-lite': huella(['android', 'build.py']),  # la Lite cambia config.json (paquete y nombre) al compilar
         'windows': huella(['desktop/main.js', 'desktop/preload.js', 'desktop/actualizador.js', 'desktop/package.json', 'desktop/build']),
+        'windows-lite': huella(['desktop/main.js', 'desktop/preload.js', 'desktop/actualizador.js', 'desktop/build']),  # la Lite cambia package.json
     }
 
 
@@ -117,7 +118,7 @@ def sub_actual(site):
     return subversion(site).get('sub', '')
 
 
-def publicar(site, salida, tag, repo, apk, exe, apk_lite=None):
+def publicar(site, salida, tag, repo, apk, exe, apk_lite=None, exe_lite=None):
     site, salida = Path(site), Path(salida)
     salida.mkdir(parents=True, exist_ok=True)
     man = json.loads((site / 'contenido.json').read_text(encoding='utf-8'))
@@ -125,7 +126,7 @@ def publicar(site, salida, tag, repo, apk, exe, apk_lite=None):
     man['base'] = f'https://raw.githubusercontent.com/{repo}/contenido-{tag}/'
     man['cambios'] = subversion(site).get('cambios', [])[:30]
     completo = {}
-    for plat, f, nombre in (('android', apk, 'PokeBonk.apk'), ('windows', exe, 'PokeBonk-Windows-Instalador.exe'), ('android-lite', apk_lite, 'PokeBonk-Lite.apk')):
+    for plat, f, nombre in (('android', apk, 'PokeBonk.apk'), ('windows', exe, 'PokeBonk-Windows-Instalador.exe'), ('android-lite', apk_lite, 'PokeBonk-Lite.apk'), ('windows-lite', exe_lite, 'PokeBonk-Lite-Windows-Instalador.exe')):
         if f and Path(f).is_file():
             completo[plat] = {'url': f'https://github.com/{repo}/releases/download/{tag}/{nombre}',
                               'bytes': Path(f).stat().st_size, 'sha256': sha_archivo(f)}
@@ -139,9 +140,9 @@ if __name__ == '__main__':
     sp = ap.add_subparsers(dest='cmd', required=True)
     b = sp.add_parser('base'); b.add_argument('site'); b.add_argument('--version', required=True)
     p = sp.add_parser('publicar'); p.add_argument('site'); p.add_argument('salida'); p.add_argument('--tag', required=True)
-    p.add_argument('--repo', required=True); p.add_argument('--apk'); p.add_argument('--exe'); p.add_argument('--apk-lite')
+    p.add_argument('--repo', required=True); p.add_argument('--apk'); p.add_argument('--exe'); p.add_argument('--apk-lite'); p.add_argument('--exe-lite')
     a = ap.parse_args()
     if a.cmd == 'base':
         base(a.site, a.version)
     else:
-        publicar(a.site, a.salida, a.tag, a.repo, a.apk, a.exe, a.apk_lite)
+        publicar(a.site, a.salida, a.tag, a.repo, a.apk, a.exe, a.apk_lite, a.exe_lite)

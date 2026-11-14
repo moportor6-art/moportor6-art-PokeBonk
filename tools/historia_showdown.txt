@@ -1,0 +1,35 @@
+# Retratos del modo historia (PokéBonk Lite) que no trae Pokémon Reloaded: destino (site/assets/historia/<destino>.png) y nombre en
+# play.pokemonshowdown.com/sprites/trainers/<nombre>.png. Los baja la acción «Historia» (.github/workflows/historia.yml).
+prof-kanto oak
+prof-johto elm
+prof-hoenn birch
+prof-sinnoh rowan
+prof-teselia juniper
+prof-kalos sycamore
+prof-alola kukui
+prof-galar magnolia
+prof-paldea sada
+azul blue
+camp-kanto blue-gen3champion
+camp-johto lance
+camp-hoenn steven
+camp-sinnoh cynthia
+camp-teselia alder
+camp-kalos diantha
+camp-alola kukui-stand
+camp-galar leon
+camp-paldea geeta
+hala hala
+olivia olivia
+bea bea
+opal opal
+gordie gordie
+raihan raihan
+katy katy
+brassius brassius
+iono iono
+kofu kofu
+larry larry
+ryme ryme
+tulip tulip
+grusha grusha

@@ -104,6 +104,7 @@ function displayInfo() {
     fpsFreeNext: !!cfg.fpsFree
   };
 }
+ipcMain.on('pb-edicion', e => { e.returnValue = /lite/i.test(app.getName()) ? 'lite' : 'completa'; });
 ipcMain.handle('pb-display', () => displayInfo());
 ipcMain.handle('pb-set-display', (e, p) => {
   p = p || {};

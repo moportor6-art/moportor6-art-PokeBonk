@@ -458,6 +458,7 @@ final class Actualizador {
             JSONObject mm = man.getJSONObject("modulos");
             for (Iterator<String> it = mm.keys(); it.hasNext(); ) {
                 String m = it.next();
+                if (PLAT.endsWith("-lite") && !modulos.has(m) && listaBase(m).length() == 0) continue; // Lite: sin los otros juegos
                 String h = modulos.has(m) ? modulos.optString(m) : (base.getJSONObject("modulos").has(m) ? base.getJSONObject("modulos").getJSONObject(m).optString("hash") : "");
                 if (!h.equals(mm.getJSONObject(m).optString("hash"))) todos = false;
             }

@@ -4,16 +4,40 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.79';
+  const SUB = '0.80';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.80',
+      date: Date.UTC(2026, 10, 14, 4, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.80`,
+      summary: 'PokéBonk Lite: Modo historia de Kanto a Paldea, y Lite también para Windows.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `**Modo historia** (solo en PokéBonk Lite, botón junto a Encargos):`,
+        `- Elige a tu compañero con el Profesor Oak y recorre las 9 regiones en orden: en cada una, su profesor te la presenta, vences a sus líderes (en Alola, los 4 kahunas) y después a la Liga y su campeón (en Kanto, Azul).`,
+        `- Cada capítulo es una partida en un mapa de la región: sobrevive y vence al equipo del líder. Diálogos con retrato antes y después, y pantalla VS. Si pierdes, repites el capítulo. Las medallas cuentan también fuera de la historia.`,
+        `- 3 ranuras de guardado. Puedes «Guardar y salir» en mitad de un capítulo y seguir luego: el Polvo Estelar ganado hasta ese momento pasa ya al Laboratorio.`,
+        `- **Laboratorio** dentro de la historia: en la pantalla del capítulo y en la pausa de la partida. Las mejoras son de tu compañero y se aplican al momento.`,
+        `- Retratos: líderes de Pokémon Reloaded (con permiso) y profesores, campeones y los que faltan, de Pokémon Showdown.`,
+        ``,
+        `**PokéBonk Lite para Windows**: nuevo instalador **PokeBonk-Lite-Windows-Instalador.exe** en cada release. Es otro programa (con sus propias partidas) y se actualiza solo sin bajar los otros juegos.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.79',
       date: Date.UTC(2026, 10, 14, 2, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.79`,
@@ -1875,6 +1899,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.80',
+      date: '2026-11-14',
+      title: 'PokéBonk Lite: Modo historia y versión de Windows.',
+      notes: [
+        ['new', 'Modo historia (Lite): las 9 regiones en orden, con profesores, líderes, Liga y campeones, diálogos con retrato y 3 ranuras de guardado.'],
+        ['new', 'En la historia, «Guardar y salir» pasa al Laboratorio el Polvo ganado, y hay Laboratorio en la pausa con mejoras al momento.'],
+        ['new', 'PokéBonk Lite también para Windows (instalador aparte).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.79',

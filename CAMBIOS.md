@@ -1,5 +1,11 @@
 # Cambios respecto al port original
 
+## Modo historia y Lite para Windows (Subversión 0.80)
+- `site/historia.js` (nuevo, solo con `PB_EDICION === 'lite'`): botón «Modo historia» en la fila de Encargos; ranuras en `profile.pbHistoria`; profesor de cada región, líderes en orden (`PB_GYM.sel`) y Liga con su campeón (`run.__gym.l`); diálogos, VS, resultado al volver al menú. Envuelve `__pbApp.startRun` (otra partida deja la historia en pausa) y `run.saveAndQuitOnce` (adelanta el Polvo: `stats.pbDust` negativo + `profile`/`snap`). Laboratorio propio en el capítulo y en la pausa (`PB_LAB`, `meta.buyLab`, copia en `meta.snap`).
+- `main-…js`: `finishRun` acepta `pbDust` negativo (`stardust = max(0, stardust + pbDust)`). `gimnasios.js`: `run.__gym.l` (rival que no es líder, sin medalla).
+- Retratos en `site/assets/historia/`: líderes de Pokémon Reloaded; el resto, de Pokémon Showdown con la acción «Historia» (`.github/workflows/historia.yml`, `tools/historia_showdown.txt`).
+- Lite para Windows: trabajo `windows-lite` (sin los otros juegos; `package.json` como «PokeBonk Lite», appId `.lite`). `preload.js`/`main.js`: `pokebonkDesktop.edicion()`; `actualizador.js`: plataforma `windows-lite` y sin módulos de otros juegos; `contenido.py`: huella `windows-lite` y `--exe-lite`. `Actualizador.java`: la Lite ya no se queda con la versión vieja por los módulos que no tiene.
+
 ## Edición PokéBonk Lite (Subversión 0.79)
 - `.github/workflows/compilar.yml`: trabajo `lite` (sin los otros juegos, `config.json` con paquete `….lite` y nombre «PokéBonk Lite») que publica `PokeBonk-Lite.apk` en la release; `contenido` lo espera y lo añade al manifiesto.
 - `site/edicion.js` (nuevo): `PB_EDICION` = 'lite' o 'completa' según el paquete (`AndroidMenu.edicion()` en `MainActivity`). En la Lite: `pokeisaac-boton.js` no pone la Sala de juegos y `remaster.js` quita las insignias de los otros juegos (Maestro pide 1 juego).

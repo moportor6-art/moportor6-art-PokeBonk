@@ -590,10 +590,120 @@ jobs:
             desktop/dist/PokeBonk-Windows-Instalador.exe
             desktop/dist/PokeBonk-Windows-*.zip
 
+  # PokéBonk Lite para Windows: el mismo programa con otro nombre (instalación y partidas aparte) y sin los otros juegos.
+  windows-lite:
+    if: startsWith(github.ref, 'refs/tags/') || github.event_name == 'workflow_dispatch' || contains(github.event.head_commit.message, '[windows]')
+    runs-on: windows-latest
+    steps:
+      # Los mismos bytes que en Linux (sin CRLF): el actualizador compara archivos por su SHA-256.
+      - name: Sin conversión de saltos de línea
+        shell: bash
+        run: git config --global core.autocrlf false
+
+      - uses: actions/checkout@v4
+        with:
+          lfs: true
+
+      - name: Quitar los otros juegos
+        shell: bash
+        run: rm -rf site/pokeisaac site/pokelike site/pokepath site/pokemonsurvivors site/pokeplunder site/pokeoverlord site/pokesurvivor
+
+      - name: Nombre de la Lite (otro programa, con sus propias partidas)
+        shell: bash
+        working-directory: desktop
+        run: |
+          node -e "const f='package.json',p=JSON.parse(require('fs').readFileSync(f));p.name='pokebonk-lite';p.productName='PokeBonk Lite';Object.assign(p.build,{appId:'com.moportor6.pokebonk.lite',productName:'PokeBonk Lite'});p.build.win.artifactName='PokeBonk-Lite-Windows-\${version}.\${ext}';Object.assign(p.build.nsis,{shortcutName:'PokeBonk Lite',artifactName:'PokeBonk-Lite-Windows-Instalador.\${ext}'});require('fs').writeFileSync(f,JSON.stringify(p,null,2))"
+          cat package.json
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Número de versión
+        id: ver
+        shell: bash
+        run: |
+          NUM=$(echo "${GITHUB_REF_NAME}" | grep -oE '[0-9]+' | tail -n1 || true)
+          if [ -z "$NUM" ]; then NUM=0; fi
+          echo "num=$NUM" >> "$GITHUB_OUTPUT"
+
+      # Caché de Electron: si su servidor de descargas falla (error 504), se usa la copia guardada.
+      - uses: actions/cache@v4
+        with:
+          path: |
+            ~/AppData/Local/electron/Cache
+            ~/AppData/Local/electron-builder/Cache
+          key: electron-${{ hashFiles('desktop/package.json') }}
+
+      - name: Manifiesto del actualizador y certificado de la firma
+        shell: bash
+        env:
+          KEYSTORE_BASE64: ${{ secrets.KEYSTORE_BASE64 }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+        run: |
+          python tools/contenido.py base site --version ${{ steps.ver.outputs.num }}
+          if [ -n "$KEYSTORE_BASE64" ]; then
+            echo "$KEYSTORE_BASE64" | base64 -d > "$RUNNER_TEMP/clave.keystore"
+            KT=$(command -v keytool || echo "$JAVA_HOME/bin/keytool")
+            "$KT" -exportcert -rfc -alias pokebonk -keystore "$RUNNER_TEMP/clave.keystore" -storepass "$KEYSTORE_PASSWORD" > desktop/clave.pem
+            rm -f "$RUNNER_TEMP/clave.keystore"
+            head -1 desktop/clave.pem
+          else
+            echo "sin clave: el actualizador de Windows no podrá comprobar firmas"; : > desktop/clave.pem
+          fi
+
+      - name: Preparar y compilar
+        shell: bash
+        working-directory: desktop
+        run: |
+          rm -rf site && cp -r ../site site
+          for i in 1 2 3 4; do
+            npm install --no-audit --no-fund && break
+            echo "npm install falló (intento $i); reintento en 30 s"; sleep 30
+            [ "$i" = 4 ] && exit 1
+          done
+          npx electron-builder --win --publish never -c.extraMetadata.version=0.9.${{ steps.ver.outputs.num }}
+          ls dist
+
+      # Prueba: abre la app 45 s y deja en el registro de la compilación los errores y una captura (base64).
+      - name: Probar la app de Windows
+        shell: bash
+        working-directory: desktop
+        continue-on-error: true
+        run: |
+          mkdir -p diag
+          export PB_DIAG_DIR="$(cygpath -w "$PWD/diag")"
+          timeout 150 "./dist/win-unpacked/PokeBonk Lite.exe" || echo "salida: $?"
+          echo "===== REGISTRO ====="
+          cat diag/registro.txt || echo "sin registro"
+          echo "===== CAPTURA ====="
+          base64 -w0 diag/captura.jpg 2>/dev/null || echo "sin captura"
+          echo
+          echo "===== FIN ====="
+
+      - name: Publicar en la release
+        if: startsWith(github.ref, 'refs/tags/')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            desktop/dist/PokeBonk-Lite-Windows-Instalador.exe
+            desktop/dist/PokeBonk-Lite-Windows-*.zip
+          prerelease: true
+
+      - name: Guardar (ejecución manual)
+        if: ${{ !startsWith(github.ref, 'refs/tags/') }}
+        continue-on-error: true
+        uses: actions/upload-artifact@v4
+        with:
+          name: PokeBonk-Lite-Windows
+          path: |
+            desktop/dist/PokeBonk-Lite-Windows-Instalador.exe
+            desktop/dist/PokeBonk-Lite-Windows-*.zip
+
   # Actualizador: publica el contenido de esta versión archivo por archivo (rama y etiqueta contenido-vN) y su
   # manifiesto firmado con la clave del APK, con el APK y el instalador completos para cuando cambie la app.
   contenido:
-    needs: [apk, windows, lite]
+    needs: [apk, windows, lite, windows-lite]
     if: startsWith(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
@@ -620,7 +730,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           mkdir -p completos
-          for i in 1 2 3; do gh release download "$GITHUB_REF_NAME" -D completos -p PokeBonk.apk -p PokeBonk-Windows-Instalador.exe -p PokeBonk-Lite.apk --clobber && break; sleep 20; done
+          for i in 1 2 3; do gh release download "$GITHUB_REF_NAME" -D completos -p PokeBonk.apk -p PokeBonk-Windows-Instalador.exe -p PokeBonk-Lite.apk -p PokeBonk-Lite-Windows-Instalador.exe --clobber && break; sleep 20; done
           ls -la completos
 
       - name: Publicar (manifiesto firmado, rama contenido y etiqueta contenido-vN)

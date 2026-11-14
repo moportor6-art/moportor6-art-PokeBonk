@@ -79,7 +79,8 @@
   const img = (reg, l) => reg === 'alola' ? `./assets/ui/types/${l.tipo}.png` : `./assets/medallas/${l.id}.png`;
   const G = { LIDERES, sel: null, medallas, mods: todasMods };
   window.PB_GYM = G;
-  const lider = run => run?.__gym ? LIDERES[run.__gym.reg]?.find(l => l.id === run.__gym.id) : null;
+  // run.__gym.l: un rival que no es líder (el campeón del modo historia, historia.js), con su propio equipo.
+  const lider = run => run?.__gym ? run.__gym.l ?? LIDERES[run.__gym.reg]?.find(l => l.id === run.__gym.id) : null;
   // Guardián de la zona: 1 → primero del equipo, 2 → el del medio, 3 o más → su as.
   G.jefe = run => {
     const l = lider(run);
@@ -129,7 +130,7 @@
           run.ui.banner(`Gimnasio de ${l.nombre}`, `Tipo ${TIPO[l.tipo]}: sus guardianes son el equipo del líder. ¡Gana la Medalla ${REGION[s.reg]}!`, '#e0a020', { species: l.equipo[l.equipo.length - 1] });
         }
       }
-      if (run.__gym && !run.__gymPagado && run.state === 'over' && run.victory) {
+      if (run.__gym && !run.__gym.l && !run.__gymPagado && run.state === 'over' && run.victory) {
         run.__gymPagado = true;
         const m = meta(), l = lider(run), reg = run.__gym.reg;
         if (!m || !l) return;

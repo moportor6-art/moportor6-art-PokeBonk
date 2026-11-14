@@ -524,7 +524,8 @@
     ['Pokémon Overlord', 'De jab_lao.'],
     ['Pokelike', 'De pokelike.xyz.'],
     ['Sprites de Pokémon', 'PMDCollab (SpriteCollab) y sus artistas, CC BY-NC 4.0.'],
-    ['Medallas de gimnasio', 'Sprites de PokeAPI/sprites (GitHub). Imágenes © The Pokémon Company / Nintendo; proyecto de fans sin fines de lucro.']
+    ['Medallas de gimnasio', 'Sprites de PokeAPI/sprites (GitHub). Imágenes © The Pokémon Company / Nintendo; proyecto de fans sin fines de lucro.'],
+    ['Retratos del modo historia (PokéBonk Lite)', 'Líderes de Pokémon Reloaded (uso privado, con permiso de sus autores); profesores, campeones y el resto, de Pokémon Showdown (play.pokemonshowdown.com/sprites/trainers). © The Pokémon Company / Nintendo; sin fines de lucro.']
   ];
   // Ficha del entrenador (arriba de Juegos y del Pasaporte).
   const fichaHTML = (d) => {
