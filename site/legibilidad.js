@@ -4,10 +4,14 @@
      encima del retrato, pantalla de elegir compañero y panel «Preparar partida» en pantallas bajas.
    - Tooltips más altos que la pantalla: se encogen lo justo para verse enteros.
    - Partida: si el minimapa choca con los botones de la derecha (Incienso, Ultimate...), se aparta o se encoge un poco.
-     Si el jugador movió esas piezas con el editor del HUD, se respeta su posición. */
+     Si el jugador movió esas piezas con el editor del HUD, se respeta su posición. Durante la partida solo se aparta más,
+     nunca vuelve atrás (antes saltaba cada vez que un botón aparecía o desaparecía).
+   - Márgenes de la cámara del móvil (0.81): el mismo a los dos lados. Al girar el móvil 180° la cámara cambia de lado y
+     antes todo el HUD (botones Mega/Dynamax, minimapa…) se desplazaba de lado, también lo colocado con el editor. */
 (() => {
   const st = document.createElement('style');
-  st.textContent = `.currency.bonk{color:#5b3a00!important;text-shadow:none!important}
+  st.textContent = `html:root{--sl:max(env(safe-area-inset-left,0px),env(safe-area-inset-right,0px));--sr:max(env(safe-area-inset-left,0px),env(safe-area-inset-right,0px))}
+.currency.bonk{color:#5b3a00!important;text-shadow:none!important}
 .chip[style*="background"],.jay-companion-type,.mp-tag,.tk-lv,.mv-badge,.bd-go,.ls-plate .chip{text-shadow:0 1px 1px rgba(0,0,0,.45),0 0 2px rgba(0,0,0,.3)}
 .ic-buy.poor,.ic-buy.poor *{color:#4a4366!important;text-shadow:none!important}
 .bd-foot{flex-wrap:wrap;row-gap:6px}.bd-foot .bd-go{margin-left:auto}
@@ -47,6 +51,7 @@
   requestAnimationFrame(tooltip);
 
   // Minimapa contra los botones táctiles de la derecha.
+  const fijo = { run: null, clave: '', need: 0 };
   const minimapa = () => {
     const tr = document.querySelector('#hud .hud-tr, .hud-tr');
     if (!tr || !tr.offsetParent || document.body.classList.contains('pb-hud-editing')) return;
@@ -62,6 +67,10 @@
       const q = b.getBoundingClientRect();
       if (q.left < r.right && q.right > r.left && q.top < r.bottom && q.bottom > r.top && q.left > r.left + r.width / 2) need = Math.max(need, r.right - q.left + 4);
     }
+    // Misma partida y misma pantalla: no vuelve atrás (que no salte al aparecer o desaparecer un botón).
+    const clave = innerWidth + 'x' + innerHeight;
+    if (fijo.run === window.__pbRun && fijo.clave === clave) need = Math.max(need, fijo.need); else { fijo.run = window.__pbRun; fijo.clave = clave; }
+    fijo.need = need;
     if (!need) return;
     const top = document.querySelector('.hud-top')?.getBoundingClientRect();
     const libre = Math.max(0, top && top.bottom > r.top ? r.left - top.right - 6 : r.left - 8);

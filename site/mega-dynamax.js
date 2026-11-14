@@ -224,14 +224,15 @@
     ui() {
       if (!M.el) {
         const st = document.createElement('style');
-        st.textContent = `.pb-mx{position:fixed;left:max(14px,env(safe-area-inset-left));top:26%;z-index:30;display:flex;flex-direction:column;gap:10px;pointer-events:none}
+        st.textContent = `.pb-mx{position:fixed;left:max(14px,var(--sl,0px));top:26%;z-index:30;display:flex;flex-direction:column;gap:10px;pointer-events:none}
 .pb-mx button{pointer-events:auto;width:64px;height:64px;border-radius:50%;border:3px solid #fff;font:900 12px/1 system-ui,sans-serif;color:#fff;letter-spacing:.5px;box-shadow:0 4px 0 rgba(0,0,0,.25);touch-action:manipulation}
 .pb-mx .mg,.pb-mx .dx{border:0;background:center/contain no-repeat;display:flex;align-items:flex-end;justify-content:center;padding-bottom:4px;text-shadow:0 0 3px #000,0 1px 2px #000}
 .pb-mx .mg{background-image:url(./assets/botones/mega.png)}
 .pb-mx .dx{background-image:url(./assets/botones/dmax-carga.png)}
 .pb-mx .dx.on{background-image:url(./assets/botones/dmax.png)}
 .pb-mx button.ready{font-size:0}
-.pb-mx[hidden],.pb-mx button[hidden]{display:none!important}
+.pb-mx[hidden]{display:none!important}
+.pb-mx button[hidden]{visibility:hidden!important;pointer-events:none!important}
 .pb-mx button.ready{animation:pbmx 1s ease-in-out infinite}
 .pb-mx .mg:disabled{filter:grayscale(.85) brightness(.85)}
 @keyframes pbmx{50%{transform:scale(1.1)}}`;

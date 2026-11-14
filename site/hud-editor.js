@@ -35,8 +35,10 @@ html body #ui .pz > .pz-hero .pz-kpis{grid-template-columns:repeat(6,minmax(0,1f
 html body #ui .pz > .pz-hero .sm-kpi{grid-column:auto!important;padding:2px 2px!important}
 html body #ui .pz > .pz-hero .sm-kpi b{font-size:12px!important}
 html body #ui .pz > .pz-hero .sm-kpi span{font-size:7px!important;white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis}
-html body #ui .pz > .sm-foot .actions > .btn:not(.big){min-height:34px!important;padding-top:4px!important;padding-bottom:4px!important}
-html body #ui .pz > .sm-foot .actions > .btn:nth-child(-n+2):not(.big){min-height:38px!important}
+html body #ui .pz > .sm-foot .actions > .btn:not(.big){min-height:32px!important;padding-top:4px!important;padding-bottom:4px!important}
+html body #ui .pz > .sm-foot .actions > .btn:nth-child(-n+2):not(.big){min-height:34px!important}
+html body #ui .pz{grid-template-rows:auto auto minmax(0,1fr)!important}
+html body #ui .pz > .sm-foot{min-height:0!important;overflow-y:auto!important}
 }`;
   document.head.append(pauseFix);
 

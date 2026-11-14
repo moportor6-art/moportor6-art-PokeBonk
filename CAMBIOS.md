@@ -1,5 +1,11 @@
 # Cambios respecto al port original
 
+## HUD y pausa en el móvil (Subversión 0.81)
+- `legibilidad.js`: `--sl`/`--sr` = el mayor de los dos márgenes seguros (al girar el móvil 180° la cámara cambia de lado y desplazaba el HUD); el minimapa solo se aparta más durante la partida, nunca vuelve atrás.
+- `mega-dynamax.js`: los botones usan `--sl`; un botón oculto guarda su hueco (`visibility`), así el otro no se mueve.
+- `hud-editor.js` (arreglo de la pausa en pantallas bajas): filas `auto auto 1fr`, pie desplazable si no cabe y botones algo más bajos.
+- `historia.js`: el botón Laboratorio de la pausa va en `.pz-tabs` (antes, al lado de los botones, los estrechaba).
+
 ## Modo historia y Lite para Windows (Subversión 0.80)
 - `site/historia.js` (nuevo, solo con `PB_EDICION === 'lite'`): botón «Modo historia» en la fila de Encargos; ranuras en `profile.pbHistoria`; profesor de cada región, líderes en orden (`PB_GYM.sel`) y Liga con su campeón (`run.__gym.l`); diálogos, VS, resultado al volver al menú. Envuelve `__pbApp.startRun` (otra partida deja la historia en pausa) y `run.saveAndQuitOnce` (adelanta el Polvo: `stats.pbDust` negativo + `profile`/`snap`). Laboratorio propio en el capítulo y en la pausa (`PB_LAB`, `meta.buyLab`, copia en `meta.snap`).
 - `main-…js`: `finishRun` acepta `pbDust` negativo (`stardust = max(0, stardust + pbDust)`). `gimnasios.js`: `run.__gym.l` (rival que no es líder, sin medalla).

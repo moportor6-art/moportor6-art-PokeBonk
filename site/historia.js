@@ -525,14 +525,18 @@
   };
   const botonPausa = run => {
     if (run?.__hist == null || run.state === 'over') return;
-    const foot = document.querySelector('.pz .sm-foot');
+    // En la barra de pestañas (Movimientos · Objetos · Estadísticas): junto a los botones de abajo los estrechaba
+    // («Ajuste s», «Guarda r y salir») y en pantallas bajas tapaba las estadísticas.
+    const foot = document.querySelector('.pz .pz-tabs');
     if (!foot || foot.querySelector('.pb-hist-pz')) return;
     const b = document.createElement('button');
-    b.className = 'btn ghost pb-hist-pz';
+    b.type = 'button';
+    b.className = 'pz-tab pb-hist-pz';
     b.textContent = 'Laboratorio';
+    b.style.cssText = 'background:linear-gradient(#9a6af2,#6a3ad8);color:#fff;border-radius:12px;flex:0 1 auto;padding:0 14px';
     b.title = 'Mejora a tu Pokémon sin salir de la partida';
     b.onclick = () => laboratorio(ORDEN[H()?.slots[run.__hist]?.r ?? 0], run.startSpecies, run, null);
-    foot.prepend(b);
+    foot.append(b);
   };
 
   window.PB_HISTORIA = { abrir: pantallaRanuras, D, PROF, CAMP, capitulo, mapaDe, laboratorio };

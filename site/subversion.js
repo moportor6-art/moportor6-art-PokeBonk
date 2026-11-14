@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.80';
+  const SUB = '0.81';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.81',
+      date: Date.UTC(2026, 10, 14, 3, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.81`,
+      summary: 'Botones Mega/Dynamax y minimapa quietos, y menú de pausa ordenado en el móvil.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Botones MEGA y DYNAMAX quietos**: al girar el móvil, la cámara cambiaba de lado y todo el HUD se desplazaba (también lo colocado con el editor). Ahora el margen es el mismo a los dos lados. Si uno de los dos botones no está disponible, el otro ya no cambia de sitio.`,
+        `- **Minimapa**: se aparta de los botones una sola vez por partida y se queda ahí; antes saltaba cada vez que aparecía un botón.`,
+        `- **Menú de pausa en pantallas bajas**: ya no tapa las estadísticas ni parte los botones («Ajuste s», «Guarda r y salir»). En el modo historia, el botón **Laboratorio** está junto a las pestañas Movimientos · Objetos · Estadísticas.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.80',
       date: Date.UTC(2026, 10, 14, 4, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.80`,
@@ -1899,6 +1918,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.81',
+      date: '2026-11-14',
+      title: 'HUD y pausa en el móvil.',
+      notes: [
+        ['fix', 'Los botones Mega/Dynamax y el minimapa ya no se mueven solos.'],
+        ['fix', 'Menú de pausa ordenado en pantallas bajas; Laboratorio de la historia junto a las pestañas.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.80',
