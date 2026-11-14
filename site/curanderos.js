@@ -37,7 +37,7 @@
     mult(run) {
       const k = run.__pbCuraK ??= avance(run);
       const tier = Math.max(0, Math.min(2, run.tier | 0));
-      return Math.min(1.6, 1 + k * 0.02) * (1 + 0.1 * tier);
+      return Math.min(2.4, 1.6 + k * 0.03) * (1 + 0.15 * tier); // 0.83: más fuertes desde el principio
     },
     // Al curar a un salvaje: número verde y unas chispas sobre él.
     curado(run, i, cant) {
@@ -55,14 +55,14 @@
   C.pulso = (run, i, cerca) => {
     const E = run.enemies, m = C.mult(run);
     if (E.hp[i] < E.maxHp[i]) {
-      const cant = Math.min(E.maxHp[i] - E.hp[i], E.maxHp[i] * 0.1 * m);
+      const cant = Math.min(E.maxHp[i] - E.hp[i], E.maxHp[i] * 0.15 * m);
       E.hp[i] += cant; C.curado(run, i, cant);
     }
     let n = 0;
     for (const j of cerca) {
-      if (j === i || n >= 8 || E.healBlock[j] > 0 || (E.flags[j] & (4 | 128))) continue;
-      const tope = E.maxHp[j] * 0.2 * m;
-      if (E.shield[j] < tope) { E.shield[j] = Math.min(tope, E.shield[j] + E.maxHp[j] * 0.08 * m); n++; }
+      if (j === i || n >= 12 || E.healBlock[j] > 0 || (E.flags[j] & (4 | 128))) continue;
+      const tope = E.maxHp[j] * 0.4 * m;
+      if (E.shield[j] < tope) { E.shield[j] = Math.min(tope, E.shield[j] + E.maxHp[j] * 0.15 * m); n++; }
     }
     if (n) run.vfx.ring(E.x[i], E.y[i] + 0.2, E.z[i], 5, 0x8ae0ff, 0.5);
   };
@@ -92,14 +92,14 @@
         // Solo salvajes normales: ni jefes, élites, Alfas, capturas, tesoros, hordas, objetos, remotos ni clásicos.
         if (flags & (1 | 2 | 4 | 128 | 512 | 1024 | 4096 | 8192 | 16384 | 32768 | 65536 | 131072)) return r;
         if (run.mode === 'duel' || CURA.has(r ?? id) || ESCUDO.has(r ?? id)) return r;
-        if ((run.stageTime ?? 99) < 25) return r; // no en el arranque de la zona (lo taparía su aviso)
+        if ((run.stageTime ?? 99) < 12) return r; // no en el arranque de la zona (lo taparía su aviso)
         const k = run.__pbCuraK ??= avance(run);
-        const tope = 2 + (k >= 10 ? 1 : 0) + (k >= 25 ? 1 : 0);
-        const espera = Math.max(8, 18 - k * 0.3);
+        const tope = 4 + (k >= 10 ? 1 : 0) + (k >= 25 ? 2 : 0);
+        const espera = Math.max(4, 9 - k * 0.2);
         for (const rol of ROLES) {
           const T = '__pb' + rol.k + 'T';
           if ((run.time ?? 0) - (run[T] ?? -999) < espera) continue;
-          if (Math.random() > 0.1 || vivos(run, rol.bit) >= tope) continue;
+          if (Math.random() > 0.25 || vivos(run, rol.bit) >= tope) continue;
           run[T] = run.time ?? 0;
           return elegir(run, rol);
         }
@@ -116,7 +116,7 @@
   window.PB_REG_E = (E, i, sp) => {
     try { prevE?.(E, i, sp); } catch {}
     // Escuderos normales: +50 % de PS.
-    try { if ((E.flags[i] & 96) && !(E.flags[i] & (1 | 2 | 4 | 65536))) { const f = E.flags[i] & 32 ? 2 : 1.5; E.maxHp[i] *= f; E.hp[i] *= f; } } catch {}
+    try { if ((E.flags[i] & 96) && !(E.flags[i] & (1 | 2 | 4 | 65536))) { const f = E.flags[i] & 32 ? 3 : 2.5; E.maxHp[i] *= f; E.hp[i] *= f; } } catch {}
   };
   // Aviso cuando un curandero se acerca (aparecen lejos, en el borde): grande la primera vez, pequeño después.
   const avisar = (run, sp, rol) => {

@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.82';
+  const SUB = '0.83';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.83',
+      date: Date.UTC(2026, 10, 14, 5, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.83`,
+      summary: 'Curanderos y escuderos mucho más numerosos y fuertes desde el principio.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Más curanderos y escuderos**: aparecen desde los 12 s de cada zona (antes 25 s), con más probabilidad, más seguido y hasta 4 de cada tipo a la vez desde el primer mapa (5 y 7 más adelante).`,
+        `- **Curan y protegen más**: su fuerza empieza en ×1,6 (antes ×1) y llega a ×2,4. Se curan a sí mismos el 15 %, y los escudos llegan al 40 % de los PS (antes 20 %), suben más rápido y alcanzan a 12 salvajes cercanos.`,
+        `- **Más duros**: curanderos ×3 PS y escuderos ×2,5.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.82',
       date: Date.UTC(2026, 10, 14, 4, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.82`,
@@ -1938,6 +1957,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.83',
+      date: '2026-11-14',
+      title: 'Curanderos y escuderos más duros.',
+      notes: [
+        ['change', 'Más curanderos y escuderos desde el principio, con más curación, escudos más grandes y más PS.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.82',

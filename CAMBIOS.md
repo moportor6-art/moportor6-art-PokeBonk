@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Curanderos y escuderos más duros (Subversión 0.83)
+- `curanderos.js`: `mult` = min(2,4; 1,6 + 0,03·avance)·(1 + 0,15·tier); autocuración 15 %; escudo tope 40 % (+15 % por pulso, hasta 12 salvajes); aparecen desde los 12 s de zona, prob. 0,25, espera 9→4 s, tope 4/5/7 vivos por tipo; PS ×3 curanderos, ×2,5 escuderos.
+
 ## Avisos sin pisarse (Subversión 0.82)
 - `legibilidad.js` (`apilar`, cada 250 ms): la racha y `.pb-mx` se apartan a la derecha de `.hud-party` (los botones, una sola vez por partida y no si el editor del HUD los movió); `.pb-fiebre` va debajo de `.bossbar`/`.minibars`/`.djh` y empuja `.toasts` por debajo.
 - `guia.js`: la etiqueta del objetivo prueba debajo, encima y a los lados del Pokémon y elige el primer hueco libre.
