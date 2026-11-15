@@ -80,7 +80,7 @@
   fetch('./data/pokemon.json').then(r => r.json()).then(l => { for (const x of l) STATS.set(x.id, x.stats); }).catch(() => {});
   const extraDef = pl => {
     const st = STATS.get(pl.speciesId);
-    return (st ? (st.def + st.spd) / 8 : 0) + 1 * (pl.level ?? 1); // 0.93: el doble (antes 0,5)
+    return (st ? (st.def + st.spd) / 8 : 0) + 0.8 * (pl.level ?? 1); // 0.93: el doble (antes 0,5); 0.96: −20 % (0,8)
   };
   setInterval(() => {
     const pl = window.__pbRun?.player;
@@ -91,9 +91,12 @@
       try {
         if (this.stats) {
           this.stats.armor += extraDef(this);
-          // 0.94: también ataque por nivel: +1 % de daño y +0,5 % de velocidad de ataque por nivel.
+          // 0.94: también ataque por nivel: +0,8 % de daño (0.96: −20 %, antes 1 %) y +0,5 % de velocidad de ataque.
           const lv = this.level ?? 1;
-          this.stats.damage *= 1 + 0.01 * lv;
+          this.stats.damage *= 1 + 0.008 * lv;
+          // 0.96: Maldición de la horda (Laboratorio): más salvajes, más EXP.
+          const mc = maldicion();
+          if (mc && !run0()?.duel && run0()?.mode !== 'duel') { this.stats.enemyAmount *= 1 + 0.25 * mc; this.stats.xpGain *= 1 + 0.15 * mc; }
           this.stats.attackSpeed *= 1 + 0.005 * lv;
         }
       } catch {}
@@ -109,6 +112,46 @@
     d.nivel = pl.level; d.sp = pl.speciesId;
     try { pl.recompute(); } catch {}
   }, 500);
+
+  // ---------- Maldición de la horda (0.96, Laboratorio de la Lite) ----------
+  // Nivel 0-8 (profile.pbMaldicion): cada nivel +25 % de salvajes en las oleadas (×3 al 8) y +15 % de EXP y de Polvo
+  // Estelar al terminar (+120 % al 8). No se aplica en duelos.
+  const MAX_M = 8;
+  const run0 = () => window.__pbRun;
+  const maldicion = () => Math.max(0, Math.min(MAX_M, window.__pbMeta?.profile?.pbMaldicion | 0));
+  const polvo0 = window.PB_REGIONES?.polvo;
+  if (window.PB_REGIONES) window.PB_REGIONES.polvo = run => {
+    const b = (() => { try { return polvo0?.call(window.PB_REGIONES, run) ?? 1; } catch { return 1; } })();
+    return run?.mode === 'duel' ? b : b * (1 + 0.15 * maldicion());
+  };
+  setInterval(() => {
+    const lab = document.querySelector('.screen.lab'), m = window.__pbMeta;
+    if (!lab || !m) return;
+    let caja = lab.querySelector('.pb-lab-mald');
+    const n = maldicion();
+    if (caja && caja.dataset.n === String(n)) return;
+    if (!caja) {
+      const ref = lab.querySelector('.pb-lab-nat') ?? lab.querySelector('.pb-lab-oro') ?? lab.querySelector('.scr-head');
+      if (!ref) return;
+      caja = document.createElement('div');
+      caja.className = 'pb-lab-oro pb-lab-mald';
+      caja.style.cssText = 'background:#3a1a3a;color:#ffd8ff';
+      ref.after(caja);
+    }
+    caja.dataset.n = String(n);
+    caja.replaceChildren();
+    const t = document.createElement('span');
+    t.innerHTML = `☠ Maldición de la horda: <b>${n}/${MAX_M}</b> <small style="color:#ffb0ff">· oleadas +${n * 25} % · EXP y Polvo +${n * 15} %</small>`;
+    const btn = (txt, d) => {
+      const b = document.createElement('button');
+      b.className = 'btn small';
+      b.textContent = txt;
+      b.disabled = n + d < 0 || n + d > MAX_M;
+      b.onclick = () => { m.profile.pbMaldicion = Math.max(0, Math.min(MAX_M, n + d)); try { m.save(); } catch {} };
+      return b;
+    };
+    caja.append(t, btn('−', -1), btn('+', 1));
+  }, 400);
 
   const aviso = (run, t) => { try { run.ui.toast(t, null); } catch {} };
   setInterval(() => {

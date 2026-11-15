@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.95';
+  const SUB = '0.96';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.96',
+      date: Date.UTC(2026, 10, 15, 20, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.96`,
+      summary: 'PokéBonk Lite: Maldición de la horda en el Laboratorio y ajuste del crecimiento por nivel.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **☠ Maldición de la horda** (Laboratorio, arriba): de 0 a **8 niveles**, gratis y la puedes bajar cuando quieras. Cada nivel: **+25 % de salvajes** en las oleadas y **+15 % de EXP y de Polvo Estelar**. Al 8: el triple de salvajes, +120 % de EXP y de Polvo. No cuenta en duelos.`,
+        `- **Crecimiento por nivel un 20 % menor**: +0,8 de armadura y +0,8 % de daño por nivel (antes +1 y +1 %). La velocidad de ataque sigue igual (+0,5 %).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.95',
       date: Date.UTC(2026, 10, 15, 6, 45),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.95`,
@@ -2190,6 +2209,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.96',
+      date: '2026-11-15',
+      title: 'Maldición de la horda (Lite).',
+      notes: [
+        ['new', 'Lite: Maldición de la horda en el Laboratorio (8 niveles: +25 % salvajes, +15 % EXP y Polvo por nivel).'],
+        ['balance', 'Lite: armadura y daño por nivel un 20 % menores.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.95',

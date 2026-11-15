@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Maldición de la horda en la Lite (Subversión 0.96)
+- `dificultad.js`: `profile.pbMaldicion` 0-8 con caja en el Laboratorio; en `player.recompute` multiplica `enemyAmount` ×(1+0,25·n) y `xpGain` ×(1+0,15·n), y envuelve `PB_REGIONES.polvo` ×(1+0,15·n) (no en duelos). Armadura por nivel 0,8 y daño por nivel 0,8 % (antes 1 y 1 %).
+
 ## Oro acumulable en la Lite (Subversión 0.95)
 - `oro-guardado.js`: con `PB_EDICION === 'lite'`, `take()` vuelve a llevar todo el ahorro a la partida (lo deja en `pb-oro-en-partida` por si se cierra la app) y `put()` lo devuelve con lo ganado; la completa sigue con la regla de la 0.74.
 
