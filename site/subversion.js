@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.94';
+  const SUB = '0.95';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.95',
+      date: Date.UTC(2026, 10, 15, 6, 45),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.95`,
+      summary: 'PokéBonk Lite: el oro ahorrado vuelve a entrar en la partida siguiente.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**, por la Dificultad Remaster:`,
+        `- Los **Pokédólares** que te sobran al terminar una partida se guardan y **empiezas la siguiente con todos ellos**, como antes de la 0.74. Se van acumulando partida tras partida.`,
+        `- Lo ahorrado se sigue pudiendo gastar fuera: tienda de Megas y cambio por Polvo en el Laboratorio.`,
+        `- Duelos y cooperativo siguen empezando con 0 ₽, para no dar ventaja.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.94',
       date: Date.UTC(2026, 10, 15, 4, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.94`,
@@ -2170,6 +2190,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.95',
+      date: '2026-11-15',
+      title: 'Oro acumulable (Lite).',
+      notes: [
+        ['balance', 'Lite: el oro ahorrado vuelve a entrar en la partida siguiente y se acumula.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.94',

@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Oro acumulable en la Lite (Subversión 0.95)
+- `oro-guardado.js`: con `PB_EDICION === 'lite'`, `take()` vuelve a llevar todo el ahorro a la partida (lo deja en `pb-oro-en-partida` por si se cierra la app) y `put()` lo devuelve con lo ganado; la completa sigue con la regla de la 0.74.
+
 ## Ataque por nivel en la Lite (Subversión 0.94)
 - `dificultad.js` (envoltura de `player.recompute`): `stats.damage` ×(1 + 0,01·nivel) y `stats.attackSpeed` ×(1 + 0,005·nivel).
 
