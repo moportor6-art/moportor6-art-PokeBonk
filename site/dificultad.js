@@ -8,7 +8,7 @@
      en el suelo y salen el doble (uno extra cada 2,5-4 min desde el minuto 2);
    - presión adaptativa: cada 30 s, si vas sobrado (más del 80 % de PS y matando rápido) sube un 10 % (hasta ×3);
      si vas por debajo del 30 % de PS, baja.
-   - defensa: armadura extra por la Defensa y Def. Esp. reales del Pokémon (/8) y +0,5 por nivel (0.89, todos los modos);
+   - defensa: armadura extra por la Defensa y Def. Esp. reales del Pokémon (/8) y +1 por nivel (0.89; el doble desde la 0.93; todos los modos);
    - precios: mejoras del Laboratorio y Poké Balls del mapa un 40 % más baratas (0.88, todos los modos).
    Ganchos: PB_REG_E (aparición, encadenado) y run.director.fire('alpha') del juego. */
 (() => {
@@ -75,12 +75,12 @@
   }, 200);
 
   // Defensa (0.89, todos los modos de la Lite): armadura extra = (Defensa + Def. Esp. reales de la etapa actual) / 8
-  // + 0,5 por nivel. El juego solo daba 5-16 de armadura base, casi igual para todos.
+  // + 1 por nivel. El juego solo daba 5-16 de armadura base, casi igual para todos.
   const STATS = new Map();
   fetch('./data/pokemon.json').then(r => r.json()).then(l => { for (const x of l) STATS.set(x.id, x.stats); }).catch(() => {});
   const extraDef = pl => {
     const st = STATS.get(pl.speciesId);
-    return (st ? (st.def + st.spd) / 8 : 0) + 0.5 * (pl.level ?? 1);
+    return (st ? (st.def + st.spd) / 8 : 0) + 1 * (pl.level ?? 1); // 0.93: el doble (antes 0,5)
   };
   setInterval(() => {
     const pl = window.__pbRun?.player;

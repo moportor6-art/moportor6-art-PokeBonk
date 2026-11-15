@@ -4,16 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.92';
+  const SUB = '0.93';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.93',
+      date: Date.UTC(2026, 10, 15, 4, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.93`,
+      summary: 'PokéBonk Lite: el doble de defensa por nivel.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- Solo en **PokéBonk Lite**: la armadura extra por nivel pasa de +0,5 a **+1 por nivel** (en el nivel 50, +50 en vez de +25). La de la Defensa real de tu Pokémon sigue igual.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.92',
       date: Date.UTC(2026, 10, 15, 1, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.92`,
@@ -2134,6 +2151,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.93',
+      date: '2026-11-15',
+      title: 'Más defensa por nivel (Lite).',
+      notes: [
+        ['balance', 'Lite: armadura extra por nivel al doble (+1 por nivel).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.92',

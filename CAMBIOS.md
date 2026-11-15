@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Más defensa por nivel en la Lite (Subversión 0.93)
+- `dificultad.js` (`extraDef`): +1 de armadura por nivel (antes 0,5).
+
 ## Ciencia de naturalezas (Subversión 0.92)
 - `naturalezas.js` (`analizar`): pesos por estadística (Físico/Especial = parte de ataques de cada clase, o At/AtEsp sin ataques; Armadura y PS = 0,35·(Def+DefEsp)/(At+AtEsp); Velocidad 0,45), puntúa las 25 (+15 %·peso subida − 10 %·peso bajada; neutras +4 %·suma) y explica la mejor; la mejor va primera como recomendada; panel «Análisis científico completo» con las 5 mejores; el Laboratorio sugiere por estadísticas.
 
