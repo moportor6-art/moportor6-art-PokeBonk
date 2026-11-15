@@ -88,7 +88,15 @@
     const rc = pl.recompute;
     pl.recompute = function (...a) {
       const r = rc.apply(this, a);
-      try { if (this.stats) this.stats.armor += extraDef(this); } catch {}
+      try {
+        if (this.stats) {
+          this.stats.armor += extraDef(this);
+          // 0.94: también ataque por nivel: +1 % de daño y +0,5 % de velocidad de ataque por nivel.
+          const lv = this.level ?? 1;
+          this.stats.damage *= 1 + 0.01 * lv;
+          this.stats.attackSpeed *= 1 + 0.005 * lv;
+        }
+      } catch {}
       return r;
     };
     pl.__pbDef = { nivel: pl.level, sp: pl.speciesId };

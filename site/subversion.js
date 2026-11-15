@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.93';
+  const SUB = '0.94';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
-      id: 'moportor6-sub-0.93',
+      id: 'moportor6-sub-0.94',
       date: Date.UTC(2026, 10, 15, 4, 30),
       tag: 'novedad',
       pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.94`,
+      summary: 'PokéBonk Lite: tu Pokémon gana daño y velocidad de ataque con cada nivel.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**, sumado a la armadura por nivel (que en la 0.93 pasó al doble, +1 por nivel):`,
+        `- **+1 % de daño por nivel** (nivel 40: +40 %).`,
+        `- **+0,5 % de velocidad de ataque por nivel** (nivel 40: +20 %).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
+      id: 'moportor6-sub-0.93',
+      date: Date.UTC(2026, 10, 15, 4, 30),
+      tag: 'novedad',
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.93`,
@@ -2151,6 +2170,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.94',
+      date: '2026-11-15',
+      title: 'Ataque por nivel (Lite).',
+      notes: [
+        ['balance', 'Lite: +1 % de daño y +0,5 % de velocidad de ataque por nivel.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.93',

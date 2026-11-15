@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Ataque por nivel en la Lite (Subversión 0.94)
+- `dificultad.js` (envoltura de `player.recompute`): `stats.damage` ×(1 + 0,01·nivel) y `stats.attackSpeed` ×(1 + 0,005·nivel).
+
 ## Más defensa por nivel en la Lite (Subversión 0.93)
 - `dificultad.js` (`extraDef`): +1 de armadura por nivel (antes 0,5).
 
