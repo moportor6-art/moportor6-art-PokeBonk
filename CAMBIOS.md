@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Ciencia de naturalezas (Subversión 0.92)
+- `naturalezas.js` (`analizar`): pesos por estadística (Físico/Especial = parte de ataques de cada clase, o At/AtEsp sin ataques; Armadura y PS = 0,35·(Def+DefEsp)/(At+AtEsp); Velocidad 0,45), puntúa las 25 (+15 %·peso subida − 10 %·peso bajada; neutras +4 %·suma) y explica la mejor; la mejor va primera como recomendada; panel «Análisis científico completo» con las 5 mejores; el Laboratorio sugiere por estadísticas.
+
 ## Naturalezas en la Lite (Subversión 0.91)
 - `site/naturalezas.js` (nuevo, solo Lite): 25 naturalezas en `profile.pbNat[especie inicial]`; se ofrecen 3 (por `cls` de `player.moves` y por Def+DefEsp frente a At+AtEsp) un nivel antes de la primera evolución (misma cuenta que `runEvolution`) o en el 16, con `run.state='modal'` y `run.resume()`; `player.recompute` envuelto multiplica `physical`/`special`/`armor`/`maxHp`/`moveSpeed`+`attackSpeed` (×1,15 / ×0,9, neutras ×1,04). Ficha en la pausa y caja en el Laboratorio para olvidarla (300 de Polvo).
 - `index.html`: carga `naturalezas.js` tras `debilitar.js`.

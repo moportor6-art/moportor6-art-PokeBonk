@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.91';
+  const SUB = '0.92';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.92',
+      date: Date.UTC(2026, 10, 15, 1, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.92`,
+      summary: 'PokéBonk Lite: análisis científico de naturalezas, con el porqué.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**, en la elección de naturaleza:`,
+        `- La **recomendada** es la mejor de las 25 para tu Pokémon según sus **ataques equipados** y sus **estadísticas**, y debajo te dice **por qué** (por ejemplo: «Sube Especial porque el 100 % de tus ataques son especiales; baja Físico porque no llevas ataques físicos»).`,
+        `- **🔬 Análisis científico completo**: tus ataques, tus estadísticas y las 5 mejores naturalezas con su rendimiento estimado; puedes elegir cualquiera de ellas.`,
+        `- En el **Laboratorio**, si aún no tiene naturaleza, te adelanta la mejor según sus estadísticas.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.91',
       date: Date.UTC(2026, 10, 15, 0, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.91`,
@@ -2114,6 +2134,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.92',
+      date: '2026-11-15',
+      title: 'Ciencia de naturalezas (Lite).',
+      notes: [
+        ['new', 'Lite: la naturaleza recomendada se calcula con tus ataques y estadísticas y explica por qué; análisis completo con las 5 mejores.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.91',

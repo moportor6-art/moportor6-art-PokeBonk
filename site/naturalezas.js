@@ -52,6 +52,39 @@
     return lado === 'f' ? ['firme', 'alegre', 'audaz'] : ['modesta', 'miedosa', 'mansa'];
   };
 
+  // ---------- análisis («hacer ciencia», 0.92): puntúa las 25 y explica la mejor ----------
+  // Peso de cada estadística para TU Pokémon: Físico/Especial según la parte de tus ataques de cada clase; Armadura y
+  // PS según lo defensivo que es ((Def + Def. Esp.) / (At + At. Esp.)); Velocidad siempre ayuda algo (esquivar y atacar).
+  const analizar = p => {
+    let f = 0, e = 0;
+    for (const m of p.moves ?? []) { const c = m?.def?.cls; if (c === 'physical') f++; else if (c === 'special') e++; }
+    const s = STATS.get(p.speciesId)?.stats ?? { atk: 1, spa: 1, def: 1, spd: 1, spe: 1 };
+    const tot = f + e;
+    const of = tot ? [f / tot, e / tot] : s.atk >= s.spa ? [0.7, 0.3] : [0.3, 0.7];
+    const r = (s.def + s.spd) / Math.max(1, s.atk + s.spa);
+    const w = { atk: of[0], spa: of[1], def: 0.35 * r, spd: 0.35 * r, spe: 0.45 };
+    const sum = Object.values(w).reduce((a, b) => a + b, 0);
+    const pts = n => n.up ? (SUBE - 1) * w[n.up] - (1 - BAJA) * w[n.dn] : (NEUTRA - 1) * sum;
+    const rank = Object.values(NAT).map(n => ({ n, v: pts(n) })).sort((a, b) => b.v - a.v);
+    const pct = x => Math.round(x * 100);
+    const motivo = n => {
+      if (!n.up) return `Ningún lado destaca tanto como para sacrificar otro: +4 % a todo.`;
+      const por = {
+        atk: `el ${pct(of[0])} % de tus ataques son físicos`, spa: `el ${pct(of[1])} % de tus ataques son especiales`,
+        def: `es un Pokémon defensivo (Def + Def. Esp. ${s.def + s.spd} frente a At + At. Esp. ${s.atk + s.spa})`,
+        spd: `es un Pokémon defensivo (Def + Def. Esp. ${s.def + s.spd} frente a At + At. Esp. ${s.atk + s.spa})`,
+        spe: `moverte y atacar más rápido rinde siempre (Velocidad ${s.spe})`
+      };
+      const sin = {
+        atk: tot ? (f ? `solo el ${pct(of[0])} % de tus ataques son físicos` : `no llevas ataques físicos`) : `tu Ataque (${s.atk}) es el más bajo de tus dos lados`,
+        spa: tot ? (e ? `solo el ${pct(of[1])} % de tus ataques son especiales` : `no llevas ataques especiales`) : `tu At. Esp. (${s.spa}) es el más bajo de tus dos lados`,
+        def: `tu defensa es lo que menos aprovechas`, spd: `tus PS son lo que menos aprovechas`, spe: `la velocidad es lo que menos te aporta`
+      };
+      return `Sube ${TXT[n.up]} porque ${por[n.up]}; baja ${TXT[n.dn]} porque ${sin[n.dn]}.`;
+    };
+    return { rank, motivo, f, e, s, mejor: rank[0].n };
+  };
+
   const aplicar = (pl, n) => {
     const st = pl.stats;
     if (!st || !n) return;
@@ -71,16 +104,26 @@
 .pb-nat button{cursor:pointer;border:3px solid #8a7ad8;border-radius:14px;background:#3a3070;color:#fff;padding:12px 10px;font:800 17px system-ui,sans-serif}
 .pb-nat button small{display:block;margin-top:4px;font-size:13px;font-weight:700;color:#ffe9a8}
 .pb-nat button.rec{border-color:#ffd23a;background:#4a3a20}.pb-nat button i{display:block;font-style:normal;font-size:11px;color:#ffd23a;margin-bottom:2px}
+.pb-nat .por{margin:10px 0 4px;font-size:14px;color:#c8ffda}.pb-nat .cien{display:inline-block;color:#ffd23a;font-weight:800;font-size:14px;margin:2px 0 6px}
+.pb-nat .lab{text-align:left;background:rgba(0,0,0,.25);border-radius:12px;padding:8px 12px}.pb-nat .lab p{font-size:13px;text-align:left}
+.pb-nat .lab ol{margin:4px 0 0;padding-left:22px}.pb-nat .lab li{margin:4px 0}.pb-nat .lab li button{padding:6px 10px;font-size:14px;width:100%;text-align:left}
+.pb-nat .lab li small{display:inline;margin:0 0 0 6px}.pb-nat .lab em{display:block;font-size:12px;color:#c8ffda;margin-top:2px}
 .pb-nat-chip{display:inline-block;margin-left:6px;padding:2px 8px;border-radius:9px;background:#ffd23a;color:#3a2a00;font:800 11px system-ui,sans-serif;vertical-align:middle}`;
   document.head.append(css);
 
   const ofrecer = run => {
-    const p = run.player, ops = sugerir(p);
+    const p = run.player, A = analizar(p);
+    const ops = [A.mejor.id, ...sugerir(p).filter(id => id !== A.mejor.id)].slice(0, 3);
     const pausa = !run.coop;
     if (pausa) run.state = 'modal';
     const capa = document.createElement('div');
     capa.className = 'pb-nat';
-    capa.innerHTML = `<div class="c"><h2>¡${STATS.get(p.speciesId)?.name ?? 'Tu Pokémon'} muestra su naturaleza!</h2><p>Según sus ataques y su forma de luchar. Elige una: será suya para siempre.</p><div class="op">${ops.map((id, k) => `<button data-n="${id}" class="${k ? '' : 'rec'}">${k ? '' : '<i>RECOMENDADA</i>'}${NAT[id].n}<small>${desc(NAT[id])}</small></button>`).join('')}</div></div>`;
+    const sp = STATS.get(p.speciesId);
+    capa.innerHTML = `<div class="c"><h2>¡${sp?.name ?? 'Tu Pokémon'} muestra su naturaleza!</h2><p>Según sus ataques y su forma de luchar. Elige una: será suya para siempre.</p><div class="op">${ops.map((id, k) => `<button data-n="${id}" class="${k ? '' : 'rec'}">${k ? '' : '<i>RECOMENDADA</i>'}${NAT[id].n}<small>${desc(NAT[id])}</small></button>`).join('')}</div>
+<p class="por">🔬 ${A.motivo(A.mejor)}</p><a class="cien" href="#">🔬 Análisis científico completo</a><div class="lab" hidden>
+<p>Ataques equipados: <b>${A.f}</b> físicos · <b>${A.e}</b> especiales. Estadísticas de ${sp?.name ?? 'tu Pokémon'}: At ${A.s.atk} · At. Esp. ${A.s.spa} · Def ${A.s.def} · Def. Esp. ${A.s.spd} · Vel ${A.s.spe}.</p>
+<ol>${A.rank.slice(0, 5).map((x, k) => `<li><button data-n="${x.n.id}">${x.n.n} <small>${desc(x.n)} · rendimiento ${x.v >= 0 ? '+' : ''}${(x.v * 100).toFixed(1).replace('.', ',')} %</small></button>${k ? '' : `<em>${A.motivo(x.n)}</em>`}</li>`).join('')}</ol></div></div>`;
+    capa.querySelector('.cien').onclick = ev => { ev.preventDefault(); const l = capa.querySelector('.lab'); l.hidden = !l.hidden; };
     capa.querySelectorAll('button').forEach(b => b.onclick = () => {
       const g = guardadas();
       if (g) { g[clave(run)] = b.dataset.n; try { meta().save(); } catch {} }
@@ -140,7 +183,9 @@
     caja.dataset.k = `${sp}|${n?.id}`;
     caja.replaceChildren();
     const t = document.createElement('span');
-    t.innerHTML = n ? `Naturaleza: <b>${n.n}</b> <small>· ${desc(n)}</small>` : `Naturaleza: <small>se elige un nivel antes de su primera evolución</small>`;
+    let ciencia = '';
+    try { if (!n && STATS.has(sp)) { const A = analizar({ speciesId: sp, moves: [] }); ciencia = ` · 🔬 por sus estadísticas: <b>${A.mejor.n}</b> (${desc(A.mejor)}); en la partida se afina con tus ataques`; } } catch {}
+    t.innerHTML = n ? `Naturaleza: <b>${n.n}</b> <small>· ${desc(n)}</small>` : `Naturaleza: <small>se elige un nivel antes de su primera evolución${ciencia}</small>`;
     caja.append(t);
     if (n) {
       const b = document.createElement('button');
