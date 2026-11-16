@@ -1,0 +1,543 @@
+{
+ "formato": 1,
+ "version": 139,
+ "sub": "0.98",
+ "shell": {
+  "android": "9b17d5850ea6cedf",
+  "android-lite": "4fcedf032e4c57c8",
+  "windows": "64bf0e7140a74631",
+  "windows-lite": "410beb131686e56f"
+ },
+ "modulos": {
+  "pokebonk": {
+   "nombre": "PokéBonk (juego principal)",
+   "hash": "f3d4b837842a2ac6c317e2937ba300176f7cadedb3346fa8ae780301ff5d6f61",
+   "archivos": 8420,
+   "bytes": 229353799
+  },
+  "pokeisaac": {
+   "nombre": "PokéIsaac",
+   "hash": "71e7112d6711efdfe856dc30bc20a397592a5c3408399a3621e9b24819308302",
+   "archivos": 5679,
+   "bytes": 82367848
+  },
+  "pokemonsurvivors": {
+   "nombre": "Pokémon Survivors",
+   "hash": "6d6d793f1b44a124624b1346b09c855ea1bd32f36a7c84c674c7af8817859240",
+   "archivos": 7247,
+   "bytes": 65426479
+  },
+  "pokesurvivor": {
+   "nombre": "PokéSurvivor",
+   "hash": "d5eb83edadaeddfca4d4863752a6371713fb2fa069ffc8431c1d9338377c4238",
+   "archivos": 10,
+   "bytes": 187901432
+  },
+  "pokepath": {
+   "nombre": "PokéBonk TD",
+   "hash": "0d884a5a8ade40b54255358b16d48ff73111f852c0f52f998ded5d7f93deac70",
+   "archivos": 3684,
+   "bytes": 41183181
+  },
+  "pokeplunder": {
+   "nombre": "PokéPlunder",
+   "hash": "0303453dd6fb1e11bc32338bdf721833b84a354e59c478bacc31ba72641e738e",
+   "archivos": 665,
+   "bytes": 29735389
+  },
+  "pokeoverlord": {
+   "nombre": "Pokémon Overlord",
+   "hash": "df0eb363ae033074c26b929c949b44de00c97c40db2984aeb6762f69b23b2666",
+   "archivos": 11,
+   "bytes": 103109162
+  },
+  "pokelike": {
+   "nombre": "Pokelike",
+   "hash": "8341d77d35adc31f6da998dae1d66f84c07780ec185fcd62c4e03cb83b5543d6",
+   "archivos": 1999,
+   "bytes": 134945324
+  }
+ },
+ "tag": "v139",
+ "base": "https://raw.githubusercontent.com/moportor6-art/moportor6-art-PokeBonk/contenido-v139/",
+ "cambios": [
+  {
+   "oficial": "0.9.9",
+   "sub": "0.98",
+   "date": "2026-11-16",
+   "title": "Tope de nivel visible (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: el tope de nivel se muestra junto a tu nivel y nunca impide evolucionar."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.97",
+   "date": "2026-11-16",
+   "title": "Equilibrio (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: Poké Balls +15 % por compra, a la partida entra la mitad del oro ahorrado, tope de nivel por medallas y escalado según tu nivel."
+    ],
+    [
+     "new",
+     "Lite: élites con rasgos (Veloz, Vampírico, Explosivo, Blindado), furia de jefes a los 2 minutos y tope de 5 copias por objeto."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.96",
+   "date": "2026-11-15",
+   "title": "Maldición de la horda (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Maldición de la horda en el Laboratorio (8 niveles: +25 % salvajes, +15 % EXP y Polvo por nivel)."
+    ],
+    [
+     "balance",
+     "Lite: armadura y daño por nivel un 20 % menores."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.95",
+   "date": "2026-11-15",
+   "title": "Oro acumulable (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: el oro ahorrado vuelve a entrar en la partida siguiente y se acumula."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.94",
+   "date": "2026-11-15",
+   "title": "Ataque por nivel (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: +1 % de daño y +0,5 % de velocidad de ataque por nivel."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.93",
+   "date": "2026-11-15",
+   "title": "Más defensa por nivel (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: armadura extra por nivel al doble (+1 por nivel)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.92",
+   "date": "2026-11-15",
+   "title": "Ciencia de naturalezas (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: la naturaleza recomendada se calcula con tus ataques y estadísticas y explica por qué; análisis completo con las 5 mejores."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.91",
+   "date": "2026-11-15",
+   "title": "Naturalezas (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: naturalezas según tus ataques y tu forma de luchar, elegidas antes de la primera evolución y para siempre."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.90",
+   "date": "2026-11-14",
+   "title": "Movimientos que bajan defensas (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Chirrido, Sonido Metálico, Rocío Ácido o Patada Trueno según tu tipo, desde el nivel 12, sin ocupar hueco."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.89",
+   "date": "2026-11-14",
+   "title": "Defensa real (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: armadura extra por la Defensa y Def. Esp. reales de tu Pokémon y +0,5 por nivel."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.88",
+   "date": "2026-11-14",
+   "title": "Precios más bajos (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: Laboratorio y Poké Balls del mapa un 40 % más baratos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.87",
+   "date": "2026-11-14",
+   "title": "Laboratorio de la historia.",
+   "notes": [
+    [
+     "fix",
+     "Lite: el Laboratorio del modo historia conserva la posición de la lista al mejorar."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.86",
+   "date": "2026-11-14",
+   "title": "Mega y Dynamax más fuertes (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: Mega y Dynamax cada 25 bajas y sus mejoras un 30 % más fuertes."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.85",
+   "date": "2026-11-14",
+   "title": "Mega y Dynamax más a mano (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: Mega y Dynamax cada 50 bajas y 3 minutos por transformación."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.84",
+   "date": "2026-11-14",
+   "title": "Dificultad Remaster (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: salvajes y Alfas mucho más duros, élites en Normal, embestidas de Alfa con escolta y presión adaptativa."
+    ],
+    [
+     "balance",
+     "Lite: cada mapa es un poco más difícil que el anterior, de Kanto a Paldea."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.83",
+   "date": "2026-11-14",
+   "title": "Curanderos y escuderos más duros.",
+   "notes": [
+    [
+     "balance",
+     "Más curanderos y escuderos desde el principio, con más curación, escudos más grandes y más PS."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.82",
+   "date": "2026-11-14",
+   "title": "Avisos sin pisarse.",
+   "notes": [
+    [
+     "fix",
+     "Racha, botones Mega/Dynamax, fiebres, avisos y guía ya no se montan unos sobre otros."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.81",
+   "date": "2026-11-14",
+   "title": "HUD y pausa en el móvil.",
+   "notes": [
+    [
+     "fix",
+     "Los botones Mega/Dynamax y el minimapa ya no se mueven solos."
+    ],
+    [
+     "fix",
+     "Menú de pausa ordenado en pantallas bajas; Laboratorio de la historia junto a las pestañas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.80",
+   "date": "2026-11-14",
+   "title": "PokéBonk Lite: Modo historia y versión de Windows.",
+   "notes": [
+    [
+     "new",
+     "Modo historia (Lite): las 9 regiones en orden, con profesores, líderes, Liga y campeones, diálogos con retrato y 3 ranuras de guardado."
+    ],
+    [
+     "new",
+     "En la historia, «Guardar y salir» pasa al Laboratorio el Polvo ganado, y hay Laboratorio en la pausa con mejoras al momento."
+    ],
+    [
+     "new",
+     "PokéBonk Lite también para Windows (instalador aparte)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.79",
+   "date": "2026-11-14",
+   "title": "Edición PokéBonk Lite.",
+   "notes": [
+    [
+     "new",
+     "Nueva edición PokéBonk Lite: solo PokéBonk, sin la Sala de juegos, mucho más ligera."
+    ],
+    [
+     "new",
+     "Se instala junto a la completa y se actualiza sola sin bajar los otros juegos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.78",
+   "date": "2026-11-14",
+   "title": "Medallas oficiales con bonificaciones.",
+   "notes": [
+    [
+     "new",
+     "Las medallas de gimnasio usan los sprites oficiales."
+    ],
+    [
+     "balance",
+     "Cada medalla da una mejora permanente según su tipo; cada región completa, +3 % de daño."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.77",
+   "date": "2026-11-14",
+   "title": "Gimnasios y rival.",
+   "notes": [
+    [
+     "new",
+     "Gimnasios: 68 líderes y kahunas en 9 regiones, con medallas y Polvo."
+    ],
+    [
+     "new",
+     "Tu rival Azul aparece en la zona 2 y evoluciona con cada encuentro."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.76",
+   "date": "2026-11-13",
+   "title": "Escuderos, clima, oro en el Laboratorio y premios de Pokédex.",
+   "notes": [
+    [
+     "new",
+     "Escuderos en todos los mapas, con aviso y marca azul."
+    ],
+    [
+     "balance",
+     "El clima de la zona también afecta a los salvajes (±15 % de daño según su tipo), con aviso al empezar."
+    ],
+    [
+     "new",
+     "En el Laboratorio se cambia el oro guardado por Polvo Estelar (10 ₽ = 1)."
+    ],
+    [
+     "new",
+     "Insignias «Explorador de X» (mitad de la Pokédex regional) en todas las regiones, y «Campeón» para Kanto y Johto."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.75",
+   "date": "2026-11-13",
+   "title": "Curanderos más numerosos, con escudo y autocuración.",
+   "notes": [
+    [
+     "balance",
+     "Hasta 2-4 curanderos a la vez según el avance, y salen más seguido."
+    ],
+    [
+     "new",
+     "Los curanderos se curan a sí mismos y dan un escudo pequeño a los salvajes cercanos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.74",
+   "date": "2026-11-13",
+   "title": "Oro ahorrado solo fuera de la partida; curanderos más visibles.",
+   "notes": [
+    [
+     "balance",
+     "El oro que sobra se acumula para la tienda de Megas, pero ya no se suma al empezar la partida siguiente."
+    ],
+    [
+     "balance",
+     "Los curanderos tienen el doble de PS y no salen en los primeros 25 s."
+    ],
+    [
+     "fix",
+     "El aviso de curandero sale cuando se acerca uno, no al aparecer lejos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.73",
+   "date": "2026-11-13",
+   "title": "Zonas de 15 minutos.",
+   "notes": [
+    [
+     "balance",
+     "Cada zona del modo clásico dura 15 minutos (antes 10) en todos los mapas."
+    ],
+    [
+     "balance",
+     "Los 5 minutos nuevos tienen su propio guion de eventos: más Alfas, hordas, élites, tótem e invocador."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.72",
+   "date": "2026-11-13",
+   "title": "Forma regional legible en tema oscuro.",
+   "notes": [
+    [
+     "fix",
+     "El recuadro de Forma regional ya no sale con el texto casi invisible en el tema oscuro."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.71",
+   "date": "2026-11-13",
+   "title": "Curanderos en todos los mapas.",
+   "notes": [
+    [
+     "new",
+     "Los salvajes curanderos pueden salir en cualquier mapa (1-3 a la vez según el avance), con aviso y marca verde."
+    ],
+    [
+     "balance",
+     "Su cura sube poco a poco con cada mapa (hasta +60 %) y con la dificultad."
+    ],
+    [
+     "new",
+     "Los Alfas de apoyo curanderos te curan un 2 % cada 8 s (más con vínculo y evoluciones)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.70",
+   "date": "2026-11-13",
+   "title": "Cooperativo en tu Wi-Fi.",
+   "notes": [
+    [
+     "coop",
+     "Nuevo **Cooperativo en tu Wi-Fi**: crea una sala en un móvil y únete desde otros de la misma red, sin internet ni cuenta."
+    ],
+    [
+     "coop",
+     "Es el cooperativo original (sala, listo, mapa y dificultad, chat, partida compartida y vuelta a la sala) para 2-4 entrenadores."
+    ],
+    [
+     "coop",
+     "La sala se encuentra sola en la Wi-Fi; si no, se puede escribir la dirección del anfitrión."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.69",
+   "date": "2026-11-13",
+   "title": "Repaso visual de menús y HUD.",
+   "notes": [
+    [
+     "fix",
+     "Elegir compañero: las tarjetas no tapan a los Pokémon y el botón cabe en pantallas bajas."
+    ],
+    [
+     "fix",
+     "Textos claros sobre fondo claro (Bonkoins, Tienda, etiquetas, regiones bloqueadas)."
+    ],
+    [
+     "fix",
+     "Botón «Editar» de Builds, nombres largos de ataque y tooltips altos ya no se cortan."
+    ],
+    [
+     "fix",
+     "En partida, el minimapa y el aviso del objetivo dejan de montarse sobre los botones y los ataques."
+    ],
+    [
+     "fix",
+     "Las barras de desplazamiento no se dibujan encima de tooltips y ventanas."
+    ]
+   ]
+  }
+ ],
+ "completo": {
+  "android": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v139/PokeBonk.apk",
+   "bytes": 831429923,
+   "sha256": "91a5b21f963d065ec7314eaf7e7375c58028787390f8d76ff0bef04ed22c34bc"
+  },
+  "windows": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v139/PokeBonk-Windows-Instalador.exe",
+   "bytes": 811741649,
+   "sha256": "0621fb6e6127c2fb89718bf56f466be0e785be28d1e0a15ca413fe3dab7d993c"
+  },
+  "android-lite": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v139/PokeBonk-Lite.apk",
+   "bytes": 217715166,
+   "sha256": "cabf20912ba72cdb49841bcef35f06d837394c896663627450a4e22fb351f47d"
+  },
+  "windows-lite": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v139/PokeBonk-Lite-Windows-Instalador.exe",
+   "bytes": 303980034,
+   "sha256": "9a1952eb255ca51d8073e7ef410a34a48a479e0eb4942a8254198e96ff70d438"
+  }
+ }
+}
