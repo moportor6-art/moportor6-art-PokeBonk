@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.98';
+  const SUB = '0.99';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.99',
+      date: Date.UTC(2026, 10, 16, 17, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.99`,
+      summary: 'PokéBonk Lite: en el modo Sin fin las vitaminas no tienen tope.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**, modo **Sin fin**:`,
+        `- **Sin tope de nivel** (el tope por medallas solo vale en partidas normales y en la historia).`,
+        `- **Vitaminas sin tope**: los objetos que se apilan se pueden seguir sumando sin límite.`,
+        `- **Con tope**, como siempre: los que aumentan **proyectiles** (cantidad, rebotes o velocidad) y los objetos únicos.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.98',
       date: Date.UTC(2026, 10, 16, 7, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.98`,
@@ -2252,6 +2272,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.99',
+      date: '2026-11-16',
+      title: 'Sin fin sin topes (Lite).',
+      notes: [
+        ['balance', 'Lite: en Sin fin las vitaminas no tienen tope (salvo proyectiles y objetos únicos) ni hay tope de nivel.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.98',

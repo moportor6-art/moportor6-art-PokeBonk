@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Sin fin sin topes en la Lite (Subversión 0.99)
+- `main-…js`: el máximo de cada objeto (`Lo.get(x)?.max??10`, 4 sitios) pregunta antes a `window.PB_ITEM_MAX(id, def)`.
+- `equilibrio.js`: `PB_ITEM_MAX` devuelve 999 en `run.endless` para objetos con máximo ≥ 3 que no tocan `projectiles`/`bounces`/`projSpeed`.
+
 ## Tope de nivel visible (Subversión 0.98)
 - `equilibrio.js`: el tope es como mínimo `run.nextEvo.level`; marca fija «TOPE N» bajo `.tl-lvl` mientras estás topado y aviso cada 90 s.
 

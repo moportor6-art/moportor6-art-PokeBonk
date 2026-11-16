@@ -7,9 +7,19 @@
    - Élites con rasgo: Veloz (+40 % velocidad), Vampírico (se cura 3× el daño que te hace), Explosivo (al morir deja una
      zona que estalla) o Blindado (los 4 primeros golpes no le hacen daño).
    - Furia: jefes, guardianes y líderes que siguen vivos a los 2 minutos se enfurecen (+30 % daño y velocidad).
-   Solo partidas normales / historia (no duelos, torre, sin fin ni expedición). */
+   Solo partidas normales / historia (no duelos, torre, sin fin ni expedición). En Sin fin (0.99): sin tope de nivel y
+   vitaminas sin tope (salvo las de proyectiles y los objetos únicos). */
 (() => {
   if (window.PB_EDICION !== 'lite') return;
+  // 0.99: modo Sin fin sin tope en las vitaminas (objetos apilables, máx. 3 o más): se pueden seguir apilando.
+  // Los que tocan proyectiles (cantidad, rebotes, velocidad) mantienen su tope; los únicos (máx. 1-2) también.
+  const PROY = new Set(['projectiles', 'bounces', 'projSpeed']);
+  window.PB_ITEM_MAX = (id, def) => {
+    const run = window.__pbRun;
+    if (!run?.endless || !def || (def.max ?? 10) < 3) return undefined;
+    if ((def.mods ?? []).some(m => PROY.has(m.stat))) return undefined;
+    return 999;
+  };
   const activa = run => run && run.mode === 'standard' && !run.tower && !run.endless && !run.expedition && !run.duel;
   const meta = () => window.__pbMeta;
   const medallas = () => Object.values(meta()?.profile?.pbMedallas ?? {}).reduce((a, l) => a + (l?.length ?? 0), 0);
