@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.99';
+  const SUB = '1.00';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.00',
+      date: Date.UTC(2026, 10, 16, 18, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.00`,
+      summary: 'Modo historia: dificultad Normal o Difícil y jaulas con Pokémon que aún no tienes.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `**Modo historia** (PokéBonk Lite):`,
+        `- **Dificultad Normal o Difícil**, en la pantalla de cada capítulo (se guarda en tu partida y la puedes cambiar antes de cada combate). Normal es la de siempre; Difícil suma la dificultad Difícil del juego: salvajes con **+40 % PS**, **+42 % daño**, **+30 % más numerosos** y más élites, y da **+75 % de Polvo**.`,
+        `- **Jaulas de captura**: traen Pokémon de ese mapa que **aún no tienes**; si ya los tienes todos, alguno con la **investigación pendiente**. Así cada gimnasio es una temporada para completar la investigación de su zona.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.99',
       date: Date.UTC(2026, 10, 16, 17, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.99`,
@@ -2272,6 +2291,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.00',
+      date: '2026-11-16',
+      title: 'Historia: dificultad y jaulas.',
+      notes: [
+        ['new', 'Lite: modo historia con dificultad Normal o Difícil.'],
+        ['new', 'Lite: en la historia, las jaulas traen Pokémon del mapa que aún no tienes o con investigación pendiente.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.99',

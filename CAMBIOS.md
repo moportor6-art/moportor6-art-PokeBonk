@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Historia: dificultad y jaulas (Subversión 1.00)
+- `historia.js`: botón «Dificultad: Normal / Difícil» en la pantalla del capítulo (`slot.dif`; Difícil arranca con `tier: 1`). `window.PB_JAULA(run, pool, rng)`: en partidas de la historia elige para las jaulas especies del `director.pool` que no están en la Liga (`meta.inLeague`) o, si no quedan, con `researchDone` pendiente.
+- `menus-…js`: al colocar las jaulas, `t.data.species` pregunta antes a `window.PB_JAULA`.
+
 ## Sin fin sin topes en la Lite (Subversión 0.99)
 - `main-…js`: el máximo de cada objeto (`Lo.get(x)?.max??10`, 4 sitios) pregunta antes a `window.PB_ITEM_MAX(id, def)`.
 - `equilibrio.js`: `PB_ITEM_MAX` devuelve 999 en `run.endless` para objetos con máximo ≥ 3 que no tocan `projectiles`/`bounces`/`projSpeed`.

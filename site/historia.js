@@ -358,7 +358,9 @@
       <div class="cap"><img src="./assets/historia/${cap.retrato}.png" alt=""><div class="info"><h2>${esc(cap.nombre)}</h2>
       <p>${esc(cap.lugar)} · Tipo ${esc(TIPO[cap.tipo] ?? cap.tipo)}</p><p>Mapa: ${esc(mapaNom)}. Sobrevive y vence a su equipo: ${eq.map(nombrePk).map(esc).join(', ')}.</p>
       <p>Tu compañero: <b>${esc(nombrePk(s.sp))}</b> · <span class="polvo">${Math.floor(meta()?.profile?.stardust ?? 0)} de Polvo</span></p></div></div>
+      <div class="fila"><button class="hbt dif" title="Difícil: salvajes con +40 % PS, +42 % daño, +30 % más numerosos y más élites; +75 % de Polvo">Dificultad: ${s.dif === 'dificil' ? 'Difícil' : 'Normal'}</button></div>
       <div class="fila"><button class="hbt go">¡Al combate!</button><button class="hbt lab">Laboratorio</button><button class="hbt vol">Volver</button></div>`;
+    b.querySelector('.dif').onclick = () => { s.dif = s.dif === 'dificil' ? 'normal' : 'dificil'; guardar(); pantallaCapitulo(i); };
     const ir = () => {
       const fin = () => vs(cap.reg, cap.retrato, s.sp, () => empezar(i));
       const d = D[cap.id];
@@ -378,10 +380,23 @@
     const h = H(), s = h.slots[i], cap = capitulo(s), [mapa] = mapaDe(s);
     h.activo = i; s.res = null; guardar();
     if (!cap.liga) GYM() && (GYM().sel = { reg: cap.reg, id: cap.id });
-    nuestroCfg = { species: s.sp, biome: mapa, tier: 0, boosts: [], mode: 'standard' };
+    nuestroCfg = { species: s.sp, biome: mapa, tier: s.dif === 'dificil' ? 1 : 0, boosts: [], mode: 'standard' }; // 1.00: Normal o Difícil
     const a = app();
     if (!a?.startRun) return;
     Promise.resolve(a.startRun(nuestroCfg)).then(ok => { if (!ok && !a.run) { GYM() && (GYM().sel = null); } });
+  };
+  // 1.00: en las partidas de la historia, las jaulas de captura traen Pokémon del mapa que aún no tienes y, si ya
+  // los tienes todos, alguno con la investigación pendiente (main → menus-…js: PB_JAULA al colocar las jaulas).
+  window.PB_JAULA = (run, pool, rng) => {
+    try {
+      const h = H(), s = h?.slots[h.activo];
+      if (h?.activo == null || !s || run.startSpecies !== s.sp || run.biome?.id !== mapaDe(s)[0] || !pool.length) return undefined;
+      const m = meta();
+      const nuevos = pool.filter(x => !m.inLeague?.(x.id));
+      const inv = pool.filter(x => !m.researchDone?.(x.id));
+      const l = nuevos.length ? nuevos : inv;
+      return l.length ? rng.pick(l).id : undefined;
+    } catch { return undefined; }
   };
   // Una partida que no empieza desde aquí (ni «Reiniciar» la nuestra) deja la historia en pausa.
   const envolverApp = () => {
