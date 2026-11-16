@@ -1,0 +1,1 @@
+var e=e=>{let[t=``,n]=e.split(`/`,2);return(t===`pokemon`||t===`skins`)&&n!==void 0?`${t}/${n}`:t},t={origin:``,versions:{}},n=n=>{let r=t.versions[e(n)];return r?`${t.origin}/assets/${n}?v=${r}`:`/pokemonsurvivors/assets/${n}`},r=e=>{let t=new Image;return t.crossOrigin=`anonymous`,t.src=e,t};export{n,r as t};
