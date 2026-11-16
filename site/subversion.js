@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.00';
+  const SUB = '1.01';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.01',
+      date: Date.UTC(2026, 10, 16, 19, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.01`,
+      summary: 'PokéBonk Lite: movimientos de tipos compatibles y mucho menos oro en el mapa.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Movimientos de tipos compatibles** (como las MT): cada Pokémon puede aprender además movimientos de 2 tipos afines, a partir del nivel 18 y cada 8 niveles. Por ejemplo, los tipo Agua aprenden Hielo (Esquirla Helada, Viento Hielo, Puño Hielo) y Siniestro, así que puedes juntar dos de Hielo para una fusión en el PC de Bill. Fuego → Lucha y Tierra; Planta → Veneno y Tierra; Eléctrico → Acero y Psíquico; Dragón → Fuego y Agua…`,
+        `- **Menos oro**: el mapa suelta un **60 % menos** de Pokédólares (monedas, Meowth, montones de monedas), en partidas normales y en el modo historia. Ahorrar vuelve a valer la pena.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.00',
       date: Date.UTC(2026, 10, 16, 18, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.00`,
@@ -2291,6 +2310,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.01',
+      date: '2026-11-16',
+      title: 'Tipos compatibles y oro (Lite).',
+      notes: [
+        ['new', 'Lite: movimientos de 2 tipos compatibles por Pokémon (desde el nivel 18), para más variedad y fusiones.'],
+        ['balance', 'Lite: el mapa suelta un 60 % menos de oro.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.00',

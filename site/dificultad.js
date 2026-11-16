@@ -95,6 +95,8 @@
           // 0.94: también ataque por nivel: +0,8 % de daño (0.96: −20 %, antes 1 %) y +0,5 % de velocidad de ataque.
           const lv = this.level ?? 1;
           this.stats.damage *= 1 + 0.008 * lv;
+          // 1.01: el mapa suelta un 60 % menos de oro (monedas, Meowth, cofres de monedas) en partidas normales e historia.
+          if (activa(run0())) this.stats.gold *= 0.4;
           // 0.96: Maldición de la horda (Laboratorio): más salvajes, más EXP.
           const mc = maldicion();
           if (mc && !run0()?.duel && run0()?.mode !== 'duel') { this.stats.enemyAmount *= 1 + 0.25 * mc; this.stats.xpGain *= 1 + 0.15 * mc; }

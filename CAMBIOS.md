@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Tipos compatibles y oro en la Lite (Subversión 1.01)
+- `site/compatibilidad.js` (nuevo, solo Lite, cargado tras `edicion.js`): envuelve `fetch` para `data/learnsets.json` y añade a cada especie hasta 6 movimientos de 2 tipos compatibles (tabla `COMPAT`/`MOV`) desde el nivel 18, cada 8 niveles.
+- `dificultad.js`: `stats.gold` ×0,4 en partidas normales e historia.
+
 ## Historia: dificultad y jaulas (Subversión 1.00)
 - `historia.js`: botón «Dificultad: Normal / Difícil» en la pantalla del capítulo (`slot.dif`; Difícil arranca con `tier: 1`). `window.PB_JAULA(run, pool, rng)`: en partidas de la historia elige para las jaulas especies del `director.pool` que no están en la Liga (`meta.inLeague`) o, si no quedan, con `researchDone` pendiente.
 - `menus-…js`: al colocar las jaulas, `t.data.species` pregunta antes a `window.PB_JAULA`.
