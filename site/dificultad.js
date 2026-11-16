@@ -70,7 +70,8 @@
     const ia = window.__pbRun?.interactables;
     if (!ia || ia.__pbBarato || typeof ia.chestCost !== 'function') return;
     const c = ia.chestCost.bind(ia);
-    ia.chestCost = () => Math.max(1, Math.round(c() * BARATO));
+    // 0.97: cada Poké Ball comprada en la partida encarece la siguiente un 15 % más.
+    ia.chestCost = () => Math.max(1, Math.round(c() * BARATO * 1.15 ** (window.__pbRun?.chestsBought ?? 0)));
     ia.__pbBarato = true;
   }, 200);
 

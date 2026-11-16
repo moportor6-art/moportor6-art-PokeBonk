@@ -16,7 +16,8 @@
     // PokéBonk Lite (0.95, por la Dificultad Remaster): vuelve lo de antes, el ahorro entra en la partida siguiente.
     take() {
       if (window.PB_EDICION !== 'lite') return 0;
-      const b = num(BANK); set(PEND, b); set(BANK, 0); return b;
+      // 0.97: solo entra la mitad; la otra mitad se queda ahorrada (tienda de Megas, Laboratorio, siguientes partidas).
+      const t = num(BANK), b = Math.floor(t / 2); set(PEND, b); set(BANK, t - b); return b;
     },
     // Al terminar: lo que sobra de la partida se suma a la hucha.
     put(g) { set(BANK, num(BANK) + Math.max(0, Math.floor(g || 0))); set(PEND, 0); },

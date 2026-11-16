@@ -4,16 +4,40 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.96';
+  const SUB = '0.97';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.97',
+      date: Date.UTC(2026, 10, 16, 4, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.97`,
+      summary: 'PokéBonk Lite: gran ajuste de equilibrio (Poké Balls, oro, tope de nivel, élites con rasgos, furia).',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Poké Balls**: cada una que compras en la partida encarece la siguiente un **15 %** más.`,
+        `- **Oro ahorrado**: a la partida entra **la mitad**; la otra mitad sigue ahorrada.`,
+        `- **Tope de nivel por medallas**: 30 + 6 por cada medalla de gimnasio (máx. 100). Al llegar, la EXP extra se convierte en **Polvo Estelar**.`,
+        `- **Escalado según tu nivel**: si vas por encima del nivel esperado para el tiempo de partida, los salvajes ganan +2 % de PS y daño por nivel de más (máx. +60 %).`,
+        `- **Tope por objeto**: máximo **5 copias** de cada objeto por partida.`,
+        `- **Élites con rasgo**: **Veloz**, **Vampírico** (se cura al golpearte), **Explosivo** (al morir deja una zona que estalla: ¡apártate!) o **Blindado** (los 4 primeros golpes no le hacen daño).`,
+        `- **Furia**: jefes, guardianes y líderes vivos a los **2 minutos** se enfurecen (+30 % de daño y velocidad).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.96',
       date: Date.UTC(2026, 10, 15, 20, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.96`,
@@ -2209,6 +2233,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.97',
+      date: '2026-11-16',
+      title: 'Equilibrio (Lite).',
+      notes: [
+        ['balance', 'Lite: Poké Balls +15 % por compra, a la partida entra la mitad del oro ahorrado, tope de nivel por medallas y escalado según tu nivel.'],
+        ['new', 'Lite: élites con rasgos (Veloz, Vampírico, Explosivo, Blindado), furia de jefes a los 2 minutos y tope de 5 copias por objeto.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.96',

@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Equilibrio de la Lite (Subversión 0.97)
+- `dificultad.js`: `chestCost` ×1,15^`run.chestsBought`. `oro-guardado.js`: `take()` de la Lite lleva la mitad del ahorro.
+- `site/equilibrio.js` (nuevo, solo Lite): tope de nivel 30 + 6·medallas (`player.addXp` envuelto; el exceso va a `stats.pbDust`), escalado de salvajes por nivel de más (+2 %/nivel, máx. +60 %), tope de 5 por objeto (`player.$h8lcma`), rasgos de élite (velocidad, curación en `player.hurt`, explosión con `vfx.telegraph` + `run.later`, bloqueo en `combat.hit`) y furia a los 120 s (jefes, flag 4).
+- `index.html`: carga `equilibrio.js` tras `naturalezas.js`.
+
 ## Maldición de la horda en la Lite (Subversión 0.96)
 - `dificultad.js`: `profile.pbMaldicion` 0-8 con caja en el Laboratorio; en `player.recompute` multiplica `enemyAmount` ×(1+0,25·n) y `xpGain` ×(1+0,15·n), y envuelve `PB_REGIONES.polvo` ×(1+0,15·n) (no en duelos). Armadura por nivel 0,8 y daño por nivel 0,8 % (antes 1 y 1 %).
 
