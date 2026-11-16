@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Tope de nivel visible (Subversión 0.98)
+- `equilibrio.js`: el tope es como mínimo `run.nextEvo.level`; marca fija «TOPE N» bajo `.tl-lvl` mientras estás topado y aviso cada 90 s.
+
 ## Equilibrio de la Lite (Subversión 0.97)
 - `dificultad.js`: `chestCost` ×1,15^`run.chestsBought`. `oro-guardado.js`: `take()` de la Lite lleva la mitad del ahorro.
 - `site/equilibrio.js` (nuevo, solo Lite): tope de nivel 30 + 6·medallas (`player.addXp` envuelto; el exceso va a `stats.pbDust`), escalado de salvajes por nivel de más (+2 %/nivel, máx. +60 %), tope de 5 por objeto (`player.$h8lcma`), rasgos de élite (velocidad, curación en `player.hurt`, explosión con `vfx.telegraph` + `run.later`, bloqueo en `combat.hit`) y furia a los 120 s (jefes, flag 4).

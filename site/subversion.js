@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '0.97';
+  const SUB = '0.98';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-0.98',
+      date: Date.UTC(2026, 10, 16, 7, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.98`,
+      summary: 'PokéBonk Lite: el tope de nivel se ve y nunca impide evolucionar.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite** (tope de nivel de la 0.97: 30 + 6 por medalla):`,
+        `- Mientras estás en el tope, debajo de tu nivel aparece **TOPE N**, y cada 90 s un aviso te recuerda que la EXP se está convirtiendo en Polvo Estelar y que con medallas sube el tope.`,
+        `- El tope **nunca queda por debajo del nivel de tu siguiente evolución**: siempre puedes evolucionar.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-0.97',
       date: Date.UTC(2026, 10, 16, 4, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 0.97`,
@@ -2233,6 +2252,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '0.98',
+      date: '2026-11-16',
+      title: 'Tope de nivel visible (Lite).',
+      notes: [
+        ['fix', 'Lite: el tope de nivel se muestra junto a tu nivel y nunca impide evolucionar.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '0.97',

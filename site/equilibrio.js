@@ -13,7 +13,8 @@
   const activa = run => run && run.mode === 'standard' && !run.tower && !run.endless && !run.expedition && !run.duel;
   const meta = () => window.__pbMeta;
   const medallas = () => Object.values(meta()?.profile?.pbMedallas ?? {}).reduce((a, l) => a + (l?.length ?? 0), 0);
-  const tope = () => Math.min(100, 30 + 6 * medallas());
+  // 0.98: nunca por debajo del nivel de la siguiente evolución (si no, te quedabas sin poder evolucionar).
+  const tope = () => { const r = window.__pbRun; return Math.min(100, Math.max(30 + 6 * medallas(), r?.nextEvo?.level ?? 0)); };
   const esperado = run => 3 + 2.5 * ((run.time ?? 0) / 60);
   const RASGOS = ['veloz', 'vampirico', 'explosivo', 'blindado'];
   const NOMBRE = { veloz: 'Veloz', vampirico: 'Vampírico', explosivo: 'Explosivo', blindado: 'Blindado' };
@@ -46,7 +47,7 @@
 
   setInterval(() => {
     const run = window.__pbRun, pl = run?.player;
-    if (!activa(run) || !pl) return;
+    if (!activa(run) || !pl) { const m = document.querySelector('.pb-tope'); if (m) m.hidden = true; return; }
     const E = run.enemies, st = S(run);
     // Ganchos por partida.
     if (pl.addXp && !pl.__pbEqXp) {
@@ -54,7 +55,8 @@
       pl.addXp = function (e, ...a) {
         if ((this.level ?? 1) >= tope()) {
           run.stats.pbDust = (run.stats.pbDust ?? 0) + e * 0.05;
-          if (!st.avisoTope) { st.avisoTope = true; try { run.ui.toast(`Tope de nivel ${tope()} (medallas: ${medallas()}): la EXP extra se convierte en Polvo Estelar`, null); } catch {} }
+          const t = run.time ?? 0;
+          if (!(st.avisoTope > t)) { st.avisoTope = t + 90; try { run.ui.toast(`Tope de nivel ${tope()}: ${medallas()} medallas (30 + 6 por medalla). La EXP extra se convierte en Polvo Estelar; gana medallas para subirlo`, null); } catch {} }
           return;
         }
         return ax.call(this, e, ...a);
@@ -96,6 +98,15 @@
         return hit.call(this, j, dmg, o);
       };
       c.__pbEq = true;
+    }
+    // Marca «TOPE» junto al nivel mientras estás topado (fija en pantalla: el recuadro del nivel recorta lo que sobresale).
+    const lv = document.querySelector('#hud .tl-lvl');
+    let m = document.querySelector('.pb-tope');
+    const top = lv && (pl.level ?? 1) >= tope();
+    if (top && !m) { m = document.createElement('div'); m.className = 'pb-tope'; m.style.cssText = 'position:fixed;z-index:30;pointer-events:none;font:900 10px system-ui;color:#3a2a00;background:#ffd23a;border:2px solid #fff3c0;border-radius:8px;padding:1px 6px;letter-spacing:.5px;transform:translate(-50%,0)'; document.body.append(m); }
+    if (m) {
+      m.hidden = !top || run.state !== 'play';
+      if (top) { const r = lv.getBoundingClientRect(); m.style.left = (r.left + r.width / 2) + 'px'; m.style.top = (r.bottom + 2) + 'px'; m.textContent = `TOPE ${tope()}`; }
     }
     // Explosivos: al morir dejan una zona que estalla a los 1,1 s.
     for (const [j, t] of st.rasgo) {
