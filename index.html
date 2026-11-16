@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <title>Juega Poke Isaac gratis online - PokéIsaac</title>
+  <meta name="description" content="Juega gratis a PokéIsaac, un roguelike con Pokémon al estilo Binding of Isaac: explora mazmorras, derrota jefes, consigue objetos y completa la Pokédex. Gratis, en el navegador, en solitario o en cooperativo online.">
+  <link rel="canonical" href="https://pokeisaac.com/">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="PokéIsaac">
+  <meta property="og:title" content="Juega Poke Isaac gratis online - PokéIsaac">
+  <meta property="og:description" content="Juega gratis a PokéIsaac, un roguelike con Pokémon al estilo Binding of Isaac: explora mazmorras, derrota jefes, consigue objetos y completa la Pokédex. Gratis, en el navegador, en solitario o en cooperativo online.">
+  <meta property="og:url" content="https://pokeisaac.com/">
+  <meta property="og:image" content="https://pokeisaac.com/icons/icon-512.png?v=2">
+  <meta name="twitter:card" content="summary">
+  <meta name="twitter:title" content="Juega Poke Isaac gratis online - PokéIsaac">
+  <meta name="twitter:description" content="Juega gratis a PokéIsaac, un roguelike con Pokémon al estilo Binding of Isaac: explora mazmorras, derrota jefes, consigue objetos y completa la Pokédex. Gratis, en el navegador, en solitario o en cooperativo online.">
+  <script>window.PI_BUILD = "1.2.0-f1bc0654"; window.PI_VERSION = "1.2.0"; window.PI_FILEV = {"anim/alola.js":"34a02d3d","anim/galar.js":"cb2ec8e8","anim/hoenn.js":"3152eca0","anim/johto.js":"408f0873","anim/kalos.js":"f63018db","anim/kanto.js":"48ea7e65","anim/paldea.js":"d1610a89","anim/sinnoh.js":"52ad1e64","anim/teselia.js":"20fc8577","regions/alola-thumb.png":"ff52757c","regions/CREDITS.txt":"4bdddf0d","regions/galar-thumb.png":"6e514265","regions/hoenn-thumb.png":"fb261dd8","regions/johto-thumb.png":"d9f88975","regions/kalos-thumb.png":"01f402e7","regions/kanto-thumb.jpg":"5bf6606b","regions/paldea-thumb.png":"f0263638","regions/sinnoh-thumb.png":"73ffb18a","regions/teselia-thumb.png":"ef235cd4"}; window.PI_LANGS = ["de","it","ja","ko","pt","ru","zh","zt"]; window.PI_ASSETS = {"base":"https://bfwnvevcyrwwukokooty.supabase.co/storage/v1/object/public/pokeisaac-assets/","ver":"7d0f61fc18","vers":{"cries":"8c5b76a9","items-ps":"7cad28be","items":"9ec73ad6","music":"f2204d84","portrait":"8c26f301","sfx":"09ba3a1e","sprite":"7614db04","thumbs":"6d851770"},"bases":{"cries":"https://pi-assets.pages.dev/","items-ps":"https://pi-assets.pages.dev/","items":"https://pi-assets.pages.dev/","music":"https://pi-assets.pages.dev/","portrait":"https://pi-assets.pages.dev/","sfx":"https://pi-assets.pages.dev/","sprite":"https://pi-sprites.pages.dev/","thumbs":"https://pi-assets.pages.dev/"},"mirror":null,"packv":"84a81cd09e","packsOnBase":true}; window.PI_COOP_URL = "https://pokeisaac-coop-production.up.railway.app"; window.PI_COOP_REGIONS = {"eu":"https://pokeisaac-coop-production.up.railway.app","use":"https://pokeisaac-coop-use-production.up.railway.app","usw":"https://pokeisaac-coop-usw-production.up.railway.app","ap":"https://pokeisaac-coop-ap-production.up.railway.app"};</script>
+  <script type="application/ld+json">{"@context":"https://schema.org","@type":"VideoGame","name":"PokéIsaac","alternateName":["Poke Isaac","PokeIsaac"],"url":"https://pokeisaac.com/","description":"Juega gratis a PokéIsaac, un roguelike con Pokémon al estilo Binding of Isaac: explora mazmorras, derrota jefes, consigue objetos y completa la Pokédex. Gratis, en el navegador, en solitario o en cooperativo online.","inLanguage":["es","en"],"genre":["Roguelike","Acción","Aventura"],"gamePlatform":"Navegador web","applicationCategory":"Game","operatingSystem":"Cualquiera","playMode":["SinglePlayer","MultiPlayer"],"isAccessibleForFree":true,"offers":{"@type":"Offer","price":"0","priceCurrency":"EUR"}}</script>
+  <link rel="icon" href="favicon.ico?v=2" sizes="any">
+  <link rel="icon" href="favicon.svg?v=2" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png?v=2">
+  <link rel="manifest" href="site.webmanifest?v=2">
+  <meta name="theme-color" content="#1b1528">
+  <link href="fonts/press-start-2p.css" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css?v=1.2.0-f1bc0654">
+  <link rel="stylesheet" href="css/account.css?v=1.2.0-f1bc0654">
+  <link rel="stylesheet" href="css/coop.css?v=1.2.0-f1bc0654">
+</head>
+<body>
+  <div id="wrap">
+    <canvas id="game" width="1024" height="576"></canvas>
+  </div>
+  <!-- Capas DOM sobre el canvas (formularios con teclado real, también en móvil). -->
+  <div id="account-ui" hidden></div>
+  <div id="coop-ui" hidden></div>
+  <div id="friends-ui" hidden></div>
+  <div id="admin-ui" hidden></div>
+  <div id="shop-ui" hidden></div>
+  <div id="invite-pop" hidden></div>
+  <div id="debug" hidden></div>
+
+  <script src="js/vendor/supabase-2.45.4.js?v=1.2.0-f1bc0654"></script>
+  <script src="js/vendor/activity-boot.js?v=1.2.0-f1bc0654"></script>
+  <script src="assets/manifest.js?v=1.2.0-f1bc0654"></script>
+  <script src="assets/anim/kanto.js?v=1.2.0-f1bc0654"></script>
+  <script src="volver-pokebonk.js"></script>
+  <script src="pb-local.js"></script>
+<script src="js/pokeisaac.js?v=1.2.0-f1bc0654"></script>
+  <script src="js/vendor/pixelfx.js?v=1.2.0-f1bc0654"></script>
+  <noscript>Juega Poke Isaac gratis online - PokéIsaac. Juega gratis a PokéIsaac, un roguelike con Pokémon al estilo Binding of Isaac: explora mazmorras, derrota jefes, consigue objetos y completa la Pokédex. Gratis, en el navegador, en solitario o en cooperativo online. Activa JavaScript para jugar.</noscript>
+</body>
+</html>
