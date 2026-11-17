@@ -1,0 +1,2809 @@
+import { Element } from '../utils/Element.js';
+import { text } from '../file/text.js';
+import { playSound, playMusic } from '../file/audio.js';
+import { GameScene } from '../utils/GameScene.js';
+import { pokemonData } from './data/pokemonData.js';
+import { itemData } from './data/itemData.js';
+import { Pokemon } from './component/Pokemon.js';
+import { weatherData } from './data/weatherData.js';
+import { saveData } from '../file/data.js';
+import { songData } from './data/songData.js';
+import { passiveData } from './data/passiveData.js';
+
+const SECTIONS = ['profile', 'box', 'inventory', 'shop', 'map', 'challenge', 'dex','damageDealt', 'menu'];
+
+
+const TARGET_MODES = [
+	'first', 'last', 'highHP', 'lowHP', 'highArmor', 'noArmor', 'faster', 'slower', 'poisoned', 'notPoisoned', 
+	'burned', 'notBurned', 'stuned', 'notStuned', 'slowed', 'notSlowed', 'cursed', 'curseable', 'nightmared', 'random', 'invisible'
+]
+
+const TARGET_MODES_TRADUCTIONS = {
+	area: ['Area', 'Área', 'Zone', 'Área', 'Area', 'Fläche', 'エリア', '지역', '区域', 'Obszar'],
+	aura: ['Aura', 'Aura', 'Aura', 'Aura', 'Aura', 'Aura', 'オーラ', '오라', '气场', 'Aura'],
+	bombardment: ['Bombardment', 'Bombardeo', 'Bombardement', 'Bombardeio', 'Bombardamento', 'Bombardement', 'じゅうたん爆撃', '융단폭격', '轰炸', 'Bombardowanie'],
+	allies: ['Aura', 'Aura', 'Aura', 'Aura', 'Aura', 'Aura', 'オーラ', '오라', '气场', 'Aura'],
+	orbital: ['Orbital', 'Orbital', 'Orbitale', 'Orbital', 'Orbitale', 'Orbital', '軌道', '궤도', '軌道', 'Orbital'],
+	available: ['Available', 'Disponibles', 'Disponibles', 'Disponíveis', 'Disponibili', 'Verfügbar', '利用可能', '이용 가능', '可用', 'Dostępne'],
+
+	first: ['First', 'Primero', 'Premier', 'Primeiro', 'Primo', 'Erster', '最初', '첫 번째', '第一个', 'Pierwszy'],
+	last: ['Last', 'Último', 'Dernier', 'Último', 'Ultimo', 'Letzter', '最後', '마지막', '最后一个', 'Ostatni'],
+
+	faster: ['Faster', 'Más rápido', 'Plus rapide', 'Mais rápido', 'Più veloce', 'Schneller', 'より速い', '더 빠름', '更快', 'Szybszy'],
+	slower: ['Slower', 'Más lento', 'Plus lent', 'Mais lento', 'Più lento', 'Langsamer', 'より遅い', '더 느림', '更慢', 'Wolniejszy'],
+
+	highArmor: ['High Armor', 'Más armadura', 'Haute armure', 'Mais armadura', 'Alta armatura', 'Hohe Rüstung', '高防御', '높은 방어', '高护甲', 'Wysoki Pancerz'],
+	noArmor: ['No Armor', 'Sin armadura', 'Pas d’armure', 'Sem armadura', 'Senza armatura', 'Keine Rüstung', '無防御', '방어 없음', '无护甲', 'Bez Pancerza'],
+
+	highHP: ['High HP', 'Mas PS', 'Le plus de PV', 'HP alto', 'Alta salute', 'Hohe KP', '高HP', '높은 HP', '高生命值', 'Wysokie HP'],
+	lowHP: ['Low HP', 'Menos PS', 'Le moins de PV', 'HP baixo', 'Bassa salute', 'Niedrige KP', '低HP', '낮은 HP', '低生命值', "Niskie HP"],
+
+	poisoned: ['Poisoned', 'Envenenado', 'Empoisonné', 'Envenenado', 'Avvelenato', 'Vergiftet', '毒状態', '독 중독', '中毒', 'Zatruty'],
+	notPoisoned: ['Not Poisoned', 'No envenenado', 'Non empoisonné', 'Não envenenado', 'Non avvelenato', 'Nicht vergiftet', '未毒', '비중독', '未中毒', 'Nie Zatruty'],
+
+	burned: ['Burned', 'Quemado', 'Brulé', 'Queimado', 'Scottato', 'Verbrannt', '火傷', '화상', '灼伤', 'Oparzony'],
+	notBurned: ['Not Burned', 'No quemado', 'Non brulé', 'Não queimado', 'Non scottato', 'Nicht verbrannt', '未火傷', '비화상', '未灼伤', 'Nie Oparzony'],
+
+	stuned: ['Stunned', 'Aturdido', 'Étourdi', 'Atordoado', 'Stordito', 'Betäubt', '気絶', '기절', '眩晕', 'Ogłuszony'],
+	notStuned: ['Not Stunned', 'No aturdido', 'Non étourdí', 'Não atordoado', 'Non stordito', 'Nicht betäubt', '未気絶', '비기절', '未眩晕', 'Nie Ogłuszony'],
+
+	slowed: ['Slowed', 'Ralentizado', 'Ralenti', 'Lento', 'Rallentato', 'Verlangsamt', '減速', '감속', '减速', 'Spowolniony'],
+	notSlowed: ['Not Slowed', 'No ralentizado', 'Non ralenti', 'Não lento', 'Non rallentato', 'Nicht verlangsamt', '未減速', '비감속', '未减速', 'Nie Spowolniony'],
+
+	cursed: ["Cursed", "Maldito", "Maudit", "Amaldiçoado", "Maledetto", "Verflucht", "呪われた", "저주받은", "被诅咒的", "Przeklęty"],
+	curseable: ['Curseable', 'Maldecible', 'Maudissable', 'Amaldiçoável', 'Maledicibile', 'Verfluchbar', '呪われ得る', '저주 가능', '可被诅咒', 'Możliwy do Przeklęcia'],
+
+	nightmared: ["Nightmare'd", "Con pesadilla", "Cauchemarde", "Com pesadelo", "Con incubo", "Mit Albtraum", "悪夢を伴う", "악몽을 동반한", "带着噩梦的", "Ma Koszmar"],
+
+	random: ['Random', 'Aleatorio', 'Aléatoire', 'Aleatório', 'Casuale', 'Zufällig', 'ランダム', '무작위', '随机', 'Losowy'],
+	invisible: ['Invisible', 'Invisible', 'Invisible', 'Invisível', 'Invisibile', 'Unsichtbar', '透明', '투명', '隐形', 'Niewidzialny']
+}
+
+export class UI {
+	constructor(main) {
+		this.main = main;
+		this.render();
+
+		this.damageDealtDisplay = false;
+		this.damageDealtType = 'trueDamage';
+		this.enemyPositionDisplay = 0;
+		this.tileTerrainHover = null;
+
+		this.bellRhythmSequence = [1, 3, 1, 2, 1, 4, 2, 4, 1];
+		this.bellRhythmGroupIndex = 0;     
+		this.bellRhythmClickCount = 0;    
+		this.bellRhythmLastClickTime = 0;  
+		this.bellRhythmAwaitingPause = false; 
+
+		this.fastScene = new FastScene(this.main, this);
+
+		document.addEventListener('click', (event) => {
+		    const hasPending = this.main.area.towers.some(t => t.awaitingBombardZone);
+		    if (!hasPending) return;
+
+		    if (event.target === this.main.game.canvas) return; // el click en el mapa se gestiona aparte
+
+		    this.main.area.towers.forEach(t => { t.awaitingBombardZone = false; });
+		}, true);
+	}
+
+	render() {
+		this.topBar = new Element(this.main.scene, { className: 'ui-top-bar' }).element;
+
+		this.saveTeamButtonContainer = new Element(this.topBar, { className: 'ui-save-team-button-container stroke' }).element;
+
+		this.saveTeamButton = [];
+		for (let i = 0; i < 5; i++) {
+			this.saveTeamButton[i] = new Element(this.saveTeamButtonContainer, { className: 'ui-save-team-button', text: `#${i+1}` }).element;
+			this.saveTeamButton[i].addEventListener('mouseenter', () => {
+				playSound('open', 'ui');
+				this.showTeamSlotTooltip(i, 'save');
+			})
+			this.saveTeamButton[i].addEventListener('mouseleave', () => { this.main.tooltip.hide() });
+			this.saveTeamButton[i].addEventListener('click', () => { 
+				if (this.main.game.stopped) return playSound('pop0', 'ui');
+				this.saveTeamButtonHandle(i);
+			});
+		}
+
+		this.importTeamButtonContainer = new Element(this.topBar, { className: 'ui-import-team-button-container stroke' }).element;
+
+		this.importTeamButton = [];
+		for (let i = 0; i < 5; i++) {
+			this.importTeamButton[i] = new Element(this.importTeamButtonContainer, { className: 'ui-import-team-button', text: `#${i+1}` }).element;
+			this.importTeamButton[i].addEventListener('mouseenter', () => {
+				playSound('open', 'ui');
+				this.showTeamSlotTooltip(i, 'load');
+			})
+			this.importTeamButton[i].addEventListener('mouseleave', () => { this.main.tooltip.hide() });
+			this.importTeamButton[i].addEventListener('click', () => { 
+				if (this.main.game.stopped || this.main.area.heavyMetal) return playSound('pop0', 'ui');
+				this.importTeamButtonHandle(i);
+			});
+		}
+
+		this.weather = new Element(this.topBar, { className: 'ui-weather' }).element;
+
+		this.mapRoutCointainer = new Element(this.topBar, { className: 'ui-map-route-container stroke' }).element;
+		this.mapRoute = new Element(this.mapRoutCointainer, { className: 'ui-map-route' }).element;
+		this.mapRecord = new Element(this.mapRoutCointainer, { className: 'ui-map-record' }).element;
+
+		this.bottomBar = new Element(this.main.scene, { className: 'ui-bottom-bar' }).element;
+		this.challenge = new Element(this.bottomBar, { className: 'ui-challenge stroke' }).element;
+		this.chrono = new Element(this.bottomBar, { id: 'ui-chrono' }).element;
+
+		this.waveSelectorContainer = new Element(this.bottomBar, { className: 'ui-wave-selector-container' }).element;
+
+		this.waveSelectorTenLess = new Element(this.waveSelectorContainer, { className: 'ui-wave-selector stroke', text: '<<' }).element;
+		this.waveSelectorOneLess = new Element(this.waveSelectorContainer, { className: 'ui-wave-selector stroke', text: '<' }).element;
+		this.waveSelectorLabel = new Element(this.waveSelectorContainer, { className: 'ui-wave-selector-label stroke' }).element;
+		this.waveSelectorOneMore = new Element(this.waveSelectorContainer, { className: 'ui-wave-selector stroke', text: '>' }).element;
+		this.waveSelectorTenMore = new Element(this.waveSelectorContainer, { className: 'ui-wave-selector stroke', text: '>>' }).element;
+		this.waveSelectorBlock = new Element(this.waveSelectorContainer, { className: 'ui-wave-selector stroke', text: 'R' }).element;
+		this.waveSelectorMirror = new Element(this.waveSelectorContainer, { className: 'ui-wave-selector stroke', text: 'M' }).element;
+
+		this.waveSelectorTenLess.addEventListener('click', () => { this.main.area.changeWave(-10) });
+		this.waveSelectorOneLess.addEventListener('click', () => { this.main.area.changeWave(-1) });
+		this.waveSelectorOneMore.addEventListener('click', () => { this.main.area.changeWave(1) });
+		this.waveSelectorTenMore.addEventListener('click', () => { this.main.area.changeWave(10) });
+		this.waveSelectorBlock.addEventListener('click', () => { this.waveSelectorBlockHandle() });
+		this.waveSelectorMirror.addEventListener('click', () => { this.waveSelectorMirrorHandle() });
+
+		this.waveSelectorTenLess.addEventListener('mouseenter', () => { playSound('hover1', 'ui') });
+		this.waveSelectorOneLess.addEventListener('mouseenter', () => { playSound('hover1', 'ui') });
+		this.waveSelectorOneMore.addEventListener('mouseenter', () => { playSound('hover1', 'ui') });
+		this.waveSelectorTenMore.addEventListener('mouseenter', () => { playSound('hover1', 'ui') });
+		this.waveSelectorBlock.addEventListener('mouseenter', () => { playSound('hover1', 'ui') });
+		this.waveSelectorMirror.addEventListener('mouseenter', () => { playSound('hover1', 'ui') });
+
+
+		this.waveIncome = new Element(this.bottomBar, { className: 'ui-wave-income stroke' }).element;
+		this.waveIncomeState = {
+			routeKey: '',
+			waveKey: '',
+			routeStartTime: 0,
+			lastGold: 0,
+			routeEarned: 0,
+			waveEarned: 0,
+			lastTime: 0,
+			smoothPerSecond: 0
+		};
+		this.waveIncomeTimer = setInterval(() => {
+			this.updateWaveIncome(true);
+		}, 200);
+
+		this.tilesCountContainer = new Element(this.bottomBar, { className: 'ui-tiles-count-container stroke' }).element;
+		this.tilesCount = [];
+		this.tilesCountNum = [0, 0, 0, 0];
+		
+		for (let i = 0; i < 4; i++) {
+			this.tilesCount[i] = new Element(this.tilesCountContainer, { className: 'ui-tiles-count' }).element;
+			this.tilesCount[i].addEventListener('mouseenter', () => {
+				this.tileTerrainHover = i+1;
+			})
+			this.tilesCount[i].addEventListener('mouseleave', () => {
+				this.tileTerrainHover = null;
+			})
+		}
+
+		this.playerPanel = new Element(this.main.scene, { className: 'ui-player-panel' }).element;
+		this.playerPortrait = new Element(this.playerPanel, { className: 'ui-player-portrait' }).element;
+		this.playerName = new Element(this.playerPanel, { className: 'ui-player-name stroke' }).element;
+		this.playerHealth = new Element(this.playerPanel, { className: 'ui-player-health' }).element;
+		this.hearts = [];
+		this.playerGold = new Element(this.playerPanel, { className: 'ui-player-gold stroke' }).element;
+		this.playerStars = new Element(this.playerPanel, { className: 'ui-player-stars stroke' }).element;
+		this.playerRibbons = new Element(this.playerPanel, { className: 'ui-player-ribbons stroke' }).element;
+		this.playerRibbonsIcon = new Element(this.playerRibbons, { className: 'ui-player-ribbons-icon' }).element;
+		this.playerRibbonsText = new Element(this.playerRibbons, { className: 'ui-player-ribbons-text' }).element;
+
+		this.playerLimitLine = new Element(this.playerPanel, { className: 'ui-player-limit-line' }).element;
+
+		this.pokemonContainer = new Element(this.playerPanel, { className: 'ui-pokemon-container' }).element;
+		this.pokemon = [];
+
+		for (let i = 0; i < 10; i++) {
+			this.pokemon[i] = new Element(this.pokemonContainer, { className: 'ui-pokemon' }).element;
+			this.pokemon[i].name = new Element(this.pokemon[i], { className: 'ui-pokemon-name stroke' }).element;
+			this.pokemon[i].sprite = new Element(this.pokemon[i], { className: 'ui-pokemon-sprite' }).element;
+			this.pokemon[i].shiny = new Element(this.pokemon[i], { className: 'ui-pokemon-shiny' }).element;
+			this.pokemon[i].level = new Element(this.pokemon[i], { className: 'ui-pokemon-level stroke' }).element;
+			this.pokemon[i].stars = new Element(this.pokemon[i], { className: 'ui-pokemon-stars' }).element;
+			this.pokemon[i].attackStyle = new Element(this.pokemon[i], { className: 'ui-pokemon-attack-style' }).element;
+			this.pokemon[i].fieldStatus = new Element(this.pokemon[i], { className: 'ui-pokemon-field-status' }).element;
+			this.pokemon[i].dittoBg = new Element(this.pokemon[i], { className: 'ui-pokemon-ditto-bg' }).element;
+			this.pokemon[i].targetMode = new Element(this.pokemon[i], { className: 'ui-pokemon-target-mode' }).element;
+			this.pokemon[i].targetLeft = new Element(this.pokemon[i].targetMode, { className: 'ui-pokemon-target-arrow', text: '<' }).element;
+			this.pokemon[i].targetText = new Element(this.pokemon[i].targetMode, { className: 'ui-pokemon-target-text' }).element;
+			this.pokemon[i].targetRight = new Element(this.pokemon[i].targetMode, { className: 'ui-pokemon-target-arrow', text: '>' }).element;
+
+			this.pokemon[i].buttonContainer = new Element(this.pokemon[i], { className: 'ui-pokemon-button-container' }).element;
+			this.pokemon[i].deploy = new Element(this.pokemon[i].buttonContainer, { className: 'ui-pokemon-button' }).element;
+			this.pokemon[i].info = new Element(this.pokemon[i].buttonContainer, { className: 'ui-pokemon-button', text: 'i' }).element;
+			this.pokemon[i].levelUp = new Element(this.pokemon[i].buttonContainer, { className: 'ui-pokemon-button', text: '+1' }).element;
+			this.pokemon[i].item = new Element(this.pokemon[i].buttonContainer, { className: 'ui-pokemon-button', text: '+' }).element;
+			this.pokemon[i].noPokemon = new Element(this.pokemon[i].buttonContainer, { className: 'ui-pokemon-button', text: '+' }).element;
+
+			this.pokemon[i].deploy.addEventListener('mouseenter', () => { playSound('hover3', 'ui') });
+			// this.pokemon[i].deploy.addEventListener('mouseenter', () => { this.showSlotButtonTooltip(i, 'deploy') });
+			// this.pokemon[i].deploy.addEventListener('mouseleave', () => { this.main.tooltip.hide() });
+			this.pokemon[i].deploy.addEventListener('click', () => {
+				if (this.main.area.heavyMetal) {
+					return playSound('pop0', 'ui');
+				}
+
+				const pokemon = this.main.team.pokemon[i];
+				if (!pokemon) return;
+
+				// PAUSA
+				if (this.main.game.stopped) {
+					if (pokemon.ability?.id !== 'timeWarp') {
+						return playSound('pop0', 'ui');
+					}
+
+					if (
+						this.main.game.deployingUnit &&
+						this.main.game.deployingUnit !== pokemon
+					) {
+						return playSound('pop0', 'ui');
+					}
+
+					// TimeWarp desplegado -> retirar
+					if (pokemon.isDeployed) {
+						this.main.game.deployingUnit = pokemon;
+						this.main.game.retireUnit();
+						this.main.game.deployingUnit = undefined;
+
+						if (this.main.game._timeWarpHoverHandler) {
+							window.removeEventListener(
+								'pointermove',
+								this.main.game._timeWarpHoverHandler
+							);
+							this.main.game._timeWarpHoverHandler = null;
+						}
+
+						this.main.UI.updatePokemon();
+
+						this.main.game.mouse.x = undefined;
+						this.main.game.mouse.y = undefined;
+
+						this.main.game.lastTime = 0;
+						this.main.game.animate(performance.now());
+						return;
+					}
+
+					// TimeWarp ya seleccionado -> cancelar
+					if (this.main.game.deployingUnit === pokemon) {
+						this.main.game.cancelDeployUnit();
+
+						if (this.main.game._timeWarpHoverHandler) {
+							window.removeEventListener(
+								'pointermove',
+								this.main.game._timeWarpHoverHandler
+							);
+							this.main.game._timeWarpHoverHandler = null;
+						}
+
+						this.main.game.mouse.x = undefined;
+						this.main.game.mouse.y = undefined;
+
+						this.main.game.lastTime = 0;
+						this.main.game.animate(performance.now());
+						return;
+					}
+
+					// Seleccionar TimeWarp
+					this.main.game.tryDeployUnit(i, false);
+
+					// EXACTAMENTE como el drag de UI:
+					// actualizar mouse con coordenadas reales del canvas
+					// y redibujar mientras la partida sigue pausada.
+					if (
+						this.main.game.deployingUnit === pokemon &&
+						this.main.game.stopped
+					) {
+						if (this.main.game._timeWarpHoverHandler) {
+							window.removeEventListener(
+								'pointermove',
+								this.main.game._timeWarpHoverHandler
+							);
+						}
+
+						this.main.game._timeWarpHoverHandler = (ev) => {
+							if (
+								!this.main.game.stopped ||
+								this.main.game.deployingUnit !== pokemon
+							) {
+								window.removeEventListener(
+									'pointermove',
+									this.main.game._timeWarpHoverHandler
+								);
+								this.main.game._timeWarpHoverHandler = null;
+								return;
+							}
+
+							const canvas = this.main.game.canvas;
+							const rect = canvas.getBoundingClientRect();
+
+							if (
+								ev.clientX >= rect.left &&
+								ev.clientX <= rect.right &&
+								ev.clientY >= rect.top &&
+								ev.clientY <= rect.bottom
+							) {
+								const scaleX = canvas.width / rect.width;
+								const scaleY = canvas.height / rect.height;
+
+								this.main.game.mouse.x =
+									(ev.clientX - rect.left) * scaleX;
+
+								this.main.game.mouse.y =
+									(ev.clientY - rect.top) * scaleY;
+
+								this.main.game.activeTile =
+									this.main.area.placementTiles.find(tile =>
+										this.main.game.mouse.x > tile.position.x &&
+										this.main.game.mouse.x < tile.position.x + tile.size &&
+										this.main.game.mouse.y > tile.position.y &&
+										this.main.game.mouse.y < tile.position.y + tile.size
+									) || null;
+
+								this.main.area.placementTiles.forEach(tile => {
+									tile.update(this.main.game.mouse);
+								});
+
+								this.main.game.lastTime = 0;
+								this.main.game.animate(performance.now());
+							}
+						};
+
+						window.addEventListener(
+							'pointermove',
+							this.main.game._timeWarpHoverHandler
+						);
+
+						// Pintar inmediatamente aunque todavía no se haya movido el ratón.
+						this.main.area.placementTiles.forEach(tile => {
+							tile.update(this.main.game.mouse);
+						});
+
+						this.main.game.lastTime = 0;
+						this.main.game.animate(performance.now());
+					}
+
+					return;
+				}
+
+				// FUERA DE PAUSA
+				if (this.main.game.deployingUnit) {
+					if (this.main.game.deployingUnit === pokemon) {
+						this.main.game.cancelDeployUnit();
+					}
+					return;
+				}
+
+				this.main.game.tryDeployUnit(i, true);
+			});
+
+			this.pokemon[i].info.addEventListener('mouseenter', () => { playSound('hover3', 'ui') })
+			// this.pokemon[i].info.addEventListener('mouseenter', () => { this.showSlotButtonTooltip(i, 'info') });
+			// this.pokemon[i].info.addEventListener('mouseleave', () => { this.main.tooltip.hide() });
+			this.pokemon[i].info.addEventListener('click', () => {
+				if (!this.main.boxScene.isOpen && !this.main.inventoryScene.isOpen) this.main.pokemonScene.open(this.main.team.pokemon[i], i);
+				else this.main.pokemonScene.open(this.main.team.pokemon[i], i, this.main.team.pokemon);
+			});
+
+			this.pokemon[i].levelUp.addEventListener('mouseenter', () => { playSound('hover3', 'ui') })
+			this.pokemon[i].levelUp.addEventListener('click', () => {
+			    const pokemon = this.main.team.pokemon[i];
+
+			    if (pokemon?.attackType === 'bombardment') {
+			        if (this.main.game.stopped) return playSound('pop0', 'ui');
+
+			        const tower = this.main.area.towers.find(t => t.pokemon === pokemon);
+			        if (!tower) return playSound('pop0', 'ui');
+
+			        tower.awaitingBombardZone = true;
+			        playSound('select', 'ui'); 
+			        return;
+			    }
+
+			    if (this.main.game.stopped) return playSound('pop0', 'ui');
+			    if (this.main.team.pokemon[i].lvl < 100 && this.main.player.gold >= this.main.team.pokemon[i].cost) {
+			        this.main.player.changeGold(-this.main.team.pokemon[i].cost);
+			        this.main.team.pokemon[i].levelUp();
+			        this.updatePokemon();
+			        playSound('obtain', 'ui');
+			        if (this.fastScene.isOpen) this.fastScene.close();
+			    }
+			});
+
+			this.pokemon[i].item.addEventListener('mouseenter', () => { playSound('hover3', 'ui') });
+			// this.pokemon[i].item.addEventListener('mouseenter', () => { this.showSlotButtonTooltip(i, 'item') });
+			// this.pokemon[i].item.addEventListener('mouseleave', () => { this.main.tooltip.hide() });
+			this.pokemon[i].item.addEventListener('click', (e) => {
+				//this.main.tooltip.hide();
+				e.stopPropagation();
+
+				this.fastScene.open('item', i);
+			});
+
+			this.pokemon[i].noPokemon.addEventListener('mouseenter', () => { playSound('hover3', 'ui') });
+			this.pokemon[i].noPokemon.addEventListener('click', (e) => { 
+				e.stopPropagation();
+				this.fastScene.open('pokemon', i) 
+			});
+
+			this.pokemon[i].fieldStatus.addEventListener('mouseenter', () => {
+				const pokemon = this.main.team.pokemon[i];
+				if (!pokemon) return;
+				this.main.tooltip.showItem(
+					pokemon.isDeployed
+						? { name: text.ui.fieldStatus.label, description: text.ui.fieldStatus.yes }
+						: { name: text.ui.fieldStatus.label, description: text.ui.fieldStatus.no }
+				);
+			});
+			this.pokemon[i].fieldStatus.addEventListener('mouseleave', () => { this.main.tooltip.hide() });
+
+			this.pokemon[i].attackStyle.addEventListener('mouseenter', () => {
+				const pokemon = this.main.team.pokemon[i];
+				if (!pokemon) return;
+				this.main.tooltip.showItem({
+					name: ['Attack Shape'],
+					description: [this.getAttackStyleTooltip(pokemon)]
+				});
+			});
+			this.pokemon[i].attackStyle.addEventListener('mouseleave', () => { this.main.tooltip.hide() });
+
+			this.pokemon[i].targetLeft.addEventListener('mouseenter', () => { playSound('hover1', 'ui') });
+			this.pokemon[i].targetRight.addEventListener('mouseenter', () => { playSound('hover1', 'ui') });
+			this.pokemon[i].targetLeft.addEventListener('click', (e) => {
+				e.stopPropagation();
+				this.changeSlotTargetMode(i, -1);
+			});
+			this.pokemon[i].targetRight.addEventListener('click', (e) => {
+				e.stopPropagation();
+				this.changeSlotTargetMode(i, 1);
+			});
+
+			this.pokemon[i].sprite.addEventListener('dblclick', () => {
+				if (this.main.game.stopped) return playSound('pop0', 'ui');
+
+				const pokemon = this.main.team.pokemon[i];
+				if (!pokemon || this.main.area.inChallenge.draft) return;
+
+				if (this.main.game.deployingUnit != undefined) this.main.game.cancelDeployUnit();
+
+				if (pokemon.isDeployed) {
+					this.main.game.deployingUnit = pokemon;
+					this.main.game.retireUnit();
+				} else {
+					playSound('unequip', 'ui');
+				}
+
+				this.main.box.addPokemon(pokemon);
+				this.main.team.removePokemon(pokemon);
+
+				this.main.area.checkWeather();
+				this.update();
+
+				if (this.fastScene.isOpen) this.fastScene.close();
+			});
+
+			this.pokemon[i].sprite.addEventListener('click', () => {
+				if (this.main.dexScene.isOpen) {
+					playSound('click1', 'ui');
+					const pokemon = this.main.team.pokemon[i];
+					const dex = this.main.dexScene;
+
+					if (dex.search.value.value) dex.search.value.value = '';
+
+					dex.changeMode('pokemon');
+
+					dex.sortedTower = 0;
+					dex.update();
+
+					const entry = dex.entries.find(entry =>
+						entry.type === 'pokemon' &&
+						(entry.data?.id === pokemon.id ||
+						 entry.basePokemon?.id === pokemon.id)
+					);
+
+					if (entry) {
+						dex.toggleEntry(entry);
+					}
+				}
+			});
+
+			this.pokemon[i].shiny.addEventListener('mouseenter', () => { playSound('hover1', 'ui') })
+			this.pokemon[i].shiny.addEventListener('click', () => {
+				if (this.main.game.stopped) return playSound('pop0', 'ui');
+				if (this.main.team.pokemon[i] != undefined) {
+					if (this.main.team.pokemon[i].isShiny) {
+						this.main.team.pokemon[i].toggleShiny();
+						this.update();
+						playSound('option', 'ui');
+					}
+				}
+			})
+		}
+
+		this.pokemon[6].stars.innerHTML = `<span class="lock">🔒</span><br><span class="msrre">⭐</span>40`;
+		this.pokemon[7].stars.innerHTML = `<span class="lock">🔒</span><br><span class="msrre">⭐</span>160`;
+		this.pokemon[8].stars.innerHTML = `<span class="lock">🔒</span><br><span class="msrre">⭐</span>320`;
+		this.pokemon[9].stars.innerHTML = `<span class="lock">🔒</span><br><span class="msrre">⭐</span>540`;
+
+		this.mapPanel = new Element(this.main.scene, { className: 'ui-map-panel' }).element;
+
+		this.sectionContainer = new Element(this.mapPanel, { className: 'ui-section-container' }).element;
+		this.section = [];
+
+		SECTIONS.forEach(section =>  {
+			this.section[section] = new Element(this.sectionContainer, { className: 'ui-section' }).element;
+			this.section[section].img = new Element(this.section[section], { className: 'ui-section-img', image: `./src/assets/images/icons/${section}.png` }).element;
+			this.section[section].addEventListener('mouseenter', () => {
+				playSound('hover1', 'ui');
+				let tooltip;
+				if (
+					section === 'challenge' &&
+					(
+						this.main.area.isCustom ||
+						this.main.player.stars < 540 ||
+						this.main.player.records[this.main.area.map.id] < 100 ||			
+						(this.main.team.pokemon.length + this.main.box.pokemon.length) < 30)
+					) {
+					tooltip = text.sectionTooltip["challengeLocked"];
+				} //else tooltip = text.sectionTooltip[section];
+				if (tooltip) this.main.tooltip.showItem(tooltip);
+			});
+			this.section[section].addEventListener('mouseleave', () => { this.main.tooltip.hide() });
+		}) 
+
+		this.section['profile'].addEventListener('click', () => { this.main.profileScene.open() });
+		this.section['box'].addEventListener('click', () => { this.main.boxScene.open() });
+		this.section['inventory'].addEventListener('click', () => { this.main.inventoryScene.open() });
+		this.section['shop'].addEventListener('click', () => { this.main.shopScene.open() });
+		this.section['map'].addEventListener('click', () => { this.main.mapScene.open() });
+		this.section['challenge'].addEventListener('click', () => { this.main.challengeScene.open()  });
+		this.section['dex'].addEventListener('click', () => { this.main.dexScene.open()  });
+		this.section['damageDealt'].addEventListener('click', () => { this.damageDealtSwitch() });
+		this.section['menu'].addEventListener('click', () => { this.main.menuScene.open() });
+		
+		this.mapPanelBackground = new Element(this.mapPanel, { className: 'ui-map-panel-background' }).element;
+		this.mapWavePokemonContainer = new Element(this.mapPanelBackground, { className: 'ui-map-wave-pokemon-container' }).element;
+		this.mapWavePokemon = [];
+
+		this.infoContainer = new Element(this.mapPanelBackground, { className: 'ui-info-container stroke' }).element;
+		this.infoName = new Element(this.infoContainer, { className: 'ui-info-name' }).element;
+		this.infoStatContainer = new Element(this.infoContainer, { className: 'ui-info-stat-container stroke' }).element;
+		this.infoHealth = new Element(this.infoStatContainer, { className: 'ui-info-stat' }).element;
+		this.infoArmor = new Element(this.infoStatContainer, { className: 'ui-info-stat' }).element;
+		this.infoSpeed = new Element(this.infoStatContainer, { className: 'ui-info-stat' }).element;
+		this.infoPower = new Element(this.infoStatContainer, { className: 'ui-info-stat' }).element;
+		this.infoRegen = new Element(this.infoStatContainer, { className: 'ui-info-stat' }).element;
+		this.infoStun = new Element(this.infoStatContainer, { className: 'ui-info-stat' }).element;
+		this.infoSlow = new Element(this.infoStatContainer, { className: 'ui-info-stat' }).element;
+		this.infoBurn = new Element(this.infoStatContainer, { className: 'ui-info-stat' }).element;
+		this.infoPoison = new Element(this.infoStatContainer, { className: 'ui-info-stat' }).element;
+		this.infoInvisible = new Element(this.infoStatContainer, { className: 'ui-info-stat' }).element;
+		this.infoGold = new Element(this.infoStatContainer, { className: 'ui-info-stat' }).element;
+
+		this.infoPassive = new Element(this.mapPanel, { className: 'ui-info-passive' }).element;
+		this.infoPassive.name = new Element(this.infoPassive, { className: 'ui-info-passive-name stroke' }).element;
+		this.infoPassive.description = new Element(this.infoPassive, { className: 'ui-info-passive-description stroke' }).element;
+
+		this.waveButtonBackground = new Element(this.mapPanel, { className: 'ui-wave-button-background' }).element;
+
+		this.musicContainer = new Element(this.mapPanel, { className: 'ui-wave-music-container stroke' }).element;
+		this.musicPrev = new Element(this.musicContainer, { className: 'ui-wave-music-arrow', text: '<' }).element;
+		this.musicName = new Element(this.musicContainer, { className: 'ui-wave-music-name' }).element;
+		this.musicNext = new Element(this.musicContainer, { className: 'ui-wave-music-arrow', text: '>' }).element;
+
+		this.musicPrev.addEventListener('mouseenter', () => { playSound('open', 'ui') })
+		this.musicPrev.addEventListener('click', () => this.changeMusic(-1));
+
+		this.musicNext.addEventListener('mouseenter', () => { playSound('open', 'ui') })
+		this.musicNext.addEventListener('click', () => this.changeMusic(1));
+
+		this.nextWave = new Element(this.mapPanel, { className: 'ui-next-wave stroke' }).element;
+		this.nextWave.addEventListener('mouseenter', () => { playSound('open', 'ui') })
+		this.nextWave.addEventListener('click', () => this.main.area.newWave());
+
+		this.pauseWave = new Element(this.mapPanel, { className: 'ui-pause-wave stroke', text: '||' }).element;
+		this.pauseWave.addEventListener('mouseenter', () => { playSound('open', 'ui') })
+		this.pauseWave.addEventListener('click', () => { this.main.game.switchPause(); });
+
+		this.autoWave = new Element(this.mapPanel, { className: 'ui-auto-wave stroke' }).element;
+		this.autoWave.addEventListener('mouseenter', () => { playSound('open', 'ui') })
+		this.autoWave.addEventListener('click', () => this.main.area.switchAutoWave());	
+
+		this.speedWave = new Element(this.mapPanel, { className: 'ui-speed-wave stroke', text: '🚀' }).element;
+		this.speedWave.addEventListener('mouseenter', () => { playSound('open', 'ui') });
+		this.speedWave.addEventListener('click', () => { this.main.game.toggleSpeed() });
+
+		this.damageDealtContainer = new Element(this.mapPanel, { className: 'ui-damage-dealt-container' }).element;
+		this.damageDealtButton = new Element(this.mapPanel, { className: 'ui-damage-dealt-button stroke' }).element;
+		this.damageDealtButton.addEventListener('mouseenter', () => { playSound('open', 'ui') });
+		this.damageDealtButton.addEventListener('click', () => { this.changeDamageType() });
+
+		this.damageDealtUnit = [];
+
+		for (let i = 0; i < 10; i++) {
+			this.damageDealtUnit[i] = new Element(this.damageDealtContainer, { className: 'ui-damage-dealt-unit' }).element;
+			this.damageDealtUnit[i].sprite = new Element(this.damageDealtUnit[i], { className: 'ui-damage-dealt-unit-sprite' }).element;
+			this.damageDealtUnit[i].number = new Element(this.damageDealtUnit[i], { className: 'ui-damage-dealt-unit-number stroke' }).element;
+			this.damageDealtUnit[i].barContainer = new Element(this.damageDealtUnit[i], { className: 'ui-damage-dealt-unit-bar-container' }).element;
+			this.damageDealtUnit[i].barPrevious = new Element(this.damageDealtUnit[i].barContainer, { className: 'ui-damage-dealt-unit-bar-previous' }).element;
+			this.damageDealtUnit[i].bar = new Element(this.damageDealtUnit[i].barContainer, { className: 'ui-damage-dealt-unit-bar' }).element;
+		}	
+
+		this.renderInteractiveMap();
+	}
+
+	renderInteractiveMap() {
+		this.secretCacnea = new Element(this.main.scene, { className: 'secret-cacnea' }).element;
+		this.secretCacnea.addEventListener('click', () => { 
+			this.secretCacnea.style.pointerEvents = 'none';
+			this.main.player.secrets.cacnea = true;
+			this.getSecret('cacnea');
+		});
+
+		this.secretDhelmise = new Element(this.main.scene, { className: 'secret-dhelmise' }).element;
+		this.secretDhelmise.addEventListener('click', () => { 
+			this.secretDhelmise.style.pointerEvents = 'none';
+			this.main.player.secrets.dhelmise = true;
+			this.getSecret('dhelmise');
+		});
+
+		this.secretGreavard = new Element(this.main.scene, { className: 'secret-greavard' }).element;
+		this.secretGreavard.addEventListener('click', () => { 
+			this.secretGreavard.style.pointerEvents = 'none';
+			this.main.player.secrets.greavard = true;
+			this.getSecret('greavard'); 
+		});
+
+		this.secretSandygast = new Element(this.main.scene, { className: 'secret-sandygast' }).element;
+		this.secretSandygast.addEventListener('click', () => { 
+			this.secretSandygast.style.pointerEvents = 'none';
+			this.main.player.secrets.sandygast = true;
+			this.getSecret('sandygast'); 
+		});
+
+		this.secretDucklett = new Element(this.main.scene, { className: 'secret-ducklett' }).element;
+		this.secretDucklett.addEventListener('click', () => { 
+			this.secretDucklett.style.pointerEvents = 'none';
+			this.main.player.secrets.ducklett = true;
+			this.getSecret('ducklett'); 
+		});
+
+		this.secretManaphyCave = new Element(this.main.scene, { className: 'secret-manaphy-cave' }).element;
+		this.secretManaphyCave.addEventListener('click', () => { 
+			this.secretManaphyCave.style.pointerEvents = 'none';
+			this.main.player.secretMaps.manaphyCave = true;
+			this.getSecretMap(20); 
+		});
+
+		this.secretVictiniCave = new Element(this.main.scene, { className: 'secret-victini-cave' }).element;
+		this.secretVictiniCave.addEventListener('click', () => { 
+			this.secretVictiniCave.style.pointerEvents = 'none';
+			this.main.player.secretMaps.victiniCave = true;
+			this.getSecretMap(31); 
+		});
+
+		this.secretMarshadowCave = new Element(this.main.scene, { className: 'secret-marshadow-cave' }).element;
+		this.secretMarshadowCave.addEventListener('click', () => { 
+			this.secretMarshadowCave.style.pointerEvents = 'none';
+			this.main.player.secretMaps.marshadowCave = true;
+			this.getSecretMap(32); 
+		});
+
+		this.secretCastle = new Element(this.main.scene, { className: 'secret-castle' }).element;
+		this.secretCastle.addEventListener('click', () => { 
+			this.secretCastle.style.pointerEvents = 'none';
+			this.main.player.secretMaps.secretCastle = true;
+			this.getSecretMap(33); 
+		});
+
+		this.secretChess = new Element(this.main.scene, { className: 'secret-chess' }).element;
+		this.secretChess.addEventListener('click', () => { 
+			this.secretChess.style.pointerEvents = 'none';
+			this.main.player.secretMaps.secretChess = true;
+			this.getSecretMap(35); 
+		});
+
+		this.secretBronzor = new Element(this.main.scene, { className: 'secret-bronzor' }).element;
+		this.secretBronzor.addEventListener('click', () => { 
+			if (this.main.area.waveNumber === 50) {
+				this.handleBellRhythmClick();
+			} else {
+				this.main.area.useBell();
+			}
+		});
+
+		this.secretSpiritomb = new Element(this.main.scene, { className: 'secret-spiritomb' }).element;
+		this.secretSpiritomb.addEventListener('click', () => { 
+			this.secretSpiritomb.style.pointerEvents = 'none';
+			this.main.player.secrets.spiritomb = true;
+			this.getSecret('spiritomb'); 
+		});
+
+		this.secretBeedrillite = new Element(this.main.scene, { className: 'secret-beedrill' }).element;
+		this.secretBeedrillite.addEventListener('click', () => { 
+			this.secretBeedrillite.style.pointerEvents = 'none';
+			this.main.player.secretItems.beedrillite = true;
+			this.getSecretItem('beedrillite'); 
+		});
+
+		this.secretGengarite = new Element(this.main.scene, { className: 'secret-gengar' }).element;
+		this.secretGengarite.addEventListener('click', () => { 
+			this.secretGengarite.style.pointerEvents = 'none';
+			this.main.player.secretItems.gengarite = true;
+			this.getSecretItem('gengarite'); 
+		});
+	}
+
+	update() {
+		this.updatePlayer();
+		this.updatePokemon();
+		this.updateMap();
+
+		const wavePreview = this.main.area.waves[this.main.area.waveNumber].preview;
+		this.displayEnemyInfo(wavePreview[this.enemyPositionDisplay], this.enemyPositionDisplay);
+
+		this.waveSelectorContainer.style.display = 'none';
+		this.waveSelectorLabel.innerText = text.ui.waveManager[this.main.lang].toUpperCase();
+
+		if (!this.main.area.inChallenge && this.main.player.records[this.main.area.map.id] === 100 && this.main.player.hasBike) this.waveSelectorContainer.style.display = 'revert-layer';
+			
+		this.musicContainer.style.display = 'none';
+		if (this.main.player.hasSubwoofer) {
+			this.musicContainer.style.display = 'revert-layer';
+			this.musicName.innerHTML = `♪ ${this.main.area.music.name[this.main.lang].toUpperCase()}`
+		}
+
+		if (!this.main.area.map.isSecret) this.mapRoute.innerHTML = `${this.main.area.map.name[this.main.lang].toUpperCase()} <br>${text.map.wave[this.main.lang].toUpperCase()} ${this.main.area.waveNumber}`;
+		this.tilesCount.forEach((tc, i) => { tc.innerHTML = `${this.tilesCountNum[i]}/${this.main.area.map.tilesNum[i] + this.main.area.addTiles[i]}`});
+
+		if (
+			this.main.player.stars >= 540 &&
+			this.main.player.records[this.main.area.map.id] === 100 &&
+			(this.main.team.pokemon.length + this.main.box.pokemon.length) > 30
+		) {
+			this.section['challenge'].style.opacity = 1;
+			this.section['challenge'].style.pointerEvents = 'revert-layer';	
+		} else {
+			this.section['challenge'].style.opacity = 0.4;
+			//this.section['challenge'].style.pointerEvents = 'none';
+		}
+
+		if (!this.main.area.isCustom) {
+			this.main.teamManager.teams.forEach((team, i) => {
+				this.importTeamButton[i].style.pointerEvents = 'revert-layer';
+				this.importTeamButton[i].style.filter = 'revert-layer';
+				this.saveTeamButton[i].style.pointerEvents = 'revert-layer';
+				this.saveTeamButton[i].style.filter = 'revert-layer';
+			})
+		} 
+
+		if (this.main.area.inChallenge) {
+			this.challenge.style.display = 'revert-layer';
+			this.section['map'].style.opacity = 0.4;
+			this.section['map'].style.pointerEvents = 'none';
+
+			this.section['box'].style.opacity = (this.main.area.inChallenge.draft) ? 0.4 : 1;
+			this.section['box'].style.pointerEvents = (this.main.area.inChallenge.draft) ? 'none' : 'revert-layer';
+
+			this.section['inventory'].style.opacity = (this.main.area.inChallenge.noItems) ? 0.4 : 1;
+			this.section['inventory'].style.pointerEvents = (this.main.area.inChallenge.noItems) ? 'none' : 'revert-layer';
+
+			this.chrono.style.display = 'revert-layer';
+			this.challenge.innerText = text.challenge.label[this.main.lang].toUpperCase();
+		} else {
+			this.challenge.style.display = 'none';
+			this.chrono.style.display = 'none';
+			this.section['map'].style.opacity = 1;
+			this.section['map'].style.pointerEvents = 'revert-layer';
+			this.section['box'].style.opacity = 1;
+			this.section['box'].style.pointerEvents = 'revert-layer';
+			this.section['inventory'].style.opacity = 1;
+			this.section['inventory'].style.pointerEvents = 'revert-layer';
+		}
+
+		if (!this.main.area.inChallenge && !this.main.area.isCustom) {
+			this.main.teamManager.teams.forEach((team, i) => {
+				if (team[this.main.area.routeNumber].length == 0) {
+					this.importTeamButton[i].style.pointerEvents = 'revert-layer';
+					this.importTeamButton[i].style.filter = 'brightness(0.7)';
+				} else {
+					this.importTeamButton[i].style.pointerEvents = 'revert-layer';
+					this.importTeamButton[i].style.filter = 'revert-layer';
+				}
+			})
+		} else {
+			for (let i = 0; i < this.importTeamButton.length; i++) {
+				const team = this.main.teamManager.getChallengeTeam(i);
+				if (team.length == 0) {
+					this.importTeamButton[i].style.pointerEvents = 'revert-layer';
+					this.importTeamButton[i].style.filter = 'brightness(0.7)';
+				} else {
+					this.importTeamButton[i].style.pointerEvents = 'revert-layer';
+					this.importTeamButton[i].style.filter = 'revert-layer';
+				}
+			}
+		}
+
+		if (this.main.area.isCustom) {
+			this.main.teamManager.teams.forEach((team, i) => {
+				this.importTeamButton[i].style.pointerEvents = 'none';
+				this.importTeamButton[i].style.filter = 'brightness(0.7)';
+				this.saveTeamButton[i].style.pointerEvents = 'none';
+				this.saveTeamButton[i].style.filter = 'brightness(0.7)';
+			})
+		} 
+
+		if (
+			this.main.area.routeNumber == 4 && 
+			!this.main.area.inChallenge &&
+			!this.main.player.secrets.cacnea
+		) {
+			this.secretCacnea.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretCacnea.style.pointerEvents = 'none';
+		} 
+
+		if (
+			this.main.area.routeNumber == 11 && 
+			!this.main.area.inChallenge &&
+			!this.main.player.secrets.dhelmise
+		) {
+			this.secretDhelmise.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretDhelmise.style.pointerEvents = 'none';
+		} 
+
+		if (
+			this.main.area.routeNumber == 2 && 
+			!this.main.area.inChallenge &&
+			!this.main.player.secrets.greavard
+		) {
+			this.secretGreavard.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretGreavard.style.pointerEvents = 'none';
+		}
+
+		if (
+			this.main.area.routeNumber == 16 && 
+			!this.main.area.inChallenge &&
+			!this.main.player.secrets.sandygast
+		) {
+			this.secretSandygast.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretSandygast.style.pointerEvents = 'none';
+		}
+
+		if (
+			this.main.area.routeNumber == 13 && 
+			!this.main.area.inChallenge &&
+			!this.main.player.secrets.ducklett
+		) {
+			this.secretDucklett.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretDucklett.style.pointerEvents = 'none';
+		}
+
+		if (
+			this.main.area.routeNumber == 11 && 
+			!this.main.area.inChallenge &&
+			!this.main.area.waveActive
+		) {
+			this.secretManaphyCave.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretManaphyCave.style.pointerEvents = 'none';
+		}
+
+		if (
+			this.main.area.routeNumber == 26 && 
+			!this.main.area.inChallenge &&
+			!this.main.area.waveActive
+		) {
+			this.secretVictiniCave.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretVictiniCave.style.pointerEvents = 'none';
+		}
+
+		if (
+			this.main.area.routeNumber == 15 && 
+			!this.main.area.inChallenge &&
+			!this.main.area.waveActive
+		) {
+			this.secretMarshadowCave.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretMarshadowCave.style.pointerEvents = 'none';
+		}
+
+		if (
+			this.main.area.routeNumber == 29 && 
+			!this.main.area.inChallenge &&
+			!this.main.area.waveActive &&
+			this.main.player.secrets.klefki
+		) {
+			this.secretCastle.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretCastle.style.pointerEvents = 'none';
+		}
+
+		if (
+			this.main.area.routeNumber == 34 && 
+			!this.main.area.inChallenge &&
+			!this.main.area.waveActive
+		) {
+			this.secretChess.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretChess.style.pointerEvents = 'none';
+		}
+
+		if (this.main.area.routeNumber == 27) {
+			this.secretBronzor.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretBronzor.style.pointerEvents = 'none';
+		}
+
+		if (
+			this.main.area.routeNumber == 28 && 
+			!this.main.area.inChallenge &&
+			!this.main.player.secrets.spiritomb
+		) {
+			this.secretSpiritomb.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretSpiritomb.style.pointerEvents = 'none';
+		}
+
+		if (
+			this.main.area.routeNumber == 39 && 
+			!this.main.area.inChallenge &&
+			!this.main.area.waveActive &&
+			!this.main.player.secretItems.beedrillite 
+		) {
+			this.secretBeedrillite.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretBeedrillite.style.pointerEvents = 'none';
+		}
+
+		if (
+			this.main.area.routeNumber == 6 && 
+			!this.main.area.inChallenge &&
+			!this.main.area.waveActive &&
+			!this.main.player.secretItems.gengarite 
+		) {
+			this.secretGengarite.style.pointerEvents = 'revert-layer';
+		} else {
+			this.secretGengarite.style.pointerEvents = 'none';
+		}
+
+		this.displayWeather();
+	}
+
+	displayWeather() {
+		if (!this.main.area.weather) {
+			this.weather.style.display = 'none';
+		} else {
+			this.weather.style.display = 'block';
+			this.weather.style.backgroundImage = `url("${weatherData[this.main.area.weather].sprite}")`;
+			this.main.tooltip.bindTo(this.weather, { name: weatherData[this.main.area.weather].name, description: weatherData[this.main.area.weather].description }, 'item', 'var(--white)');
+		}
+
+		this.tilesCount.forEach((tc, i) => { tc.innerHTML = `${this.tilesCountNum[i]}/${this.main.area.map.tilesNum[i] + this.main.area.addTiles[i]}`});
+	}
+
+	updatePlayer() {
+		this.playerPortrait.style.backgroundImage = `url("./src/assets/images/portraits/${this.main.player.portrait}.png")`;
+		this.playerName.innerText = this.main.player.name.toUpperCase();
+		this.playerGold.innerText = `$${this.main.utility.formatGold(this.main.player.gold, this.main.lang)}`;
+		this.updateWaveIncome();
+		this.playerStars.innerHTML = `<span class="msrre">${this.main.utility.drawStarEmoji(this.main.uiTheme)}</span>${Math.min(4000, this.main.player.stars)}`;
+		this.playerRibbonsText.innerHTML = `${this.main.player.ribbons}`;
+
+		this.playerHealth.innerHTML = '';
+		this.hearts = []
+		for (let i = 0; i < 14; i++) {
+			if (this.main.player.health[this.main.area.map.id] > i) this.hearts[i] = new Element(this.playerHealth, { className: 'ui-player-heart-on' }).element;
+			else this.hearts[i] = new Element(this.playerHealth, { className: 'ui-player-heart-off' }).element;
+		}
+	}
+
+	updateWaveIncome(isLiveTick = false) {
+		if (!this.waveIncome) return;
+		if (!this.main || !this.main.area || !this.main.player || !this.main.area.map) return;
+
+		const area = this.main.area;
+		const player = this.main.player;
+		const state = this.waveIncomeState;
+
+		if (area.inChallenge || area.isCustom) {
+			this.waveIncome.style.display = 'none';
+			return;
+		}
+
+		this.waveIncome.style.display = 'revert-layer';
+
+		const now = performance.now();
+		const routeKey = `${area.map.id}:${area.inChallenge ? 1 : 0}`;
+		const waveKey = `${routeKey}:${area.waveNumber}:${area.waveActive ? 1 : 0}`;
+
+		if (state.lastTime === 0) {
+			state.routeKey = routeKey;
+			state.waveKey = waveKey;
+			state.routeStartTime = now;
+			state.lastGold = player.gold || 0;
+			state.routeEarned = 0;
+			state.waveEarned = 0;
+			state.lastTime = now;
+			state.smoothPerSecond = 0;
+			this.waveIncome.innerText = `WAVE $0 | $/min: 0`;
+			return;
+		}
+
+		if (state.routeKey !== routeKey) {
+			state.routeKey = routeKey;
+			state.waveKey = waveKey;
+			state.routeStartTime = now;
+			state.lastGold = player.gold || 0;
+			state.routeEarned = 0;
+			state.waveEarned = 0;
+			state.lastTime = now;
+			state.smoothPerSecond = 0;
+		}
+
+		if (state.waveKey !== waveKey) {
+			state.waveKey = waveKey;
+			// state.waveEarned = 0;
+		}
+
+		const currentGold = player.gold || 0;
+		const deltaGold = currentGold - state.lastGold;
+		if (deltaGold > 0) state.routeEarned += deltaGold;
+		if (area.waveActive && deltaGold > 0) state.waveEarned += deltaGold;
+		state.lastGold = currentGold;
+
+		const elapsedSec = Math.max(0.001, (now - state.lastTime) / 1000);
+		if (area.waveActive) {
+			const instant = Math.max(0, deltaGold) / elapsedSec;
+			state.smoothPerSecond = (state.smoothPerSecond * 0.75) + (instant * 0.25);
+		} else if (isLiveTick) {
+			state.smoothPerSecond *= 0.85;
+			if (state.smoothPerSecond < 0.05) state.smoothPerSecond = 0;
+		}
+		state.lastTime = now;
+
+		const waveEarned = area.waveActive ? state.waveEarned : Math.max(0, area.goldWave || state.waveEarned || 0);
+		const routeMinutes = Math.max(1 / 60, (now - state.routeStartTime) / 60000);
+		const perMinute = state.routeEarned / routeMinutes;
+		this.waveIncome.innerText = `WAVE $${this.main.utility.numberDot(Math.floor(waveEarned))} | $${this.main.utility.numberDot(Math.floor(perMinute))}/min`;
+	}
+
+	getLocalizedValue(values, fallback = '') {
+		if (!Array.isArray(values)) return fallback;
+		return values[this.main.lang] ?? values[0] ?? fallback;
+	}
+
+	getShortTooltipText(textValue, maxLen = 90) {
+		if (!textValue) return '';
+		const clean = `${textValue}`.replace(/\s+/g, ' ').trim();
+		if (clean.length <= maxLen) return clean;
+		return `${clean.slice(0, maxLen - 3)}...`;
+	}
+
+	showCompactItemTooltip(item) {
+		if (!item) return;
+		const itemName = this.getLocalizedValue(item.name, 'Item');
+		const itemDesc = this.getShortTooltipText(this.getLocalizedValue(item.description, ''), 70) || 'No description.';
+		this.main.tooltip.showItem({ name: [itemName], description: [itemDesc] });
+	}
+
+	getAttackStyleSymbol(pokemon) {
+		const abilityId = pokemon?.ability?.id;
+		if (['icyWind', 'dazzlingGleam'].includes(abilityId)) return 'C';
+		if (['secretSword', 'ancientSword'].includes(abilityId) || pokemon?.item?.id === 'ancientSword') return 'S';
+		if (['boomburst', 'liquidVoice', 'drumBeating', 'originPulse', 'charmedCharm', 'emptyLight'].includes(abilityId)) return 'W';
+		if (pokemon?.attackType === 'area') return 'A';
+		if (pokemon?.attackType === 'aura') return '~';
+		if (pokemon?.attackType === 'bombardment') return 'B';
+		if (pokemon?.attackType === 'stream') return '>';
+		switch (pokemon?.rangeType) {
+			case 'cross': return '+';
+			case 'xShape': return 'X';
+			case 'vShape': return 'V';
+			case 'star': return '*';	
+			case 'horizontalLine': return '-';
+			case 'donut':
+			case 'circle':
+			default: return 'O';
+		}
+	}
+
+	getAttackStyleTooltip(pokemon) {
+		const abilityId = pokemon?.ability?.id;
+		let specialShape;
+		if (['icyWind', 'dazzlingGleam'].includes(abilityId)) {
+			specialShape = ['Cone', 'Cono', 'Cône', 'Cone', 'Cono', 'Kegel', '円錐', '원뿔', '锥形', 'Stożek'];
+		} else if (['secretSword', 'ancientSword'].includes(abilityId) || pokemon?.item?.id === 'ancientSword') {
+			specialShape = ['Sweep', 'Barrido', 'Balayage', 'Varredura', 'Spazzata', 'Schwertstreich', '斬撃', '휘두르기', '横扫', 'Cięcie'];
+		} else if (['boomburst', 'liquidVoice', 'drumBeating', 'originPulse', 'charmedCharm', 'emptyLight'].includes(abilityId)) {
+			specialShape = ['Waves', 'Ondas', 'Vagues', 'Ondas', 'Onde', 'Wellen', '波', '파동', '波', 'Fale'];
+		}
+
+		const shapeNames = {
+			circle: ['Circle range', 'En círculo', 'En cercle', 'Em círculo', 'A cerchio', 'Kreisbereich', '円形', '원형', '圓形', 'Kołowy'],
+			donut: ['Ring range', 'En anillo', 'En anneau', 'Em anel', 'A anello', 'Ringbereich', 'ドーナツ型', '도넛형', '環状', 'Pierścieniowy'],
+			cross: ['Cross range', 'En cruz', 'En croix', 'Em cruz', 'A croce', 'Kreuzbereich', '十字', '십자', '十字', 'Krzyżowy'],
+			xShape: ['X-shaped', 'En X', 'En X', 'Em X', 'A forma di X', 'X-Form', 'X字', 'X자형', 'X字', 'W kształcie X'],
+			star: ['Star', 'Estrella', 'Étoile', 'Estrela', 'Stella', 'Stern', 'スター', '별', '星星', 'Gwiazda'],
+			vShape: ['V-shaped', 'En V', 'En V', 'Em V', 'A forma di V', 'V-Form', 'V字', 'V자형', 'V字', 'W kształcie V'],
+			horizontalLine: ['Line range', 'En horizontal', 'En ligne', 'Em linha', 'In linea', 'Linienbereich', '直線', '직선', '直線', 'Liniowy']
+		};
+		const targetNames = {
+			single: ['single target', 'monobjetivo', 'cible unique', 'alvo único', 'bersaglio singolo', 'einzelziel', '単体', '단일 대상', '單體', 'pojedynczy cel'],
+			stream: ['stream attack', 'ataque de chorro', 'attaque en jet', 'ataque de jato', 'attacco a getto', 'Strahlenangriff', '噴射攻撃', '분사 공격', '噴射攻擊', 'atak strumieniowy'],
+			area: ['area target', 'en area', 'en zone', 'em área', 'ad area', 'flächenschaden', '範囲', '광역', '範疇', 'obszarowy'],
+			aura: ['aura', 'aura', 'aura', 'aura', 'aura', 'aura', 'オーラ', '오라', '氣場', 'aura'],
+			orbital: ['orbital', 'orbital', 'orbitale', 'orbital', 'orbitale', 'orbital', '軌道', '궤도', '軌道', 'orbital'],
+			bombardment: ['Bombardment', 'Bombardeo', 'Bombardement', 'Bombardeio', 'Bombardamento', 'Bombardement', 'じゅうたん爆撃', '융단폭격', '轰炸', 'Bombardowanie'],
+		};
+		const shape = specialShape?.[this.main.lang] || shapeNames[pokemon?.rangeType][this.main.lang] || 'Circle range';
+		const target = specialShape
+			? targetNames.area[this.main.lang]
+			: targetNames[pokemon?.attackType][this.main.lang] || pokemon?.attackType || 'target';
+		return `${shape}, ${target}.`;
+	}
+
+	getCompactTargetLabel(pokemon) {
+		if (pokemon?.orbital > 0) return TARGET_MODES_TRADUCTIONS['orbital'][this.main.lang];
+		return TARGET_MODES_TRADUCTIONS[pokemon?.targetMode][this.main.lang] || pokemon?.targetMode[this.main.lang] || '';
+	}
+
+	canChangeSlotTargetMode(pokemon) {
+		if (!pokemon) return false;
+		if (['quickClaw', 'spindaCocktail', 'silphScope'].includes(pokemon?.item?.id)) return false;
+		if ((pokemon?.id == 53 && pokemon?.item?.id !== 'ringTarget') || pokemon?.adn?.id == 53) return false;
+		if (pokemon?.orbital > 0) return false;
+		return !['area', 'aura', 'allies', 'bombardment'].includes(pokemon.targetMode);
+	}
+
+	changeSlotTargetMode(index, dir) {
+		const pokemon = this.main.team.pokemon[index];
+		if (!pokemon || !this.canChangeSlotTargetMode(pokemon)) return playSound('pop0', 'ui');
+
+		let modeIndex = TARGET_MODES.findIndex(mode => mode === pokemon.targetMode);
+		if (modeIndex === -1) modeIndex = 0;
+		const maxIndex = (
+			pokemon.ability.id == 'moongeistBeam' || pokemon.ability.id == 'grimNeigh' || pokemon.ability.id == 'frisk' || 
+			pokemon.ability.id == 'illuminateBuff' || pokemon.ability.id == 'illuminate' || pokemon.ability.id == 'vigilantFrisk' || 
+			pokemon?.item?.id == 'silphScope'  || pokemon.ability.id == 'scrappy'
+			) ? 20 : 19;
+
+		modeIndex += dir;
+		if (modeIndex > maxIndex) modeIndex = 0;
+		else if (modeIndex < 0) modeIndex = maxIndex;
+
+		pokemon.changeTargetMode(TARGET_MODES[modeIndex]);
+		this.updatePokemon();
+		playSound('option', 'ui');
+	}
+
+	getSavedTeamSlot(slot) {
+		if (this.main.area.inChallenge) {
+			const team = this.main.teamManager.getChallengeTeam(slot);
+			const slotLimit = this.main.area.inChallenge.slotLimit;
+			return typeof slotLimit === 'number' ? team.slice(0, slotLimit) : team;
+		}
+		const routeNumber = this.main.area.routeNumber;
+		return this.main.teamManager.teams?.[slot]?.[routeNumber] || [];
+	}
+
+	getMatchingPokemonForTeamEntry(entry, index) {
+		if (!entry) return null;
+		const itemId = typeof entry.item === 'string' ? entry.item : entry.item?.id;
+		const isMatch = pokemon => {
+			if (!pokemon || pokemon.id !== entry.id) return false;
+			if (!itemId) return true;
+			return (pokemon.item?.id || null) === itemId;
+		};
+
+		const indexedPokemon = this.main.team.pokemon?.[index];
+		if (isMatch(indexedPokemon)) return indexedPokemon;
+
+		const allPokemon = [
+			...(this.main.team.pokemon || []),
+			...(this.main.box.pokemon || [])
+		];
+		return allPokemon.find(isMatch) || allPokemon.find(pokemon => pokemon?.id === entry.id) || null;
+	}
+
+	getTeamEntryPokemonName(entry, index) {
+		if (!entry) return 'Unknown Pokemon';
+		const specieByKey = pokemonData[entry.specieKey] || pokemonData[entry.form];
+		const matchedPokemon = this.getMatchingPokemonForTeamEntry(entry, index);
+		const data = Object.values(pokemonData).find(pokemon => pokemon?.id === entry.id);
+		return this.getLocalizedValue(entry.savedName, '')
+			|| this.getLocalizedValue(entry.name, '')
+			|| this.getLocalizedValue(specieByKey?.name, '')
+			|| this.getLocalizedValue(matchedPokemon?.name, '')
+			|| this.getLocalizedValue(matchedPokemon?.specie?.name, '')
+			|| this.getLocalizedValue(data?.name, `Pokemon #${entry.id ?? '?'}`);
+	}
+
+	getTeamEntryItemName(entry) {
+		const item = entry?.item;
+		if (!item) return 'No Item';
+		const itemRecord = typeof item === 'string' ? itemData[item] : itemData[item.id];
+		return this.getLocalizedValue(item.name, '')
+			|| this.getLocalizedValue(itemRecord?.name, item.id || item || 'Item');
+	}
+
+	formatTeamSlotLines(entries) {
+		if (!Array.isArray(entries) || entries.length === 0) return ['Empty'];
+		return entries.slice(0, 10).map((entry, index) => {
+			const pokemonName = this.getTeamEntryPokemonName(entry, index);
+			const itemName = this.getTeamEntryItemName(entry);
+			const passengerText = entry.isPassenger ? ' (Passenger)' : '';
+			return `${index + 1}. ${pokemonName} - ${itemName}${passengerText}`;
+		});
+	}
+
+	showTeamSlotTooltip(slot, mode) {
+		this.main.tooltip.tooltip.style.paddingBottom = "10px";
+
+	    const isChallenge = !!this.main.area.inChallenge;
+	    const routeText = this.mapRoute?.innerText?.replace(/\s+/g, ' ').trim();
+	    const routeLabel = isChallenge
+	        ? (this.main.area.inChallenge.draft ? 'Draft Pick Challenge' : 'Challenge')
+	        : (routeText || `Route ${this.main.area.routeNumber}`);
+	    const slotLabel = `#${slot + 1}`;
+	    const entries = mode === 'save'
+	        ? (this.main.team.pokemon || []).filter(Boolean)
+	        : this.getSavedTeamSlot(slot);
+	    const title = mode === 'save' ? `Save Team ${slotLabel}` : `Load Team ${slotLabel}`;
+	    const slotLimit = this.main.area.inChallenge?.slotLimit;
+	    const noItemsText = mode === 'load' && this.main.area.inChallenge?.noItems && entries.length > 0
+	        ? '<br><span style="font-size:8px;color:#aaa">Held items will be ignored for No Items.</span>'
+	        : '';
+	    const storedChallengeTeam = this.main.area.inChallenge
+	        ? this.main.teamManager.getChallengeTeam(slot)
+	        : [];
+	    const slotLimitText = mode === 'load' && typeof slotLimit === 'number' && storedChallengeTeam.length > slotLimit
+	        ? `<br><span style="font-size:8px;color:#aaa">Only the first ${slotLimit} Pokemon will load for this slot limit.</span>`
+	        : '';
+	    const actionText = mode === 'save'
+	        ? `${text.ui.saveCurrentTeam[this.main.lang]} ${routeLabel}.`
+	        : (entries.length === 0
+	            ? `${text.ui.noSavedTeamFor[this.main.lang]} ${routeLabel}.`
+	            : `${routeLabel} ${slotLimitText}${noItemsText}`);
+
+	    const spritesHTML = entries.length > 0
+	        ? `<div style="display:flex;flex-wrap:wrap;gap:3px;margin-top:6px;">${this.buildTeamSlotSpritesHTML(entries)}</div>`
+	        : '';
+
+	    this.main.tooltip.tooltip.innerHTML = `
+	        <div class="tooltip-content">
+	            <span class="tooltip-name">${title}</span>
+	            <span class="tooltip-description">${actionText}</span>
+	            ${spritesHTML}
+	        </div>
+	    `;
+	    
+	    mode === 'save' ? this.main.tooltip._setTooltipColor('var(--save)') : this.main.tooltip._setTooltipColor('var(--import)')
+
+	    this.main.tooltip.tooltip.style.display = 'block';
+	    this.main.tooltip._ensurePositionOnce();
+	}
+
+	buildTeamSlotSpritesHTML(entries) {
+	    if (!Array.isArray(entries) || entries.length === 0) return '<span style="font-size:9px;color:#888">EMPTY</span>';
+	    
+	    return entries.slice(0, 12).map((entry, index) => {
+	        const matched = this.getMatchingPokemonForTeamEntry(entry, index);
+	        const spriteUrl = matched?.sprite?.base
+	            ?? matched?.specie?.sprite?.base
+	            ?? '';
+	        const item = entry?.item;
+
+	        if (item != undefined) this.main.tooltip.tooltip.style.paddingBottom = "35px";
+	        const itemUrl = item?.sprite ?? (typeof item === 'string' ? itemData[item]?.sprite : null) ?? '';
+	        const passengerMark = entry.isPassenger
+	            ? '<span style="position:absolute;top:0;right:0;font-size:7px;line-height:1;background:rgba(0,0,0,0.7);color:#fff;padding:1px 2px;">P</span>'
+	            : '';
+	        const itemEl = itemUrl
+	            ? `<img src="${itemUrl}" class="tooltip-item-sprite"/>`
+	            : '';
+
+	        return `<span style="position:relative;display:inline-block;width:28px;height:28px;flex-shrink:0;">
+	            ${spriteUrl ? `<img src="${spriteUrl}" style="width:28px;height:28px;object-fit:contain;" />` : '<span style="display:block;width:28px;height:28px;background:#333;"></span>'}
+	            ${itemEl}
+	            ${passengerMark}
+	        </span>`;
+	    }).join('');
+	}
+
+	showSlotButtonTooltip(index, type) {
+		const pokemon = this.main.team.pokemon[index];
+		if (!pokemon) return;
+
+		if (type === 'deploy') {
+			const tooltipData = pokemon.isDeployed
+				? { name: ['Remove'], description: ['Remove this Pokemon from the field.'] }
+				: { name: ['Add'], description: ['Add this Pokemon to the field and show valid tiles.'] };
+			this.main.tooltip.showItem(tooltipData);
+			return;
+		}
+
+		if (type === 'info') {
+			this.main.tooltip.showItem({ name: ['Info'], description: ['Open this Pokemon details panel.'] });
+			return;
+		}
+
+		if (type === 'item') {
+			if (!pokemon.item) {
+				this.main.tooltip.showItem({ name: ['Item'], description: ['Open item selection for this Pokemon.'] });
+				return;
+			}
+			const itemName = this.getLocalizedValue(pokemon.item.name, 'Item');
+			const itemDesc = this.getShortTooltipText(this.getLocalizedValue(pokemon.item.description, ''), 120) || 'No description.';
+			this.main.tooltip.showItem({ name: [itemName], description: [itemDesc] });
+		}
+	}
+
+	updatePokemon() {
+		for (let i = 0; i < 10; i++) {
+			this.pokemon[i].name.innerText = text.ui.empty[this.main.lang].toUpperCase();
+
+			this.pokemon[i].style.background = 'revert-layer';
+			this.pokemon[i].name.style.color = '#888';
+			this.pokemon[i].level.innerText = '';
+			this.pokemon[i].shiny.style.display = 'none';
+			this.pokemon[i].shiny.classList.remove('is-inline');
+			this.pokemon[i].sprite.style.backgroundImage = '';
+			this.pokemon[i].sprite.style.cursor = "";
+			this.pokemon[i].style.transform = `revert-layer`
+			this.pokemon[i].sprite.style.transform = `revert-layer`
+			
+			this.pokemon[i].item.style.background = "revert-layer";
+			this.pokemon[i].item.style.pointerEvents = 'none';
+			this.pokemon[i].item.style.display = 'none';
+			this.pokemon[i].item.style.filter = 'revert-layer'
+			this.pokemon[i].item.innerText = '+';
+			this.pokemon[i].item.title = '';
+
+			this.pokemon[i].deploy.style.background = 'revert-layer';
+			this.pokemon[i].deploy.style.pointerEvents = 'none';
+			this.pokemon[i].deploy.style.display = 'none';
+			this.pokemon[i].deploy.style.paddingTop = 'revert-layer';
+			this.pokemon[i].deploy.style.filter = 'revert-layer';
+			this.pokemon[i].deploy.style.boxShadow = 'revert-layer';
+			this.pokemon[i].deploy.title = '';
+
+			this.pokemon[i].info.style.pointerEvents = 'none';
+			this.pokemon[i].info.style.display = 'none';
+			this.pokemon[i].info.title = '';
+
+			this.pokemon[i].levelUp.style.pointerEvents = 'none';
+			this.pokemon[i].levelUp.style.display = 'none';
+			this.pokemon[i].levelUp.style.filter = 'brightness(0.6)';
+
+			this.pokemon[i].noPokemon.style.display = 'revert-layer';
+
+			this.pokemon[i].stars.style.display = 'none';
+			this.pokemon[i].attackStyle.style.display = 'none';
+			this.pokemon[i].attackStyle.classList.remove('is-circle', 'is-donut', 'is-cross', 'is-x-shape', 'is-v-shape', 'is-star','is-line');
+			this.pokemon[i].attackStyle.innerText = '';
+			this.pokemon[i].fieldStatus.style.display = 'none';
+			this.pokemon[i].fieldStatus.classList.remove('is-deployed', 'is-undeployed');
+			this.pokemon[i].fieldStatus.innerText = '';
+			this.pokemon[i].targetMode.style.display = 'none';
+			this.pokemon[i].targetMode.classList.remove('is-locked');
+			this.pokemon[i].targetText.innerText = '';
+			this.pokemon[i].dittoBg.style.display = 'none';
+
+			this.damageDealtUnit[i].sprite.style.display = 'none';
+			this.damageDealtUnit[i].number.style.display = 'none';
+			this.damageDealtUnit[i].barContainer.style.display = 'none';
+			this.damageDealtUnit[i].bar.style.display = 'none';
+		}
+
+		this.main.team.pokemon.forEach((pokemon, i) => {
+			let lang = this.main.lang;
+			if (pokemon.name[lang] == undefined) lang = 0;
+
+			this.pokemon[i].noPokemon.style.display = 'none';
+			
+			this.pokemon[i].name.innerText = (pokemon.alias != undefined) ? pokemon.alias.toUpperCase() : pokemon.name[lang].toUpperCase();
+			this.pokemon[i].name.style.fontSize = (this.pokemon[i].name.textContent.length >= 10) ? '10px' : 'revert-layer';
+
+			if (pokemon.id == 70) this.pokemon[i].dittoBg.style.display = 'revert-layer';
+	
+			if (typeof this.main.area.inChallenge.lvlCap == 'number') {
+				this.pokemon[i].level.innerText = `Lv ${this.main.area.inChallenge.lvlCap}`;
+			} else this.pokemon[i].level.innerText = `Lv ${pokemon.lvl}`;
+			
+			this.pokemon[i].sprite.style.backgroundImage = `url("${pokemon.sprite.base}")`;
+			if (pokemon.item != undefined) {
+				this.pokemon[i].item.innerText = '';
+				this.pokemon[i].item.style.background = `url("${pokemon.item.sprite}") center/contain no-repeat, linear-gradient(180deg,var(--uiPokemonButton4a) 0%, var(--uiPokemonButton4b) 100%)`;
+				if (pokemon.item.id == 'inverter') {
+					if (pokemon.ability.id != 'contrary') this.pokemon[i].style.transform = `scale(1, -1)`;
+					else this.pokemon[i].sprite.style.transform = `translate(-50%, 0) scale(1, -1)`;
+				}
+			}
+			if (pokemon.isShiny) {
+				this.pokemon[i].shiny.style.display = 'revert-layer';
+				this.pokemon[i].shiny.classList.add('is-inline');
+			}
+			
+			this.pokemon[i].sprite.style.cursor = "grab";
+			this.damageDealtUnit[i].sprite.style.display = 'revert-layer';
+			this.damageDealtUnit[i].number.style.display = 'revert-layer';
+			this.damageDealtUnit[i].barContainer.style.display = 'revert-layer';
+			this.damageDealtUnit[i].bar.style.display = 'revert-layer';
+
+			this.damageDealtUnit[i].sprite.style.backgroundImage = `url("${pokemon.sprite.base}")`;
+			this.damageDealtUnit[i].bar.style.backgroundColor = pokemon.specie.color;
+			this.damageDealtUnit[i].barPrevious.style.backgroundColor = `${pokemon.specie.color}4D`;
+
+			this.pokemon[i].name.style.color = pokemon.specie.color;
+			this.pokemon[i].style.backgroundColor = `${pokemon.specie.color}33`
+			this.pokemon[i].attackStyle.style.display = (this.main.indicatorShape) ? 'revert-layer' : 'none';
+			this.pokemon[i].attackStyle.innerText = this.getAttackStyleSymbol(pokemon);
+			const abilityId = pokemon.ability?.id;
+			this.pokemon[i].attackStyle.classList.toggle('is-cone', ['icyWind', 'dazzlingGleam'].includes(abilityId));
+			this.pokemon[i].attackStyle.classList.toggle('is-sweep', ['secretSword', 'ancientSword'].includes(abilityId) || pokemon.item?.id === 'ancientSword');
+			this.pokemon[i].attackStyle.classList.toggle('is-waves', ['boomburst', 'liquidVoice', 'drumBeating', 'originPulse', 'charmedCharm', 'emptyLight'].includes(abilityId));
+			this.pokemon[i].attackStyle.classList.toggle('is-stream', pokemon.attackType === 'stream');
+			if (pokemon.rangeType === 'circle' && pokemon.attackType !== 'stream') {
+				switch(pokemon.attackType) {
+				case 'area':
+					this.pokemon[i].attackStyle.classList.toggle('is-area', true);
+					break;
+				case 'aura':
+					this.pokemon[i].attackStyle.classList.toggle('is-aura', true);
+					break;
+				default:
+					this.pokemon[i].attackStyle.classList.toggle('is-circle', true);
+					break
+				}
+			}
+			this.pokemon[i].attackStyle.classList.toggle('is-donut', pokemon.rangeType === 'donut');
+			this.pokemon[i].attackStyle.classList.toggle('is-cross', pokemon.rangeType === 'cross');
+			this.pokemon[i].attackStyle.classList.toggle('is-x-shape', pokemon.rangeType === 'xShape');
+			this.pokemon[i].attackStyle.classList.toggle('is-v-shape', pokemon.rangeType === 'vShape');
+			this.pokemon[i].attackStyle.classList.toggle('is-star', pokemon.rangeType === 'star');
+			this.pokemon[i].attackStyle.classList.toggle('is-line', pokemon.rangeType === 'horizontalLine');
+			this.pokemon[i].fieldStatus.style.display = (this.main.indicatorField) ? 'revert-layer' : 'none';
+			this.pokemon[i].fieldStatus.innerText = pokemon.isDeployed ? '✓' : '✕';
+			this.pokemon[i].fieldStatus.classList.toggle('is-deployed', pokemon.isDeployed);
+			this.pokemon[i].fieldStatus.classList.toggle('is-undeployed', !pokemon.isDeployed);
+			this.pokemon[i].targetMode.style.display = (this.main.fastTarget) ? 'revert-layer' : 'none';
+			this.pokemon[i].targetMode.classList.toggle('is-locked', !this.canChangeSlotTargetMode(pokemon));
+			this.pokemon[i].targetText.innerText = this.getCompactTargetLabel(pokemon);
+
+			this.pokemon[i].deploy.style.pointerEvents = 'all';
+			this.pokemon[i].deploy.style.filter = 'revert-layer';
+			this.pokemon[i].deploy.style.display = 'revert-layer';
+			this.pokemon[i].deploy.title = '';
+
+			this.pokemon[i].info.style.pointerEvents = 'all';
+			this.pokemon[i].info.style.filter = 'revert-layer';
+			this.pokemon[i].info.style.display = 'revert-layer';
+			this.pokemon[i].info.title = '';
+
+			this.pokemon[i].item.style.display = 'revert-layer';
+			this.pokemon[i].item.style.pointerEvents = 'all';
+			if (pokemon.item) {
+				const itemName = this.getLocalizedValue(pokemon.item.name, 'Item');
+				const itemDesc = this.getShortTooltipText(this.getLocalizedValue(pokemon.item.description, ''), 100);
+				this.pokemon[i].item.title = '';
+			} else {
+				this.pokemon[i].item.title = '';
+			}
+
+			if (pokemon.attackType === 'bombardment') {
+			    this.pokemon[i].levelUp.innerText = '◎';
+			    this.pokemon[i].levelUp.style.fontSize = "18px";
+			    this.pokemon[i].levelUp.style.lineHeight = "19px";
+			    this.pokemon[i].levelUp.style.display = 'revert-layer';
+			    this.pokemon[i].levelUp.style.pointerEvents = 'all';
+			    this.pokemon[i].levelUp.style.filter = 'revert-layer';
+			} else {
+			    this.pokemon[i].levelUp.innerText = '+1';
+			    this.pokemon[i].levelUp.style.fontSize = "revert-layer";
+			    this.pokemon[i].levelUp.style.lineHeight = "revert-layer";
+			    if (typeof this.main.area.inChallenge.lvlCap !== 'number') {
+			        if (pokemon.lvl < 100) this.pokemon[i].levelUp.style.display = 'revert-layer';
+			        if (pokemon.lvl < 100 && this.main.player.gold >= pokemon.cost) {
+			            this.pokemon[i].levelUp.style.pointerEvents = 'all';
+			            this.pokemon[i].levelUp.style.filter = 'revert-layer';
+			        }	
+			    }
+			}
+
+			if (pokemon.isDeployed) {
+				if (
+					['silphScope', 'airBalloon', 'heavyDutyBoots', 'dampMulch', 'assaultVest', 
+					'twistedSpoon', 'subwoofer', 'ejectButton', 'mitsuesCocktail',
+					'blimpKeys', 'pokeSkates'].includes(pokemon?.item?.id)) {
+					this.pokemon[i].item.style.pointerEvents = 'none';
+					this.pokemon[i].item.style.filter = 'brightness(0.6)'
+				}
+				this.pokemon[i].deploy.style.background = 
+					`url("./src/assets/images/icons/pokeball-open.png") center / 50% no-repeat, linear-gradient(180deg,rgba(178, 61, 39, 1) 0%, rgba(157, 56, 41, 1) 100%)`
+			}
+		})
+
+		for (let i = 9; i > this.main.player.teamSlots - 1; i--) {
+			this.pokemon[i].noPokemon.style.display = 'none';
+			this.pokemon[i].style.background = 'rgba(0, 0, 0, 0.55)';
+			this.pokemon[i].name.innerText = text.ui.locked[this.main.lang].toUpperCase();
+			this.pokemon[i].stars.style.display = 'revert-layer';		
+		}
+
+		if (typeof this.main.area.inChallenge.slotLimit == 'number') {
+			for (let i = 9; i >= this.main.area.inChallenge.slotLimit; i--) {
+				this.pokemon[i].style.background = 'rgba(140, 0, 0, 0.55)';
+			}
+		}
+
+		this.pokemon.forEach((slot, i) => {
+	        slot.dataset.index = i;  
+	        slot.style.touchAction = 'none';
+	    });
+
+	    this.setupPokemonDragAndDrop();
+	}
+
+
+ 	setupPokemonDragAndDrop() {
+	    if (this.main.area.inChallenge?.draft) return;
+
+	    this.playerPanel.style.pointerEvents = 'all';
+	    this.pokemonContainer.style.pointerEvents = 'auto';
+	    this.pokemon.forEach(slot => slot.style.pointerEvents = 'auto');
+	    this.isDragging = false;
+
+	    const THRESHOLD = 5;
+
+	    let draggedIndex = null;
+	    let clone = null;
+	    let activePointerId = null;
+	    let slotElement = null;
+
+	    const onPointerCancelDuringDrag = () => {
+		    clearDragState();
+		};
+
+	    const clearDragState = () => {
+		    if (clone) {
+		        clone.remove();
+		        clone = null;
+		    }
+
+		    if (slotElement && activePointerId != null) {
+		        try { slotElement.releasePointerCapture(activePointerId); } catch (e) {}
+		    }
+
+		    draggedIndex = null;
+		    activePointerId = null;
+		    slotElement = null;
+		    this.isDragging = false;
+
+		    if (this.main?.game?.mouse) {
+		        this.main.game.mouse.x = undefined;
+		        this.main.game.mouse.y = undefined;
+		        try { this.main.game.animate(performance.now()); } catch (err) {}
+		    }
+
+		    document.body.style.cursor = '';
+		    window.removeEventListener('pointercancel', onPointerCancelDuringDrag);
+		};
+
+	    const onPointerMoveDuringDrag = (e) => {
+		    const draggedPokemon =
+		        draggedIndex != null
+		            ? this.main.team.pokemon[draggedIndex]
+		            : null;
+
+		    if (
+		        (this.main.game.stopped && draggedPokemon?.ability?.id !== 'timeWarp') ||
+		        this.main.area.heavyMetal
+		    ) {
+		        return playSound('pop0', 'ui');
+		    }
+
+		    if (!clone) return;
+
+		    clone.style.left = `${e.pageX - clone.offsetWidth / 2}px`;
+		    clone.style.top = `${e.pageY - clone.offsetHeight / 2}px`;
+
+	        clone.style.display = 'none';
+	        const targetElement = document.elementFromPoint(e.clientX, e.clientY);
+	        clone.style.display = 'block';
+
+	        const targetSlot = targetElement?.closest('.ui-pokemon');
+	        this.pokemon.forEach(s => s.classList.remove('drag-over'));
+	        if (targetSlot && parseInt(targetSlot.dataset.index) !== draggedIndex) {
+	            targetSlot.classList.add('drag-over');
+	        }
+
+	        try {
+	            const canvasEl = this.main.game.canvas;
+	            const rect = canvasEl.getBoundingClientRect();
+
+	            if (
+	                e.clientX >= rect.left && e.clientX <= rect.right &&
+	                e.clientY >= rect.top && e.clientY <= rect.bottom
+	            ) {
+	                const scaleX = canvasEl.width / rect.width;
+	                const scaleY = canvasEl.height / rect.height;
+	                const canvasX = (e.clientX - rect.left) * scaleX;
+	                const canvasY = (e.clientY - rect.top) * scaleY;
+
+	                this.main.game.mouse.x = canvasX;
+	                this.main.game.mouse.y = canvasY;
+	            } else {
+	                this.main.game.mouse.x = undefined;
+	                this.main.game.mouse.y = undefined;
+	            }
+	        } catch (err) {
+	            // si no hay game/canvas, noop
+	        }
+
+	        try { this.main.game.animate(performance.now()); } catch (err) {}
+	    };
+
+	    const onPointerUpDuringDrag = (e) => {
+		    const pokemon =
+		        draggedIndex != null
+		            ? this.main.team.pokemon[draggedIndex]
+		            : null;
+
+		    if (
+		        (this.main.game.stopped && pokemon?.ability?.id !== 'timeWarp') ||
+		        this.main.area.heavyMetal
+		    ) {
+		        return playSound('pop0', 'ui');
+		    }
+
+	        window.removeEventListener('pointermove', onPointerMoveDuringDrag);
+	        window.removeEventListener('pointerup', onPointerUpDuringDrag);
+	        window.removeEventListener('pointercancel', onPointerCancelDuringDrag);
+
+	        if (clone) clone.remove();
+
+	        const canvasEl = this.main.game.canvas;
+	        const rect = canvasEl.getBoundingClientRect();
+
+	        const cx = e.clientX;
+	        const cy = e.clientY;
+
+	        let tile = null;
+	        if (
+	            cx >= rect.left && cx <= rect.right &&
+	            cy >= rect.top && cy <= rect.bottom &&
+	            draggedIndex != null
+	        ) {
+	            const scaleX = canvasEl.width / rect.width;
+	            const scaleY = canvasEl.height / rect.height;
+	            const canvasX = (cx - rect.left) * scaleX;
+	            const canvasY = (cy - rect.top) * scaleY;
+
+	            tile = this.main.area.placementTiles.find(t =>
+	                canvasX > t.position.x &&
+	                canvasX < t.position.x + t.size &&
+	                canvasY > t.position.y &&
+	                canvasY < t.position.y + t.size
+	            );
+	        }
+
+	        if (tile && draggedIndex != null) {
+			    const pokemon = this.main.team.pokemon[draggedIndex];
+			    const clickedPokemon = tile.tower || null;
+
+			    if (
+				    this.main.game.stopped &&
+				    (tile.tower || tile.passenger)
+				) {
+				    playSound('pop0', 'ui');
+
+				    // Cancelar completamente el drag
+				    this.main.game.deployingUnit = undefined;
+
+				    if (slotElement) {
+				        const sprite = slotElement.querySelector('.ui-pokemon-sprite');
+				        if (sprite) sprite.style.opacity = '1';
+
+				        slotElement.classList.remove('is-dragging', 'drag-over');
+				    }
+
+				    this.pokemon.forEach(s => s.classList.remove('drag-over'));
+
+				    clearDragState();
+				    return;
+				}
+
+	            // poner el juego en modo deploy (tryDeployUnit puede llamar retireUnit internamente)
+	            this.main.game.tryDeployUnit(draggedIndex, true);
+
+	            // si tryDeployUnit retiró la unidad (deployingUnit quedó vacío), reasignar temporalmente
+	            if (!this.main.game.deployingUnit) {
+	                this.main.game.deployingUnit = pokemon;
+	            }
+
+	            // Si el jugador hizo click sobre la misma torre que estaba desplegando -> cancelar
+	            if (clickedPokemon === this.main.game.deployingUnit) {
+	                this.main.game.cancelDeployUnit();
+	            } else {
+	                // validar si la unidad puede colocarse en ese tipo de tile
+	                const canPlace = tile?.canPlacePokemonHere 
+				    ? tile.canPlacePokemonHere(this.main.game.deployingUnit)
+				    : (
+				        this.main.game.deployingUnit.tiles.includes(tile.land) ||
+				        (this.main.game.deployingUnit?.item?.id == 'airBalloon' && tile.land == 4) ||
+				        (this.main.game.deployingUnit?.item?.id == 'heavyDutyBoots' && tile.land == 2) ||
+				        (this.main.game.deployingUnit?.item?.id == 'assaultVest' && tile.land == 2) ||
+				        (this.main.game.deployingUnit?.item?.id == 'dampMulch' && tile.land == 1) ||
+				        (this.main.game.deployingUnit?.item?.id == 'mitsuesCocktail' && tile.land == 3) ||
+				        (this.main.game.deployingUnit?.item?.id == 'subwoofer' && tile.land == 3 && [76, 86, 120].includes(this.main.game.deployingUnit.id))
+				    );
+
+	                if (!canPlace) {
+	                    // no se puede colocar ahí -> cancelar deploy
+	                    this.main.game.cancelDeployUnit();
+	                } else {
+	                    if (!clickedPokemon) {
+	                        // tile vacío -> desplegar normalmente
+	                        this.main.game.moveUnitToTile(tile);
+	                    } else {
+						    // tile ocupado -> decidir swap o passenger o reemplazo
+						    if (this.main.game.deployingUnit.isDeployed) {
+						        // la que arrastramos ya estaba desplegada -> swap
+						        const sourceTile = this.main.area.placementTiles.find(t => t.tower === this.main.game.deployingUnit);
+						        if (sourceTile) {
+						            this.main.game.swapUnits(sourceTile, this.main.game.deployingUnit, tile, clickedPokemon);
+						        } else {
+						            // fallback: retirar la torre objetivo y colocar nueva
+						            this.main.game.retireUnit();
+						            this.main.game.moveUnitToTile(tile);
+						        }
+						        this.main.game.cancelDeployUnit();
+						        playSound('equip', 'ui');
+						        if (this.main.UI.fastScene.isOpen) this.main.UI.fastScene.close();
+						        if (!this.main.area.waveActive) {
+						            this.main.UI.revertUI();
+						            this.main.UI.nextWave.style.filter = 'revert-layer';
+						            this.main.UI.nextWave.style.pointerEvents = 'revert-layer';
+						        }
+						    } else {
+						        // la que arrastramos no estaba desplegada -> intentar passenger si la base lo permite
+						        const base = clickedPokemon; // pokemon que hace de base en la tile
+						        const hasPassenger = !!tile.passenger;
+
+						        // helper: comprobar si la unidad arrastrada puede ir sobre esta tile (incluye reglas para grassPlatform)
+						        const canBePlacedHere = tile?.canPlacePokemonHere
+						            ? tile.canPlacePokemonHere(this.main.game.deployingUnit)
+						            : (
+						                this.main.game.deployingUnit.tiles && this.main.game.deployingUnit.tiles.includes(tile.land) ||
+						                (this.main.game.deployingUnit?.item?.id == 'airBalloon' && tile.land == 4) ||
+						                (this.main.game.deployingUnit?.item?.id == 'heavyDutyBoots' && tile.land == 2) ||
+						                (this.main.game.deployingUnit?.item?.id == 'assaultVest' && tile.land == 2) ||
+						                (this.main.game.deployingUnit?.item?.id == 'dampMulch' && tile.land == 1) ||
+						                (this.main.game.deployingUnit?.item?.id == 'mitsuesCocktail' && tile.land == 3) ||
+						                (this.main.game.deployingUnit?.item?.id == 'subwoofer' && tile.land == 3 && [76, 86, 120].includes(this.main.game.deployingUnit.id))
+						            );
+
+						        // Si la base permite passenger (grassPlatform)
+						        if (base?.ability?.id === 'grassPlatform' || base?.ability?.id === 'mount' || base?.ability?.id === 'grimNeigh' || base?.ability?.id === 'rest' || base?.ability?.id === 'icePlatform') {
+						            if (!hasPassenger) {
+						                // no hay pasajero -> moveUnitToTile colocará como passenger
+						                this.main.game.moveUnitToTile(tile);
+						            } else {
+						                // ya hay pasajero: si la unidad arrastrada PUEDE ser passenger -> reemplazar pasajero
+						                if (canBePlacedHere) {
+						                    const oldPassenger = tile.passenger;
+						                    // retirar el pasajero actual: retireUnit usa this.deployingUnit, así que lo ajustamos temporalmente
+						                    this.main.game.deployingUnit = oldPassenger;
+						                    this.main.game.retireUnit();
+
+						                    // ahora colocar la unidad que arrastramos como passenger
+						                    this.main.game.deployingUnit = pokemon; // pokemon es la variable del arrastre
+						                    this.main.game.moveUnitToTile(tile);
+						                } else {
+						                    // no puede ser pasajero -> retirar base (lo que también limpia al pasajero) y colocar como base
+						                    const tempDeploying = this.main.game.deployingUnit;
+						                    this.main.game.deployingUnit = base;
+						                    this.main.game.retireUnit(); // elimina base y pasajero
+						                    this.main.game.deployingUnit = tempDeploying;
+						                    this.main.game.moveUnitToTile(tile); // ahora la tile está libre, colocará la nueva unidad como base
+						                }
+						            }
+						        } else {
+						            // base no permite passenger -> comportamiento clásico: sustituir la base
+						            const tempDeploying = this.main.game.deployingUnit;
+						            this.main.game.deployingUnit = clickedPokemon;
+						            this.main.game.retireUnit();
+						            this.main.game.deployingUnit = tempDeploying;
+						            this.main.game.moveUnitToTile(tile);
+						        }
+						    }
+						}
+	                }
+	            }
+
+	            // UI updates y limpieza
+	            this.updatePokemon();
+	            this.pokemon.forEach(s => s.classList.remove('drag-over'));
+	            clearDragState();
+	            this.pokemon.forEach(slot => {
+	                const sprite = slot.querySelector('.ui-pokemon-sprite');
+	                if (sprite) sprite.style.opacity = '1';
+	            });
+
+	            // asegurarse de limpiar mouse del juego y forzar redraw final
+	            if (this.main?.game?.mouse) {
+	                this.main.game.mouse.x = undefined;
+	                this.main.game.mouse.y = undefined;
+	            }
+	            try { this.main.game.animate(performance.now()); } catch (err) {}
+
+	            document.body.style.cursor = '';
+	            return; // fin del flujo de drop en mapa
+	        }
+
+	        if (slotElement && activePointerId != null) {
+			    try { slotElement.releasePointerCapture(activePointerId); } catch (_e) {}
+			    activePointerId = null;
+			}
+	        // A la caja
+	        const domTarget = document.elementFromPoint(e.clientX, e.clientY);
+			const droppedOnBox = domTarget && (
+			    domTarget.closest('.box-scene') ||
+			    domTarget.closest('.box-scene-unit-container') ||
+			    domTarget.closest('.box-scene-unit')
+			);
+
+			if (droppedOnBox && draggedIndex != null) {
+			    try {
+			        if (slotElement) {
+			            const originSprite = slotElement.querySelector('.ui-pokemon-sprite');
+			            if (originSprite) originSprite.style.opacity = '1';
+			            slotElement.classList?.remove('is-dragging', 'drag-over');
+			        }
+			    } catch (e) {
+			       
+			    }
+
+			    const pokemon = this.main.team.pokemon[draggedIndex];
+			    if (!pokemon) { clearDragState(); return; }
+
+			    if (this.fastScene?.isOpen) this.fastScene.close();
+
+			    if (pokemon.isDeployed) {
+			        if (this.main.game.deployingUnit != undefined) this.main.game.cancelDeployUnit();
+			        this.main.game.deployingUnit = pokemon;
+			        this.main.game.retireUnit();
+			    } else {
+			        playSound('unequip', 'ui');
+			    }
+
+			    this.main.box.addPokemon(pokemon);
+			    this.main.team.removePokemon(pokemon);
+
+			    if (this.main.area.checkWeather) this.main.area.checkWeather();
+			    this.updatePokemon(); 
+
+			    if (this.main.boxScene && this.main.boxScene.isOpen) this.main.boxScene.update();
+			    if (this.main.UI) this.main.UI.update();
+
+				try { if (!this.main.area.isCustom) saveData(this.main.player, this.main.team, this.main.box, this.main.area, this.main.shop, this.main.teamManager); } catch (err) {}
+
+			    playSound('click1', 'ui');
+			    clearDragState();
+			    return;
+			}
+
+	        const targetElement = document.elementFromPoint(e.clientX, e.clientY);
+	        const targetSlot = targetElement?.closest('.ui-pokemon');
+
+	        if (targetSlot && draggedIndex != null) {
+	            const toIndex = parseInt(targetSlot.dataset.index);
+	            if (toIndex !== draggedIndex && toIndex < this.main.player.teamSlots) {
+	                const team = this.main.team.pokemon;
+
+	                const firstBefore = team[0];
+
+	                const temp = team[draggedIndex];
+	                if (!team[toIndex]) {
+	                    team[toIndex] = temp;
+	                    team[draggedIndex] = undefined;
+	                    this.main.team.pokemon = team.filter(p => p !== undefined);
+	                } else {
+	                    team[draggedIndex] = team[toIndex];
+	                    team[toIndex] = temp;
+	                }
+
+	                this.updatePokemon();
+	                playSound('click1', 'ui');
+
+	                if (this.main.team.pokemon[0] !== firstBefore) {
+	                    const ditto = this.main.team.pokemon.find(p => p.id === 70);
+	                    if (ditto != undefined && !ditto.isDeployed) {
+	                        playSound('teleport', 'effect')
+
+	                        const oldTarget = ditto.targetMode
+
+	                        if ([58, 59, 63, 64, 65, 66, 94, 140, 136, 151, 247].includes(ditto.adn.id)) this.main.player.fossilInTeam--;
+	                        if ([179, 239].includes(ditto.adn.id)) this.main.player.pastInTeam--;
+							if ([178, 238].includes(ditto.adn.id)) this.main.player.futureInTeam--;
+	                        ditto.adn = this.main.team.pokemon[0].specie;
+	                        if ([58, 59, 63, 64, 65, 66, 94, 140, 136, 151, 247].includes(ditto.adn.id)) this.main.player.fossilInTeam++;
+	                        if ([179, 239].includes(ditto.adn.id)) this.main.player.pastInTeam++;
+							if ([178, 238].includes(ditto.adn.id)) this.main.player.futureInTeam++;
+	                        ditto.transformADN(oldTarget);
+
+	                        this.main.UI.updatePokemon();
+	                        this.update();
+	                    }
+	                }
+	            }
+	        }
+
+	        this.pokemon.forEach(s => s.classList.remove('drag-over'));
+	        clearDragState();
+
+	        this.pokemon.forEach(slot => {
+	            const sprite = slot.querySelector('.ui-pokemon-sprite');
+	            if (sprite) sprite.style.opacity = '1';
+	        });
+
+	        if (!tile) {
+	            // if (this.main.game.deployingUnit && !this.main.game.deployingUnit.isDeployed) {
+	            //     this.main.game.deployingUnit = undefined;
+	            // }
+	            if (this.main.game.deployingUnit) {
+			        this.main.game.deployingUnit = undefined;
+			    }
+	        }
+
+	        if (this.main?.game?.mouse) {
+	            this.main.game.mouse.x = undefined;
+	            this.main.game.mouse.y = undefined;
+	            try { this.main.game.animate(performance.now()); } catch (err) {}
+	        }
+
+	        document.body.style.cursor = '';
+	    };
+
+	    const startDragActual = (e, index, originatingSlot) => {
+		    const draggedPokemon = this.main.team.pokemon[index];
+
+		    if (
+		        (this.main.game.stopped && draggedPokemon?.ability?.id !== 'timeWarp') ||
+		        this.main.area.heavyMetal
+		    ) {
+		        return playSound('pop0', 'ui');
+		    }
+
+		    if (!draggedPokemon || index >= this.main.player.teamSlots) {
+		        clearDragState();
+		        return;
+		    }
+
+		    this.main.game.deployingUnit = draggedPokemon;
+
+		    if (this.fastScene.isOpen) this.fastScene.close();
+
+		    draggedIndex = index;
+	        slotElement = originatingSlot;
+	        document.body.style.cursor = 'grabbing';
+
+	        const spriteEl = this.pokemon[index].querySelector('.ui-pokemon-sprite');
+	        clone = spriteEl ? spriteEl.cloneNode(true) : this.pokemon[index].cloneNode(true);
+
+	        clone.style.position = 'absolute';
+	        clone.style.zIndex = '10000';
+	        clone.style.opacity = '0.9';
+	        clone.style.pointerEvents = 'none'; // importante para elementFromPoint
+	        clone.classList.add('dragging');
+	        if (draggedPokemon.item?.id === 'inverter') {
+	            clone.style.transform = 'scale(1.2, -1.2)';
+	        }
+	        document.body.appendChild(clone);
+
+	        spriteEl.style.opacity = '0%';
+	        this.isDragging = true;
+
+	        clone.style.width = `${spriteEl ? spriteEl.offsetWidth : this.pokemon[index].offsetWidth}px`;
+	        clone.style.height = `${spriteEl ? spriteEl.offsetHeight : this.pokemon[index].offsetHeight}px`;
+
+	        const setClonePos = (pageX, pageY) => {
+	            clone.style.left = `${pageX - clone.offsetWidth / 2}px`;
+	            clone.style.top = `${pageY - clone.offsetHeight / 2}px`;
+	        };
+	        setClonePos(e.pageX, e.pageY);
+
+	        playSound('hover3', 'ui');
+
+	        try {
+	            originatingSlot.setPointerCapture(e.pointerId);
+	            activePointerId = e.pointerId;
+	        } catch (err) {
+	            activePointerId = null;
+	        }
+
+	        window.addEventListener('pointermove', onPointerMoveDuringDrag);
+	        window.addEventListener('pointerup', onPointerUpDuringDrag);
+	        window.addEventListener('pointercancel', onPointerCancelDuringDrag);
+	    };
+
+	    const onPointerDownCandidate = function(e) {
+	        if (!e.isPrimary) return;
+
+	        if (e.target.closest('.ui-pokemon-button') || e.target.closest('.ui-pokemon-button-container') || e.target.closest('.fast-scene-container')) {
+	            return;
+	        }
+
+	        const originatingSlot = this;
+	        const index = parseInt(originatingSlot.dataset.index);
+
+	        let startX = e.clientX;
+	        let startY = e.clientY;
+
+	        const onMoveCheck = (ev) => {
+	            const dx = ev.clientX - startX;
+	            const dy = ev.clientY - startY;
+	            if (Math.hypot(dx, dy) > THRESHOLD) {
+	                window.removeEventListener('pointermove', onMoveCheck);
+	                window.removeEventListener('pointerup', onCancel);
+	                startDragActual(ev, index, originatingSlot);
+	            }
+	        };
+
+	        const onCancel = () => {
+	            window.removeEventListener('pointermove', onMoveCheck);
+	            window.removeEventListener('pointerup', onCancel);
+	        };
+
+	        e.preventDefault();
+
+	        window.addEventListener('pointermove', onMoveCheck);
+	        window.addEventListener('pointerup', onCancel);
+	    };
+
+	    this.pokemon.forEach((slot, index) => {
+	        if (slot.dragSetup) return;
+	        slot.dragSetup = true;
+
+	        slot.dataset.index = index;
+
+	        const sprite = slot.sprite;
+	        if (!sprite) return;
+
+	        sprite.addEventListener('pointerdown', (e) => onPointerDownCandidate.call(slot, e));
+	        sprite.addEventListener('dragstart', (e) => e.preventDefault());
+
+	        slot.addEventListener('dragstart', (e) => e.preventDefault());
+	    });
+	}
+	
+	displayEnemyInfo(enemy, pos) {
+		if (pos >= this.mapWavePokemon.length) {
+			const wavePreview = this.main.area.waves[this.main.area.waveNumber].preview;
+			enemy = wavePreview[0];
+			pos = 0;
+		}
+		
+		this.mapWavePokemon.forEach((pokemon, i) => {
+			pokemon.style.filter = `brightness(0.8)`;
+			if (pos === i) pokemon.style.filter = `brightness(1) drop-shadow(0 0 1px white)`;
+		})
+
+		const bonusSteps = Math.floor((this.main.area.waveNumber-1) / 5);
+
+		let hp = enemy.hp;
+		let armor = enemy.armor;
+		let gold = enemy.gold + this.main.player.extraGold;
+
+		if (bonusSteps > 0) {
+			if (this.main.area.waveNumber != 100) hp = Math.floor(enemy.hp * (1 + 0.02 * bonusSteps));
+			if (this.main.area.waveNumber != 100) armor = Math.floor(enemy.armor * (1 + 0.01 * bonusSteps));
+			gold = Math.floor(gold * (1 + 0.15 * bonusSteps));
+		}
+
+		if (typeof this.main.area.inChallenge.toughEnemies == 'number') {
+			hp += Math.floor(hp * (this.main.area.inChallenge.toughEnemies / 100));
+			armor += Math.floor(armor * (this.main.area.inChallenge.toughEnemies / 100));
+		}
+
+		if (this.main.area.inChallenge.draft) {
+			if (this.main.area.waveNumber === 100) {
+				hp -= Math.floor(hp * (25 / 100));
+				armor -= Math.floor(armor * (25 / 100));
+			} else {
+				hp -= Math.floor(hp * (10 / 100));
+				armor -= Math.floor(armor * (10 / 100));
+			}		
+		}
+
+		if (this.main.area.isCustom) {
+			gold = 0;
+			hp += Math.floor(hp * (this.main.area.customData.health / 100));
+			armor += Math.floor(armor * (this.main.area.customData.armor / 100));
+		}
+
+		if (enemy.id !== 'mew' && enemy.id !== 'calyrex') {
+			this.infoName.innerHTML = enemy.name[this.main.lang].toUpperCase(); 
+			this.infoHealth.innerHTML = `${text.ui.health[this.main.lang].toUpperCase()} <span class="pos-right">${this.main.utility.numberDot(hp, this.main.lang)}</span>`;
+			this.infoArmor.innerHTML =`${text.ui.armor[this.main.lang].toUpperCase()} <span class="pos-right">${this.main.utility.numberDot((armor || 0), this.main.lang)}</span>`;
+			this.infoSpeed.innerHTML =`${text.ui.speed[this.main.lang].toUpperCase()} <span class="pos-right">${enemy.speed}</span>`;
+			this.infoPower.innerHTML = `${text.ui.power[this.main.lang].toUpperCase()} <span class="pos-right">${enemy.power}</span>`;
+			this.infoRegen.innerHTML = `${text.ui.regen[this.main.lang].toUpperCase()} <span class="pos-right">${this.main.utility.numberDot(enemy.regeneration, this.main.lang)}/s</span>`;
+			this.infoStun.innerHTML = `${text.ui.stun[this.main.lang].toUpperCase()}`;
+			this.infoSlow.innerHTML = `${text.ui.slow[this.main.lang].toUpperCase()}`;
+			this.infoBurn.innerHTML = `${text.ui.burn[this.main.lang].toUpperCase()}`;
+			this.infoPoison.innerHTML = `${text.ui.poison[this.main.lang].toUpperCase()}`;
+			this.infoInvisible.innerHTML = `${text.ui.invisible[this.main.lang].toUpperCase()} <span class="pos-right">${(enemy.invisible) ? text.ui.yes[this.main.lang].toUpperCase() : text.ui.no[this.main.lang].toUpperCase()}</span>`;
+			this.infoGold.innerHTML = `${text.ui.gold[this.main.lang].toUpperCase()} <span class="pos-right">$${this.main.utility.numberDot(gold, this.main.lang)}</span>`;
+		} else {
+			this.infoName.innerHTML = enemy.name[this.main.lang].toUpperCase(); 
+			this.infoHealth.innerHTML = `${text.ui.health[this.main.lang].toUpperCase()} <span class="pos-right">???</span>`;
+			this.infoArmor.innerHTML =`${text.ui.armor[this.main.lang].toUpperCase()} <span class="pos-right">???</span>`;
+			this.infoSpeed.innerHTML =`${text.ui.speed[this.main.lang].toUpperCase()} <span class="pos-right">${enemy.speed}</span>`;
+			this.infoPower.innerHTML = `${text.ui.power[this.main.lang].toUpperCase()} <span class="pos-right">???</span>`;
+			this.infoRegen.innerHTML = `${text.ui.regen[this.main.lang].toUpperCase()} <span class="pos-right">???</span>`;
+			this.infoStun.innerHTML = `${text.ui.stun[this.main.lang].toUpperCase()}`;
+			this.infoSlow.innerHTML = `${text.ui.slow[this.main.lang].toUpperCase()}`;
+			this.infoBurn.innerHTML = `${text.ui.burn[this.main.lang].toUpperCase()}`;
+			this.infoPoison.innerHTML = `${text.ui.poison[this.main.lang].toUpperCase()}`;
+			this.infoInvisible.innerHTML = `${text.ui.invisible[this.main.lang].toUpperCase()} <span class="pos-right" style="color: var(--green);">${(enemy.invisible) ? text.ui.yes[this.main.lang].toUpperCase() : text.ui.no[this.main.lang].toUpperCase()}</span>`;
+			this.infoGold.innerHTML = `${text.ui.gold[this.main.lang].toUpperCase()} <span class="pos-right">$${this.main.utility.numberDot(10000, this.main.lang)}</span>`;
+		}
+
+		if ([6,7,8].includes(this.main.lang)) {
+			this.infoStatContainer.style.lineHeight = '10px'
+		} else {
+			this.infoStatContainer.style.lineHeight = 'revert-layer'
+		}
+
+		if (enemy.passive != undefined) {
+			this.infoPassive.style.display = 'block';
+			this.infoPassive.name.innerHTML = enemy.passive.name[this.main.lang].toUpperCase();
+			this.infoPassive.description.innerHTML = enemy.passive.description[this.main.lang].toUpperCase();
+
+			if (enemy?.passive?.id === 'healer' && (typeof this.main?.area?.inChallenge?.lvlCap === 'number' || this.main?.area?.inChallenge?.noItems)) 
+				this.infoPassive.description.innerHTML = passiveData['healerChallenge'].description[this.main.lang].toUpperCase();
+		} else {
+			this.infoPassive.style.display = 'none';
+		}
+		
+		if (enemy.id !== 'mew') {
+			this.infoStun.innerHTML += (enemy.canStun) ? `<span class="pos-right" style="color: var(--green);">${text.ui.vulnerable[this.main.lang].toUpperCase()}</span>` : `<span class="pos-right" style="color: #999;">${text.ui.resistant[this.main.lang].toUpperCase()}</span>`
+			this.infoSlow.innerHTML += (enemy.canSlow) ? `<span class="pos-right" style="color: var(--green);">${text.ui.vulnerable[this.main.lang].toUpperCase()}</span>` : `<span class="pos-right" style="color: #999;">${text.ui.resistant[this.main.lang].toUpperCase()}</span>`
+			this.infoBurn.innerHTML += (enemy.canBurn) ? `<span class="pos-right" style="color: var(--green);">${text.ui.vulnerable[this.main.lang].toUpperCase()}</span>` : `<span class="pos-right" style="color: #999;">${text.ui.resistant[this.main.lang].toUpperCase()}</span>`
+			this.infoPoison.innerHTML += (enemy.canPoison) ? `<span class="pos-right" style="color: var(--green);">${text.ui.vulnerable[this.main.lang].toUpperCase()}</span>` : `<span class="pos-right" style="color: #999;">${text.ui.resistant[this.main.lang].toUpperCase()}</span>`	
+			this.infoInvisible.innerHTML +=  (enemy.invisible) ? `<span class="pos-right" style="color: var(--green);">${text.ui.yes[this.main.lang].toUpperCase()}</span>` : `<span class="pos-right" style="color: var(--red);">${text.ui.no[this.main.lang].toUpperCase()}</span>`	
+		} else {
+			this.infoStun.innerHTML += '<span class="pos-right">???</span>';
+			this.infoSlow.innerHTML += '<span class="pos-right">???</span>';
+			this.infoBurn.innerHTML += '<span class="pos-right">???</span>';
+			this.infoPoison.innerHTML += '<span class="pos-right">???</span>';
+		}
+		this.enemyPositionDisplay = pos;
+	}
+
+	updateMap() {
+		this.mapRecord.innerHTML = `<span class="msrre">${this.main.utility.drawStarEmoji(this.main.uiTheme)}</span>${Math.min(100, this.main.player.records[this.main.area.map.id])}`;
+
+		const pokemonCount = this.countPokemon(this.main.area.waves[this.main.area.waveNumber]);
+		const wavePreview = this.main.area.waves[this.main.area.waveNumber].preview;
+
+		this.mapWavePokemonContainer.innerHTML = "";
+		this.mapWavePokemon = [];
+		wavePreview.forEach((pokemon, i) => {
+			this.mapWavePokemon[i] = new Element(this.mapWavePokemonContainer, { className: 'ui-map-wave-pokemon', image: pokemon.sprite.base }).element;
+			this.mapWavePokemon[i].addEventListener('click', () => { 
+				playSound('click1', 'ui');
+				this.displayEnemyInfo(pokemon, i);
+			})
+			this.mapWavePokemon[i].addEventListener('mouseenter', () => { playSound('hover1', 'ui') });
+			this.mapWavePokemon[i].count = new Element(this.mapWavePokemon[i], { className: 'ui-map-wave-pokemon-number stroke', text: `x${pokemonCount[i]-1}` }).element;
+		})
+
+		this.autoWave.innerHTML = text.ui.autoWave[this.main.lang].toUpperCase();
+		this.nextWave.innerText = text.ui.nextWave[this.main.lang].toUpperCase();
+	
+		this.autoWave.style.filter = `revert-layer`;
+		this.autoWave.style.pointerEvents = `revert-layer`;
+		this.speedWave.style.filter = `revert-layer`;
+		this.speedWave.style.pointerEvents = `revert-layer`;	
+
+		if (this.main.area.waveActive) {
+			this.nextWave.style.filter = `brightness(0.8)`;
+			this.nextWave.style.pointerEvents = 'none';
+		} else {
+			this.nextWave.style.filter = `revert-layer`;
+			this.nextWave.style.pointerEvents = 'all';
+		}
+
+		this.damageDealtButton.innerHTML = text.ui[this.damageDealtType][this.main.lang].toUpperCase();
+
+		if (this.main.area.map.isSecret || this.main.area.isCustom) {
+			this.mapRecord.innerHTML = `<span class="msrre">${this.main.utility.drawStarEmoji(this.main.uiTheme)}</span>???`;
+			this.mapRoute.innerHTML = this.main.area.map.name[this.main.lang].toUpperCase()
+		}
+	}
+
+	countPokemon(grupo) {
+	    const res = {};
+	    const arrayCount = (arr) => {
+	        arr.forEach(pokemon => {
+	            if (pokemon !== null) {
+	                const id = pokemon.id;
+	                res[id] = (res[id] || 0) + 1;
+	            }
+	        });
+	    };
+	    
+	    arrayCount(grupo.preview);
+	    arrayCount(grupo.wave);
+
+	    return grupo.preview.map(pokemon => res[pokemon.id]);
+	}
+
+	updateDamageDealt() {
+		this.main.team.pokemon.forEach((pokemon, i) => {
+			const totalDamageDealt = (this.damageDealtType == 'trueDamage') ? this.main.area.totalTrueDamageDealt : this.main.area.totalDamageDealt
+			const damageDealt = (this.damageDealtType == 'trueDamage') ? pokemon.trueDamageDealt : pokemon.damageDealt;
+			if (damageDealt > 0) {
+				const per = Math.ceil((damageDealt / totalDamageDealt) * 100)
+				this.damageDealtUnit[i].number.innerHTML = `
+					${this.main.utility.numberDot(Math.floor(damageDealt), this.main.lang)} 
+					<span style="position: absolute; right: 0px; top: 2px; font-size: 8px; text-align: right">(${per}%)</span>
+				`;
+				this.damageDealtUnit[i].bar.style.width = `${per}%`;
+			} else {
+				this.damageDealtUnit[i].number.innerHTML = `0 <span style="position: absolute; right: 0px; top: 2px; font-size: 8px; text-align: right">(0%)</span>`;
+				this.damageDealtUnit[i].bar.style.width = '0%';
+			}
+			if ([19, 83, 101, 111, 144, 173].includes(pokemon.id)) {
+				this.damageDealtUnit[i].number.innerHTML = `${text.ui.helping[this.main.lang]} <span style="position: absolute; right: 0px; top: 2px; font-size: 8px; text-align: right">:)</span>`;
+			} else if ([252].includes(pokemon.id)) {
+				this.damageDealtUnit[i].number.innerHTML = `${text.ui.suffering[this.main.lang]} <span style="position: absolute; right: 0px; top: 2px; font-size: 8px; text-align: right">:)</span>`;
+			}
+		});
+	}
+
+	refreshDamageDealt(force = false) {	
+		for (let i = 0; i < 10; i++) {
+			if (this.main.team.pokemon[i]) {
+				this.main.team.pokemon[i].damageDealt = 0;
+				this.main.team.pokemon[i].trueDamageDealt = 0;
+			}
+			this.damageDealtUnit[i].number.innerHTML = `0 <span style="position: absolute; right: 0px; top: 2px; font-size: 8px; text-align: right">(0%)</span>`;
+			this.damageDealtUnit[i].barPrevious.style.width = (force) ? '0%' : this.damageDealtUnit[i].bar.style.width;
+			this.damageDealtUnit[i].bar.style.width = '0%';
+		}
+	}
+
+	damageDealtSwitch() {
+		playSound('option', 'ui');
+		this.damageDealtDisplay =! this.damageDealtDisplay;
+		if (this.damageDealtDisplay) {
+			this.damageDealtContainer.style.display = 'block';
+			this.damageDealtButton.style.display = 'block';
+		} else {
+			this.damageDealtContainer.style.display = 'none';
+			this.damageDealtButton.style.display = 'none';
+		}
+	}
+
+	blockRightUI() {
+		this.mapPanel.style.pointerEvents = 'none';
+		this.mapPanel.style.filter = 'brightness(0.8)';
+		this.nextWave.style.pointerEvents = 'none';
+		this.mapWavePokemonContainer.style.pointerEvents = 'all';
+	}
+
+	blockLeftUI() {
+		this.playerPanel.style.pointerEvents = 'none';
+		this.playerPanel.style.filter = 'brightness(0.8)';
+		this.playerPanel.querySelectorAll('*').forEach(el => el.style.pointerEvents = 'none');
+	}
+
+	blockAllUI() {
+		this.blockRightUI();
+		this.blockLeftUI();
+	}
+
+	blockMenuUI() {
+		SECTIONS.forEach(section =>  {
+			this.section[section].style.pointerEvents = 'none';
+			this.section[section].img.style.backgroundSize = '17px';
+			this.section[section].img.style.opacity = '0.8'
+		})
+	}
+
+	revertUI() {
+		this.mapPanel.style.pointerEvents = 'all';
+		this.playerPanel.style.pointerEvents = 'all';
+		this.mapPanel.style.filter = 'revert-layer';
+		this.playerPanel.style.filter = 'revert-layer';
+		this.nextWave.style.pointerEvents = 'all';
+
+		SECTIONS.forEach(section =>  {
+			this.section[section].style.pointerEvents = 'all';
+			this.section[section].img.style.backgroundSize = 'revert-layer';
+			this.section[section].img.style.opacity = 'revert-layer';
+		})
+	}
+
+	handleBellRhythmClick() {
+		const now = performance.now();
+		const PAUSE_MIN = 500;   
+		const PAUSE_MAX = 3000; 
+		const INTRA_MAX = 450; 
+
+		playSound('bronzor1', 'effect')
+
+		if (this.bellRhythmGroupIndex === 0 && this.bellRhythmClickCount === 0) {
+			this.bellRhythmClickCount = 1;
+			this.bellRhythmLastClickTime = now;
+			this.bellRhythmAwaitingPause = false;
+			this.checkBellRhythmGroupComplete();
+			return;
+		}
+
+		const elapsed = now - this.bellRhythmLastClickTime;
+
+		if (this.bellRhythmAwaitingPause) {
+			if (elapsed < PAUSE_MIN || elapsed > PAUSE_MAX) {
+				// console.log("mal");
+				playSound('bell', 'effect')
+				this.resetBellRhythm();
+				return;
+			}
+
+			// console.log("bien");
+			this.bellRhythmGroupIndex++;
+			this.bellRhythmClickCount = 1;
+			this.bellRhythmLastClickTime = now;
+			this.bellRhythmAwaitingPause = false;
+			this.checkBellRhythmGroupComplete();
+			return;
+		}
+
+
+		if (elapsed > INTRA_MAX) {
+			// console.log("mal (too slow within group)");
+			playSound('bell', 'effect')
+			this.resetBellRhythm();
+			return;
+		}
+
+		this.bellRhythmClickCount++;
+		this.bellRhythmLastClickTime = now;
+
+		const expectedCount = this.bellRhythmSequence[this.bellRhythmGroupIndex];
+
+		if (this.bellRhythmClickCount > expectedCount) {
+			// console.log("mal");
+			playSound('bell', 'effect')
+			this.resetBellRhythm();
+			return;
+		}
+
+		this.checkBellRhythmGroupComplete();
+	}
+
+	checkBellRhythmGroupComplete() {
+		const expectedCount = this.bellRhythmSequence[this.bellRhythmGroupIndex];
+
+		if (this.bellRhythmClickCount !== expectedCount) return;
+
+		if (this.bellRhythmGroupIndex === this.bellRhythmSequence.length - 1) {
+			// console.log("correcto");
+			playSound('bronzor2', 'effect')
+			this.resetBellRhythm();
+
+			if (
+				!this.main.area.inChallenge &&
+				!this.main.player.secrets.bronzor
+			) {
+				this.main.player.secrets.bronzor = true;
+				this.getSecret('bronzor'); 
+			}
+			
+			return;
+		}
+
+		this.bellRhythmAwaitingPause = true;
+	}
+
+	resetBellRhythm() {
+		this.bellRhythmGroupIndex = 0;
+		this.bellRhythmClickCount = 0;
+		this.bellRhythmLastClickTime = 0;
+		this.bellRhythmAwaitingPause = false;
+	}
+
+	getSecret(poke) {
+		let txt = " ";
+		const pokemon = pokemonData[poke];
+		const reward = new Pokemon(pokemon, 1, null, this.main);
+
+		if (pokemon?.key === 'wooper') txt = text.shop.wooper;
+		if (pokemon?.key === 'tyrunt') txt = text.shop.tyrunt;
+
+		if (this.main.area.heavyMetal) {
+			reward.inGroup = false;
+			this.main.box.pokemon.push(reward);
+		} else if (this.main.team.pokemon.length < this.main.player.teamSlots && !this.main.area.inChallenge) {
+			this.main.team.addPokemon(reward);
+		} else {
+			this.main.box.addPokemon(reward);
+		}
+
+		this.main.shopScene.displayPokemon.open(reward, txt);
+
+		this.main.player.stats.pokemonOwned++;
+		this.main.player.stats.totalPokemonLevel++;
+
+		if (!this.main.area.isCustom) saveData(this.main.player, this.main.team, this.main.box, this.main.area, this.main.shop, this.main.teamManager);
+		this.main.UI.update();	
+	}
+
+	getSecretMap(mapId) {
+		this.main.area.loadArea(mapId);
+		this.main.UI.update();
+		if (!this.main.area.isCustom) saveData(this.main.player, this.main.team, this.main.box, this.main.area, this.main.shop, this.main.teamManager);
+		this.main.UI.displayEnemyInfo(this.main.area.waves[this.main.area.waveNumber].preview[0], 0);
+		this.main.area.checkWeather();
+		playSound('step', 'ui');
+	}
+
+	getSecretItem(itemId) {
+		let txt = undefined;
+
+		switch(itemId) {
+			case 'beedrillite':
+				this.main.area.map.background = './src/assets/images/maps/9-2bis.png';
+		        this.main.game.canvasBackground.src = this.main.area.map.background;
+		        txt = text.shop.beedrillite;
+			break;
+
+			case 'gengarite':
+				this.main.area.map.background = './src/assets/images/maps/3-1bis.png';
+		        this.main.game.canvasBackground.src = this.main.area.map.background;
+		        //txt = text.shop.gengarite; // no hay texto aun
+			break;
+		}
+
+		this.main.shopScene.displayItem.open(itemData[itemId], txt);
+
+		this.main.player.obtainItem(itemData[itemId]);
+	    this.main.player.itemAmount++;
+
+		if (!this.main.area.isCustom) saveData(this.main.player, this.main.team, this.main.box, this.main.area, this.main.shop, this.main.teamManager);
+	}
+
+	importTeamButtonHandle(i) {
+		if (this.main.isSectionOpen()) return playSound('pop0', 'ui');
+		if (!this.main.area.inChallenge && this.main.teamManager.teams[i][this.main.area.routeNumber].length == 0) return
+		if (this.main.area.inChallenge && this.main.teamManager.getChallengeTeam(i).length == 0) return
+			
+		const msg = new Element(this.main.scene, {
+			className: 'team-saved-message',
+			text: text.ui.loadTeam[this.main.lang].toUpperCase()
+		}).element;
+
+		msg.style.opacity = 0;
+		setTimeout(() => {
+			msg.style.opacity = 1;
+		}, 0);
+
+		setTimeout(() => {
+			msg.style.opacity = 0;
+			setTimeout(() => msg.remove(), 500);
+		}, 1500);
+
+		if (this.main.area.inChallenge) this.main.teamManager.importTeam(i, true); 
+		else this.main.teamManager.importTeam(i); 
+	}
+
+	saveTeamButtonHandle(i) {
+		const msg = new Element(this.main.scene, {
+			className: 'team-saved-message',
+			text: text.ui.savedTeam[this.main.lang].toUpperCase()
+		}).element;
+
+		msg.style.opacity = 0;
+		setTimeout(() => {
+			msg.style.opacity = 1;
+		}, 0);
+
+		setTimeout(() => {
+			msg.style.opacity = 0;
+			setTimeout(() => msg.remove(), 500);
+		}, 1500);
+
+		if (this.main.area.inChallenge) this.main.teamManager.saveTeam(i, true); 
+		else this.main.teamManager.saveTeam(i); 
+	}
+
+	waveSelectorBlockHandle() {
+		this.main.area.repeat = !this.main.area.repeat;
+		playSound('option', 'ui');
+		if (this.main.area.repeat) {
+			this.waveSelectorBlock.style.background = 'var(--waveSelectorRepeat1)';
+			this.waveSelectorBlock.style.boxShadow = 'inset 0 2px 0 var(--waveSelectorRepeat2), inset 0 -2px 0 var(--waveSelectorRepeat3)';
+		} else {
+			this.waveSelectorBlock.style.background = 'revert-layer';
+			this.waveSelectorBlock.style.boxShadow = 'revert-layer';
+		}
+	}
+
+	waveSelectorMirrorHandle() {	
+		this.main.area.mirrorWM = !this.main.area.mirrorWM;
+		playSound('option', 'ui');
+		if (this.main.area.mirrorWM) {
+			this.waveSelectorMirror.style.background = 'var(--waveSelectorMirror1)';
+			this.waveSelectorMirror.style.boxShadow = 'inset 0 2px 0 var(--waveSelectorMirror2), inset 0 -2px 0 var(--waveSelectorMirror3)';
+		} else {
+			this.waveSelectorMirror.style.background = 'revert-layer';
+			this.waveSelectorMirror.style.boxShadow = 'revert-layer';
+		}
+	}
+
+	changeMusic(dir) {
+   	 	playSound('option', 'ui');
+
+	    let currentIndex = songData.findIndex(s => s.id === this.main.area.music.id);
+	    currentIndex += dir;
+
+	    if (currentIndex < 0) currentIndex = songData.length - 1;
+	    else if (currentIndex >= songData.length) currentIndex = 0;
+
+	    this.main.area.music = songData[currentIndex];
+	    this.musicName.innerHTML = `♪ ${this.main.area.music.name[this.main.lang].toUpperCase()}`;
+
+	    playMusic(this.main.area.music.song);
+	}
+
+	changeDamageType() {
+		this.damageDealtType = (this.damageDealtType == 'trueDamage') ? 'overdamage' : 'trueDamage';
+		playSound('option', 'ui');
+		this.damageDealtButton.innerHTML = text.ui[this.damageDealtType][this.main.lang].toUpperCase();
+		this.updateDamageDealt();
+	}
+	
+}
+
+class FastScene {
+	constructor(main, UI) {
+		this.main = main;
+		this.UI = UI;
+
+		this.scene;
+		this.position;
+
+		this.isOpen = false;
+		this.pokemonArray = [];
+		this.itemArray = [];
+
+		this.render(); 
+	}
+
+	render() {
+		this.window = document.createElement('div');
+		this.window.className = 'item-scene-window';
+
+        this.container = new Element(this.window, { className: 'fast-scene-container' }).element;
+        this.prompt = new Element(this.window, { className: 'fast-scene-prompt' }).element; 
+
+        document.addEventListener('click', (e) => {
+			if (!this.isOpen) return;
+
+			if (!this.container.contains(e.target)) {
+				this.close();
+			}
+		});
+
+        this.itemSlot = [];
+        this.pokemonSlot = [];
+	}
+
+	open(scene, position) {
+		const pokemon = this.main.team.pokemon[position];
+
+		if ((this.main.game.stopped && !( scene === 'item' && pokemon?.ability?.id === 'timeWarp' ) ) || this.main.area.heavyMetal ) { return playSound('pop0', 'ui'); }
+
+
+		if (this.isOpen && this.position == position) return this.close();
+		if (this.main.area.inChallenge.noItems && scene == 'item' && pokemon?.specie?.id != 142) {
+			playSound('pop0', 'ui');
+			return;
+		}
+		if (
+			scene == 'pokemon' &&
+			typeof this.main.area.inChallenge.slotLimit == 'number' &&
+			position >= this.main.area.inChallenge.slotLimit
+		) {
+			playSound('pop0', 'ui');
+			return;
+		}
+
+		playSound('open', 'ui');
+
+		this.pokemonArray = [];
+		this.itemArray = [];
+		this.itemSlot = [];
+		this.pokemonSlot = [];
+
+		this.scene = scene;
+		this.position = position;
+		this.UI.pokemon[this.position].appendChild(this.container);
+		this.isOpen = true;
+
+		this.container.innerHTML = "";
+		this.prompt.innerText = text.ui.empty[this.main.lang].toUpperCase();
+
+		if (this.scene == 'pokemon') this.openPokemonScene()
+		else this.openItemScene();
+	}
+
+	close() {
+		if (this.isOpen) {
+			this.isOpen = false;
+			playSound('close', 'ui');
+			this.UI.pokemon[this.position].removeChild(this.container);
+		}
+	}
+
+	openPokemonScene() {
+		this.pokemonArray = this.main.box.pokemon;
+		this.container.style.background = 'linear-gradient(30deg, rgba(70, 70, 70, 1) 0%, rgba(50, 50, 50, 1) 100%)';
+		(this.pokemonArray.length > 0) ? this.prompt.style.display = 'none' : this.prompt.style.display = 'revert-layer';
+
+		this.pokemonArray.forEach((pokemon, i) => {
+			this.pokemonSlot[i] = new Element(this.container, { className: 'fast-scene-pokemon-slot' }).element;
+			this.pokemonSlot[i].style.backgroundImage = `url("${pokemon.sprite.base}")`;
+
+			this.pokemonSlot[i].addEventListener('click', () => {
+				playSound('equip', 'ui');
+				this.main.team.addPokemon(pokemon);
+				this.main.box.removePokemon(pokemon);
+				this.UI.update();
+				this.close();
+			})
+		})
+	}
+
+	openItemScene() {
+		const pokemon = this.main.team.pokemon[this.position];
+
+		const originalItems = this.main.itemController.getItems();
+		let items = [...originalItems];
+
+		this.container.style.background = `linear-gradient(30deg, ${pokemon.specie.color}2D 100%, ${pokemon.specie.color}5D 100%), #555`;
+
+		this.container.addEventListener('wheel', (e) => {
+			e.preventDefault();
+
+			this.container.scrollBy({
+				top: e.deltaY * 0.8,
+				behavior: 'smooth'
+			});
+		}, { passive: false });
+
+		const favorites = new Set(
+			this.main.player.favoriteItems[pokemon.specie.id] ?? []
+		);
+
+		this.main.inventoryScene.sorted = this.main.player.sortedInventory ?? 0;
+		const sorted = this.main.inventoryScene.sortItems(items);
+
+		items = [
+			...sorted.filter(item => favorites.has(item.id)),
+			...sorted.filter(item => !favorites.has(item.id))
+		];
+
+		this.itemArray = items.filter(item =>
+			this.main.itemController.canEquip(item, pokemon)
+		);
+
+		this.itemArray.forEach((item) => {
+			const slot = new Element(this.container, {
+				className: 'fast-scene-pokemon-item'
+			}).element;
+
+			slot.equiped = new Element(slot, {
+				className: 'item-scene-slot-equiped stroke'
+			}).element;
+
+			slot.favorite = new Element(slot, {
+				className: 'item-scene-slot-favorite stroke'
+			}).element;
+
+			slot.style.backgroundImage = `url("${item.sprite}")`;
+			slot.equiped.innerHTML = this.main.itemController.isEquipped(item) ? 'E' : '';
+			slot.favorite.innerHTML = favorites.has(item.id) ? '★' : '';
+
+			slot.style.filter =
+				`drop-shadow(0px 0px 1px ${this.main.utility.colorTier(item.tier)}) ` +
+				`drop-shadow(0px 0px 1px ${this.main.utility.colorTier(item.tier)})`;
+
+			slot.addEventListener('mouseenter', () => {
+				playSound('hover3', 'ui');
+			});
+
+			slot.addEventListener('click', () => {
+				playSound('equip', 'ui');
+
+				this.main.itemController.equip(item, pokemon);
+				this.UI.update();
+				this.close();
+
+				if (item.id === 'quickClaw' && pokemon.attackType !== 'area') {
+					pokemon.changeTargetMode(TARGET_MODES[6]);
+				} else if (item.id === 'spindaCocktail') {
+					pokemon.changeTargetMode(TARGET_MODES[19]);
+				}
+
+				this.UI.updatePokemon();
+			});
+		});
+
+		const removeSlot = new Element(this.container, {
+			className: 'fast-scene-pokemon-item'
+		}).element;
+
+		removeSlot.textContent = '✕';
+		removeSlot.style.display = 'flex';
+		removeSlot.style.alignItems = 'center';
+		removeSlot.style.justifyContent = 'center';
+		removeSlot.style.fontWeight = 'bold';
+		removeSlot.style.fontSize = '14px';
+		removeSlot.style.color = '#f4f4f4';
+		removeSlot.style.textShadow = '1px 1px black';
+
+		const deployedLockedItems = [
+			'silphScope', 'airBalloon', 'heavyDutyBoots', 'dampMulch', 'assaultVest',
+			'twistedSpoon', 'subwoofer', 'ejectButton', 'jadeOrb', 'lustrousOrb',
+			'dampRock', 'smoothRock', 'icyRock', 'heatRockWeather', 'mitsuesCocktail',
+			'blimpKeys', 'pokeSkates'
+		];
+
+		const cannotRemoveNow =
+			!pokemon?.item ||
+			(pokemon.isDeployed && deployedLockedItems.includes(pokemon?.item?.id));
+
+		if (cannotRemoveNow) {
+			removeSlot.style.filter = 'brightness(0.6)';
+			removeSlot.style.pointerEvents = 'none';
+			removeSlot.style.cursor = 'not-allowed';
+		} else {
+			removeSlot.style.cursor = 'pointer';
+
+			removeSlot.addEventListener('mouseenter', () => {
+				playSound('hover3', 'ui');
+			});
+
+			removeSlot.addEventListener('mouseleave', () => {
+				this.main.tooltip.hide();
+			});
+
+			removeSlot.addEventListener('click', () => {
+				playSound('unequip', 'ui');
+
+				pokemon.retireItem();
+				this.UI.update();
+				this.close();
+			});
+		}
+	}
+}
