@@ -1,7 +1,7 @@
 /* Subversión propia (moportor6, 1.10): contador de los retos de evolución, solo en PokéBonk Lite.
    Durante la partida, una etiqueta muestra los retos pendientes de las evoluciones especiales de tu línea (Blissey,
    Crobat, Espeon, Steelix, Gallade… las de formas.js) y cuánto llevas: lo guardado + lo de esta partida (meta.runGain).
-   Se mueve, agranda u oculta en «Editar HUD» (hud-editor.js). Tocarla la pliega o despliega. */
+   Solo se ve jugando (no tapa la pausa ni las ventanas; 1.11). Se mueve, agranda u oculta en «Editar HUD» (hud-editor.js). Tocarla la pliega o despliega. */
 (() => {
   if (window.PB_EDICION !== 'lite') return;
   const DESC = {
@@ -21,7 +21,7 @@
   let el = null, plegado = false, ultimo = '';
   setInterval(() => {
     const run = window.__pbRun, m = meta(), F = window.PB_FORMAS, p = m?.profile;
-    const vivo = run && run.player && (run.state === 'play' || run.state === 'paused' || run.state === 'modal') && run.mode !== 'duel';
+    const vivo = run && run.player && run.state !== 'over' && run.mode !== 'duel';
     let html = '';
     if (vivo && F && p) {
       const fam = id => { try { return m.family(id); } catch { return id; } };
@@ -46,6 +46,7 @@
       document.body.append(el);
     }
     el.classList.toggle('plegado', plegado);
+    el.style.visibility = run.state === 'play' || document.body.classList.contains('pb-hud-editing') ? '' : 'hidden';
     if (html !== ultimo) { el.innerHTML = html; ultimo = html; }
   }, 500);
 })();

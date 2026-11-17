@@ -4,16 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.10';
+  const SUB = '1.11';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.11',
+      date: Date.UTC(2026, 10, 17, 19, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.11`,
+      summary: 'La etiqueta de retos de evolución ya no tapa la pausa.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Retos de evolución** (Lite): la etiqueta solo se ve mientras juegas; en la pausa y en las ventanas se oculta. En «Editar HUD» sigue apareciendo para moverla.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.10',
       date: Date.UTC(2026, 10, 17, 18, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.10`,
@@ -2487,6 +2504,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.11',
+      date: '2026-11-17',
+      title: 'Retos de evolución sin tapar la pausa.',
+      notes: [
+        ['fix', 'Lite: la etiqueta de retos de evolución se oculta en la pausa y en las ventanas.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.10',
