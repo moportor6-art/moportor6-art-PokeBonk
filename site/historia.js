@@ -448,6 +448,8 @@
       run.__gym = { reg: cap.reg, id: cap.id, l: { id: cap.id, nombre: cap.nombre, tipo: cap.tipo, equipo: cap.c.equipo } };
       try { run.ui.banner(`Liga Pokémon de ${REG[cap.reg]}`, `Campeón: ${cap.nombre}. Sus guardianes son su equipo. ¡Gana para coronarte!`, '#ffd84a', { species: cap.c.equipo.at(-1) }); } catch {}
     } else if (!run.__gym) run.__gym = { reg: cap.reg, id: cap.id };
+    // 1.04: en el santuario espera el as del líder (o del campeón) en vez de Mew, Moltres…; fases.js le da Mega y Dynamax.
+    run.forceLegendary = (cap.liga ? cap.c.equipo : cap.l.equipo).at(-1);
     // «Guardar y salir»: el Polvo ganado hasta ahora pasa ya al Laboratorio.
     const orig = run.saveAndQuitOnce;
     if (typeof orig === 'function') run.saveAndQuitOnce = async function (...a) {

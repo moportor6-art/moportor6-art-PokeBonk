@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Santuario del líder (Subversión 1.04)
+- `historia.js` (`marcar`): `run.forceLegendary` = último Pokémon del equipo del líder o del campeón (el juego lo usa en el santuario, `$rxeaw8`).
+- `fases.js`: en el santuario de la historia, Mega al 66 % y Dynamax al 33 % (ambas si tiene Mega); el tamaño del Dynamax se mantiene aunque el kit lo reajuste.
+
 ## Compañeros y jefes con fase 2 en la Lite (Subversión 1.03)
 - `historia.js`: botón «Cambiar» en la pantalla del capítulo (`elegirCompanero`, con `profile.league`), cambia `slot.sp`.
 - `site/fases.js` (nuevo, solo Lite): jefes (flag 4) en zona ≥ 3, Sin fin o gimnasio, al 50 % de PS: Mega (`E.pbSid` = sid de `PB_MEGA.MEGAS`, 70 % PS, ×1,4 daño) o Dynamax (`E.scale` ×2, PS máx. ×1,5, 75 % PS, ×1,25 daño). `index.html`: carga `fases.js` tras `equilibrio.js`.

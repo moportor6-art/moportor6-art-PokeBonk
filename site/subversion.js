@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.03';
+  const SUB = '1.04';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.04',
+      date: Date.UTC(2026, 10, 17, 7, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.04`,
+      summary: 'Modo historia: en el santuario te espera el as del líder, con Mega y Dynamax.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `**Modo historia** (PokéBonk Lite):`,
+        `- En el **santuario** ya no salen Mew, Moltres, Zapdos…: te espera el **Pokémon as del líder** (o del campeón en la Liga), como jefe legendario con sus fases.`,
+        `- Además, al **66 %** de PS **megaevoluciona** (si su especie tiene Mega) y al **33 %** **se dinamaxiza**; si tiene las dos, acaba con ambas a la vez.`,
+        `- Tu Pokémon también puede usar Mega y Dynamax a la vez si tiene las dos.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.03',
       date: Date.UTC(2026, 10, 17, 6, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.03`,
@@ -2349,6 +2369,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.04',
+      date: '2026-11-17',
+      title: 'Santuario del líder (Lite).',
+      notes: [
+        ['new', 'Lite: en el santuario de la historia lucha el as del líder, que megaevoluciona y se dinamaxiza.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.03',
