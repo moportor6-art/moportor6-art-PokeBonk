@@ -369,6 +369,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: PokeBonk-apk
+          retention-days: 2
           path: dist/PokeBonk.apk
 
   # PokéBonk Lite: solo PokéBonk, sin los otros juegos (que siguen en el repositorio). Otro paquete (.lite), así se
@@ -586,6 +587,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: PokeBonk-Windows
+          retention-days: 2
           path: |
             desktop/dist/PokeBonk-Windows-Instalador.exe
             desktop/dist/PokeBonk-Windows-*.zip
@@ -696,6 +698,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: PokeBonk-Lite-Windows
+          retention-days: 2
           path: |
             desktop/dist/PokeBonk-Lite-Windows-Instalador.exe
             desktop/dist/PokeBonk-Lite-Windows-*.zip
