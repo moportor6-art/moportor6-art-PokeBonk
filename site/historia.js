@@ -630,6 +630,10 @@
     b.title = 'Mejora a tu Pokémon sin salir de la partida';
     b.onclick = () => laboratorio(ORDEN[H()?.slots[run.__hist]?.r ?? 0], run.startSpecies, run, null);
     foot.append(b);
+    // 1.10: en pantallas estrechas no cabía y quedaba cortado fuera del panel: primero se acorta y, si aún no
+    // cabe, las pestañas pasan a dos filas.
+    if (foot.scrollWidth > foot.clientWidth + 1) { b.textContent = '🧪 Lab'; b.style.padding = '0 10px'; }
+    if (foot.scrollWidth > foot.clientWidth + 1) { foot.style.flexWrap = 'wrap'; foot.style.rowGap = '6px'; }
   };
 
   window.PB_HISTORIA = { abrir: pantallaRanuras, D, PROF, CAMP, capitulo, mapaDe, laboratorio, capa: abrir, cerrar, nombrePk, dialogo };

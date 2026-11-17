@@ -1,5 +1,5 @@
 /* Subversión propia (moportor6, 1.08): Radio, solo en PokéBonk Lite (idea de Pokémon Survivors, de pedrobarretto).
-   En la pausa, botón «📻» junto a las pestañas: eliges qué música suena en las partidas (o «Aleatoria», la de siempre).
+   En la pausa, «HUD y guía» → botón «📻 Música»: eliges qué música suena en las partidas (o «Aleatoria», la de siempre).
    Se guarda (profile.pbRadio) y vale para las siguientes. Gancho: la elección de pista del juego (nM en menus-…js)
    pregunta a window.PB_RADIO(); el cambio en marcha usa run.audio.playTrack. */
 (() => {
@@ -8,14 +8,14 @@
   const meta = () => window.__pbMeta;
   window.PB_RADIO = () => meta()?.profile?.pbRadio || null;
   const nombre = id => PISTAS.find(p => p[0] === (id ?? ''))?.[1] ?? 'Aleatoria';
+  // 1.10: dentro del menú «HUD y guía» de la pausa; en la barra de pestañas empujaba fuera el botón del Laboratorio.
   setInterval(() => {
-    const bar = document.querySelector('.pz .pz-tabs');
-    if (!bar || bar.querySelector('.pb-radio')) return;
+    const row = document.querySelector('.pb-he-menu .row');
+    if (!row || row.querySelector('.pb-radio')) return;
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'pz-tab pb-radio';
-    b.style.cssText = 'background:linear-gradient(#3a9a8a,#1a6a5a);color:#fff;border-radius:12px;flex:0 1 auto;padding:0 12px;white-space:nowrap';
-    const pinta = () => { b.textContent = `📻 ${nombre(window.PB_RADIO())}`; };
+    b.className = 'pb-radio';
+    const pinta = () => { b.textContent = `📻 Música: ${nombre(window.PB_RADIO())}`; };
     pinta();
     b.title = 'Radio: cambia la música de las partidas';
     b.onclick = e => {
@@ -29,6 +29,6 @@
       const run = window.__pbRun;
       if (run && id) try { run.music = id; run.audio.playTrack(id); } catch {}
     };
-    bar.append(b);
-  }, 400);
+    row.append(b);
+  }, 300);
 })();
