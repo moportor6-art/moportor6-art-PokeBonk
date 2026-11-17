@@ -4,16 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.08';
+  const SUB = '1.09';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.09',
+      date: Date.UTC(2026, 10, 17, 16, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.09`,
+      summary: 'El botón TERA también se puede mover, agrandar, girar u ocultar en «Editar HUD».',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Editar HUD**: el botón **TERA** se edita igual que MEGA y DMAX (posición, tamaño, giro u ocultarlo), por si queda pegado a otros botones.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.08',
       date: Date.UTC(2026, 10, 17, 12, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.08`,
@@ -2449,6 +2466,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.09',
+      date: '2026-11-17',
+      title: 'Botón TERA en el editor del HUD.',
+      notes: [
+        ['fix', 'Editar HUD: el botón TERA se puede mover, cambiar de tamaño, girar u ocultar.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.08',

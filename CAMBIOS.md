@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Botón TERA en el editor del HUD (Subversión 1.09)
+- `hud-editor.js`: `ITEMS` incluye `.pb-mx .pb-tera` (TERA), como MEGA y DMAX.
+
 ## Ideas de Pokémon Survivors en la Lite (Subversión 1.08)
 - `tera.js`: botón TERA en `.pb-mx` (Nv. 15, una vez por zona, 180 s, tecla T); envuelve `player.recompute` (daño ×1,2, armadura +10) y `combat.hit` (×1,25 al teratipo); teratipo en `profile.pbTera[especie]` (caja del Laboratorio). `fases.js`: jefes finales se teracristalizan al 85 %.
 - `hoopa.js`: botón en la pantalla de la historia; desafío de 3/5/7 jefes (`run.boss.spawn` con kit) con legendarios de la Liga y Hoopa (720) al final; `profile.pbHoopa`.
