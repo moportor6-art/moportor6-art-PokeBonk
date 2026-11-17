@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Tanques y Vida Esfera (Subversión 1.14)
+- `tanques.js`: nivel de tanque por especie según la parte de PS+Def+DefEsp de su forma final (≥ 0,565 Tanque, ≥ 0,66 Muralla); envuelve `recompute` (PS, armadura, púas, robo de vida, curación) y `hurt` (veneno al atacante con `combat.$xj1ewj`); regeneración por % y retroceso de la Vida Esfera.
+- `defineProperty-…js`: `life-orb` sin `maxHp ×0,9` y con otra descripción en la Lite (`window.PB_EDICION`).
+
 ## Ultraentes vencibles (Subversión 1.13)
 - `ultra.js`: `E.spawn(sp, x, z, 1, 1, 4|1)` y PS/daño fijos de guardián por zona (antes `hpMult()*45`, más de 1 M de PS); `PB_ULTRA.es(run, j)`.
 - `fases.js`: salta los Ultraentes (no son jefes de líder).

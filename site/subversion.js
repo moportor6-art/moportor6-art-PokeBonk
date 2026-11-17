@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.13';
+  const SUB = '1.14';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.14',
+      date: Date.UTC(2026, 10, 17, 23, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.14`,
+      summary: 'PokéBonk Lite: los Pokémon tanque tienen identidad propia y la Vida Esfera funciona como en los juegos.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Tanques** (143 Pokémon de todas las generaciones, según sus estadísticas originales; también sus primeras etapas): **Tanque** +15 % PS, +8 armadura y regeneran 0,15 % de PS por segundo; **Muralla** (Chansey, Blissey, Toxapex, Steelix, Shuckle, Clodsire…) +25 % PS, +15 armadura y 0,25 %/s.`,
+        `- **Sinergia por tipo**: Veneno envenena a quien les golpea; Acero y Roca devuelven daño (púas); Planta roba vida; el resto cura más (Restos).`,
+        `- **Vida Esfera**: ya no quita PS máximos. Mientras golpeas pierdes un 0,2 % de tus PS máximos por segundo por copia, sin bajar de 1 PS. Los Pokémon que regeneran mucho la compensan.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.13',
       date: Date.UTC(2026, 10, 17, 21, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.13`,
@@ -2542,6 +2562,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.14',
+      date: '2026-11-17',
+      title: 'Tanques y Vida Esfera (Lite).',
+      notes: [
+        ['new', 'Lite: identidad de Tanque y Muralla para 143 Pokémon, con sinergia por tipo (veneno, púas, drenadoras o restos).'],
+        ['balance', 'Lite: Vida Esfera sin −10 % de PS máximos; ahora pierdes 0,2 % de PS por segundo por copia mientras golpeas.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.13',
