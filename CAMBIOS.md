@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Aguante y quién te derrotó (Subversión 1.12)
+- `equilibrio.js`: el envoltorio de `player.hurt` pone el tope propio del juego (7.º argumento, fracción de PS máximos) a 0,45 en todos los golpes; si el golpe te debilita, `muerte()` muestra cartel y aviso `.pb-muerte` en resultados (`run.__pbMuerte`).
+
 ## Retos de evolución sin tapar la pausa (Subversión 1.11)
 - `evo-retos.js`: `.pb-evoreto` solo es visible con `run.state === 'play'` o en el editor del HUD.
 

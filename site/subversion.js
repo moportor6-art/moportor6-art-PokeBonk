@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.11';
+  const SUB = '1.12';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.12',
+      date: Date.UTC(2026, 10, 17, 20, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.12`,
+      summary: 'PokéBonk Lite: ningún golpe te quita más del 45 % de tus PS y, si caes, se dice quién te derrotó.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Aguante**: ningún golpe suelto te quita más del **45 %** de tus PS máximos. Desde la vida llena hacen falta al menos 3 golpes para debilitarte.`,
+        `- **Quién te derrotó**: al caer sale un cartel con el Pokémon (y si era jefe, Mega, Dynamax o enfurecido), el daño del último golpe y su tipo. También aparece arriba en la pantalla de resultados.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.11',
       date: Date.UTC(2026, 10, 17, 19, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.11`,
@@ -2504,6 +2523,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.12',
+      date: '2026-11-17',
+      title: 'Aguante y aviso de quién te derrotó (Lite).',
+      notes: [
+        ['balance', 'Lite: ningún golpe quita más del 45 % de los PS máximos.'],
+        ['new', 'Lite: al caer se muestra quién te derrotó, con el daño y el tipo del último golpe.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.11',

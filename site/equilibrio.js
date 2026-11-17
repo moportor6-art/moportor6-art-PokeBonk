@@ -14,6 +14,32 @@
   // 0.99: modo Sin fin sin tope en las vitaminas (objetos apilables, máx. 3 o más): se pueden seguir apilando.
   // Los que tocan proyectiles (cantidad, rebotes, velocidad) mantienen su tope; los únicos (máx. 1-2) también.
   const PROY = new Set(['projectiles', 'bounces', 'projSpeed']);
+  // 1.12: quién te derrotó (cartel al caer y aviso en la pantalla de resultados).
+  const TIPO = { normal: 'Normal', fire: 'Fuego', water: 'Agua', grass: 'Planta', electric: 'Eléctrico', ice: 'Hielo', fighting: 'Lucha', poison: 'Veneno', ground: 'Tierra', flying: 'Volador', psychic: 'Psíquico', bug: 'Bicho', rock: 'Roca', ghost: 'Fantasma', dragon: 'Dragón', dark: 'Siniestro', steel: 'Acero', fairy: 'Hada' };
+  const muerte = (run, src, dano, tipo) => {
+    const E = run.enemies, nom = sp => window.PB_HISTORIA?.nombrePk?.(sp) ?? `#${sp}`;
+    let quien = 'el escenario (peligro o efecto del mapa)';
+    if (src >= 0 && E.species?.[src]) {
+      const f = E.flags[src], extra = [];
+      if (f & 4) extra.push('jefe');
+      if (E.pbSid?.[src]) extra.push('Mega');
+      if ((E.scale?.[src] ?? 1) >= 2) extra.push('Dynamax');
+      if (S(run).furia.get(src)?.ok) extra.push('enfurecido');
+      quien = nom(E.species[src]) + (extra.length ? ` (${extra.join(' · ')})` : '');
+    }
+    const txt = `Te derrotó ${quien}: último golpe de ${dano} de daño${TIPO[tipo] ? ` de tipo ${TIPO[tipo]}` : ''}.`;
+    run.__pbMuerte = txt;
+    try { run.ui.banner('Debilitado', txt, '#ff4a3a'); } catch {}
+    let n = 0;
+    const t = setInterval(() => {
+      if (++n > 40 || window.__pbRun !== run && n > 4) { clearInterval(t); return; }
+      if (run.state !== 'over' || document.querySelector('.pb-muerte')) return;
+      const d = document.createElement('div'); d.className = 'pb-muerte';
+      d.style.cssText = 'position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:99999;background:rgba(60,10,10,.92);color:#fff;border:2px solid #ff6a5a;border-radius:10px;padding:5px 12px;font:800 13px system-ui,sans-serif;max-width:90vw;text-align:center;pointer-events:auto;cursor:pointer';
+      d.textContent = '💀 ' + txt; d.onclick = () => d.remove();
+      document.body.append(d); setTimeout(() => d.remove(), 12000); clearInterval(t);
+    }, 500);
+  };
   window.PB_ITEM_MAX = (id, def) => {
     const run = window.__pbRun;
     if (!run?.endless || !def || (def.max ?? 10) < 3) return undefined;
@@ -81,7 +107,12 @@
     if (pl.hurt && !pl.__pbEqHurt) {
       const h = pl.hurt;
       pl.hurt = function (dmg, tipo, src, ...a) {
+        // 1.12: aguante. Ningún golpe suelto te quita más del 45 % de tus PS máximos (el juego ya trae ese tope como
+        // 7.º argumento de hurt; aquí se pone a todos), y si caes, se dice quién y con cuánto.
+        a[3] = a[3] > 0 ? Math.min(a[3], 0.45) : 0.45;
+        const antes = this.hp, vivia = !this.dead;
         const r = h.call(this, dmg, tipo, src, ...a);
+        try { if (vivia && (this.dead || this.hp <= 0)) muerte(run, src, Math.round(antes - Math.max(0, this.hp)), tipo); } catch {}
         try {
           const t = src >= 0 && rasgo(run, src);
           if (r !== false && t?.r === 'vampirico' && E.alive[src]) {
