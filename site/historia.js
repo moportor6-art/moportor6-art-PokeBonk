@@ -357,7 +357,7 @@
       <p class="sub">${esc(REG[cap.reg])} · ${cap.liga ? 'Liga Pokémon' : `${cap.reg === 'alola' ? 'Gran desafío' : 'Gimnasio'} ${s.k + 1} de ${lideres(cap.reg).length}`}</p>
       <div class="cap"><img src="./assets/historia/${cap.retrato}.png" alt=""><div class="info"><h2>${esc(cap.nombre)}</h2>
       <p>${esc(cap.lugar)} · Tipo ${esc(TIPO[cap.tipo] ?? cap.tipo)}</p><p>Mapa: ${esc(mapaNom)}. Sobrevive y vence a su equipo: ${eq.map(nombrePk).map(esc).join(', ')}.</p>
-      <p>Tu compañero: <b>${esc(nombrePk(s.sp))}</b> · <span class="polvo">${Math.floor(meta()?.profile?.stardust ?? 0)} de Polvo</span></p></div></div>
+      <p>Tu compañero: <b>${esc(nombrePk(s.sp))}</b> <button class="hbt cam" style="padding:2px 10px;font-size:13px">Cambiar</button> · <span class="polvo">${Math.floor(meta()?.profile?.stardust ?? 0)} de Polvo</span></p></div></div>
       <div class="fila"><button class="hbt dif" title="Difícil: salvajes con +40 % PS, +42 % daño, +30 % más numerosos y más élites; +75 % de Polvo">Dificultad: ${s.dif === 'dificil' ? 'Difícil' : 'Normal'}</button></div>
       <div class="fila"><button class="hbt go">¡Al combate!</button><button class="hbt lab">Laboratorio</button><button class="hbt vol">Volver</button></div>`;
     b.querySelector('.dif').onclick = () => { s.dif = s.dif === 'dificil' ? 'normal' : 'dificil'; guardar(); pantallaCapitulo(i); };
@@ -369,8 +369,24 @@
     };
     b.querySelector('.go').onclick = ir;
     b.querySelector('.lab').onclick = () => laboratorio(cap.reg, s.sp, null, () => pantallaCapitulo(i));
+    b.querySelector('.cam').onclick = () => elegirCompanero(i, cap.reg);
     b.querySelector('.vol').onclick = b.querySelector('.hx').onclick = pantallaRanuras;
     teclas = { ok: ir, salir: pantallaRanuras };
+    c.append(b);
+  };
+
+  // 1.03: antes de cada capítulo puedes cambiar de compañero por cualquiera de tu Liga (los que tienes desbloqueados).
+  const elegirCompanero = (i, reg) => {
+    const s = H().slots[i], m = meta();
+    const lista = [...new Set(m?.profile?.league ?? [])].sort((a, b) => a - b);
+    const c = abrir(reg);
+    const b = document.createElement('div'); b.className = 'hb';
+    b.innerHTML = `<button class="hx" aria-label="Volver">✕</button><h2>Elige compañero</h2><p class="sub">Cualquiera de tu Liga (${lista.length}). Sus mejoras del Laboratorio y su naturaleza son solo suyas.</p>
+      <div class="ini" style="max-height:52vh;overflow:auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(96px,1fr));gap:6px">${lista.map(sp => `<button data-sp="${sp}" class="${sp === s.sp ? 'on' : ''}" style="${sp === s.sp ? 'outline:3px solid #ffd23a' : ''}"><img src="./assets/portraits/${sp}.png" alt="" loading="lazy">${esc(nombrePk(sp))}</button>`).join('')}</div>
+      <div class="fila"><button class="hbt vol">Volver</button></div>`;
+    b.querySelectorAll('[data-sp]').forEach(x => x.onclick = () => { s.sp = +x.dataset.sp; guardar(); pantallaCapitulo(i); });
+    b.querySelector('.vol').onclick = b.querySelector('.hx').onclick = () => pantallaCapitulo(i);
+    teclas = { ok: () => {}, salir: () => pantallaCapitulo(i) };
     c.append(b);
   };
 

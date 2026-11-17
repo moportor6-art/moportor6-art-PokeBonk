@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.02';
+  const SUB = '1.03';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.03',
+      date: Date.UTC(2026, 10, 17, 6, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.03`,
+      summary: 'PokéBonk Lite: cambia de compañero en la historia y los jefes finales megaevolucionan o se dinamaxizan.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Modo historia: cambia de compañero** antes de cada capítulo (botón «Cambiar» junto a tu compañero): puedes elegir cualquier Pokémon de tu Liga. Cada uno conserva sus mejoras del Laboratorio y su naturaleza.`,
+        `- **Segunda fase de los jefes finales** (última zona, Sin fin, líderes y campeones): al bajar a la mitad de PS, **megaevolucionan** si su especie tiene Mega (recuperan hasta el 70 % y +40 % de daño) o, si no, **se dinamaxizan** (el doble de grandes, PS ×1,5, recuperan hasta el 75 % y +25 % de daño).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.02',
       date: Date.UTC(2026, 10, 17, 5, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.02`,
@@ -2330,6 +2349,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.03',
+      date: '2026-11-17',
+      title: 'Compañeros y jefes con fase 2 (Lite).',
+      notes: [
+        ['new', 'Lite: en la historia puedes cambiar de compañero antes de cada capítulo.'],
+        ['new', 'Lite: los jefes finales megaevolucionan o se dinamaxizan a mitad de vida.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.02',

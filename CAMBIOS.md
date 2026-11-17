@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Compañeros y jefes con fase 2 en la Lite (Subversión 1.03)
+- `historia.js`: botón «Cambiar» en la pantalla del capítulo (`elegirCompanero`, con `profile.league`), cambia `slot.sp`.
+- `site/fases.js` (nuevo, solo Lite): jefes (flag 4) en zona ≥ 3, Sin fin o gimnasio, al 50 % de PS: Mega (`E.pbSid` = sid de `PB_MEGA.MEGAS`, 70 % PS, ×1,4 daño) o Dynamax (`E.scale` ×2, PS máx. ×1,5, 75 % PS, ×1,25 daño). `index.html`: carga `fases.js` tras `equilibrio.js`.
+
 ## Movimientos de apoyo en la Lite (Subversión 1.02)
 - `site/apoyo.js` (nuevo, solo Lite, no en duelos): baile en el nivel 10 (Danza Espada / Maquinación / Danza Dragón, en `player.recompute`) y protección en el 15 (escudo periódico en `player.shield`; Defensa Férrea suma armadura); rango 1 + ⌊(nivel − aprendido)/5⌋, máx. 8; ficha «Movimientos de apoyo» tras `.pz-ability` con los iconos de `assets/ui/types/`.
 - `debilitar.js`: expone `PB_DEB(run)` para esa ficha. `index.html`: carga `apoyo.js` tras `debilitar.js`.
