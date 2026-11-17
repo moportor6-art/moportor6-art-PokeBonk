@@ -133,6 +133,7 @@
       try { run.ui.toast(`Naturaleza ${NAT[b.dataset.n].n}: ${desc(NAT[b.dataset.n])}`, null); } catch {}
     });
     document.body.append(capa);
+    if (pausa && run.ui) run.ui.modalEl = capa; // si no, el juego quita la pausa a los 1,5 s
   };
 
   setInterval(() => {

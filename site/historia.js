@@ -450,6 +450,31 @@
     } else if (!run.__gym) run.__gym = { reg: cap.reg, id: cap.id };
     // 1.04: en el santuario espera el as del líder (o del campeón) en vez de Mew, Moltres…; fases.js le da Mega y Dynamax.
     run.forceLegendary = (cap.liga ? cap.c.equipo : cap.l.equipo).at(-1);
+    // 1.05: al tocar el santuario, antes de que salga su as, el líder te habla (la partida se detiene mientras).
+    const sb = run.spawnBoss;
+    if (typeof sb === 'function') run.spawnBoss = function (...args) {
+      if (this.stage !== 4 || !this.sanctuary || this.__pbSantDlg) return sb.apply(this, args);
+      this.__pbSantDlg = true;
+      const as = run.forceLegendary, ret = cap.retrato, quien = cap.nombre, asNom = nombrePk(as);
+      const lineas = [
+        [ret, quien, cap.liga ? '¡Así que has llegado hasta el final de la Liga! Has superado a todos los que se interponían en tu camino.' : '¡Vaya, vaya! Has superado a todos mis entrenadores y a mis fanáticos más empedernidos. ¡Enhorabuena!'],
+        [ret, quien, 'Pero eso solo era la prueba de admisión. Este es mi santuario, y aquí no hay esbirros que te allanen el camino.'],
+        [ret, quien, `Lo más difícil viene ahora. No te lo voy a poner tan fácil como ellos: ¡voy con todo!`],
+        ['pk:' + as, asNom, `¡${asNom} aparece dispuesto a darlo todo!`],
+        [ret, quien, `¡Adelante, ${asNom}! ¡Que empiece el verdadero combate!`]
+      ];
+      const antes = this.state;
+      this.state = 'modal';
+      try {
+        dialogo(cap.reg, lineas, () => {
+          if (this.state === 'over' || this.state === 'dead') return;
+          try { this.resume ? this.resume() : (this.state = antes === 'modal' ? 'play' : antes); } catch { this.state = 'play'; }
+          sb.apply(this, args);
+        });
+        // El juego quita el estado 'modal' si no ve una ventana suya abierta: le decimos que es la del diálogo.
+        if (this.ui) this.ui.modalEl = document.querySelector('.pb-h');
+      } catch { this.state = 'play'; sb.apply(this, args); }
+    };
     // «Guardar y salir»: el Polvo ganado hasta ahora pasa ya al Laboratorio.
     const orig = run.saveAndQuitOnce;
     if (typeof orig === 'function') run.saveAndQuitOnce = async function (...a) {

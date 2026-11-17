@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.04';
+  const SUB = '1.05';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.05',
+      date: Date.UTC(2026, 10, 17, 7, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.05`,
+      summary: 'Modo historia: el líder te habla antes del combate del santuario.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `**Modo historia** (PokéBonk Lite):`,
+        `- Al tocar el **santuario**, antes de que salga su as, la partida se detiene y el **líder** (o el campeón) te felicita por superar la prueba de admisión: a sus entrenadores y fanáticos más empedernidos. Pero te avisa: lo difícil viene ahora y no te lo pondrá tan fácil. Después aparece su Pokémon con su retrato.`,
+        `- Arreglo: la elección de **naturaleza** ya no deja de pausar la partida si tardas en decidirte.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.04',
       date: Date.UTC(2026, 10, 17, 7, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.04`,
@@ -2369,6 +2388,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.05',
+      date: '2026-11-17',
+      title: 'Diálogo del santuario (Lite).',
+      notes: [
+        ['new', 'Lite: el líder te habla antes del combate del santuario.'],
+        ['fix', 'Lite: la elección de naturaleza mantiene la partida en pausa.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.04',

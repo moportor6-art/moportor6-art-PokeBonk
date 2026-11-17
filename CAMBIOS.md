@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Diálogo del santuario (Subversión 1.05)
+- `historia.js` (`marcar`): envuelve `run.spawnBoss`; en el santuario (zona 4) primero el diálogo del líder/campeón con `run.state = 'modal'` y `run.ui.modalEl` = la capa (el juego quita el modal a los 1,5 s si no ve ventana), luego `resume()` y el jefe.
+- `naturalezas.js`: también pone `run.ui.modalEl` mientras eliges.
+
 ## Santuario del líder (Subversión 1.04)
 - `historia.js` (`marcar`): `run.forceLegendary` = último Pokémon del equipo del líder o del campeón (el juego lo usa en el santuario, `$rxeaw8`).
 - `fases.js`: en el santuario de la historia, Mega al 66 % y Dynamax al 33 % (ambas si tiene Mega); el tamaño del Dynamax se mantiene aunque el kit lo reajuste.
