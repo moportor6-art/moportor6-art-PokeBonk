@@ -1,5 +1,13 @@
 # Cambios respecto al port original
 
+## Ideas de Pokémon Survivors en la Lite (Subversión 1.08)
+- `tera.js`: botón TERA en `.pb-mx` (Nv. 15, una vez por zona, 180 s, tecla T); envuelve `player.recompute` (daño ×1,2, armadura +10) y `combat.hit` (×1,25 al teratipo); teratipo en `profile.pbTera[especie]` (caja del Laboratorio). `fases.js`: jefes finales se teracristalizan al 85 %.
+- `hoopa.js`: botón en la pantalla de la historia; desafío de 3/5/7 jefes (`run.boss.spawn` con kit) con legendarios de la Liga y Hoopa (720) al final; `profile.pbHoopa`.
+- `ultra.js`: ultrafenda (35 % por zona desde el minuto 4) con Ultraente jefe; vencerlo lo añade a la Liga; Ultraimpulso para los Ultraentes.
+- `incubadora.js`: `profile.pbHuevos` (3 huecos + cola de 3); huevo por victoria; eclosión con 1500 bajas.
+- `radio.js` + `menus-…js` (`nM` pregunta a `window.PB_RADIO()`): botón 📻 en la pausa; `profile.pbRadio`.
+- `historia.js`: `PB_HISTORIA` expone `capa`, `cerrar`, `nombrePk` y `dialogo`.
+
 ## Legendarios, Alto Mando y guardianes (Subversión 1.07)
 - `menus-…js` (`BP`): el kit de autor del santuario (volcán, cueva, torre, bosque) también se da si `window.PB_KIT(arena, especie)`; `fases.js` lo define en la Lite (todas menos 382/384).
 - `historia.js`: `ALTO` (4 miembros por región, retratos `e4-*` de Showdown en `tools/historia_showdown.txt`); diálogo de presentación antes del campeón; en la Liga `run.__pbAlto` hace que los guardianes de las zonas 1-3 sean sus ases (el cuarto, extra en la zona 3, con `run.boss.spawn`) con su cartel.

@@ -12,7 +12,7 @@
   // (volcán de Charizard, cueva de Mewtwo, torre de Ho-Oh, bosque de Celebi). Kyogre y Rayquaza siguen con los suyos.
   window.PB_KIT = (arena, sp) => !!arena && sp !== 382 && sp !== 384;
   const final = run => run.endless || (run.stage ?? 1) >= 3 || !!run.__gym;
-  const hecho = new WeakMap(), gigantes = new Map();
+  const hecho = new WeakMap(), gigantes = new Map(), teras = new Map();
   const megaevolucionar = (run, E, j, mega, vida) => {
     const x = E.x[j], y = E.y[j], z = E.z[j];
     E.pbSid ??= new Int32Array(2400);
@@ -41,12 +41,21 @@
     if (!set) hecho.set(run, set = new Set());
     // Que el Dynamax no se pierda si el kit del jefe reajusta su tamaño.
     for (const [j, d] of gigantes) { if (E.gen[j] !== d.g || !E.alive[j]) gigantes.delete(j); else if (E.scale && E.scale[j] < d.s) E.scale[j] = d.s; }
+    for (const [j, d] of teras) { if (E.gen[j] !== d.g || !E.alive[j]) teras.delete(j); else if (Math.random() < 0.3) try { run.vfx.burst(E.x[j], E.y[j] + (E.hgt?.[j] ?? 2) + 0.4, E.z[j], d.col, 3, 2, 0, 0.45, 0.4); } catch {} }
     if (!final(run)) return;
     for (let j = 0; j < E.n; j++) {
       if (!E.alive[j] || E.dying?.[j] > 0 || !(E.flags[j] & 4) || (E.flags[j] & 65536)) continue;
       const sant = run.__hist != null && (run.stage ?? 1) >= 4 && run.sanctuary;
       const k = `${j}:${E.gen[j]}`, f = E.hp[j] / E.maxHp[j];
       const sp = E.species[j], mega = window.PB_MEGA?.MEGAS?.[sp];
+      // 1.08: Teracristalización al 85 % (todos los jefes finales).
+      if (f <= 0.85 && !set.has(k + 't') && window.PB_TERA) {
+        set.add(k + 't');
+        const T = window.PB_TERA, t = T.tipos(sp)[0] ?? 'normal', col = T.COL[t] ?? 0xffffff;
+        E.dmg[j] *= 1.2;
+        teras.set(j, { g: E.gen[j], col });
+        try { run.ui.banner('¡El jefe se teracristaliza!', `Teratipo ${T.NOM[t] ?? t}: +20 % de daño`, '#' + col.toString(16).padStart(6, '0'), { species: sp }); run.vfx.ring(E.x[j], E.y[j] + 0.2, E.z[j], 6, col, 0.8); } catch {}
+      }
       // Santuario del modo historia (1.04): Mega al 66 % (si la tiene) y Dynamax al 33 %, ambas a la vez.
       if (sant) {
         if (mega?.sid && f <= 0.66 && !set.has(k + 'm')) { set.add(k + 'm'); megaevolucionar(run, E, j, mega, 0.8); }

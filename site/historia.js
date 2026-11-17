@@ -632,5 +632,5 @@
     foot.append(b);
   };
 
-  window.PB_HISTORIA = { abrir: pantallaRanuras, D, PROF, CAMP, capitulo, mapaDe, laboratorio };
+  window.PB_HISTORIA = { abrir: pantallaRanuras, D, PROF, CAMP, capitulo, mapaDe, laboratorio, capa: abrir, cerrar, nombrePk, dialogo };
 })();

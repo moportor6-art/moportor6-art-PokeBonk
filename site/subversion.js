@@ -4,16 +4,38 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.07';
+  const SUB = '1.08';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.08',
+      date: Date.UTC(2026, 10, 17, 12, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.08`,
+      summary: 'PokéBonk Lite: Teracristalización, Anillos de Hoopa, Ultrafendas, Incubadora y Radio (ideas de Pokémon Survivors).',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite** (ideas de Pokémon Survivors, de pedrobarretto, con su permiso para uso privado):`,
+        `- **Teracristalización**: botón **TERA** junto a MEGA y DYNAMAX desde el nivel 15, una vez por zona, 3 minutos (tecla T en PC). +20 % de daño, +10 de armadura y ×1,25 a tus ataques de tu teratipo. El teratipo se elige en el Laboratorio. Los jefes finales también se teracristalizan al 85 % de vida.`,
+        `- **Anillos de Hoopa**: en el Modo historia, desafío de 3, 5 o 7 jefes legendarios (los que capturaste) y Hoopa al final. Premio de Polvo Estelar y, al superar el Anillo III, Hoopa para tu Liga.`,
+        `- **Ultrafendas**: desde el minuto 4 de cada zona puede abrirse una y salir un Ultraente. Si lo vences, lo capturas con una Ente Ball. Jugando con un Ultraente, el **Ultraimpulso** sube tu daño con las bajas (hasta +30 %).`,
+        `- **Incubadora**: cada victoria te da un huevo (3 huecos en el Laboratorio). Eclosiona con 1500 bajas y te da un Pokémon de esa región que aún no tengas.`,
+        `- **Radio**: en la pausa, el botón 📻 elige la música de las partidas.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.07',
       date: Date.UTC(2026, 10, 17, 8, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.07`,
@@ -2427,6 +2449,19 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.08',
+      date: '2026-11-17',
+      title: 'Teracristalización, Anillos de Hoopa, Ultrafendas, Incubadora y Radio (Lite).',
+      notes: [
+        ['new', 'Lite: Teracristalización (botón TERA, teratipo en el Laboratorio); los jefes finales también.'],
+        ['new', 'Lite: Anillos de Hoopa, desafío de jefes legendarios desde el Modo historia.'],
+        ['new', 'Lite: Ultrafendas con Ultraentes capturables y Ultraimpulso.'],
+        ['new', 'Lite: Incubadora de huevos en el Laboratorio.'],
+        ['new', 'Lite: Radio en la pausa para elegir la música.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.07',
