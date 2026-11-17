@@ -21,6 +21,8 @@
     fighting: 'patada', fire: 'patada', ground: 'patada'
   };
   const NIVEL = 12, CADA = 15, DURA = 8;
+  // Para la ficha de la pausa (apoyo.js): el movimiento aprendido en esta partida.
+  window.PB_DEB = run => { const m = MOV[run?.__pbDeb?.mov]; return m ? { n: m.n, tipo: m.tipo, txt: `Cada ${CADA} s: los salvajes cercanos reciben ×${String(m.mul).replace('.', ',')} de daño ${DURA} s` } : null; };
 
   const st = run => run.__pbDeb ??= { until: new Float64Array(4096), gen: new Int32Array(4096), sig: 0 };
   const debil = (run, j) => {

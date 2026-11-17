@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Movimientos de apoyo en la Lite (Subversión 1.02)
+- `site/apoyo.js` (nuevo, solo Lite, no en duelos): baile en el nivel 10 (Danza Espada / Maquinación / Danza Dragón, en `player.recompute`) y protección en el 15 (escudo periódico en `player.shield`; Defensa Férrea suma armadura); rango 1 + ⌊(nivel − aprendido)/5⌋, máx. 8; ficha «Movimientos de apoyo» tras `.pz-ability` con los iconos de `assets/ui/types/`.
+- `debilitar.js`: expone `PB_DEB(run)` para esa ficha. `index.html`: carga `apoyo.js` tras `debilitar.js`.
+
 ## Tipos compatibles y oro en la Lite (Subversión 1.01)
 - `site/compatibilidad.js` (nuevo, solo Lite, cargado tras `edicion.js`): envuelve `fetch` para `data/learnsets.json` y añade a cada especie hasta 6 movimientos de 2 tipos compatibles (tabla `COMPAT`/`MOV`) desde el nivel 18, cada 8 niveles.
 - `dificultad.js`: `stats.gold` ×0,4 en partidas normales e historia.

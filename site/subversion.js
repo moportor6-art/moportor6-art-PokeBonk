@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.01';
+  const SUB = '1.02';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.02',
+      date: Date.UTC(2026, 10, 17, 5, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.02`,
+      summary: 'PokéBonk Lite: movimientos de apoyo (bailes y protecciones) que no ocupan hueco.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**: **movimientos de apoyo**. Se aprenden solos, **no ocupan hueco** y **suben de nivel cada 5 niveles** tuyos (máx. Nv. 8).`,
+        `- **Nivel 10, un baile**: **Danza Espada** si luchas con ataques físicos (+4 % de daño físico por nivel), **Maquinación** si son especiales (+4 % especial por nivel) o **Danza Dragón** si eres tipo Dragón (+2,5 % de daño y +2 % de velocidad por nivel).`,
+        `- **Nivel 15, una protección**: **Protección** (cada 15 s, un escudo del 4 % de tus PS + 1 % por nivel), **Defensa Férrea** en Acero y Roca (además +3 de armadura por nivel) o **Reflejo** en Psíquico y Hada (escudo cada 12 s).`,
+        `- En la **pausa** (pestaña Movimientos) aparecen con el icono de su tipo y su nivel, junto a Chirrido y compañía.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.01',
       date: Date.UTC(2026, 10, 16, 19, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.01`,
@@ -2310,6 +2330,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.02',
+      date: '2026-11-17',
+      title: 'Movimientos de apoyo (Lite).',
+      notes: [
+        ['new', 'Lite: Danza Espada, Maquinación o Danza Dragón (Nv. 10) y Protección, Defensa Férrea o Reflejo (Nv. 15), sin ocupar hueco y mejorando cada 5 niveles.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.01',
