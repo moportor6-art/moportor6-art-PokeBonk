@@ -4,16 +4,37 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.09';
+  const SUB = '1.10';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.10',
+      date: Date.UTC(2026, 10, 17, 18, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.10`,
+      summary: 'PokéBonk Lite: corona y cristal de la Teracristalización, jefes de líderes más duros y contador de retos de evolución.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Teracristalización como en Pokémon Survivors**: la corona de cristal de cada teratipo sobre la cabeza (con destello y centelleo), el cuerpo de cristal, la transformación y el estallido al terminar. Teratipo Astral en el Laboratorio. Los jefes también la llevan.`,
+        `- **Jefes de los líderes más duros**: los Pokémon de los líderes (gimnasios, historia y Alto Mando) tienen fuerza de legendario: +60 % de PS, al menos 40/50/60 s de combate según la zona y sus fases de Tera, Mega y Dynamax.`,
+        `- **Retos de evolución a la vista**: una etiqueta en la partida muestra los retos de las evoluciones especiales de tu línea (Blissey, Crobat, Espeon…) y cuánto llevas, contando lo de la partida actual. Tócala para plegarla y muévela en «Editar HUD».`,
+        `- **Laboratorio en la pausa de la historia**: ya no queda cortado en ninguna pantalla. La Radio pasa a «HUD y guía» → «📻 Música».`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.09',
       date: Date.UTC(2026, 10, 17, 16, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.09`,
@@ -2466,6 +2487,18 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.10',
+      date: '2026-11-17',
+      title: 'Corona tera, jefes de líderes y retos de evolución (Lite).',
+      notes: [
+        ['new', 'Lite: corona, cristal, transformación y estallido de la Teracristalización (de Pokémon Survivors); teratipo Astral.'],
+        ['balance', 'Lite: jefes de los líderes con +60 % de PS, mínimo de 40/50/60 s y fases Tera, Mega y Dynamax.'],
+        ['new', 'Lite: contador visible de los retos de evolución, movible en «Editar HUD».'],
+        ['fix', 'Lite: el botón Laboratorio de la pausa de la historia ya no queda cortado; la Radio pasa a «HUD y guía».']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.09',

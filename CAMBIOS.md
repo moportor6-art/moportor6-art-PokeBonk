@@ -1,5 +1,11 @@
 # Cambios respecto al port original
 
+## Corona tera, jefes de líderes y retos de evolución (Subversión 1.10)
+- `tera.js`: coronas de Pokémon Survivors (`data/tera-coronas.json`) en una capa 2D proyectada con la cámara (`run.r.camera`), cuerpo de cristal como tinte (`main-…js`: `player.__pbTint`; `menus-…js`: `PB_TINTE` para los jefes), transformación y estallido; teratipo Astral.
+- `fases.js`: con `run.__gym` o `run.__pbAlto`, el jefe recibe PS ×1,6 y un tope de daño por segundo (`capRate`) de 40/50/60 s, y las fases Tera 85 %, Mega 66 % y Dynamax 33 %.
+- `evo-retos.js`: etiqueta `.pb-evoreto` con los retos de `PB_FORMAS.REGLAS` de la línea (`counters['jf:…']` + `meta.runGain`); `hud-editor.js` la añade a `ITEMS`.
+- `historia.js`: el botón del Laboratorio se acorta o pasa a otra fila si no cabe; `radio.js`: el botón va al menú «HUD y guía».
+
 ## Botón TERA en el editor del HUD (Subversión 1.09)
 - `hud-editor.js`: `ITEMS` incluye `.pb-mx .pb-tera` (TERA), como MEGA y DMAX.
 

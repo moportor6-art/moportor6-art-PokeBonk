@@ -21,7 +21,8 @@
     { sel: '.tc-aim', css: '.tc .tc-aim', name: 'Apuntado' },
     { sel: '.pb-mx .mg', css: '.pb-mx .mg', name: 'MEGA' },
     { sel: '.pb-mx .dx', css: '.pb-mx .dx', name: 'DMAX' },
-    { sel: '.pb-mx .pb-tera', css: '.pb-mx .pb-tera', name: 'TERA' }
+    { sel: '.pb-mx .pb-tera', css: '.pb-mx .pb-tera', name: 'TERA' },
+    { sel: '.pb-evoreto', css: '.pb-evoreto', name: 'Retos de evolución' }
   ];
   const load = () => { try { return JSON.parse(localStorage.getItem(key())) || {}; } catch { return {}; } };
   const save = () => { try { localStorage.setItem(key(), JSON.stringify(H.layout)); } catch {} };
