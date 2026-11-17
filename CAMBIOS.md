@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Ultraentes vencibles (Subversión 1.13)
+- `ultra.js`: `E.spawn(sp, x, z, 1, 1, 4|1)` y PS/daño fijos de guardián por zona (antes `hpMult()*45`, más de 1 M de PS); `PB_ULTRA.es(run, j)`.
+- `fases.js`: salta los Ultraentes (no son jefes de líder).
+
 ## Aguante y quién te derrotó (Subversión 1.12)
 - `equilibrio.js`: el envoltorio de `player.hurt` pone el tope propio del juego (7.º argumento, fracción de PS máximos) a 0,45 en todos los golpes; si el golpe te debilita, `muerte()` muestra cartel y aviso `.pb-muerte` en resultados (`run.__pbMuerte`).
 

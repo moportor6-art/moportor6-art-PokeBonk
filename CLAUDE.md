@@ -1,4 +1,4 @@
-# PokéBonk Remaster (fork privado de moportor6)
+# PokéBonk Remaster (fork de moportor6; público desde el 17-11-2026, con permiso de los autores)
 
 Responde siempre en español.
 

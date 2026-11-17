@@ -1,6 +1,6 @@
 /* Subversión propia (moportor6, 1.08): Ultrafendas y Ultraentes, solo en PokéBonk Lite (idea de Pokémon Survivors).
    - En partidas normales y de la historia, desde el minuto 4 de cada zona hay un 35 % de que se abra UNA ultrafenda
-     cerca de ti (aviso y portal). De ella sale un Ultraente como jefe (vida de jefe, +40 % de daño).
+     cerca de ti (aviso y portal). De ella sale un Ultraente como jefe (1.13: PS y daño de un guardián de la zona, PS ×1,2).
    - Si lo vences, lo capturas con una Ente Ball: entra en tu Liga (si no lo tenías) y ganas Polvo Estelar.
    - Ultraimpulso: si juegas con un Ultraente, cada 50 bajas sube un 1 % tu daño en esa partida (máx. +30 %).
    Gancho: run.enemies.spawn (flag 4) y player.recompute. */
@@ -8,6 +8,8 @@
   if (window.PB_EDICION !== 'lite') return;
   const UE = [793, 794, 795, 796, 797, 798, 799, 803, 804, 805, 806];
   const NOM = { 793: 'Nihilego', 794: 'Buzzwole', 795: 'Pheromosa', 796: 'Xurkitree', 797: 'Celesteela', 798: 'Kartana', 799: 'Guzzlord', 803: 'Poipole', 804: 'Naganadel', 805: 'Stakataka', 806: 'Blacephalon' };
+  // 1.13: para que fases.js no los trate como jefes de líder (en los gimnasios se reforzaban y se dinamaxizaban).
+  window.PB_ULTRA = { es: (run, j) => { const s = run?.__pbFenda; return s?.j === j && run.enemies.gen[j] === s.g; } };
   const activa = run => run && run.mode === 'standard' && !run.tower && !run.endless && !run.expedition && !run.duel && !run.coop;
   const meta = () => window.__pbMeta;
   let vale = null;
@@ -60,8 +62,16 @@
     } catch {}
     run.later?.(1.2, () => {
       try {
-        const j = E.spawn(sp, x, z, run.director.hpMult() * 45, run.director.dmgMult() * 1.4, 4 | 1);
-        if (j >= 0) { s.j = j; s.g = E.gen[j]; s.sp = sp; }
+        // 1.13: PS y daño fijos, como un guardián de la zona (×1,2). Antes la vida salía con un multiplicador de más
+        // (más de un millón de PS): era imposible de vencer y te perseguía toda la partida.
+        const k = Math.max(0, Math.min(3, run.stage ?? 1) - 1), extra = (run.stage ?? 1) > 3 ? 1.5 : 1;
+        const j = E.spawn(sp, x, z, 1, 1, 4 | 1);
+        if (j >= 0) {
+          const dif = (run.diff?.enemyHp ?? 1) * (run.player?.stats?.difficulty ?? 1);
+          E.maxHp[j] = E.hp[j] = [4500, 18000, 37000][k] * 1.2 * extra * dif;
+          E.dmg[j] = [30, 63, 102][k] * extra * (run.diff?.enemyDamage ?? 1);
+          s.j = j; s.g = E.gen[j]; s.sp = sp;
+        }
       } catch {}
     });
   }, 250);

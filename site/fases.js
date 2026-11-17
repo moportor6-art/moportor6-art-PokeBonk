@@ -44,6 +44,7 @@
     if (!final(run)) return;
     for (let j = 0; j < E.n; j++) {
       if (!E.alive[j] || E.dying?.[j] > 0 || !(E.flags[j] & 4) || (E.flags[j] & 65536)) continue;
+      if (window.PB_ULTRA?.es(run, j)) continue; // 1.13: los Ultraentes de las ultrafendas no son jefes de líder
       const sant = run.__hist != null && (run.stage ?? 1) >= 4 && run.sanctuary;
       const k = `${j}:${E.gen[j]}`, f = E.hp[j] / E.maxHp[j];
       const sp = E.species[j], mega = window.PB_MEGA?.MEGAS?.[sp];

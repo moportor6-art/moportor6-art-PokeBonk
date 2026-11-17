@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.12';
+  const SUB = '1.13';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.13',
+      date: Date.UTC(2026, 10, 17, 21, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.13`,
+      summary: 'PokéBonk Lite: los Ultraentes de las ultrafendas ya se pueden vencer.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Ultraentes**: salían con más de un millón de PS (un multiplicador de más), así que eran casi imposibles de vencer y te perseguían toda la partida. Ahora tienen la vida y el daño de un guardián de su zona (+20 % de PS).`,
+        `- En los gimnasios ya no se refuerzan ni se dinamaxizan como si fueran el Pokémon del líder.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.12',
       date: Date.UTC(2026, 10, 17, 20, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.12`,
@@ -2523,6 +2542,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.13',
+      date: '2026-11-17',
+      title: 'Ultraentes vencibles (Lite).',
+      notes: [
+        ['fix', 'Lite: los Ultraentes salían con más de un millón de PS; ahora tienen los de un guardián de su zona.'],
+        ['fix', 'Lite: en los gimnasios los Ultraentes ya no reciben las fases del Pokémon del líder.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.12',
