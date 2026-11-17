@@ -4,9 +4,13 @@
    - si su especie tiene Mega (con todas sus animaciones, de PB_MEGA), MEGAEVOLUCIONAN: cambian al sprite de la Mega,
      recuperan hasta el 70 % de PS y ganan +40 % de daño;
    - si no, se DINAMAXIZAN: el doble de grandes, PS máximos ×1,5 y recuperan hasta el 75 %, y +25 % de daño.
+   Además (1.07) PB_KIT: los legendarios de todos los santuarios usan el combate de autor de su escenario.
    Gancho: E.pbSid (el sprite que dibuja el juego vía PB_RETOS.sid) y E.scale/E.sized. */
 (() => {
   if (window.PB_EDICION !== 'lite') return;
+  // 1.07: cualquier legendario (o el as del líder en la historia) usa el combate «de autor» del escenario de su santuario
+  // (volcán de Charizard, cueva de Mewtwo, torre de Ho-Oh, bosque de Celebi). Kyogre y Rayquaza siguen con los suyos.
+  window.PB_KIT = (arena, sp) => !!arena && sp !== 382 && sp !== 384;
   const final = run => run.endless || (run.stage ?? 1) >= 3 || !!run.__gym;
   const hecho = new WeakMap(), gigantes = new Map();
   const megaevolucionar = (run, E, j, mega, vida) => {

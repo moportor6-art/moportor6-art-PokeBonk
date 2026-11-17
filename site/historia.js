@@ -120,6 +120,19 @@
     galar: { nombre: 'Lionel', tipo: 'fire', equipo: [681, 887, 612, 464, 6], antes: ['Soy Lionel, el campeón invicto de Galar.', '¡Tengamos un combate de campeones!'], despues: ['Mi racha invicta… ha terminado. ¡Eres el nuevo campeón de Galar!'] },
     paldea: { nombre: 'Ciruela', tipo: 'psychic', equipo: [956, 713, 673, 976, 970, 983], antes: ['Soy Ciruela, presidenta de la Liga Pokémon de Paldea.', 'Te pondré a prueba como campeona.'], despues: ['Excelente. Eres el nuevo campeón de Paldea.'] },
   };
+  // 1.07: Alto Mando antes del campeón (retratos de Pokémon Showdown, tools/historia_showdown.txt). Cada uno es el
+  // guardián de una zona de la Liga (el cuarto, junto al tercero en la zona 3); el campeón espera en el santuario.
+  const ALTO = {
+    kanto: [['e4-lorelei', 'Lorelei', 'ice', [87, 91, 124, 131]], ['e4-bruno', 'Bruno', 'fighting', [95, 106, 107, 68]], ['e4-agatha', 'Agatha', 'ghost', [42, 93, 24, 94]], ['camp-johto', 'Lance', 'dragon', [130, 142, 149]]],
+    johto: [['e4-will', 'Mento', 'psychic', [178, 103, 80, 124]], ['koga', 'Koga', 'poison', [168, 110, 89, 169]], ['e4-bruno', 'Bruno', 'fighting', [237, 106, 107, 68]], ['e4-karen', 'Karen', 'dark', [197, 45, 94, 229]]],
+    hoenn: [['e4-sidney', 'Sixto', 'dark', [262, 275, 332, 359]], ['e4-phoebe', 'Fátima', 'ghost', [354, 302, 356]], ['e4-glacia', 'Nívea', 'ice', [362, 364, 365]], ['e4-drake', 'Dracón', 'dragon', [372, 330, 334, 373]]],
+    sinnoh: [['e4-aaron', 'Alecrán', 'bug', [267, 214, 452, 416]], ['e4-bertha', 'Gaia', 'ground', [340, 185, 76, 450]], ['e4-flint', 'Fausto', 'fire', [78, 136, 467, 392]], ['e4-lucian', 'Delos', 'psychic', [122, 203, 437, 65]]],
+    teselia: [['e4-shauntal', 'Anís', 'ghost', [426, 593, 623, 609]], ['e4-marshal', 'Lotto', 'fighting', [538, 539, 534, 620]], ['e4-grimsley', 'Aza', 'dark', [510, 560, 553, 625]], ['e4-caitlin', 'Catleya', 'psychic', [518, 561, 576, 579]]],
+    kalos: [['e4-malva', 'Malva', 'fire', [324, 663, 609, 668]], ['e4-siebold', 'Narciso', 'water', [121, 130, 689, 693]], ['e4-wikstrom', 'Tileo', 'steel', [707, 212, 476, 681]], ['e4-drasna', 'Drácena', 'dragon', [621, 334, 691, 715]]],
+    alola: [['e4-molayne', 'Tilo', 'steel', [227, 51, 707, 738]], ['olivia', 'Mayla', 'rock', [76, 526, 745]], ['e4-acerola', 'Zarala', 'ghost', [302, 770, 781, 778]], ['e4-kahili', 'Kahili', 'flying', [169, 628, 630, 733]]],
+    galar: [['e4-marnie', 'Roxy', 'dark', [262, 560, 454, 861]], ['e4-hop', 'Paul', 'normal', [832, 823, 871]], ['e4-bede', 'Berto', 'fairy', [303, 282, 678, 858]], ['raihan', 'Roy', 'dragon', [330, 706, 526, 884]]],
+    paldea: [['e4-rika', 'Cayena', 'ground', [340, 232, 51, 980]], ['e4-poppy', 'Pola', 'steel', [879, 437, 601, 959]], ['larry', 'Laureano', 'flying', [398, 357, 334, 973]], ['e4-hassel', 'Hesperio', 'dragon', [715, 612, 691, 998]]]
+  };
   const FINAL = [['prof-kanto', 'Prof. Oak', '¡Lo has conseguido! Has vencido en las nueve regiones.'], ['prof-kanto', 'Prof. Oak', 'Tu nombre y el de tu compañero ya están en el Salón de la Fama de todo el mundo Pokémon.'],
     ['azul', 'Azul', '…Está bien, lo admito. Eres el mejor. ¡Pero algún día te ganaré!'], ['prof-kanto', 'Prof. Oak', '¡Gracias por jugar al modo historia de PokéBonk Lite!']];
 
@@ -364,7 +377,11 @@
     const ir = () => {
       const fin = () => vs(cap.reg, cap.retrato, s.sp, () => empezar(i));
       const d = D[cap.id];
-      if (cap.liga) dialogo(cap.reg, lineasDe(cap.retrato, cap.nombre, cap.c.antes), fin);
+      if (cap.liga) {
+        const al = ALTO[cap.reg] ?? [];
+        const intro = al.map(([ret, n], k) => [ret, n, [`Soy ${n}, del Alto Mando. Seré tu rival en la zona ${Math.min(3, k + 1)} de la Liga.`, `Del Alto Mando, ${n}. Si llegas a mi zona, no habrá piedad.`, `${n}, del Alto Mando. Mi equipo es el más duro hasta ahora.`, `Y yo, ${n}, cierro el Alto Mando junto a mi compañero. ¡Prepárate!`][k] ?? `Soy ${n}, del Alto Mando.`]);
+        dialogo(cap.reg, [...intro, ...lineasDe(cap.retrato, cap.nombre, cap.c.antes)], fin);
+      }
       else dialogo(cap.reg, lineasDe(cap.retrato, cap.nombre, d?.[1] ?? [`¡Soy ${cap.nombre}! ¡Prepárate!`]), fin);
     };
     b.querySelector('.go').onclick = ir;
@@ -445,7 +462,9 @@
     run.__hist = h.activo;
     const cap = capitulo(s);
     if (cap.liga) {
-      run.__gym = { reg: cap.reg, id: cap.id, l: { id: cap.id, nombre: cap.nombre, tipo: cap.tipo, equipo: cap.c.equipo } };
+      const al = ALTO[cap.reg] ?? [];
+      run.__pbAlto = al;
+      run.__gym = { reg: cap.reg, id: cap.id, l: { id: cap.id, nombre: cap.nombre, tipo: cap.tipo, equipo: [...al.flatMap(x => x[3]), ...cap.c.equipo] } };
       try { run.ui.banner(`Liga Pokémon de ${REG[cap.reg]}`, `Campeón: ${cap.nombre}. Sus guardianes son su equipo. ¡Gana para coronarte!`, '#ffd84a', { species: cap.c.equipo.at(-1) }); } catch {}
     } else if (!run.__gym) run.__gym = { reg: cap.reg, id: cap.id };
     // 1.04: en el santuario espera el as del líder (o del campeón) en vez de Mew, Moltres…; fases.js le da Mega y Dynamax.
@@ -453,6 +472,20 @@
     // 1.05: al tocar el santuario, antes de que salga su as, el líder te habla (la partida se detiene mientras).
     const sb = run.spawnBoss;
     if (typeof sb === 'function') run.spawnBoss = function (...args) {
+      const al = this.__pbAlto;
+      if (al?.length && (this.stage ?? 1) <= 3) {
+        const k = (this.stage ?? 1) - 1, m = al[k];
+        const r = sb.apply(this, args);
+        try { if (m) this.ui.banner(`Alto Mando: ${m[1]}`, `Su as defiende la zona ${k + 1}`, '#ffd84a', { species: m[3].at(-1) }); } catch {}
+        // Zona 3: el cuarto miembro también sale.
+        if (k === 2 && al[3]) try {
+          const p = this.player.pos, a = Math.random() * Math.PI * 2, sp = al[3][3].at(-1);
+          const x = p.x + Math.cos(a) * 12, z = p.z + Math.sin(a) * 12;
+          if (this.terrain.inBounds(x, z, 6)) this.boss.spawn(sp, x, z, false);
+          this.ui.banner(`Alto Mando: ${al[3][1]}`, '¡Los dos últimos miembros a la vez!', '#ffd84a', { species: sp });
+        } catch {}
+        return r;
+      }
       if (this.stage !== 4 || !this.sanctuary || this.__pbSantDlg) return sb.apply(this, args);
       this.__pbSantDlg = true;
       const as = run.forceLegendary, ret = cap.retrato, quien = cap.nombre, asNom = nombrePk(as);

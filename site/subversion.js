@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.06';
+  const SUB = '1.07';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.07',
+      date: Date.UTC(2026, 10, 17, 8, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.07`,
+      summary: 'PokéBonk Lite: legendarios con combate de autor, Alto Mando en la historia y guardianes de los líderes.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Legendarios con combate de autor**: todos los legendarios de los santuarios (también los de Hoenn a Paldea y el as del líder en la historia) usan el combate especial de su escenario: el **volcán** (bombas de lava y géiseres), la **cueva** (clones y teletransportes), la **torre** (campanas y llamas arcoíris) o el **bosque** (el reloj del tiempo). Kyogre y Rayquaza conservan los suyos.`,
+        `- **Alto Mando en el modo historia**: antes del campeón te presentan los 4 miembros del Alto Mando de la región (con su retrato). En la Liga, el as de cada uno defiende una zona (los dos últimos, juntos en la zona 3), y el campeón te espera en el santuario.`,
+        `- **Guardianes de los líderes**: en partidas normales sin gimnasio elegido, los guardianes de las zonas 1 y 2 son Pokémon de un líder de la región del mapa. La zona 3 sigue con su legendario capturable.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.06',
       date: Date.UTC(2026, 10, 17, 7, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.06`,
@@ -2407,6 +2427,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.07',
+      date: '2026-11-17',
+      title: 'Legendarios, Alto Mando y guardianes (Lite).',
+      notes: [
+        ['new', 'Lite: los legendarios de todos los santuarios usan el combate de autor de su escenario.'],
+        ['new', 'Lite: Alto Mando antes del campeón en la historia.'],
+        ['new', 'Lite: guardianes de las zonas 1 y 2 con Pokémon de los líderes de la región.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.06',

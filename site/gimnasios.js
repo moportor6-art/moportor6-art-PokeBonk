@@ -82,8 +82,19 @@
   // run.__gym.l: un rival que no es líder (el campeón del modo historia, historia.js), con su propio equipo.
   const lider = run => run?.__gym ? run.__gym.l ?? LIDERES[run.__gym.reg]?.find(l => l.id === run.__gym.id) : null;
   // Guardián de la zona: 1 → primero del equipo, 2 → el del medio, 3 o más → su as.
+  // 1.07 (Lite): en partidas normales sin gimnasio elegido, los guardianes de las zonas 1 y 2 son Pokémon de un líder
+  // de la región del mapa (uno por partida). La zona 3 sigue con su legendario capturable.
+  const liderLibre = run => {
+    if (window.PB_EDICION !== 'lite' || run.__gym || run.__hist != null || run.mode !== 'standard' || run.tower || run.endless || run.expedition || run.duel || (run.stage ?? 1) > 2) return null;
+    const reg = R()?.regionMapa?.(run)?.id ?? (['encina', 'iris'].includes(run.biome?.id) ? 'johto' : 'kanto');
+    const ls = LIDERES[reg];
+    return ls?.length ? ls[Math.abs(run.seed | 0) % ls.length] : null;
+  };
   G.jefe = run => {
-    const l = lider(run);
+    // Liga del modo historia (historia.js): en las zonas 1-3, el as de cada miembro del Alto Mando.
+    const al = run.__pbAlto;
+    if (al?.length && (run.stage ?? 1) <= 3) { const sp = al[(run.stage ?? 1) - 1]?.[3].filter(vale).at(-1); if (sp) return sp; }
+    const l = lider(run) ?? liderLibre(run);
     if (!l) return null;
     const e = l.equipo.filter(vale), k = run.stage >= 3 ? e.length - 1 : run.stage === 2 ? Math.floor((e.length - 1) / 2) : 0;
     return e[k] ?? null;

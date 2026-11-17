@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Legendarios, Alto Mando y guardianes (Subversión 1.07)
+- `menus-…js` (`BP`): el kit de autor del santuario (volcán, cueva, torre, bosque) también se da si `window.PB_KIT(arena, especie)`; `fases.js` lo define en la Lite (todas menos 382/384).
+- `historia.js`: `ALTO` (4 miembros por región, retratos `e4-*` de Showdown en `tools/historia_showdown.txt`); diálogo de presentación antes del campeón; en la Liga `run.__pbAlto` hace que los guardianes de las zonas 1-3 sean sus ases (el cuarto, extra en la zona 3, con `run.boss.spawn`) con su cartel.
+- `gimnasios.js` (`G.jefe`): `__pbAlto` y, en la Lite sin gimnasio, un líder de la región del mapa para las zonas 1 y 2 (`liderLibre`).
+
 ## Compañero inicial y menú (Subversión 1.06)
 - `historia.js`: la nueva partida ofrece los iniciales y toda `profile.league`; CSS de `.pb-hist` y `.pb-hist-par` (Encargos en columna, sin pips) para que no se corten ni se monten.
 
