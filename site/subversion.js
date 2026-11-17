@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.05';
+  const SUB = '1.06';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.06',
+      date: Date.UTC(2026, 10, 17, 7, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.06`,
+      summary: 'Modo historia: empieza con cualquier Pokémon de tu Liga; botones del menú arreglados.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `**PokéBonk Lite**:`,
+        `- **Nueva partida del modo historia**: además de los iniciales clásicos, puedes elegir **cualquier Pokémon de tu Liga**. (Durante la historia lo puedes cambiar antes de cada capítulo con el botón «Cambiar».)`,
+        `- **Menú principal**: «Modo historia» ya no se corta y «Encargos» ya no se monta con su aviso de «Nuevos en…».`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.05',
       date: Date.UTC(2026, 10, 17, 7, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.05`,
@@ -2388,6 +2407,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.06',
+      date: '2026-11-17',
+      title: 'Compañero inicial y menú (Lite).',
+      notes: [
+        ['new', 'Lite: la historia puede empezar con cualquier Pokémon de tu Liga.'],
+        ['fix', 'Lite: botones «Modo historia» y «Encargos» del menú sin cortes ni textos encimados.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.05',

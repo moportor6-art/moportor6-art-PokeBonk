@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Compañero inicial y menú (Subversión 1.06)
+- `historia.js`: la nueva partida ofrece los iniciales y toda `profile.league`; CSS de `.pb-hist` y `.pb-hist-par` (Encargos en columna, sin pips) para que no se corten ni se monten.
+
 ## Diálogo del santuario (Subversión 1.05)
 - `historia.js` (`marcar`): envuelve `run.spawnBoss`; en el santuario (zona 4) primero el diálogo del líder/campeón con `run.state = 'modal'` y `run.ui.modalEl` = la capa (el juego quita el modal a los 1,5 s si no ve ventana), luego `resume()` y el jefe.
 - `naturalezas.js`: también pone `run.ui.modalEl` mientras eliges.
