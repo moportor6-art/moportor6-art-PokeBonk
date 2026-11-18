@@ -1,0 +1,543 @@
+{
+ "formato": 1,
+ "version": 161,
+ "sub": "1.24",
+ "shell": {
+  "android": "9b17d5850ea6cedf",
+  "android-lite": "4fcedf032e4c57c8",
+  "windows": "64bf0e7140a74631",
+  "windows-lite": "410beb131686e56f"
+ },
+ "modulos": {
+  "pokebonk": {
+   "nombre": "PokéBonk (juego principal)",
+   "hash": "0fe0b2dffe79809b8f9e7e3fc528397399ace8014c42c7f59b0de4d30cc6342d",
+   "archivos": 8462,
+   "bytes": 229518821
+  },
+  "pokeisaac": {
+   "nombre": "PokéIsaac",
+   "hash": "699d4bdff59c02e662a4760343b146b99e8eab2167ba6c171bbb63f2b965335f",
+   "archivos": 5680,
+   "bytes": 82833717
+  },
+  "pokemonsurvivors": {
+   "nombre": "Pokémon Survivors",
+   "hash": "0104f00a1cb86d7da7a431a13435ae91928b3ade4c847c827420c67a150bbe45",
+   "archivos": 11224,
+   "bytes": 107824348
+  },
+  "pokesurvivor": {
+   "nombre": "PokéSurvivor",
+   "hash": "d5eb83edadaeddfca4d4863752a6371713fb2fa069ffc8431c1d9338377c4238",
+   "archivos": 10,
+   "bytes": 187901432
+  },
+  "pokepath": {
+   "nombre": "PokéBonk TD",
+   "hash": "0d884a5a8ade40b54255358b16d48ff73111f852c0f52f998ded5d7f93deac70",
+   "archivos": 3684,
+   "bytes": 41183181
+  },
+  "pokeplunder": {
+   "nombre": "PokéPlunder",
+   "hash": "0303453dd6fb1e11bc32338bdf721833b84a354e59c478bacc31ba72641e738e",
+   "archivos": 665,
+   "bytes": 29735389
+  },
+  "pokeoverlord": {
+   "nombre": "Pokémon Overlord",
+   "hash": "df0eb363ae033074c26b929c949b44de00c97c40db2984aeb6762f69b23b2666",
+   "archivos": 11,
+   "bytes": 103109162
+  },
+  "pokelike": {
+   "nombre": "Pokelike",
+   "hash": "8341d77d35adc31f6da998dae1d66f84c07780ec185fcd62c4e03cb83b5543d6",
+   "archivos": 1999,
+   "bytes": 134945324
+  }
+ },
+ "tag": "v161",
+ "base": "https://raw.githubusercontent.com/moportor6-art/moportor6-art-PokeBonk/contenido-v161/",
+ "cambios": [
+  {
+   "oficial": "0.9.9",
+   "sub": "1.24",
+   "date": "2026-11-18",
+   "title": "Jefes más cortos en Normal (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite (Normal): Pokémon de los líderes con +25 % de PS y 15/18/20 s mínimos; santuario 40 s."
+    ],
+    [
+     "balance",
+     "Lite (Normal): Dominantes e Invocadores 6 s mínimos, Alfas 4 s."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.23",
+   "date": "2026-11-17",
+   "title": "Cristales en el suelo en vez de corona (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: rastro de cristales del teratipo al caminar teracristalizado."
+    ],
+    [
+     "balance",
+     "Lite: se quita la corona de la Teracristalización (tuya y de los jefes)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.22",
+   "date": "2026-11-17",
+   "title": "Pokémon de los líderes más llevaderos (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: el daño de los jefes de líder con todas sus fases y furia no pasa de ×1,6."
+    ],
+    [
+     "balance",
+     "Lite: duración mínima de los jefes de líder 30/33/35 s (antes 40/50/60)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.21",
+   "date": "2026-11-17",
+   "title": "Informe de la muerte compacto (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: el informe junta los golpes repetidos (×N) y no pasa de 80 líneas, para que no se corte el final."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.20",
+   "date": "2026-11-17",
+   "title": "Tope de nivel y evoluciones del Nv. 44 (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: con una evolución por reto desbloqueada (Blissey…), el tope de nivel sube al menos a 44."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.19",
+   "date": "2026-11-17",
+   "title": "Isla Melemele de prueba (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: mapa de prueba Isla Melemele (Alola), tropical, abierto desde el principio."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.18",
+   "date": "2026-11-17",
+   "title": "Error al terminar la Teracristalización (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: la partida ya no termina por error al acabar tu Teracristalización (parecía una muerte de un golpe)."
+    ],
+    [
+     "new",
+     "Lite: si una partida termina por error, aviso fijo con «Copiar informe del error»."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.17",
+   "date": "2026-11-17",
+   "title": "Minijefes con duración mínima (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: Dominantes e Invocadores duran al menos 10 s y los Alfas 6 s (+25 % por zona)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.16",
+   "date": "2026-11-17",
+   "title": "Informe de la muerte (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: botón «Copiar informe» en los resultados al caer, con los últimos 30 s de golpes, estados y PS."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.15",
+   "date": "2026-11-17",
+   "title": "Resultados al perder sin cerrarse solos (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: la ventana de resultados ignora los toques 1,5 s al perder (se cerraba con los toques que seguías dando)."
+    ],
+    [
+     "fix",
+     "Lite: el aviso de quién te derrotó va dentro de los resultados; el diálogo del líder espera a que los cierres."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.14",
+   "date": "2026-11-17",
+   "title": "Tanques y Vida Esfera (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: identidad de Tanque y Muralla para 143 Pokémon, con sinergia por tipo (veneno, púas, drenadoras o restos)."
+    ],
+    [
+     "balance",
+     "Lite: Vida Esfera sin −10 % de PS máximos; ahora pierdes 0,2 % de PS por segundo por copia mientras golpeas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.13",
+   "date": "2026-11-17",
+   "title": "Ultraentes vencibles (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: los Ultraentes salían con más de un millón de PS; ahora tienen los de un guardián de su zona."
+    ],
+    [
+     "fix",
+     "Lite: en los gimnasios los Ultraentes ya no reciben las fases del Pokémon del líder."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.12",
+   "date": "2026-11-17",
+   "title": "Aguante y aviso de quién te derrotó (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: ningún golpe quita más del 45 % de los PS máximos."
+    ],
+    [
+     "new",
+     "Lite: al caer se muestra quién te derrotó, con el daño y el tipo del último golpe."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.11",
+   "date": "2026-11-17",
+   "title": "Retos de evolución sin tapar la pausa.",
+   "notes": [
+    [
+     "fix",
+     "Lite: la etiqueta de retos de evolución se oculta en la pausa y en las ventanas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.10",
+   "date": "2026-11-17",
+   "title": "Corona tera, jefes de líderes y retos de evolución (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: corona, cristal, transformación y estallido de la Teracristalización (de Pokémon Survivors); teratipo Astral."
+    ],
+    [
+     "balance",
+     "Lite: jefes de los líderes con +60 % de PS, mínimo de 40/50/60 s y fases Tera, Mega y Dynamax."
+    ],
+    [
+     "new",
+     "Lite: contador visible de los retos de evolución, movible en «Editar HUD»."
+    ],
+    [
+     "fix",
+     "Lite: el botón Laboratorio de la pausa de la historia ya no queda cortado; la Radio pasa a «HUD y guía»."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.09",
+   "date": "2026-11-17",
+   "title": "Botón TERA en el editor del HUD.",
+   "notes": [
+    [
+     "fix",
+     "Editar HUD: el botón TERA se puede mover, cambiar de tamaño, girar u ocultar."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.08",
+   "date": "2026-11-17",
+   "title": "Teracristalización, Anillos de Hoopa, Ultrafendas, Incubadora y Radio (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Teracristalización (botón TERA, teratipo en el Laboratorio); los jefes finales también."
+    ],
+    [
+     "new",
+     "Lite: Anillos de Hoopa, desafío de jefes legendarios desde el Modo historia."
+    ],
+    [
+     "new",
+     "Lite: Ultrafendas con Ultraentes capturables y Ultraimpulso."
+    ],
+    [
+     "new",
+     "Lite: Incubadora de huevos en el Laboratorio."
+    ],
+    [
+     "new",
+     "Lite: Radio en la pausa para elegir la música."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.07",
+   "date": "2026-11-17",
+   "title": "Legendarios, Alto Mando y guardianes (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: los legendarios de todos los santuarios usan el combate de autor de su escenario."
+    ],
+    [
+     "new",
+     "Lite: Alto Mando antes del campeón en la historia."
+    ],
+    [
+     "new",
+     "Lite: guardianes de las zonas 1 y 2 con Pokémon de los líderes de la región."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.06",
+   "date": "2026-11-17",
+   "title": "Compañero inicial y menú (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: la historia puede empezar con cualquier Pokémon de tu Liga."
+    ],
+    [
+     "fix",
+     "Lite: botones «Modo historia» y «Encargos» del menú sin cortes ni textos encimados."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.05",
+   "date": "2026-11-17",
+   "title": "Diálogo del santuario (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: el líder te habla antes del combate del santuario."
+    ],
+    [
+     "fix",
+     "Lite: la elección de naturaleza mantiene la partida en pausa."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.04",
+   "date": "2026-11-17",
+   "title": "Santuario del líder (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: en el santuario de la historia lucha el as del líder, que megaevoluciona y se dinamaxiza."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.03",
+   "date": "2026-11-17",
+   "title": "Compañeros y jefes con fase 2 (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: en la historia puedes cambiar de compañero antes de cada capítulo."
+    ],
+    [
+     "new",
+     "Lite: los jefes finales megaevolucionan o se dinamaxizan a mitad de vida."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.02",
+   "date": "2026-11-17",
+   "title": "Movimientos de apoyo (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Danza Espada, Maquinación o Danza Dragón (Nv. 10) y Protección, Defensa Férrea o Reflejo (Nv. 15), sin ocupar hueco y mejorando cada 5 niveles."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.01",
+   "date": "2026-11-16",
+   "title": "Tipos compatibles y oro (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: movimientos de 2 tipos compatibles por Pokémon (desde el nivel 18), para más variedad y fusiones."
+    ],
+    [
+     "balance",
+     "Lite: el mapa suelta un 60 % menos de oro."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.00",
+   "date": "2026-11-16",
+   "title": "Historia: dificultad y jaulas.",
+   "notes": [
+    [
+     "new",
+     "Lite: modo historia con dificultad Normal o Difícil."
+    ],
+    [
+     "new",
+     "Lite: en la historia, las jaulas traen Pokémon del mapa que aún no tienes o con investigación pendiente."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.99",
+   "date": "2026-11-16",
+   "title": "Sin fin sin topes (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: en Sin fin las vitaminas no tienen tope (salvo proyectiles y objetos únicos) ni hay tope de nivel."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.98",
+   "date": "2026-11-16",
+   "title": "Tope de nivel visible (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: el tope de nivel se muestra junto a tu nivel y nunca impide evolucionar."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.97",
+   "date": "2026-11-16",
+   "title": "Equilibrio (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: Poké Balls +15 % por compra, a la partida entra la mitad del oro ahorrado, tope de nivel por medallas y escalado según tu nivel."
+    ],
+    [
+     "new",
+     "Lite: élites con rasgos (Veloz, Vampírico, Explosivo, Blindado), furia de jefes a los 2 minutos y tope de 5 copias por objeto."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.96",
+   "date": "2026-11-15",
+   "title": "Maldición de la horda (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Maldición de la horda en el Laboratorio (8 niveles: +25 % salvajes, +15 % EXP y Polvo por nivel)."
+    ],
+    [
+     "balance",
+     "Lite: armadura y daño por nivel un 20 % menores."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "0.95",
+   "date": "2026-11-15",
+   "title": "Oro acumulable (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: el oro ahorrado vuelve a entrar en la partida siguiente y se acumula."
+    ]
+   ]
+  }
+ ],
+ "completo": {
+  "android": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v161/PokeBonk.apk",
+   "bytes": 872205875,
+   "sha256": "12d5d9209c810194f8d2e78130e6625f771cdbcab73c55c613f52763ec6476e1"
+  },
+  "windows": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v161/PokeBonk-Windows-Instalador.exe",
+   "bytes": 850327952,
+   "sha256": "3c54a7f74f8da59324aa8a1b7032ed2390c81d50d3643814069b7cb7d64a4b5c"
+  },
+  "android-lite": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v161/PokeBonk-Lite.apk",
+   "bytes": 217800522,
+   "sha256": "7fd106ed5b92e4fcb267bf9130d297a71cf22d8d700b88f2fdfd174755f205c2"
+  },
+  "windows-lite": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v161/PokeBonk-Lite-Windows-Instalador.exe",
+   "bytes": 304965508,
+   "sha256": "ded6d144b12152d68213afcda5cabe33d9073ee393a853b5451c81128a1b60fb"
+  }
+ }
+}
