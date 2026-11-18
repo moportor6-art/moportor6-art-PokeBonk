@@ -30,16 +30,29 @@
     const txt = `Te derrotó ${quien}: último golpe de ${dano} de daño${TIPO[tipo] ? ` de tipo ${TIPO[tipo]}` : ''}.`;
     run.__pbMuerte = txt;
     try { run.ui.banner('Debilitado', txt, '#ff4a3a'); } catch {}
+    // 1.15: el aviso va dentro de la ventana de resultados (se queda hasta que la cierres).
     let n = 0;
     const t = setInterval(() => {
-      if (++n > 40 || window.__pbRun !== run && n > 4) { clearInterval(t); return; }
-      if (run.state !== 'over' || document.querySelector('.pb-muerte')) return;
+      if (++n > 60 || window.__pbRun !== run && n > 4) { clearInterval(t); return; }
+      const m = run.ui?.modalEl;
+      if (run.state !== 'over' || !m?.isConnected || m.querySelector('.pb-muerte')) return;
       const d = document.createElement('div'); d.className = 'pb-muerte';
-      d.style.cssText = 'position:fixed;left:50%;top:8px;transform:translateX(-50%);z-index:99999;background:rgba(60,10,10,.92);color:#fff;border:2px solid #ff6a5a;border-radius:10px;padding:5px 12px;font:800 13px system-ui,sans-serif;max-width:90vw;text-align:center;pointer-events:auto;cursor:pointer';
-      d.textContent = '💀 ' + txt; d.onclick = () => d.remove();
-      document.body.append(d); setTimeout(() => d.remove(), 12000); clearInterval(t);
-    }, 500);
+      d.style.cssText = 'margin:0 auto 6px;max-width:92%;background:rgba(60,10,10,.92);color:#fff;border:2px solid #ff6a5a;border-radius:10px;padding:5px 12px;font:800 13px system-ui,sans-serif;text-align:center';
+      d.textContent = '💀 ' + txt;
+      (m.querySelector('.panel') ?? m).prepend(d); clearInterval(t);
+    }, 250);
   };
+  // 1.15: al caer, la ventana de resultados ignora los toques durante 1,5 s. En el móvil, los toques que seguías dando
+  // (ataque, salto…) caían sobre «Menú» y la cerraban al instante; en la historia te mandaban directo al líder.
+  let abierta = null, t0 = 0;
+  new MutationObserver(() => {
+    const run = window.__pbRun, m = run?.ui?.modalEl;
+    if (m && m !== abierta && m.isConnected && (run.state === 'over' || run.state === 'dead')) { abierta = m; t0 = performance.now(); }
+  }).observe(document.documentElement, { childList: true, subtree: true }); // (el script carga antes de <body>)
+  for (const ev of ['pointerdown', 'pointerup', 'mousedown', 'mouseup', 'touchstart', 'touchend', 'click'])
+    addEventListener(ev, e => {
+      if (abierta?.isConnected && performance.now() - t0 < (window.__pbLockMs ?? 1500) && abierta.contains(e.target)) { e.stopPropagation(); e.preventDefault(); }
+    }, true);
   window.PB_ITEM_MAX = (id, def) => {
     const run = window.__pbRun;
     if (!run?.endless || !def || (def.max ?? 10) < 3) return undefined;

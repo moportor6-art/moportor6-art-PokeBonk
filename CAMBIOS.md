@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Resultados al perder (Subversión 1.15)
+- `equilibrio.js`: `MutationObserver` (sobre `documentElement`: el script carga antes de `<body>`) detecta la ventana de resultados al caer y un filtro en captura ignora sus toques 1,5 s; el aviso `.pb-muerte` va dentro de `run.ui.modalEl`.
+- `historia.js`: `enMenu()` exige que la ventana de resultados no esté abierta.
+
 ## Tanques y Vida Esfera (Subversión 1.14)
 - `tanques.js`: nivel de tanque por especie según la parte de PS+Def+DefEsp de su forma final (≥ 0,565 Tanque, ≥ 0,66 Muralla); envuelve `recompute` (PS, armadura, púas, robo de vida, curación) y `hurt` (veneno al atacante con `combat.$xj1ewj`); regeneración por % y retroceso de la Vida Esfera.
 - `defineProperty-…js`: `life-orb` sin `maxHp ×0,9` y con otra descripción en la Lite (`window.PB_EDICION`).

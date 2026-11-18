@@ -536,7 +536,8 @@
     guardar();
   };
   // Al volver al menú tras un capítulo: su diálogo y el siguiente.
-  const enMenu = () => !!document.querySelector('.mm-item.play')?.offsetParent;
+  // 1.15: y sin la ventana de resultados abierta (si no, el diálogo del líder la tapaba nada más perder).
+  const enMenu = () => !!document.querySelector('.mm-item.play')?.offsetParent && !window.__pbRun?.ui?.modalEl?.isConnected;
   const pendiente = () => {
     const h = H(), i = h?.pendiente;
     if (i == null || capa || !enMenu()) return;

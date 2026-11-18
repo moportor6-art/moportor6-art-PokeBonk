@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.14';
+  const SUB = '1.15';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.15',
+      date: Date.UTC(2026, 10, 18, 1, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.15`,
+      summary: 'PokéBonk Lite: la pantalla de resultados ya no se cierra sola al perder.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Resultados al perder**: los toques que seguías dando al caer (ataque, salto…) pulsaban «Menú» y cerraban la ventana al instante; en el modo historia te mandaban directo al líder. Ahora la ventana ignora los toques durante 1,5 s.`,
+        `- **Quién te derrotó**: el aviso aparece dentro de la ventana de resultados y se queda hasta que la cierres.`,
+        `- Modo historia: el diálogo del líder espera a que cierres los resultados.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.14',
       date: Date.UTC(2026, 10, 17, 23, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.14`,
@@ -2562,6 +2582,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.15',
+      date: '2026-11-17',
+      title: 'Resultados al perder sin cerrarse solos (Lite).',
+      notes: [
+        ['fix', 'Lite: la ventana de resultados ignora los toques 1,5 s al perder (se cerraba con los toques que seguías dando).'],
+        ['fix', 'Lite: el aviso de quién te derrotó va dentro de los resultados; el diálogo del líder espera a que los cierres.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.14',
