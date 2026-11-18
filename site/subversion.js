@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.21';
+  const SUB = '1.22';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.22',
+      date: Date.UTC(2026, 10, 18, 8, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.22`,
+      summary: 'PokéBonk Lite: los Pokémon de los líderes, menos asfixiantes.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Tope de daño**: sumando Tera, Mega, Dynamax y furia, el Pokémon de un líder (o el del santuario) pega como mucho ×1,6 de su daño inicial (antes podía llegar a ×1,95).`,
+        `- **Duración mínima**: 30 / 33 / 35 s en las zonas 1, 2 y 3 (antes 40 / 50 / 60 s).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.21',
       date: Date.UTC(2026, 10, 18, 7, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.21`,
@@ -2691,6 +2710,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.22',
+      date: '2026-11-17',
+      title: 'Pokémon de los líderes más llevaderos (Lite).',
+      notes: [
+        ['balance', 'Lite: el daño de los jefes de líder con todas sus fases y furia no pasa de ×1,6.'],
+        ['balance', 'Lite: duración mínima de los jefes de líder 30/33/35 s (antes 40/50/60).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.21',

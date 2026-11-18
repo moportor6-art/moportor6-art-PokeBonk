@@ -13,6 +13,7 @@
   window.PB_KIT = (arena, sp) => !!arena && sp !== 382 && sp !== 384;
   const final = run => run.endless || (run.stage ?? 1) >= 3 || !!run.__gym;
   const hecho = new WeakMap(), gigantes = new Map(), teras = new Map();
+  const base = new Map(), tope = (E, j, bk) => { const b = base.get(bk); if (b > 0 && E.dmg[j] > b * 1.6) E.dmg[j] = b * 1.6; if (base.size > 300) base.clear(); };
   const megaevolucionar = (run, E, j, mega, vida) => {
     const x = E.x[j], y = E.y[j], z = E.z[j];
     E.pbSid ??= new Int32Array(2400);
@@ -48,6 +49,9 @@
       const sant = run.__hist != null && (run.stage ?? 1) >= 4 && run.sanctuary;
       const k = `${j}:${E.gen[j]}`, f = E.hp[j] / E.maxHp[j];
       const sp = E.species[j], mega = window.PB_MEGA?.MEGAS?.[sp];
+      // 1.22: daño base al verlo por primera vez; con fases y furia no pasa de ×1,6 (antes podía llegar a ×1,95).
+      const bk = `${j}:${E.gen[j]}`;
+      if (!base.has(bk)) base.set(bk, E.dmg[j]);
       // 1.08: Teracristalización al 85 % (todos los jefes finales).
       if (f <= 0.85 && !set.has(k + 't') && window.PB_TERA) {
         set.add(k + 't');
@@ -62,18 +66,21 @@
       if (lider && !set.has(k + 'L')) {
         set.add(k + 'L');
         if (!run.sanctuary) { E.maxHp[j] *= 1.6; E.hp[j] = E.maxHp[j]; }
-        const secs = run.sanctuary ? 60 : [40, 50, 60][Math.min(2, (run.stage ?? 1) - 1)], tasa = E.maxHp[j] / secs;
+        const secs = run.sanctuary ? 60 : [30, 33, 35][Math.min(2, (run.stage ?? 1) - 1)] /* 1.22: antes 40/50/60 */, tasa = E.maxHp[j] / secs;
         if (E.capRate && (!(E.capRate[j] > 0) || E.capRate[j] > tasa)) { E.capRate[j] = tasa; E.capBank[j] = tasa * 3; E.capT[j] = run.time ?? 0; }
       }
       // Santuario del modo historia (1.04) y líderes (1.10): Mega al 66 % (si la tiene) y Dynamax al 33 %, ambas a la vez.
       if (sant || lider) {
         if (mega?.sid && f <= 0.66 && !set.has(k + 'm')) { set.add(k + 'm'); megaevolucionar(run, E, j, mega, 0.8); }
         if (f <= 0.33 && !set.has(k + 'd')) { set.add(k + 'd'); dinamaxizar(run, E, j, 0.6); }
+        tope(E, j, bk);
         continue;
       }
+      tope(E, j, bk);
       if (set.has(k) || f > 0.5) continue;
       set.add(k);
       if (mega?.sid) megaevolucionar(run, E, j, mega, 0.7); else dinamaxizar(run, E, j, 0.75);
+      tope(E, j, bk);
     }
   }, 150);
   // 1.10: corona y cuerpo de cristal de los jefes teracristalizados (tera.js), cada fotograma.

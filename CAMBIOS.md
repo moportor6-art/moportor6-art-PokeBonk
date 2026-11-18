@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Jefes de líder más llevaderos (Subversión 1.22)
+- `fases.js`: guarda el daño base de cada jefe al verlo y lo limita a ×1,6 tras Tera, Mega, Dynamax y furia (`tope()`); duración mínima 30/33/35 s.
+
 ## Informe compacto (Subversión 1.21)
 - `telemetria.js`: entradas iguales seguidas (< 1,5 s) se agrupan con contador; el informe muestra las 80 últimas líneas.
 
