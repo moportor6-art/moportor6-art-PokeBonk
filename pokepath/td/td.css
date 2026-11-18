@@ -1,0 +1,285 @@
+/* PokéBonk TD. Se aplica con html.tdr-on, que td.js pone en cuanto el juego ha cargado. */
+:root{
+  --tdr-st:env(safe-area-inset-top,0px);--tdr-sb:env(safe-area-inset-bottom,0px);
+  --tdr-sl:env(safe-area-inset-left,0px);--tdr-sr:env(safe-area-inset-right,0px);
+  --tdr-ink:#2a2140;--tdr-night:#1d1336;--tdr-plum:#33235a;--tdr-paper:#fffaf3;
+  --tdr-sun:#ffcb05;--tdr-ball:#ff4a6e;--tdr-leaf:#3ec26a;--tdr-sky:#4a9dff;
+  --tdr-title:"M PLUS Rounded 1c","Nunito",system-ui,sans-serif;--tdr-font:"Nunito",system-ui,sans-serif;
+}
+.tdr{display:none}
+html.tdr-on body{background:radial-gradient(120% 80% at 50% 0%,#3a2867 0%,var(--tdr-night) 60%) fixed!important}
+html.tdr-on #view-port{display:block!important}
+html.tdr-on #screen-root{left:0!important;top:0!important}
+html.tdr-on #screen{background:transparent!important;overflow:visible!important}
+html.tdr-on #canvas-wrapper{border-radius:6px;box-shadow:0 0 0 3px #ffffff26,0 10px 30px #0008}
+html.tdr-on #canvas-wrapper canvas{image-rendering:pixelated}
+/* La interfaz de escritorio sigue ahí para que funcione todo, pero no se ve. */
+html.tdr-on .ui-player-panel,html.tdr-on .ui-map-panel,html.tdr-on .ui-top-bar,html.tdr-on .ui-bottom-bar{visibility:hidden!important}
+html.tdr-on .ui-weather{visibility:visible}
+html.tdr-on .pb-volver{display:none!important}
+
+html.tdr-on .tdr{display:block;position:fixed;inset:0;z-index:10000;pointer-events:none;font-family:var(--tdr-font);color:var(--tdr-ink);-webkit-tap-highlight-color:transparent}
+.tdr>*{pointer-events:auto}
+.tdr button{font:inherit;color:inherit;border:0;background:none;cursor:pointer;touch-action:manipulation}
+.tdr button:focus-visible{outline:3px solid var(--tdr-sun);outline-offset:2px}
+.tdr button:disabled{cursor:default}
+/* Con una ventana del juego abierta, el panel se esconde: la ventana ocupa la pantalla. */
+html.tdr-modal .tdr>:not(.tdr-secbar){visibility:hidden}
+.tdr-secbar{display:none}
+html.tdr-sec:not(.tdr-win) .tdr-secbar{display:flex;position:fixed;left:0;right:0;top:0;height:calc(var(--tdr-st) + 56px);padding:var(--tdr-st) calc(var(--tdr-sr) + 10px) 0 calc(var(--tdr-sl) + 14px);align-items:center;gap:10px;background:var(--tdr-night);box-shadow:0 2px 0 #ffffff1f;color:#fff;z-index:2}
+.tdr-secbar b{flex:1;font:900 22px var(--tdr-title)}
+.tdr-close{height:40px;padding:0 20px;border-radius:99px;background:var(--tdr-paper)!important;color:var(--tdr-ink)!important;font:900 15px var(--tdr-title)!important;box-shadow:0 3px 0 #0006}
+html.tdr-win #screen>.game-scene-background{background:#120a24d9;inset:-3000px!important}
+html.tdr-modal body{background:var(--tdr-night)!important}
+
+/* ---------- barra de arriba ---------- */
+.tdr-top{position:fixed;display:flex;align-items:center;gap:8px;color:#fff}
+.tdr-route{display:flex;flex-direction:column;min-width:0;flex:1 1 auto;line-height:1.05}
+.tdr-route b{font:900 17px var(--tdr-title);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tdr-route span{font:800 12px var(--tdr-font);color:#d9ccff}
+.tdr-life,.tdr-gold,.tdr-stars{display:flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 8px;border-radius:99px;background:#ffffff1a;box-shadow:inset 0 0 0 1.5px #ffffff26;flex:none}
+.tdr-life b,.tdr-gold b,.tdr-stars b{font:900 16px var(--tdr-title)}
+.tdr-life i{--v:1;width:22px;height:22px;flex:none;background:url("../src/assets/images/icons/heart.png") center/contain no-repeat;filter:saturate(calc(.25 + var(--v) * .75))}
+.tdr-gold b{color:#ffe27a}
+.tdr-gold:before{content:"";width:18px;height:18px;border-radius:50%;background:radial-gradient(circle at 35% 35%,#fff6c0,#f5b800 60%,#b07c00);box-shadow:0 0 0 1.5px #7a5500}
+.tdr-stars:before{content:"★";color:var(--tdr-sun);font-size:16px;line-height:1}
+
+/* ---------- panel: próxima oleada, equipo y menú ---------- */
+.tdr-side{position:fixed;display:flex;flex-direction:column;gap:8px;overflow:auto;overscroll-behavior:contain;scrollbar-width:none}
+.tdr-side::-webkit-scrollbar{display:none}
+.tdr-next{display:flex;flex-direction:column;gap:4px;padding:6px 10px;border-radius:14px;background:#ffffff14;color:#e9e1ff;flex:none}
+.tdr-next-top{display:flex;align-items:center;gap:8px;min-height:30px}
+.tdr-next-top>span{font:800 12px var(--tdr-font);white-space:nowrap}
+.tdr-foe{display:flex;flex-wrap:nowrap;gap:4px 6px;align-items:center;overflow-x:auto;scrollbar-width:none}
+.tdr-foe::-webkit-scrollbar{display:none}
+.tdr-foe span{flex:none}
+.tdr-foe:empty{display:none}
+.tdr-foe span{display:inline-flex;align-items:baseline;gap:4px;padding:2px 8px;border-radius:99px;background:#ffffff14;font-size:12px}
+.tdr-foe span small{font:800 10.5px var(--tdr-font);color:#c8bbef}
+.tdr-foe span b{font:900 12.5px var(--tdr-title);color:#fff}
+.tdr-foe span.nm{background:none;padding-left:0}
+.tdr-foe span.nm b{font-size:14px;text-transform:capitalize;color:#ffe27a}
+.tdr-foe span.pas{background:#ff4a6e33;color:#ffd0da;font:800 11.5px var(--tdr-font);text-transform:capitalize}
+.tdr-locks{display:flex;flex-wrap:wrap;align-items:center;gap:4px 6px;color:#cfc4ee;font:800 11px var(--tdr-font);flex:none}
+.tdr-locks:empty{display:none}
+.tdr-locks b{padding:2px 8px;border-radius:99px;background:#ffffff12;font:900 11px var(--tdr-title);color:#e9e1ff}
+.tdr-next-row{display:flex;gap:2px;overflow:hidden;flex:1;min-width:0}
+.tdr-next-row i{width:32px;height:32px;flex:none;background:center/contain no-repeat;image-rendering:pixelated}
+
+.tdr-team{--cols:5;display:grid;grid-template-columns:repeat(var(--cols),minmax(0,1fr));gap:6px;flex:none}
+.tdr-card.locked{display:none!important}
+.tdr-card{--pc:#8b7fb0;position:relative;display:grid;grid-template-rows:minmax(0,1fr) auto;border-radius:16px;background:var(--tdr-paper);box-shadow:0 3px 0 #0004,inset 0 0 0 2px color-mix(in srgb,var(--pc) 45%,transparent);overflow:hidden;min-width:0}
+.tdr-deploy{position:relative;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;padding:4px 4px 3px;min-height:0;background:linear-gradient(180deg,color-mix(in srgb,var(--pc) 32%,#fff),var(--tdr-paper) 70%)!important;min-height:0}
+.tdr-spr{width:100%;flex:1 1 0;min-height:18px;max-height:64px;background:center bottom/contain no-repeat;image-rendering:pixelated}
+.tdr-nm{font:900 11px var(--tdr-title);text-transform:capitalize;letter-spacing:-.02em;max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;line-height:1.15}
+.tdr-lv{font:800 10.5px var(--tdr-font);color:#6b5f88;line-height:1.1}
+.tdr-st{position:absolute;left:4px;right:4px;top:3px;font:900 9px var(--tdr-font);font-style:normal;color:#fff;background:var(--tdr-leaf);border-radius:99px;padding:1px 4px;text-align:center;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tdr-st:empty{display:none}
+.tdr-card.sel{box-shadow:0 3px 0 #0004,0 0 0 3px var(--tdr-sun)}
+.tdr-card.sel .tdr-st{background:var(--tdr-ball)}
+.tdr-card.on .tdr-deploy{background:linear-gradient(180deg,color-mix(in srgb,var(--pc) 55%,#fff),var(--tdr-paper) 75%)!important}
+.tdr-acts{display:flex;border-top:1.5px solid #00000014;min-height:28px}
+.tdr-acts button{flex:1 1 0;min-width:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font:900 12px var(--tdr-title);line-height:1;padding:3px 0}
+.tdr-acts button+button{border-left:1.5px solid #00000014}
+.tdr-acts button[hidden]{display:none}
+.tdr-up{color:#1f8a46!important;flex:1.6 1 0!important}
+.tdr-up small{font:800 9px var(--tdr-font);color:#6b5f88}
+.tdr-up small:empty{display:none}
+.tdr-up:disabled{color:#a99fbf!important}
+.tdr-item{background:center/70% no-repeat!important;image-rendering:pixelated;color:#8a6a00!important}
+.tdr-item:disabled{opacity:.45}
+.tdr-info{color:var(--tdr-sky)!important;font-style:italic!important}
+.tdr-card.empty,.tdr-card.locked{background:#ffffff12;box-shadow:inset 0 0 0 2px #ffffff22}
+.tdr-card.empty .tdr-deploy,.tdr-card.locked .tdr-deploy{background:none!important;color:#cfc4ee;justify-content:center;min-height:72px}
+.tdr-card.empty .tdr-lv,.tdr-card.locked .tdr-lv{color:#cfc4ee}
+.tdr-card.empty .tdr-acts,.tdr-card.locked .tdr-acts{display:none}
+.tdr-card.locked .tdr-deploy{cursor:default}
+
+.tdr-menu{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:6px;flex:none}
+.tdr-m{display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 2px;border-radius:12px;background:#ffffff14!important;color:#efe9ff!important;font:800 10.5px var(--tdr-font)!important;min-width:0}
+.tdr-m img{width:22px;height:22px;image-rendering:pixelated}
+.tdr-m span{max-width:100%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tdr-m.off{opacity:.45}
+.tdr-m.tdr-exit{grid-column:span 2;justify-content:center}
+.tdr-m.tdr-exit.armed{background:var(--tdr-ball)!important}
+
+/* ---------- botones de oleada ---------- */
+.tdr-dock{position:fixed;display:flex;gap:8px;align-items:stretch}
+.tdr-b{flex:none;min-width:58px;padding:0 10px;border-radius:16px;background:var(--tdr-paper)!important;color:var(--tdr-ink)!important;font:900 14px var(--tdr-title)!important;box-shadow:0 3px 0 #0005}
+.tdr-b.on{background:var(--tdr-sun)!important}
+.tdr-wave{flex:1 1 auto;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;border-radius:18px;color:#fff!important;background:linear-gradient(180deg,#ff6d8a,var(--tdr-ball) 55%,#d82a52)!important;box-shadow:0 4px 0 #8c1733,inset 0 0 0 2px #ffffff55;min-width:0}
+.tdr-wave span{font:900 clamp(15px,4.6vw,19px) var(--tdr-title);white-space:nowrap}
+.tdr-wave small{font:800 11px var(--tdr-font);opacity:.9;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.tdr-wave small:empty{display:none}
+.tdr-wave:disabled{background:linear-gradient(180deg,#8f84ad,#6f6491)!important;box-shadow:0 4px 0 #3c3358,inset 0 0 0 2px #ffffff33}
+.tdr-wave.live:disabled{background:linear-gradient(180deg,#5fd88b,#2fae5e)!important;box-shadow:0 4px 0 #1b6b3a,inset 0 0 0 2px #ffffff55}
+
+/* ---------- vertical ---------- */
+html.tdr-v .tdr-top{left:calc(var(--tdr-sl) + 10px);right:calc(var(--tdr-sr) + 10px);top:var(--tdr-st);height:58px}
+html.tdr-v .tdr-side{left:calc(var(--tdr-sl) + 8px);right:calc(var(--tdr-sr) + 8px);top:calc(var(--tdr-my) + var(--tdr-mh) + 8px);bottom:calc(var(--tdr-sb) + 80px)}
+html.tdr-v .tdr-team{flex:1 1 0;min-height:0;grid-auto-rows:minmax(0,1fr);max-height:200px}
+/* Poco alto: el menú pasa a una fila de iconos para dejar sitio al equipo. */
+html.tdr-v.tdr-low .tdr-menu{grid-template-columns:repeat(10,minmax(0,1fr));gap:4px}
+html.tdr-v.tdr-low .tdr-m{padding:6px 0}
+html.tdr-v.tdr-low .tdr-m span{display:none}
+html.tdr-v.tdr-low .tdr-m.tdr-exit span{display:block;font-size:9px;white-space:normal;line-height:1}
+html.tdr-v.tdr-low .tdr-next{min-height:34px}
+html.tdr-v.tdr-low .tdr-next-row i{width:26px;height:26px}
+html.tdr-v .tdr-dock{left:calc(var(--tdr-sl) + 8px);right:calc(var(--tdr-sr) + 8px);bottom:calc(var(--tdr-sb) + 8px);height:62px}
+@media (max-width:380px){
+  html.tdr-v .tdr-gold,html.tdr-v .tdr-life,html.tdr-v .tdr-stars{padding:0 9px 0 6px;gap:4px}
+  html.tdr-v .tdr-stars{display:none}
+}
+
+/* ---------- horizontal ---------- */
+html.tdr-h .tdr-top,html.tdr-h .tdr-side,html.tdr-h .tdr-dock{left:calc(var(--tdr-mx) + var(--tdr-mw) + 12px);right:calc(var(--tdr-sr) + 10px)}
+html.tdr-h .tdr-top{top:calc(var(--tdr-st) + 6px);height:40px;flex-wrap:nowrap}
+html.tdr-h .tdr-route b{font-size:15px}
+html.tdr-h .tdr-side{top:calc(var(--tdr-st) + 52px);bottom:calc(var(--tdr-sb) + 72px)}
+html.tdr-h .tdr-dock{bottom:calc(var(--tdr-sb) + 8px);height:56px}
+html.tdr-h .tdr-life,html.tdr-h .tdr-gold,html.tdr-h .tdr-stars{height:30px;padding:0 9px 0 6px}
+html.tdr-h .tdr-team{flex:1 1 0;min-height:0;grid-auto-rows:minmax(0,1fr);max-height:260px}
+html.tdr-h .tdr-spr{max-height:72px}
+@media (max-height:460px){
+  html.tdr-h .tdr-stars{display:none}
+  html.tdr-h .tdr-next{min-height:32px}
+  html.tdr-h .tdr-next-row i{width:26px;height:26px}
+  html.tdr-h .tdr-menu{grid-template-columns:repeat(10,minmax(0,1fr))}
+  html.tdr-h .tdr-m span{display:none}
+  html.tdr-h .tdr-m.tdr-exit span{display:block;font-size:9.5px;white-space:normal;line-height:1.05;text-align:center}
+}
+@media (prefers-reduced-motion:reduce){.tdr *{transition:none!important;animation:none!important}}
+
+/* Zoom del mapa */
+html.tdr-on #canvas-wrapper{touch-action:none}
+.tdr-zbar{position:fixed;display:flex;flex-direction:column;gap:6px;right:calc(100vw - var(--tdr-mx) - var(--tdr-mw) + 8px);top:calc(var(--tdr-my) + 8px)}
+.tdr-zbar button{width:38px;height:38px;border-radius:12px;background:#1d1336cc!important;color:#fff!important;font:900 22px/1 var(--tdr-title)!important;box-shadow:inset 0 0 0 1.5px #ffffff40}
+.tdr-zbar .tdr-zfit{display:none;height:auto;padding:6px 2px;font:900 10px/1.1 var(--tdr-title)!important}
+html.tdr-zoom .tdr-zbar .tdr-zfit{display:block}
+
+/* Tarjetas anchas (3 columnas): dibujo a la izquierda, nombre y nivel a la derecha, botones debajo. */
+.tdr-team.wide .tdr-deploy{flex-direction:row;align-items:center;justify-content:flex-start;gap:6px;padding:6px 6px 4px 4px;text-align:left}
+.tdr-team.wide .tdr-spr{flex:none;width:36px;height:44px;max-height:none;min-height:0;background-position:center}
+.tdr-team.wide .tdr-nm{font-size:12.5px;display:block}
+.tdr-team.wide .tdr-lv{font-size:11.5px;display:block}
+.tdr-team.wide .tdr-deploy>.tdr-nm,.tdr-team.wide .tdr-deploy>.tdr-lv{min-width:0}
+.tdr-team.wide .tdr-deploy{display:grid;grid-template-columns:36px minmax(0,1fr);grid-template-rows:auto auto auto;column-gap:6px;row-gap:1px;align-content:center}
+.tdr-team.wide .tdr-spr{grid-row:1/4}
+.tdr-team.wide .tdr-nm{align-self:end}
+.tdr-team.wide .tdr-lv{align-self:start}
+.tdr-team.wide .tdr-st{position:static;justify-self:start;max-width:100%;font-size:9.5px;padding:0 6px}
+.tdr-team.wide .tdr-card.empty .tdr-deploy{display:flex;justify-content:center;min-height:0}
+.tdr-team.wide .tdr-card.empty .tdr-spr{display:none}
+html.tdr-v .tdr-team.wide,html.tdr-h .tdr-team.wide{flex:1 1 auto;min-height:0;max-height:280px;grid-auto-rows:minmax(66px,1fr)}
+.tdr-menu{margin-top:auto}
+/* Con sitio de sobra, el dibujo crece con la tarjeta. */
+.tdr-team.wide .tdr-deploy{grid-template-columns:clamp(36px,30%,64px) minmax(0,1fr)!important}
+.tdr-team.wide .tdr-spr{width:100%!important;height:100%!important;min-height:44px!important;max-height:80px!important}
+@media (max-height:460px){html.tdr-h .tdr-team.wide{grid-auto-rows:minmax(72px,auto)}html.tdr-h .tdr-locks{display:none}}
+.tdr-wave.placing:disabled{background:linear-gradient(180deg,#ffd84a,var(--tdr-sun))!important;color:var(--tdr-ink)!important;box-shadow:0 4px 0 #a07800,inset 0 0 0 2px #ffffff88}
+@media (max-width:380px){.tdr-team.wide .tdr-nm{font-size:11px!important;letter-spacing:-.03em}.tdr-team.wide .tdr-deploy{grid-template-columns:30px minmax(0,1fr)!important;column-gap:4px!important}}
+
+/* ---------- letra y colores de las ventanas del juego ---------- */
+html.tdr-on body{font-family:"Nunito","Lexend",system-ui,sans-serif!important}
+html.tdr-on[data-theme]{
+  --sceneBackground:#2b1f4a;--sceneHeader:#ff4a6e;
+  --uiBackground1:#2b1f4a;--uiBackground2:#33255a;--uiBackground3:#2b1f4a;--uiBackground4:#3d2d69;--uiAlterDamage:#3d2d69;
+  --barBackground:#3d2d69;--barShadow1:#57449a;--barShadow2:#22183d;
+  --menuButton1:#3d2d69;--menuButton2:#33255a;--menuButtonOff:#c8385c;--menuButtonOn:#3ec26a;--menuSection:#3d2d69;--menuReedem:#33255a;--menuTitle:#ff4a6e;--menuColorText:#ffcb05;
+  --slider:#1d1336;--sliderGrab:#ff4a6e;--link:#9f8cff;
+  --map1:#22183d;--map2:#3d2d69;
+  --dexTab1:#2b1f4a;--dexTab2:#ff4a6e;--dexTab3:#c8385c;--dexColor:#33255a;
+  --profile1:#22183d;--profile2:#3d2d69;--profile3:#33255a;--profile4:#4a3880;
+  --scrollBarColor1:#1d1336;--scrollBarColor2:#ff4a6e;
+  --descriptionBackground:rgba(29,19,54,.95);--tooltip:rgba(29,19,54,.95);
+  --nextWave:#ff4a6e;--arrowHover:#ff4a6e;--uiSection:#ff4a6e;--challengeColor1:#ff4a6e;
+}
+html.tdr-on .section-scene-container{border:0!important;border-radius:0;box-shadow:none}
+html.tdr-on .game-scene-window{border:0!important;border-radius:18px!important;overflow:hidden;box-shadow:0 12px 40px #000a!important;background:var(--sceneBackground)!important}
+html.tdr-on .game-scene-header{height:30px!important;left:0!important;right:0!important;top:0!important}
+html.tdr-on .game-scene-container{top:30px!important}
+html.tdr-on .game-scene-title{top:5px!important;left:14px!important;font:900 15px var(--tdr-title)!important;text-shadow:none!important;-webkit-text-stroke:0!important}
+html.tdr-on .game-scene-close-button{top:0!important;right:0!important;width:44px;height:30px;line-height:30px;text-align:center;font:900 16px var(--tdr-title)!important;background:#0002}
+html.tdr-on .stroke{-webkit-text-stroke:0!important;text-shadow:0 1px 0 #0006!important}
+html.tdr-on .tooltip{border-radius:12px!important}
+
+/* ---------- ventanas en vertical, repartidas para el móvil ---------- */
+html.tdr-rep #screen>.section-scene-container,html.tdr-reph #screen>.section-scene-container{left:0!important;top:0!important;transform:none!important;width:var(--tdr-lw)!important;height:var(--tdr-lh)!important}
+/* Caja */
+html.tdr-rep .box-scene-unit-selected-name{left:130px!important;right:70px!important;font-size:14px!important;clip-path:none!important;border-radius:10px}
+/* Tienda: dos columnas de tarjetas, el huevo a lo ancho, con scroll */
+html.tdr-rep .shop-scene-item-container{top:12px!important;bottom:12px!important;left:12px!important;right:12px!important;align-content:flex-start!important;overflow-y:auto;gap:12px!important;padding-bottom:20px;scrollbar-width:none}
+html.tdr-rep .shop-scene-item{width:calc(50% - 6px)!important;height:190px!important;flex:none;border-radius:16px;outline:0!important;border:2px solid #ffffff22!important;background-size:96px!important}
+html.tdr-rep .shop-scene-egg{width:100%!important;height:170px!important}
+html.tdr-rep .shop-scene-purchase,html.tdr-rep .shop-scene-purchase-egg{height:36px!important;line-height:36px!important;font-size:14px!important;border-radius:12px!important;border:0!important}
+/* Mapa: la cuadrícula de rutas entra entera a lo ancho */
+html.tdr-rep .maps-scene-route-container-global{top:70px!important;left:50%!important;transform:translateX(-50%) scale(.6)!important;transform-origin:top center}
+html.tdr-rep .maps-scene-secret-container{top:330px!important;transform:translateX(-50%) scale(.6)!important;transform-origin:top center}
+html.tdr-rep .maps-scene-route-container-routes{top:60px!important;left:0!important;transform:none!important;width:100%!important;height:calc(100% - 60px)!important}
+/* Perfil: retrato arriba, logros debajo y las estadísticas a continuación */
+html.tdr-rep .profile-player-container{left:50%!important;transform:translateX(-50%)}
+html.tdr-rep .profile-scene-achievements-container{top:140px!important;left:12px!important;right:12px!important;width:auto!important;justify-content:center}
+html.tdr-rep .profile-stats-container{top:250px!important;left:12px!important;right:12px!important}
+html.tdr-rep .profile-stat{height:28px!important;font-size:13px!important}
+html.tdr-rep .profile-stat-label,html.tdr-rep .profile-stat-value{font-size:13px!important}
+html.tdr-rep .maps-scene-route-group-maps{display:grid!important;grid-template-columns:repeat(2,auto)!important;justify-content:center!important;gap:8px!important;width:auto!important}
+/* Datos del Pokémon y otras ventanas pequeñas: en vertical se ven al 66 %, así que la letra pequeña sube. */
+html.tdr-v .pokemon-scene-data-label,html.tdr-v .pokemon-scene-data-value,html.tdr-v .pokemon-scene-data-value-at{font-size:15px!important}
+html.tdr-v .pokemon-scene-ability-name,html.tdr-v .pokemon-scene-item-name{font-size:14px!important}
+html.tdr-v .pokemon-scene-item-description,html.tdr-v .game-scene-window [class*="description"]{font-size:15px!important;line-height:1.3!important}
+html.tdr-v .pokemon-scene-evolution-level{font-size:11px!important}
+html.tdr-v .pokemon-scene-name{font-size:24px!important}
+html.tdr-v .game-scene-title{font-size:20px!important}
+html.tdr-v .pokemon-scene-level-up{font-size:12px!important;line-height:1.15!important;border-radius:10px!important}
+/* Botones del juego: esquinas redondeadas como en PokéBonk */
+html.tdr-on .box-scene-button,html.tdr-on .box-scene-tab,html.tdr-on .maps-scene-nav-button,html.tdr-on .pokemon-scene-level-up,html.tdr-on [class*="-tab"]:not(.tdr-tab){border-radius:10px}
+html.tdr-rep .box-scene-button{font-size:12px!important}
+html.tdr-rep .box-scene-tab{font-size:11px!important}
+html.tdr-rep .inventory-scene-item-container{height:auto!important;bottom:205px!important}
+html.tdr-rep .inventory-scene-item-description{font-size:13px!important;line-height:1.35!important}
+html.tdr-rep .box-scene-unit-container{border-radius:12px}
+
+/* Horizontal: barra más baja y ventanas más grandes */
+html.tdr-h.tdr-sec:not(.tdr-win) .tdr-secbar{height:calc(var(--tdr-st) + 44px)}
+html.tdr-h .tdr-secbar b{font-size:18px}
+html.tdr-h .tdr-close{height:34px}
+html.tdr-reph .shop-scene-item-container{overflow-y:auto;align-content:flex-start!important;top:12px!important;bottom:12px!important}
+html.tdr-reph .shop-scene-item{height:190px!important;flex:none}
+html.tdr-reph .profile-stats-container{bottom:auto!important}
+html.tdr-reph .maps-scene-route-container-global{top:45px!important;transform:translateX(-50%) scale(.85)!important;transform-origin:top center}
+html.tdr-reph .inventory-scene-item-container{height:auto!important;bottom:200px!important}
+html.tdr-reph .maps-scene-route-container-global{top:62px!important}
+html.tdr-reph .profile-stats-container,html.tdr-rep .profile-stats-container{bottom:10px!important;overflow-y:auto!important;height:auto!important}
+
+/* Opciones de la vista nueva, en la barra de Ajustes */
+.tdr-opts{display:none;gap:6px}
+html.tdr-sec-menu .tdr-opts{display:flex}
+.tdr-opt{height:34px;padding:0 12px;border-radius:99px;background:#ffffff1a!important;color:#e9e1ff!important;font:800 12.5px var(--tdr-font)!important;box-shadow:inset 0 0 0 1.5px #ffffff30;white-space:nowrap}
+.tdr-opt.on{background:var(--tdr-leaf)!important;color:#fff!important;box-shadow:none}
+@media (max-width:420px){html.tdr-sec-menu .tdr-secbar b{display:none}.tdr-opt{padding:0 9px;font-size:11.5px}}
+
+/* ---------- botones de las ventanas del juego, al estilo PokéBonk ----------
+   Mismos colores de fondo que pone el juego (verde, rojo, azul… según su estado), pero sin borde negro,
+   con esquinas redondeadas, sombra abajo y la letra redondeada en negrita. */
+html.tdr-on :is(.box-scene-button,.box-scene-tab,.box-scene-view-button,.challenge-scene-start-button,.defeat-restart-button,.defeat-retry-button,
+  .delete-scene-no-button,.delete-scene-yes-button,.dex-scene-tab,.draft-scene-reroll-button,.draft-scene-restart-button,.export-scene-button,
+  .final-accept-button,.import-scene-button,.maps-scene-nav-button,.menu-scene-option-button,.name-change-accept-button,.name-change-restore-button,
+  .new-game-start-button,.pokemon-scene-level-up,.pokemon-scene-extra-button,.draft-scene-data-button-container>*,[class*="inventory-scene-tab"],[class*="challenge-scene-tab"]){
+  outline:0!important;border:0!important;border-radius:99px!important;
+  box-shadow:0 3px 0 #0006,inset 0 1px 0 #ffffff33!important;
+  font-family:"M PLUS Rounded 1c","Nunito",sans-serif!important;font-weight:900!important;letter-spacing:.02em;
+  -webkit-text-stroke:0!important;text-shadow:0 1px 0 #0005!important;image-rendering:auto!important}
+html.tdr-on :is(.box-scene-button,.box-scene-tab,.menu-scene-option-button,.pokemon-scene-level-up,.draft-scene-reroll-button,.draft-scene-restart-button):active{translate:0 2px;box-shadow:0 1px 0 #0006!important}
+html.tdr-on .menu-scene-option-button{height:22px!important;line-height:22px!important;font-size:9.5px!important;margin:0 2px}
+html.tdr-on .menu-scene-option-buttons{gap:3px}
+html.tdr-on .box-scene-search,html.tdr-on .inventory-scene-search,html.tdr-on input[type=text]{border-radius:99px!important;border:0!important;padding:0 12px!important;background:#ffffff1f!important;color:#fff!important;font-family:"Nunito",sans-serif!important}
+html.tdr-on :is(.box-scene-unit-container,.inventory-scene-item-container,.inventory-scene-item-selected-container,.menu-scene-section,.profile-stats-container){border-radius:14px!important}
+html.tdr-on .inventory-scene-item-slot,html.tdr-on .box-scene-unit{border-radius:10px!important}
+
+/* En vertical: buscador a la izquierda y orden a la derecha, sin taparse */
+html.tdr-rep .box-scene-search,html.tdr-rep .inventory-scene-search{left:12px!important;width:46%!important}
+html.tdr-rep .box-scene-sort-container,html.tdr-rep .box-scene-sort-container-inventory{right:8px!important;width:46%!important}
+html.tdr-rep .inventory-scene-item-container{overflow-y:auto!important;bottom:215px!important}
+
+.tdr-comp{width:38px;height:44px;flex:none;background:center bottom/contain no-repeat;image-rendering:pixelated;box-shadow:inset 0 0 0 1.5px #ffcb05}
+.tdr-comp[hidden]{display:none}
