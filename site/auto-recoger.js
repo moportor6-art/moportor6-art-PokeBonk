@@ -17,7 +17,7 @@
     for (const o of I.list) {
       if (!AUTO[o.kind] || o.used || (o.cost ?? 0) > 0) continue;
       if (Math.hypot(o.x - p.pos.x, o.z - p.pos.z) > (o.r ?? 2) + 0.6) continue;
-      if (o.kind === 'berry' && p.hp >= p.maxHp * 0.9) continue;
+      // 1.28: las bayas se recogen siempre (con la Bolsa de bayas, cada arbusto deja además bayas guardadas).
       try {
         I.interact(o);
         if (o.kind === 'rock') run.vfx?.burst?.(o.x, o.y + 0.8, o.z, 0xffd84a, 14, 5, 29, 0.45, 0.6);

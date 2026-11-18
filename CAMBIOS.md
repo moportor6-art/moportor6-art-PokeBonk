@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Bolsa de bayas (Subversión 1.28)
+- `bolsa.js`: `run.__pbBolsa` (cantidades, enfriamientos y efectos temporales); envuelve `interactables.interact` (bayas al usar un arbusto), `recompute` (efectos) y `hurt` (Enigma); barra `.pb-bolsa` (en `hud-editor.js`).
+- `auto-recoger.js`: los arbustos de bayas se recogen siempre.
+- Acción «Bayas» (`tools/bayas.txt`): iconos que faltan desde PokeAPI/sprites.
+
 ## Automatismos y modo rendimiento (Subversión 1.27)
 - `automatiza.js` (`profile.pbAuto`): Mega/Dynamax con `PB_MEGA`, Tera con `PB_TERA.activar` (expuesto en `tera.js`), `rifts.use()` con 3 de Incienso, baya de emergencia, `tryJohtoGrow` sin ventana, `vfx.burst`/`ground.spawn` aligerados, Laboratorio automático con `meta.buyLab` y `PB_LAB.tmp`, puntos rojos en el menú.
 

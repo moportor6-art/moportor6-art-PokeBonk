@@ -1,0 +1,31 @@
+# Subversión propia (1.28): baja de PokeAPI/sprites los iconos de las bayas de la Bolsa (PokéBonk Lite) que no trae el
+# juego (tools/bayas.txt) y los sube a main. Se lanza sola al cambiar la lista, o a mano.
+name: Bayas
+on:
+  workflow_dispatch:
+  push:
+    branches: [main]
+    paths:
+      - tools/bayas.txt
+      - .github/workflows/bayas.yml
+permissions:
+  contents: write
+jobs:
+  bayas:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Bajar iconos
+        run: |
+          grep -vE '^\s*(#|$)' tools/bayas.txt | while read b; do
+            [ -f "site/assets/items/$b.png" ] && continue
+            curl -fsSL --retry 3 "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/$b.png" -o "site/assets/items/$b.png" || echo "::warning::falta $b"
+          done
+      - name: Subir a main
+        run: |
+          git config user.name "github-actions"
+          git config user.email "github-actions@users.noreply.github.com"
+          git add site/assets/items
+          git commit -m "Iconos de bayas de la Bolsa (PokeAPI/sprites)" || { echo "nada nuevo"; exit 0; }
+          git pull --rebase origin main
+          git push origin HEAD:main

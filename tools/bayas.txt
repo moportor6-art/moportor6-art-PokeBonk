@@ -1,0 +1,7 @@
+# Iconos de bayas para bolsa.js (PokeAPI/sprites, sprites/items/<nombre>.png)
+liechi-berry
+ganlon-berry
+salac-berry
+lansat-berry
+leppa-berry
+starf-berry

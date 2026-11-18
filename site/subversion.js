@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.27';
+  const SUB = '1.28';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.28',
+      date: Date.UTC(2026, 10, 18, 20, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.28`,
+      summary: 'PokéBonk Lite: Bolsa de bayas con 10 tipos, hasta 30 de cada una, que se usan solas en su momento.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Bolsa de bayas**: una barra con un hueco por tipo de baya y su cantidad (hasta 30 de cada una). Se usan solas en su momento o tocando el hueco, y se mueve y cambia de tamaño en «Editar HUD».`,
+        `- **De dónde salen**: cada arbusto de bayas (se recoge solo, como antes, y además deja 1-2 bayas variadas) y los Alfas y élites al caer (25 %).`,
+        `- **Las bayas**: Aranja (cura 8 %), Zidra (18 %), Ziuela (quita estados), Enigma (cura tras un golpe fuerte), Lichi (+30 % daño), Gonlan (+20 armadura), Aslac (+30 % velocidad), Zonlan (+20 % crítico), Mepo (+40 % velocidad de ataque con jefes) y Arabol (dos efectos a la vez, rara).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.27',
       date: Date.UTC(2026, 10, 18, 19, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.27`,
@@ -2812,6 +2832,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.28',
+      date: '2026-11-18',
+      title: 'Bolsa de bayas (Lite).',
+      notes: [
+        ['new', 'Lite: Bolsa de bayas con 10 tipos (hasta 30 de cada una), uso automático y manual, y movible en «Editar HUD».'],
+        ['new', 'Lite: los arbustos dejan bayas variadas en la bolsa y los Alfas y élites pueden soltarlas.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.27',
