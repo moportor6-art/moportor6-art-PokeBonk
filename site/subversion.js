@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.31';
+  const SUB = '1.32';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.32',
+      date: Date.UTC(2026, 10, 18, 22, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.32`,
+      summary: 'PokéBonk Lite: Zumo de Baya, Hiperpoción y Restaurar Todo en el mapa para la bolsa.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Consumibles nuevos para la bolsa**, en arbustos propios del mapa (2-4 por zona, marcados como las bayas): **Zumo de Baya** (cura 12 %), **Hiperpoción** (cura 30 %) y, a veces, **Restaurar Todo** (cura 50 % y quita estados). Se guardan al pasar y se usan solos cuando te hacen falta (o tocándolos).`,
+        `- No existen como objeto en el juego, así que no tocan tus vitaminas ni objetos permanentes (Poción, Superpoción, Revivir…).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.31',
       date: Date.UTC(2026, 10, 18, 21, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.31`,
@@ -2885,6 +2904,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.32',
+      date: '2026-11-18',
+      title: 'Consumibles en el mapa para la bolsa (Lite).',
+      notes: [
+        ['new', 'Lite: Zumo de Baya, Hiperpoción y Restaurar Todo en arbustos del mapa; van a la bolsa y se usan solos.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.31',

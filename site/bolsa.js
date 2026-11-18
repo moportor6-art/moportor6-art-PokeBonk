@@ -10,6 +10,8 @@
      Lichi: +30 % de daño 12 s  · Gonlan: +20 armadura 12 s · Aslac: +30 % de velocidad 12 s · Zonlan: +20 % de crítico 12 s
        (las cuatro, solas por debajo del 25 %)
      Mepo: +40 % de velocidad de ataque 10 s (sola con un jefe cerca) · Arabol (rara): dos efectos de apuro a la vez
+   1.32: Zumo de Baya (cura 12 %, por debajo del 40 %), Hiperpoción (30 %, por debajo del 25 %) y Restaurar Todo (50 % y
+     quita estados, por debajo del 15 %): salen de arbustos propios del mapa (2-4 por zona) y van a la bolsa.
    Iconos: assets/items (los que faltan, de PokeAPI/sprites con la acción «Bayas»; si no está, se dibuja un círculo).
    Ganchos: run.interactables.interact, player.recompute / hurt / heal / pstat (estados). */
 (() => {
@@ -25,19 +27,23 @@
     salac: { n: 'Aslac', icon: 'salac-berry', col: '#5ad86a', w: 7, apuro: 'velocidad' },
     lansat: { n: 'Zonlan', icon: 'lansat-berry', col: '#ff8a3a', w: 7, apuro: 'critico' },
     leppa: { n: 'Mepo', icon: 'leppa-berry', col: '#ff9a5a', w: 6, auto: r => jefe(r), buff: 'ataque' },
-    starf: { n: 'Arabol', icon: 'starf-berry', col: '#e8e8ff', w: 2, apuro: 'doble' }
+    starf: { n: 'Arabol', icon: 'starf-berry', col: '#e8e8ff', w: 2, apuro: 'doble' },
+    // 1.32: consumibles propios (no existen como objeto en el juego, así que no tocan tus vitaminas ni objetos).
+    'pb-zumo': { n: 'Zumo de Baya', icon: 'berry-juice', col: '#ff8ab8', w: 0, auto: (r, p) => p.hp < p.maxHp * 0.4, usa: (r, p) => p.heal(p.maxHp * 0.12) },
+    'pb-hiper': { n: 'Hiperpoción', icon: 'pb-hyper-potion', col: '#c86aff', w: 0, auto: (r, p) => p.hp < p.maxHp * 0.25, usa: (r, p) => p.heal(p.maxHp * 0.3) },
+    'pb-restaurar': { n: 'Restaurar Todo', icon: 'pb-full-restore', col: '#ffe04a', w: 0, auto: (r, p) => p.hp < p.maxHp * 0.15, usa: (r, p) => { p.heal(p.maxHp * 0.5); for (const k in p.pstat ?? {}) p.pstat[k] = 0; } }
   };
   const BUFF = { dano: 12, armadura: 12, velocidad: 12, critico: 12, ataque: 10 };
   const NB = { dano: '+30 % de daño', armadura: '+20 de armadura', velocidad: '+30 % de velocidad', critico: '+20 % de crítico', ataque: '+40 % de velocidad de ataque' };
   const jefe = run => { const E = run.enemies, p = run.player.pos; for (let j = 0; j < (E.alive?.length ?? 0); j++) if (E.alive[j] && E.flags[j] & 4 && Math.hypot(E.x[j] - p.x, E.z[j] - p.z) < 35) return true; return false; };
-  const azar = () => { const t = Object.values(B).reduce((a, b) => a + b.w, 0); let r = Math.random() * t; for (const [k, b] of Object.entries(B)) if ((r -= b.w) < 0) return k; return 'oran'; };
+  const azar = () => { const t = Object.values(B).reduce((a, b) => a + (b.w ?? 0), 0); let r = Math.random() * t; for (const [k, b] of Object.entries(B)) if (b.w && (r -= b.w) < 0) return k; return 'oran'; };
   const S = run => run.__pbBolsa ??= { n: {}, cd: {}, buff: {}, orden: [] };
 
   const dar = (run, k, cant = 1, aviso = false) => {
     const s = S(run), antes = s.n[k] ?? 0;
     s.n[k] = Math.min(MAX, antes + cant);
     if (!s.orden.includes(k)) s.orden.push(k);
-    if (aviso && s.n[k] > antes) try { const p = run.player.pos; run.ui.popup(p.x, p.y + 2.6, p.z, `+${s.n[k] - antes} Baya ${B[k].n}`, B[k].col, 0.8); } catch {}
+    if (aviso && s.n[k] > antes) try { const p = run.player.pos; run.ui.popup(p.x, p.y + 2.6, p.z, `+${s.n[k] - antes} ${k.startsWith('pb-') ? '' : 'Baya '}${B[k].n}`, B[k].col, 0.8); } catch {}
   };
   const activar = (run, b) => {
     const s = S(run), t = run.time ?? 0, p = run.player;
@@ -52,7 +58,7 @@
     s.n[k]--; s.cd[k] = t + CD;
     try { if (b.usa) b.usa(run, p); else activar(run, b); } catch {}
     try {
-      run.ui.popup(p.pos.x, p.pos.y + 2.6, p.pos.z, `¡Baya ${b.n}!${b.apuro || b.buff ? ' ' + (b.apuro === 'doble' ? '¡Doble apuro!' : NB[b.apuro ?? b.buff]) : ''}`, b.col, 0.9);
+      run.ui.popup(p.pos.x, p.pos.y + 2.6, p.pos.z, `¡${k.startsWith('pb-') ? '' : 'Baya '}${b.n}!${b.apuro || b.buff ? ' ' + (b.apuro === 'doble' ? '¡Doble apuro!' : NB[b.apuro ?? b.buff]) : ''}`, b.col, 0.9);
       run.vfx.ring(p.pos.x, p.pos.y + 0.2, p.pos.z, 2.2, parseInt(b.col.slice(1), 16), 0.45);
     } catch {}
     return true;
@@ -84,10 +90,30 @@
       const I = run.interactables;
       if (I && !I.__pbBolsa) {
         const it = I.interact.bind(I);
-        I.interact = o => { const r = it(o); try { if (o?.kind === 'berry' && o.used) { dar(run, azar(), 1, true); if (Math.random() < 0.5) dar(run, azar(), 1, true); } } catch {} return r; };
+        I.interact = o => {
+          // 1.32: arbusto de consumible (puesto por bolsa.js): va a la bolsa, sin la curación del arbusto normal.
+          const c = o?.data?.pbCons;
+          if (c && !o.used) {
+            if ((S(run).n[c] ?? 0) >= MAX) { if (!o.__pbAviso) { o.__pbAviso = true; try { run.ui.toast(`Ya llevas ${MAX} de ${B[c].n}`, null); } catch {} } return false; }
+            o.used = true; if (o.group) o.group.userData.dim = 0.6;
+            dar(run, c, 1, true);
+            try { run.ui.toast(`¡${B[c].n}! Guardado en la bolsa`, B[c].icon); run.vfx.burst(o.x, o.y + 2, o.z, parseInt(B[c].col.slice(1), 16), 16, 4, 29, 0.5, 0.6); } catch {}
+            return true;
+          }
+          const r = it(o); try { if (o?.kind === 'berry' && o.used) { dar(run, azar(), 1, true); if (Math.random() < 0.5) dar(run, azar(), 1, true); } } catch {} return r; };
         I.__pbBolsa = true;
       }
       p.__pbBolsa = true;
+    }
+    // 1.32: en cada zona aparecen arbustos con consumibles (Zumo de Baya, Hiperpoción y, a veces, Restaurar Todo).
+    if (run.interactables?.place && run.terrain && s.zona !== (run.stage ?? 1) && run.state === 'play') {
+      s.zona = run.stage ?? 1;
+      const T = run.terrain, R = (T.play ?? 140) * 0.85, lista = ['pb-zumo', 'pb-zumo', 'pb-hiper'];
+      if (Math.random() < 0.35) lista.push('pb-restaurar');
+      for (const c of lista) for (let i = 0; i < 25; i++) {
+        const x = (Math.random() * 2 - 1) * R, z = (Math.random() * 2 - 1) * R;
+        try { if (!T.inBounds(x, z, 8) || T.inWater?.(x, z) || (T.isFlatOpen && !T.isFlatOpen(x, z))) continue; run.interactables.place('berry', x, z, { data: { pbCons: c } }); break; } catch { break; }
+      }
     }
     // Fin de los efectos temporales.
     for (const [x, fin] of Object.entries(s.buff)) if (fin && fin <= t) { s.buff[x] = 0; try { p.recompute(); } catch {} }
@@ -129,7 +155,7 @@
     if (!lista.length && editando) { el.innerHTML = '<button type="button" class="h" style="--c:#aaa"><i></i><b>0</b></button>'; return; }
     el.replaceChildren(...lista.map(x => {
       const b = B[x], h = document.createElement('button');
-      h.type = 'button'; h.className = 'h' + ((s.cd[x] ?? 0) > t ? ' cd' : ''); h.style.setProperty('--c', b.col); h.title = `Baya ${b.n}`;
+      h.type = 'button'; h.className = 'h' + ((s.cd[x] ?? 0) > t ? ' cd' : ''); h.style.setProperty('--c', b.col); h.title = `${x.startsWith('pb-') ? '' : 'Baya '}${b.n}`;
       const im = new Image(); im.src = `./assets/items/${b.icon}.png`; im.alt = '';
       im.onerror = () => im.replaceWith(document.createElement('i'));
       const n = document.createElement('b'); n.textContent = s.n[x];

@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Consumibles en el mapa (Subversión 1.32)
+- `bolsa.js`: tipos `pb-zumo`, `pb-hiper` y `pb-restaurar`; en cada zona pone arbustos `berry` con `data.pbCons` (`interactables.place`) que van a la bolsa sin la curación del arbusto. Iconos `pb-hyper-potion` y `pb-full-restore` con la acción «Bayas».
+
 ## Icono de la Baya Enigma (Subversión 1.31)
 - `bolsa.js` usa `pb-enigma-berry.png` (PokeAPI/sprites); la acción «Bayas» acepta `destino origen` y no pisa iconos del juego.
 

@@ -7,3 +7,6 @@ leppa-berry
 starf-berry
 # 1.31: el enigma-berry.png del juego es otro dibujo (parece un cuerno); la bolsa usa este
 pb-enigma-berry enigma-berry
+# 1.32: consumibles de la bolsa
+pb-hyper-potion hyper-potion
+pb-full-restore full-restore
