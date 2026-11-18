@@ -204,7 +204,7 @@
 
   const activar = () => {
     const run = window.__pbRun;
-    if (!puede(run)) return;
+    if (!puede(run)) return false;
     const s = st(run), t = tipoDe(run), p = run.player;
     s.zona = run.stage ?? 1; s.fin = (run.time ?? 0) + DURA; s.tipo = t; s.ini = run.time ?? 0;
     try { p.recompute(); } catch {}
@@ -214,6 +214,8 @@
       run.audio.power();
     } catch {}
   };
+  window.PB_TERA.activar = activar; window.PB_TERA.puede = () => puede(window.__pbRun); // 1.27: automatiza.js
+
 
   // Cada fotograma: corona, tinte y motas que suben del cristal.
   let ultimoRun = null;

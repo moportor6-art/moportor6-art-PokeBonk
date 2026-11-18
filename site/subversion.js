@@ -4,16 +4,40 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.26';
+  const SUB = '1.27';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.27',
+      date: Date.UTC(2026, 10, 18, 19, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.27`,
+      summary: 'PokéBonk Lite: más automatismos (Mega/Dynamax/Tera, Incienso, evoluciones, Laboratorio), curación de emergencia, avisos y modo rendimiento.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite** (opciones en Pausa → «HUD y guía»):`,
+        `- **Mega / Dynamax / Tera automáticos** al aparecer un jefe (Sí por defecto).`,
+        `- **Evoluciones de reto automáticas** (Blissey, Crobat…) al llegar a su nivel, sin preguntar (No por defecto).`,
+        `- **Incienso inteligente**: con el Incienso lleno abre una grieta sola cuando no hay jefe.`,
+        `- **Modo rendimiento**: Auto (menos partículas con más de 200 enemigos), Siempre o No.`,
+        `- **Curación de emergencia**: con menos del 30 % de vida te comes la baya libre más cercana (hasta 15 m).`,
+        `- **Laboratorio automático** (caja en el Laboratorio): eliges 3 mejoras y, al terminar cada partida, el Polvo se gasta en ellas por turnos.`,
+        `- **Avisos en el menú**: punto rojo en «Modo historia» si no has hecho el Desafío diario y en «Laboratorio» si puedes comprar algo o un huevo está a punto.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.26',
       date: Date.UTC(2026, 10, 18, 12, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.26`,
@@ -2788,6 +2812,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.27',
+      date: '2026-11-18',
+      title: 'Automatismos y modo rendimiento (Lite).',
+      notes: [
+        ['new', 'Lite: Mega/Dynamax/Tera automáticos con los jefes, Incienso inteligente y evoluciones de reto automáticas (opcionales).'],
+        ['new', 'Lite: curación de emergencia con bayas cercanas y Laboratorio automático con 3 prioridades.'],
+        ['new', 'Lite: avisos en el menú y modo rendimiento (menos partículas con mucha horda).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.26',

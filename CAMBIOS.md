@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Automatismos y modo rendimiento (Subversión 1.27)
+- `automatiza.js` (`profile.pbAuto`): Mega/Dynamax con `PB_MEGA`, Tera con `PB_TERA.activar` (expuesto en `tera.js`), `rifts.use()` con 3 de Incienso, baya de emergencia, `tryJohtoGrow` sin ventana, `vfx.burst`/`ground.spawn` aligerados, Laboratorio automático con `meta.buyLab` y `PB_LAB.tmp`, puntos rojos en el menú.
+
 ## Laboratorio ampliado, automatismos, medallas por Pokémon y Desafío diario (Subversión 1.26)
 - `lab-extra.js`: 4 mejoras nuevas en `PB_LAB.defs` (`pb-unown`, `pb-grieta`, `pb-huevo`, `pb-shiny`); envuelve `altarUpdate` y `updateEntrance` (prototipos) y `meta.shinyRate`; `PB_LABX.huevo` lo usa `incubadora.js`.
 - `auto-recoger.js`: `freechest` automático y elección sola de la única `.card.offer`.
