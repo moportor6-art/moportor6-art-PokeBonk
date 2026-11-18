@@ -137,7 +137,10 @@
       cx2.drawImage(c.lz, Math.round(a[0] - art.w * S / 2), Math.round(a[1] - art.h * S), Math.round(art.w * S), Math.round(art.h * S));
     }
   };
-  const ponerCorona = (clave, d) => { const c = coronas.get(clave); if (c && c.tipo === d.tipo && c.chica === d.chica) Object.assign(c, d); else coronas.set(clave, { ...d, t0: performance.now() / 1000 }); };
+  // 1.23: a petición, sin corona (ni en ti ni en los jefes); en su lugar, cristales en el suelo al caminar. El arte
+  // de las coronas se conserva aquí por si se quiere volver: basta con poner SIN_CORONA a false.
+  const SIN_CORONA = true;
+  const ponerCorona = (clave, d) => { if (SIN_CORONA) return; const c = coronas.get(clave); if (c && c.tipo === d.tipo && c.chica === d.chica) Object.assign(c, d); else coronas.set(clave, { ...d, t0: performance.now() / 1000 }); };
   const quitarCorona = clave => coronas.delete(clave);
   const alturaCuerpo = (run, sid, esc) => { try { const b = run.sprites.get(sid); const h = b?.bodyHeight?.(esc); if (h > 0) return h; } catch {} return 2.2 * (esc || 1); };
   // Tinte de cristal (r, g, b, cantidad) para el sprite: el color del teratipo, con destellos de luz.
@@ -179,6 +182,25 @@
     } catch {}
   };
   window.PB_TERA.estallar = estallar;
+  // 1.23: rastro de cristales del color del teratipo en el suelo mientras caminas teracristalizado.
+  let ultPos = null;
+  setInterval(() => {
+    const run = window.__pbRun, p = run?.player, s = run?.__pbTera;
+    if (!run || !p || run.state !== 'play' || !activo(run) || (run.time ?? 0) - (s?.ini ?? 0) < INTRO || p.dead) { ultPos = null; return; }
+    const x = p.pos.x, z = p.pos.z;
+    if (ultPos && Math.hypot(x - ultPos[0], z - ultPos[1]) < 0.7) return;
+    ultPos = [x, z];
+    const col = COL[s.tipo] ?? 0xffffff, g = run.vfx?.ground;
+    if (!g?.spawn) return;
+    try {
+      for (let i = 0; i < 3; i++) {
+        const a = Math.random() * Math.PI * 2, r = 0.25 + Math.random() * 0.6, cx = x + Math.cos(a) * r, cz = z + Math.sin(a) * r;
+        const tam = 0.9 + Math.random() * 0.8;
+        g.spawn({ x: cx, y: (run.terrain.surface ?? run.terrain.height).call(run.terrain, cx, cz) + 0.1, z: cz, life: 2.4 + Math.random(), size: tam, endSize: tam * 0.4, color: i === 1 ? 0xffffff : col, shape: i === 2 ? 32 : 29, glow: 0.7, rot: Math.random() * Math.PI * 2 });
+      }
+      if (Math.random() < 0.35) run.vfx.burst(x, p.pos.y + 0.3, z, col, 3, 1.5, 29, 0.3, 0.5);
+    } catch {}
+  }, 90);
 
   const activar = () => {
     const run = window.__pbRun;

@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.22';
+  const SUB = '1.23';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.23',
+      date: Date.UTC(2026, 10, 18, 9, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.23`,
+      summary: 'PokéBonk Lite: la Teracristalización deja cristales en el suelo en vez de la corona.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Rastro de cristales**: al caminar teracristalizado vas dejando cristales del color de tu teratipo en el suelo, con destellos, que se desvanecen poco a poco.`,
+        `- **Sin corona**: ni sobre tu Pokémon ni sobre los jefes. Se mantienen el brillo de cristal, la transformación y el estallido final.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.22',
       date: Date.UTC(2026, 10, 18, 8, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.22`,
@@ -2710,6 +2729,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.23',
+      date: '2026-11-17',
+      title: 'Cristales en el suelo en vez de corona (Lite).',
+      notes: [
+        ['new', 'Lite: rastro de cristales del teratipo al caminar teracristalizado.'],
+        ['balance', 'Lite: se quita la corona de la Teracristalización (tuya y de los jefes).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.22',

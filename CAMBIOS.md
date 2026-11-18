@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Cristales en el suelo (Subversión 1.23)
+- `tera.js`: `SIN_CORONA = true` (el arte de las coronas se conserva); rastro con `run.vfx.ground.spawn` (formas Shard 29 y Gem 32) cada 0,7 m recorridos mientras dura la tera.
+
 ## Jefes de líder más llevaderos (Subversión 1.22)
 - `fases.js`: guarda el daño base de cada jefe al verlo y lo limita a ×1,6 tras Tera, Mega, Dynamax y furia (`tope()`); duración mínima 30/33/35 s.
 
