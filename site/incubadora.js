@@ -34,7 +34,7 @@
     const run = window.__pbRun, d = D();
     if (!run || !d || run.state !== 'over' || visto === run || run.mode === 'duel') return;
     visto = run;
-    const k = run.stats?.kills ?? 0, avisos = [];
+    const k = Math.round((run.stats?.kills ?? 0) * (window.PB_LABX?.huevo?.(run) ?? 1)), avisos = []; // 1.26: Suerte de huevos
     for (const h of d.h) h.k = (h.k ?? 0) + k;
     for (const h of [...d.h]) if (h.k >= h.need) { avisos.push(eclosionar(h)); d.h.splice(d.h.indexOf(h), 1); }
     while (d.h.length < HUECOS && d.cola.length) d.h.push(d.cola.shift());

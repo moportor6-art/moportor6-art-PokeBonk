@@ -4,16 +4,37 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.25';
+  const SUB = '1.26';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.26',
+      date: Date.UTC(2026, 10, 18, 12, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.26`,
+      summary: 'PokéBonk Lite: 4 mejoras nuevas del Laboratorio, más automatismos, medallas por Pokémon y Desafío diario.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Laboratorio**: Sintonía Unown (altares un 15 % más rápidos por nivel), Imán de grietas (tardan un 15 % más en desbordarse), Suerte de huevos (+15 % de bajas para la Incubadora) y Ojo de cazador (+25 % de variocolores por nivel). 3 niveles cada una.`,
+        `- **Automático**: las Poké Balls gratis del mapa se abren solas al pasar, y si una ventana de elegir solo ofrece una carta, se elige sola.`,
+        `- **Medallas por Pokémon**: en su ficha de la Pokédex ves las medallas que has ganado con él.`,
+        `- **Desafío diario** (en el Modo historia, junto a los Anillos de Hoopa): mapa, Pokémon y regla especial del día; aguanta 10 minutos y gana 500 de Polvo una vez al día.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.25',
       date: Date.UTC(2026, 10, 18, 11, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.25`,
@@ -2767,6 +2788,18 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.26',
+      date: '2026-11-18',
+      title: 'Laboratorio ampliado, automatismos, medallas por Pokémon y Desafío diario (Lite).',
+      notes: [
+        ['new', 'Lite: Sintonía Unown, Imán de grietas, Suerte de huevos y Ojo de cazador en el Laboratorio.'],
+        ['new', 'Lite: Poké Balls gratis automáticas y elección automática cuando solo hay una carta.'],
+        ['new', 'Lite: medallas ganadas con cada Pokémon en su ficha de la Pokédex.'],
+        ['new', 'Lite: Desafío diario con regla especial y 500 de Polvo.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.25',

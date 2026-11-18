@@ -528,6 +528,8 @@
     if (run.victory) {
       const cap = capitulo(s);
       s.res = { gano: true, id: cap.id, liga: cap.liga, reg: cap.reg };
+      // 1.26: medalla ganada con este Pokémon (se ve en su ficha de la Pokédex; gimnasios.js).
+      try { if (cap.id && !cap.liga) { const p = meta().profile, pk = (p.pbMedPk ??= {})[run.startSpecies] ??= [], k = `${cap.reg}:${cap.id}`; pk.includes(k) || pk.push(k); } } catch {}
       s.k++;
       if (s.k > lideres(cap.reg).length) { s.k = 0; s.r++; if (s.r >= ORDEN.length) { s.r = ORDEN.length - 1; s.fin = true; } }
     } else s.res = { gano: false };

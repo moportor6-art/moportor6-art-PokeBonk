@@ -78,6 +78,22 @@
   };
   const img = (reg, l) => reg === 'alola' ? `./assets/ui/types/${l.tipo}.png` : `./assets/medallas/${l.id}.png`;
   const G = { LIDERES, sel: null, medallas, mods: todasMods };
+  // 1.26 (Lite): en la ficha de la Pokédex, las medallas ganadas con ese Pokémon.
+  if (window.PB_EDICION === 'lite') setInterval(() => {
+    const info = document.querySelector('.dx-info'), on = document.querySelector('.dx-tile.on img');
+    if (!info || !on) return;
+    const sp = +((on.getAttribute('src') ?? '').match(/portraits\/(\d+)\.png/)?.[1] ?? 0);
+    const lst = meta()?.profile?.pbMedPk?.[sp] ?? [], k = `${sp}|${lst.join(',')}`;
+    let d = info.querySelector('.pb-medpk');
+    if (d?.dataset.k === k) return;
+    if (!lst.length) { d?.remove(); return; }
+    if (!d) { d = document.createElement('div'); d.className = 'pb-medpk'; d.style.cssText = 'margin:8px 0;padding:6px 8px;border-radius:10px;background:rgba(224,160,32,.15);font:700 12px system-ui,sans-serif'; info.append(d); }
+    d.dataset.k = k;
+    d.innerHTML = `<div>🏅 Medallas ganadas con este Pokémon (${lst.length})</div><div style="display:flex;flex-wrap:wrap;gap:4px;margin-top:4px">` + lst.map(x => {
+      const [reg, id] = x.split(':'), l = LIDERES[reg]?.find(y => y.id === id);
+      return l ? `<img src="${img(reg, l)}" title="${l.nombre} (${REGION[reg] ?? reg})" style="width:26px;height:26px;image-rendering:pixelated">` : '';
+    }).join('') + '</div>';
+  }, 600);
   window.PB_GYM = G;
   // run.__gym.l: un rival que no es líder (el campeón del modo historia, historia.js), con su propio equipo.
   const lider = run => run?.__gym ? run.__gym.l ?? LIDERES[run.__gym.reg]?.find(l => l.id === run.__gym.id) : null;
@@ -148,6 +164,8 @@
         const p = m.profile;
         p.pbMedallas ??= {};
         const lista = p.pbMedallas[reg] ??= [];
+        // 1.26: con qué Pokémon se ha ganado cada medalla (también las repetidas), para su ficha de la Pokédex.
+        try { const pk = (p.pbMedPk ??= {})[run.startSpecies] ??= []; const k = `${reg}:${l.id}`; if (!pk.includes(k)) { pk.push(k); m.save(); } } catch {}
         if (lista.includes(l.id)) return;
         lista.push(l.id);
         let polvo = 300;
