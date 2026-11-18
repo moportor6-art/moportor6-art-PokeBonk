@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Icono de la Baya Enigma (Subversión 1.31)
+- `bolsa.js` usa `pb-enigma-berry.png` (PokeAPI/sprites); la acción «Bayas» acepta `destino origen` y no pisa iconos del juego.
+
 ## Incienso y Dominantes (Subversión 1.30)
 - `automatiza.js`: `pbAuto.inc` por defecto `false` (se reinicia una vez con `v129`).
 - `equilibrio.js`: duración mínima de Dominantes e Invocadores 12 s (Normal) / 16 s (Difícil).

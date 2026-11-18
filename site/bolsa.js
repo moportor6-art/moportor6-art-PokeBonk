@@ -19,7 +19,7 @@
     oran: { n: 'Aranja', icon: 'oran-berry', col: '#4a8aff', w: 30, auto: (r, p) => p.hp < p.maxHp * 0.5, usa: (r, p) => p.heal(p.maxHp * 0.08) },
     sitrus: { n: 'Zidra', icon: 'sitrus-berry', col: '#ffd84a', w: 18, auto: (r, p) => p.hp < p.maxHp * 0.3, usa: (r, p) => p.heal(p.maxHp * 0.18) },
     lum: { n: 'Ziuela', icon: 'lum-berry', col: '#7af07a', w: 10, auto: (r, p) => Object.values(p.pstat ?? {}).some(v => v > 0), usa: (r, p) => { for (const k in p.pstat ?? {}) p.pstat[k] = 0; } },
-    enigma: { n: 'Enigma', icon: 'enigma-berry', col: '#b05ad8', w: 6, auto: r => (r.__pbBolsaGolpe ?? -9) > (r.time ?? 0) - 1, usa: (r, p) => p.heal(p.maxHp * 0.12) },
+    enigma: { n: 'Enigma', icon: 'pb-enigma-berry', col: '#b05ad8', w: 6, auto: r => (r.__pbBolsaGolpe ?? -9) > (r.time ?? 0) - 1, usa: (r, p) => p.heal(p.maxHp * 0.12) },
     liechi: { n: 'Lichi', icon: 'liechi-berry', col: '#ff5a5a', w: 7, apuro: 'dano' },
     ganlon: { n: 'Gonlan', icon: 'ganlon-berry', col: '#8a6aff', w: 7, apuro: 'armadura' },
     salac: { n: 'Aslac', icon: 'salac-berry', col: '#5ad86a', w: 7, apuro: 'velocidad' },

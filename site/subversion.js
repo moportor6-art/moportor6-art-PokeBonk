@@ -4,16 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.30';
+  const SUB = '1.31';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.31',
+      date: Date.UTC(2026, 10, 18, 21, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.31`,
+      summary: 'PokéBonk Lite: la Baya Enigma de la bolsa ya se ve como baya.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Bolsa de bayas** (Lite): la Baya Enigma usaba un dibujo del juego que parecía un cuerno; ahora lleva su icono de baya. En la bolsa solo hay bayas, que son consumibles.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.30',
       date: Date.UTC(2026, 10, 18, 21, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.30`,
@@ -2868,6 +2885,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.31',
+      date: '2026-11-18',
+      title: 'Icono de la Baya Enigma en la bolsa (Lite).',
+      notes: [
+        ['fix', 'Lite: la Baya Enigma de la bolsa lleva su icono de baya (antes parecía un cuerno).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.30',

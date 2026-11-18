@@ -17,9 +17,10 @@ jobs:
       - uses: actions/checkout@v4
       - name: Bajar iconos
         run: |
-          grep -vE '^\s*(#|$)' tools/bayas.txt | while read b; do
+          # Cada línea: «destino [origen]» (sin origen, el mismo nombre). Nunca pisa un icono que ya trae el juego.
+          grep -vE '^\s*(#|$)' tools/bayas.txt | while read b src; do
             [ -f "site/assets/items/$b.png" ] && continue
-            curl -fsSL --retry 3 "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/$b.png" -o "site/assets/items/$b.png" || echo "::warning::falta $b"
+            curl -fsSL --retry 3 "https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/items/${src:-$b}.png" -o "site/assets/items/$b.png" || echo "::warning::falta $b"
           done
       - name: Subir a main
         run: |

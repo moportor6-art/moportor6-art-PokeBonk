@@ -1,7 +1,9 @@
-# Iconos de bayas para bolsa.js (PokeAPI/sprites, sprites/items/<nombre>.png)
+# Iconos de bayas para bolsa.js (PokeAPI/sprites, sprites/items/<origen>.png). Formato: destino [origen]
 liechi-berry
 ganlon-berry
 salac-berry
 lansat-berry
 leppa-berry
 starf-berry
+# 1.31: el enigma-berry.png del juego es otro dibujo (parece un cuerno); la bolsa usa este
+pb-enigma-berry enigma-berry
