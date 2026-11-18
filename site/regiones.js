@@ -66,7 +66,7 @@
           const o = tinte(clon(base), m.color, m.k);
           if (m.suelo) tinte(o, m.suelo[0], m.suelo[1], true);
           delete o.sanctuary; delete o.johto;
-          const zonas = o.zones.map((z, i) => ({ ...clon(z), name: m.zonas?.[i] ?? z.name }));
+          const zonas = o.zones.map((z, i) => ({ ...clon(z), ...(m.zonasDatos?.[i] ?? {}), name: m.zonas?.[i] ?? z.name })); // zonasDatos (1.19): cielo, luz y niebla propios
           Object.assign(o, m.datos, { id: m.id, name: m.name, desc: m.desc, unlock: m.unlock, region: r.id, specials: [], zones: zonas });
           // Santuario (zona 4): la arena, el altar y el portal de un santuario del juego, con el cielo teñido y
           // el legendario de este mapa. Sin santuario, el legendario es el jefe de la zona 3.

@@ -144,7 +144,40 @@
           props: ['crystal', 'pillar', 'crystal', 'rock', 'pillar'],
           music: { root: 55, scale: [0, 1, 3, 6, 7, 8, 11], bpm: 128, mood: 'mystic' }
         }
-      }
+      },
+      // 1.19 (solo Lite, de prueba): Isla Melemele, un mundo tropical propio. Isla rodeada de mar turquesa, arena,
+      // palmeras y coral, con su cielo de día y su atardecer (zonasDatos). Abierta desde el principio para probarla.
+      ...(window.PB_EDICION === 'lite' ? [{
+        id: 'melemele', base: 'canela', color: 0x40c8a0, k: .15,
+        name: 'Isla Melemele', desc: 'La primera isla de Alola: playas de arena blanca, mar turquesa y palmeras. Yungoos, Pikipek y Rockruff corretean por la orilla. (Mapa de prueba)',
+        unlock: 'Mapa de prueba: abierto', zonas: ['Playa de Hau\'oli', 'Atardecer en Melemele'],
+        zonasDatos: [
+          { sky: [0x4ab0ff, 0xcff0ff], fog: 0xbfe8ff, fogNear: 90, fogFar: 300, light: 1.05, sun: 0xfff4d0, hemiGround: 0x5aa860, sunDir: [.5, .8, .3], sunH: .7, tint: [.98, 1.02, 1.03], clouds: [1, 1, 1], cover: .3, glow: 0, glowK: 0, stars: 0, motes: 'spray' },
+          { sky: [0xff8a5a, 0xffd8a0], fog: 0xffc0a0, fogNear: 70, fogFar: 250, light: .9, sun: 0xffb070, hemiGround: 0x6a7a48, sunDir: [.8, .35, -.2], sunH: .22, tint: [1.06, .96, .94], clouds: [1, .85, .8], cover: .2, glow: 0xff9a5a, glowK: .3, stars: .2, motes: 'spray' }
+        ],
+        santuario: { de: 'coast', name: 'Ruinas de Melemele', heart: 'Corazón de Melemele', legendaries: [785], color: 0xffe040 },
+        datos: {
+          types: ['normal', 'bug', 'water', 'flying', 'fairy'], late: ['rock', 'electric'], legendaries: [785],
+          bosses: [735, 743, 738], guardians: [[735, 734], [743, 742], [738, 737]],
+          totems: [[734, 731, 736, 742], [735, 732, 737, 744], [738, 743, 741, 746]], summoners: [[735, 734], [732, 731], [737, 736]],
+          residents: [731, 734, 736, 741, 742, 744, 746, 722, 725, 728], weather: ['sun', 'clear', 'rain'],
+          sky: [0x4ab0ff, 0xcff0ff], fog: 0xbfe8ff, fogNear: 90, fogFar: 300, light: 1.05, sun: 0xfff4d0, hemiGround: 0x5aa860,
+          ground: [0x6ac85a, 0x7ad86a, 0xe8d8a0, 0x58b84a], path: 0xecdcaa, cliff: [0xd8c08a, 0xb8a070, 0xe8d8a8], waterColor: 0x2ac8e0,
+          rock: 0x8a9aa0, accent: 0xff7ac8, leaf: 0x3ac85a, bark: 0x9a7a4a, glow: 0xfff0b0, glowK: 0,
+          props: ['palm', 'palm', 'bush', 'coral', 'palm', 'rock', 'tree'], propDensity: .9, morning: { motes: 'spray' },
+          music: { root: 65, scale: [0, 2, 4, 7, 9], bpm: 116, mood: 'bright' }
+        }
+      }] : [])
     ]
   });
+  // 1.19: Isla Melemele de prueba, abierta sin completar los mapas anteriores (solo Lite).
+  if (window.PB_EDICION === 'lite') {
+    const t = setInterval(() => {
+      const m = window.__pbMeta;
+      if (!m?.biomeUnlockedByChain || m.__pbMele) return;
+      const f = m.biomeUnlockedByChain;
+      m.biomeUnlockedByChain = function (id, ...a) { return id === 'melemele' || f.call(this, id, ...a); };
+      m.__pbMele = true; clearInterval(t);
+    }, 300);
+  }
 })();

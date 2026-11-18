@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Isla Melemele de prueba (Subversión 1.19)
+- `alola.js`: mapa `melemele` (solo Lite) sobre la forma de isla de Canela con suelo, rocas, agua, cielo y apoyos propios; abierto envolviendo `meta.biomeUnlockedByChain`.
+- `regiones.js`: los mapas de región aceptan `zonasDatos` (cielo, luz y niebla por zona).
+
 ## Error al terminar la Teracristalización (Subversión 1.18)
 - `main-…js`: el tinte del jugador usa `this.__pbTint?.(t) || (…)`; antes, cuando `__pbTint` devolvía `null` (tera terminada o en su arranque), `...f` lanzaba en cada fotograma y el juego cerraba la partida por error.
 - `telemetria.js`: guarda el último error (`console.error` y `error`) en el informe y, si `run.endHow === 'error'`, muestra un aviso fijo `.pb-tel-err` para copiarlo.

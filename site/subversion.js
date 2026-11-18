@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.18';
+  const SUB = '1.19';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.19',
+      date: Date.UTC(2026, 10, 18, 5, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.19`,
+      summary: 'PokéBonk Lite: mapa de prueba Isla Melemele, un mundo tropical de Alola.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Isla Melemele** (mapa de prueba, en la región de Alola y abierto desde ya): isla de mar turquesa, arena y palmeras con coral, cielo tropical de día y atardecer en la segunda zona. Salen Pikipek, Yungoos, Grubbin, Oricorio, Cutiefly, Rockruff, Wishiwashi y los iniciales de Alola; guardianes Gumshoos, Ribombee y Vikavolt, y Tapu Koko en las Ruinas de Melemele.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.18',
       date: Date.UTC(2026, 10, 18, 4, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.18`,
@@ -2637,6 +2655,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.19',
+      date: '2026-11-17',
+      title: 'Isla Melemele de prueba (Lite).',
+      notes: [
+        ['new', 'Lite: mapa de prueba Isla Melemele (Alola), tropical, abierto desde el principio.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.18',
