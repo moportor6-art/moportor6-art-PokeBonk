@@ -6,6 +6,7 @@
    - Tope por objeto: máximo 5 copias de cada objeto por partida (o el máximo propio del objeto si es menor).
    - Élites con rasgo: Veloz (+40 % velocidad), Vampírico (se cura 3× el daño que te hace), Explosivo (al morir deja una
      zona que estalla) o Blindado (los 4 primeros golpes no le hacen daño).
+   - Duración mínima (1.17): Dominantes e Invocadores 10 s, Alfas 6 s (+25 % por zona).
    - Furia: jefes, guardianes y líderes que siguen vivos a los 2 minutos se enfurecen (+30 % daño y velocidad).
    Solo partidas normales / historia (no duelos, torre, sin fin ni expedición). En Sin fin (0.99): sin tope de nivel y
    vitaminas sin tope (salvo las de proyectiles y los objetos únicos). */
@@ -53,6 +54,21 @@
     addEventListener(ev, e => {
       if (abierta?.isConnected && performance.now() - t0 < (window.__pbLockMs ?? 1500) && abierta.contains(e.target)) { e.stopPropagation(); e.preventDefault(); }
     }, true);
+  // 1.17: Dominantes (tótem), Invocadores y Alfas duran un mínimo aunque tu daño sea enorme: 10 s los dos primeros y
+  // 6 s los Alfas (+25 % por zona). Usa el mismo tope de daño por segundo que el juego da a los guardianes (capRate).
+  const minis = new WeakMap();
+  setInterval(() => {
+    const run = window.__pbRun, E = run?.enemies;
+    if (!run || !E?.capRate || !activa(run) || run.state !== 'play') return;
+    const vistos = minis.get(run) ?? minis.set(run, new Map()).get(run), z = 1 + 0.25 * Math.max(0, Math.min(3, run.stage ?? 1) - 1);
+    for (let j = 0; j < E.alive.length; j++) {
+      const f = E.flags[j];
+      if (!E.alive[j] || (f & 4) || !(f & (4096 | 8192 | 2)) || vistos.get(j) === E.gen[j]) continue;
+      vistos.set(j, E.gen[j]);
+      const secs = (f & (4096 | 8192) ? 10 : 6) * z, tope = E.maxHp[j] / secs;
+      if (!(E.capRate[j] > 0) || E.capRate[j] > tope) E.capRate[j] = tope;
+    }
+  }, 250);
   window.PB_ITEM_MAX = (id, def) => {
     const run = window.__pbRun;
     if (!run?.endless || !def || (def.max ?? 10) < 3) return undefined;

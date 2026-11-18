@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.16';
+  const SUB = '1.17';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.17',
+      date: Date.UTC(2026, 10, 18, 3, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.17`,
+      summary: 'PokéBonk Lite: Dominantes, Invocadores y Alfas ya no caen en un segundo.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Duración mínima de los minijefes**: los Pokémon **Dominantes** (los gigantes con aura) y los **Invocadores** aguantan al menos **10 s**, y los **Alfas** al menos **6 s**, aunque tu daño sea enorme (+25 % por zona). Usan el mismo tope de daño por segundo que los guardianes.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.16',
       date: Date.UTC(2026, 10, 18, 2, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.16`,
@@ -2600,6 +2618,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.17',
+      date: '2026-11-17',
+      title: 'Minijefes con duración mínima (Lite).',
+      notes: [
+        ['balance', 'Lite: Dominantes e Invocadores duran al menos 10 s y los Alfas 6 s (+25 % por zona).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.16',

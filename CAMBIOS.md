@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Minijefes con duración mínima (Subversión 1.17)
+- `equilibrio.js`: `capRate` = PS máx. / segundos para Tótem (4096) e Invocador (8192), 10 s, y Alfa (2), 6 s; +25 % por zona.
+
 ## Informe de la muerte (Subversión 1.16)
 - `telemetria.js`: envuelve `player.hurt` e `inflict`, muestrea los PS cada 0,1 s y guarda 30 s de registro en `run.__pbTel`; botón `.pb-tel` en `run.ui.modalEl` (portapapeles, o texto seleccionado si falla); `window.PB_TELEMETRIA()`.
 
