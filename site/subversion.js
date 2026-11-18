@@ -4,16 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.32';
+  const SUB = '1.33';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.33',
+      date: Date.UTC(2026, 10, 18, 22, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.33`,
+      summary: 'PokéBonk Lite: la bolsa elige sola lo más adecuado en cada emergencia.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Bolsa más inteligente** (Lite): cuando varias cosas sirven a la vez, primero quita los estados (Ziuela); luego usa la curación que mejor tapa lo que te falta, sin gastar una grande si basta una pequeña; con muy poca vida, la que más cura (Restaurar Todo, Hiperpoción…); y después las de apuro.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.32',
       date: Date.UTC(2026, 10, 18, 22, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.32`,
@@ -2904,6 +2921,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.33',
+      date: '2026-11-18',
+      title: 'Bolsa con prioridades (Lite).',
+      notes: [
+        ['new', 'Lite: la bolsa prioriza estados, la curación justa (o la mayor en apuros graves) y después los apuros.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.32',

@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Bolsa con prioridades (Subversión 1.33)
+- `bolsa.js`: entre lo que toca usar, ordena por `prio()` (estados, curación según lo que falta con `CURA`, apuros, Mepo).
+
 ## Consumibles en el mapa (Subversión 1.32)
 - `bolsa.js`: tipos `pb-zumo`, `pb-hiper` y `pb-restaurar`; en cada zona pone arbustos `berry` con `data.pbCons` (`interactables.place`) que van a la bolsa sin la curación del arbusto. Iconos `pb-hyper-potion` y `pb-full-restore` con la acción «Bayas».
 

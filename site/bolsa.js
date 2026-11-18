@@ -33,6 +33,7 @@
     'pb-hiper': { n: 'Hiperpoción', icon: 'pb-hyper-potion', col: '#c86aff', w: 0, auto: (r, p) => p.hp < p.maxHp * 0.25, usa: (r, p) => p.heal(p.maxHp * 0.3) },
     'pb-restaurar': { n: 'Restaurar Todo', icon: 'pb-full-restore', col: '#ffe04a', w: 0, auto: (r, p) => p.hp < p.maxHp * 0.15, usa: (r, p) => { p.heal(p.maxHp * 0.5); for (const k in p.pstat ?? {}) p.pstat[k] = 0; } }
   };
+  const CURA = { oran: 0.08, 'pb-zumo': 0.12, enigma: 0.12, sitrus: 0.18, 'pb-hiper': 0.3, 'pb-restaurar': 0.5 };
   const BUFF = { dano: 12, armadura: 12, velocidad: 12, critico: 12, ataque: 10 };
   const NB = { dano: '+30 % de daño', armadura: '+20 de armadura', velocidad: '+30 % de velocidad', critico: '+20 % de crítico', ataque: '+40 % de velocidad de ataque' };
   const jefe = run => { const E = run.enemies, p = run.player.pos; for (let j = 0; j < (E.alive?.length ?? 0); j++) if (E.alive[j] && E.flags[j] & 4 && Math.hypot(E.x[j] - p.x, E.z[j] - p.z) < 35) return true; return false; };
@@ -125,12 +126,22 @@
     }
     // Uso automático.
     if (run.state === 'play' && !p.dead) {
+      // 1.33: de todo lo que toca usar, primero lo más urgente: quitar estados, luego la curación que mejor tapa lo que
+      // falta (sin desperdiciar una grande si basta una pequeña; con muy poca vida, la que más cura), luego los apuros.
+      const falta = 1 - p.hp / p.maxHp, cand = [];
       for (const k of s.orden) {
         const b = B[k];
         if (!(s.n[k] > 0) || (s.cd[k] ?? 0) > t) continue;
-        const usar = b.auto ? b.auto(run, p) : p.hp < p.maxHp * (b.apuro === 'doble' ? 0.2 : 0.25);
-        if (usar && comer(run, k)) break;
+        if (b.auto ? b.auto(run, p) : p.hp < p.maxHp * (b.apuro === 'doble' ? 0.2 : 0.25)) cand.push(k);
       }
+      const prio = k => {
+        if (k === 'lum') return 100;
+        const c = CURA[k];
+        if (c) { if (falta > 0.75) return 90 + c * 10; return c <= falta + 0.05 ? 80 + c * 10 : 60 - c * 10; }
+        return k === 'leppa' ? 30 : 40;
+      };
+      cand.sort((x, y) => prio(y) - prio(x));
+      if (cand.length) comer(run, cand[0]);
     }
     pintar(run);
   }, 200);
