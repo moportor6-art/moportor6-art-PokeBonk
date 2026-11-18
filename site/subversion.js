@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.24';
+  const SUB = '1.25';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.25',
+      date: Date.UTC(2026, 10, 18, 11, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.25`,
+      summary: 'PokéBonk Lite: niveles extra del Laboratorio para Difícil y recogida automática de rocas de oro, imanes y bayas.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Laboratorio, niveles de Difícil**: cada mejora de estadística (daño, crítico, vida, armadura, velocidad, regeneración…) tiene **3 niveles más**, a triple de precio. Solo cuentan en partidas en Difícil o más (también el Difícil del modo historia).`,
+        `- **Recogida automática**: al pasar junto a una **Roca de oro** tu Pokémon la rompe y te llevas el oro; los **Imanes** se activan solos y las **Bayas** te las comes si te falta vida. Cofres, altares, jaulas y demás siguen con el botón.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.24',
       date: Date.UTC(2026, 10, 18, 10, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.24`,
@@ -2748,6 +2767,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.25',
+      date: '2026-11-18',
+      title: 'Laboratorio de Difícil y recogida automática (Lite).',
+      notes: [
+        ['new', 'Lite: +3 niveles en cada mejora de estadística del Laboratorio, a triple de precio, que solo cuentan en Difícil.'],
+        ['new', 'Lite: las Rocas de oro, los Imanes y las Bayas se usan solos al pasar cerca.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.24',

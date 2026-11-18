@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Laboratorio de Difícil y recogida automática (Subversión 1.25)
+- `lab-dificil.js`: a las mejoras con `stat` de `PB_LAB.defs` les suma 3 a `max` (coste ×3 desde el nivel base); envuelve `meta.labStats` para restar esos niveles si la partida empezó con `tier` 0 (lo lee de `__pbApp.startRun`).
+- `auto-recoger.js`: usa solas (con `run.interactables.interact`) las rocas de oro, imanes y bayas (estas si falta vida) al estar dentro de su radio.
+
 ## Jefes más cortos en Normal (Subversión 1.24)
 - `fases.js`: con `run.tier === 0`, PS ×1,25 y `capRate` de 15/18/20 s (40 s en el santuario), impuesto aunque el juego diera uno más largo.
 - `equilibrio.js`: minijefes en Normal 6 s y Alfas 4 s.
