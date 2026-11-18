@@ -1,0 +1,1 @@
+import{a as e}from"./digTreasures-76oP4eEb.js";var t=e=>new Map(e.filter(([,e])=>e>0)),n=(e,n)=>t([[`claw:plush`,+!!e],[`claw:firstTry`,e&&n===0?1:0]]),r=(e,n)=>t([[`safari:catch`,+!!e],[`safari:shiny`,e&&n?1:0]]),i=(n,r)=>t([[`dig:find`,r.length],[`dig:fossil`,r.filter(t=>e[t].prize.kind===`fossil`).length],[`dig:golden`,n&&r.length>0?1:0]]);export{i as n,r,n as t};
