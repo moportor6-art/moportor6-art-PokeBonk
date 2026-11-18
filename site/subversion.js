@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.19';
+  const SUB = '1.20';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.20',
+      date: Date.UTC(2026, 10, 18, 6, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.20`,
+      summary: 'PokéBonk Lite: el tope de nivel ya no bloquea a Blissey, Steelix, Crobat y demás evoluciones del Nv. 44.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Evoluciones por reto del Nv. 44** (Blissey desde Chansey y las demás «de crecimiento»): se ofrecen al llegar al **nivel 44**, pero el tope de nivel por medallas (30 + 6 por medalla) podía dejarte por debajo. Ahora, si tienes una desbloqueada, el tope sube al menos a 44.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.19',
       date: Date.UTC(2026, 10, 18, 5, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.19`,
@@ -2655,6 +2673,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.20',
+      date: '2026-11-17',
+      title: 'Tope de nivel y evoluciones del Nv. 44 (Lite).',
+      notes: [
+        ['fix', 'Lite: con una evolución por reto desbloqueada (Blissey…), el tope de nivel sube al menos a 44.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.19',

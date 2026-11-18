@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Tope de nivel y evoluciones del Nv. 44 (Subversión 1.20)
+- `equilibrio.js`: `tope()` cuenta `run.johtoBranches('grow')` (evoluciones de crecimiento desbloqueadas, que el juego ofrece en el Nv. 44).
+
 ## Isla Melemele de prueba (Subversión 1.19)
 - `alola.js`: mapa `melemele` (solo Lite) sobre la forma de isla de Canela con suelo, rocas, agua, cielo y apoyos propios; abierto envolviendo `meta.biomeUnlockedByChain`.
 - `regiones.js`: los mapas de región aceptan `zonasDatos` (cielo, luz y niebla por zona).

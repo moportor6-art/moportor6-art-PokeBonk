@@ -79,7 +79,10 @@
   const meta = () => window.__pbMeta;
   const medallas = () => Object.values(meta()?.profile?.pbMedallas ?? {}).reduce((a, l) => a + (l?.length ?? 0), 0);
   // 0.98: nunca por debajo del nivel de la siguiente evolución (si no, te quedabas sin poder evolucionar).
-  const tope = () => { const r = window.__pbRun; return Math.min(100, Math.max(30 + 6 * medallas(), r?.nextEvo?.level ?? 0)); };
+  // 1.20: las evoluciones «de crecimiento» (Blissey, Steelix, Crobat… desbloqueadas en la Liga) se ofrecen en el Nv. 44:
+  // el tope nunca las bloquea.
+  const crece = r => { try { return !r?.johtoDeclined && (r?.johtoBranches?.('grow')?.length ?? 0) > 0 ? 44 : 0; } catch { return 0; } };
+  const tope = () => { const r = window.__pbRun; return Math.min(100, Math.max(30 + 6 * medallas(), r?.nextEvo?.level ?? 0, crece(r))); };
   const esperado = run => 3 + 2.5 * ((run.time ?? 0) / 60);
   const RASGOS = ['veloz', 'vampirico', 'explosivo', 'blindado'];
   const NOMBRE = { veloz: 'Veloz', vampirico: 'Vampírico', explosivo: 'Explosivo', blindado: 'Blindado' };
