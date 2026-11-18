@@ -66,7 +66,8 @@
       if (!E.alive[j] || (f & 4) || !(f & (4096 | 8192 | 2)) || vistos.get(j) === E.gen[j]) continue;
       vistos.set(j, E.gen[j]);
       const n = (run.tier | 0) === 0; // 1.24: en Normal, 6 s y 4 s
-      const secs = (f & (4096 | 8192) ? (n ? 6 : 10) : (n ? 4 : 6)) * z, tope = E.maxHp[j] / secs;
+      // 1.30: Dominantes e Invocadores, 12 s en Normal y 16 s en Difícil (caían en menos de 3 s); Alfas igual.
+      const secs = (f & (4096 | 8192) ? (n ? 12 : 16) : (n ? 4 : 6)) * z, tope = E.maxHp[j] / secs;
       if (!(E.capRate[j] > 0) || E.capRate[j] > tope) E.capRate[j] = tope;
     }
   }, 250);

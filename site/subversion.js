@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.29';
+  const SUB = '1.30';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.30',
+      date: Date.UTC(2026, 10, 18, 21, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.30`,
+      summary: 'PokéBonk Lite: el Incienso ya no abre grietas solo y los Dominantes aguantan más.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Incienso inteligente** pasa a **No** por defecto: al vencer a un Dominante ganabas Incienso y, con 3, se abría una grieta sin que lo pidieras. Si lo quieres, actívalo en Pausa → «HUD y guía».`,
+        `- **Dominantes e Invocadores** (los gigantes con aura): como mínimo 12 s en Normal y 16 s en Difícil (antes 6 y 10), +25 % por zona.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.29',
       date: Date.UTC(2026, 10, 18, 20, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.29`,
@@ -2849,6 +2868,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.30',
+      date: '2026-11-18',
+      title: 'Incienso sin grietas sorpresa y Dominantes más duros (Lite).',
+      notes: [
+        ['fix', 'Lite: el Incienso inteligente viene desactivado; ya no abre grietas sin pedirlo.'],
+        ['balance', 'Lite: Dominantes e Invocadores con 12 s (Normal) / 16 s (Difícil) como mínimo.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.29',

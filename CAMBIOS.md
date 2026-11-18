@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Incienso y Dominantes (Subversión 1.30)
+- `automatiza.js`: `pbAuto.inc` por defecto `false` (se reinicia una vez con `v129`).
+- `equilibrio.js`: duración mínima de Dominantes e Invocadores 12 s (Normal) / 16 s (Difícil).
+
 ## Barras del HUD por separado (Subversión 1.29)
 - `hud-editor.js`: `ITEMS` suma `.hud-bl > .slots` (vitaminas y objetos), `.hud-bl .bl-row > .slots` (movimientos) y `.hpbar` (barra de vida).
 

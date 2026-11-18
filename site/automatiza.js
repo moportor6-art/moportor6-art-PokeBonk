@@ -2,7 +2,7 @@
    Opciones en Pausa → «HUD y guía» (se guardan en profile.pbAuto):
    - Mega / Dynamax / Tera automáticos al aparecer un jefe (por defecto Sí).
    - Evoluciones de reto automáticas (Blissey, Crobat…, al llegar a su nivel, sin preguntar; por defecto No).
-   - Incienso inteligente: con el Incienso lleno (3), abre una grieta sola si no hay jefe (por defecto Sí).
+   - Incienso inteligente: con el Incienso lleno (3), abre una grieta sola si no hay jefe (por defecto No desde la 1.30).
    - Modo rendimiento: Auto (menos partículas con más de 200 enemigos) / Siempre / No.
    Siempre activos:
    - Curación de emergencia: con menos del 30 % de PS te comes la baya libre más cercana (hasta 15 m).
@@ -15,7 +15,7 @@
 (() => {
   if (window.PB_EDICION !== 'lite') return;
   const meta = () => window.__pbMeta;
-  const A = () => { const p = meta()?.profile; if (!p) return null; const a = p.pbAuto ??= {}; a.mx ??= true; a.evo ??= false; a.inc ??= true; a.rend ??= 'auto'; a.lab ??= { on: false, orden: [] }; return a; };
+  const A = () => { const p = meta()?.profile; if (!p) return null; const a = p.pbAuto ??= {}; a.mx ??= true; a.evo ??= false; a.inc ??= false; if (!a.v129) { a.inc = false; a.v129 = true; } /* 1.30: el Incienso inteligente pasa a No por defecto (abría grietas sin que lo pidieras) */ a.rend ??= 'auto'; a.lab ??= { on: false, orden: [] }; return a; };
   const guardar = () => { try { meta().save(); } catch {} };
   const jefe = run => { const E = run.enemies, p = run.player.pos; for (let j = 0; j < (E.alive?.length ?? 0); j++) if (E.alive[j] && E.flags[j] & 4 && !(E.dying?.[j] > 0) && !window.PB_ULTRA?.es?.(run, j) && Math.hypot(E.x[j] - p.x, E.z[j] - p.z) < 40) return true; return false; };
   const listo = b => b && b.isConnected && !b.disabled && b.classList.contains('ready') && getComputedStyle(b).visibility !== 'hidden';
@@ -97,7 +97,7 @@
   const OPC = [
     ['mx', 'Mega/Dynamax/Tera automáticos', ['Sí', 'No'], [true, false]],
     ['evo', 'Evoluciones de reto automáticas', ['No', 'Sí'], [false, true]],
-    ['inc', 'Incienso inteligente', ['Sí', 'No'], [true, false]],
+    ['inc', 'Incienso inteligente', ['No', 'Sí'], [false, true]],
     ['rend', 'Modo rendimiento', ['Auto', 'Siempre', 'No'], ['auto', 'siempre', 'no']]
   ];
   setInterval(() => {
