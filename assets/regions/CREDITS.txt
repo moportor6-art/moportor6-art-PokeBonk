@@ -1,0 +1,11 @@
+Miniaturas de región del Gacha (proyecto sin ánimo de lucro).
+
+kanto-thumb.jpg   Ryan Polito, «My Kanto Re-Creation Project» (https://ryancomix.artstation.com/)
+johto-thumb.png   Goldenrod City (HeartGold/SoulSilver)        } Imágenes de los juegos de Pokémon (Nintendo,
+hoenn-thumb.png   Littleroot Town (Rubí Omega/Zafiro Alfa)     } Game Freak, The Pokémon Company), tomadas de
+sinnoh-thumb.png  Jubilife City (Diamante Brillante/Perla Reluciente, arte conceptual) } Bulbagarden Archives
+teselia-thumb.png Castelia City (Negro/Blanco)                 } (https://archives.bulbagarden.net/),
+kalos-thumb.png   Santalune City (X/Y)                         } recortadas y reducidas.
+alola-thumb.png   Hau'oli City (Ultrasol/Ultraluna)            }
+galar-thumb.png   Wedgehurst (Espada/Escudo)                   }
+paldea-thumb.png  Porto Marinada (Escarlata/Púrpura)           }
