@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Informe de la muerte (Subversión 1.16)
+- `telemetria.js`: envuelve `player.hurt` e `inflict`, muestrea los PS cada 0,1 s y guarda 30 s de registro en `run.__pbTel`; botón `.pb-tel` en `run.ui.modalEl` (portapapeles, o texto seleccionado si falla); `window.PB_TELEMETRIA()`.
+
 ## Resultados al perder (Subversión 1.15)
 - `equilibrio.js`: `MutationObserver` (sobre `documentElement`: el script carga antes de `<body>`) detecta la ventana de resultados al caer y un filtro en captura ignora sus toques 1,5 s; el aviso `.pb-muerte` va dentro de `run.ui.modalEl`.
 - `historia.js`: `enMenu()` exige que la ventana de resultados no esté abierta.

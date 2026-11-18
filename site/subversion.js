@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.15';
+  const SUB = '1.16';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.16',
+      date: Date.UTC(2026, 10, 18, 2, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.16`,
+      summary: 'PokéBonk Lite: informe de la muerte para copiar y enviar.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **Telemetría al caer**: la partida guarda los últimos 30 s de lo que le pasa a tu vida (cada golpe con quién, tipo y PS perdidos, los estados que te ponen y las bajadas de PS sin golpe). En los resultados, **«📋 Copiar informe»** lo copia para pegarlo en el chat.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.15',
       date: Date.UTC(2026, 10, 18, 1, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.15`,
@@ -2582,6 +2600,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.16',
+      date: '2026-11-17',
+      title: 'Informe de la muerte (Lite).',
+      notes: [
+        ['new', 'Lite: botón «Copiar informe» en los resultados al caer, con los últimos 30 s de golpes, estados y PS.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.15',
