@@ -11,6 +11,10 @@
     { sel: '.hud-top', css: '#hud .hud-top', name: 'Tiempo y barra' },
     { sel: '.hud-tr', css: '#hud .hud-tr', name: 'Minimapa' },
     { sel: '.hud-bl', css: '#hud .hud-bl', name: 'Ataques y objetos' },
+    // 1.29: por separado, para mover, achicar u ocultar cada barra.
+    { sel: '.hud-bl > .slots', css: '#hud .hud-bl > .slots', name: 'Vitaminas y objetos' },
+    { sel: '.hud-bl .bl-row > .slots', css: '#hud .hud-bl .bl-row > .slots', name: 'Movimientos' },
+    { sel: '.hpbar', css: '#hud .hpbar', name: 'Barra de vida' },
     { sel: '.tc-stick', css: '.tc .tc-stick:not(.on), .tc .tc-stick.fixed', name: 'Joystick' },
     { sel: '.tc-jump', css: '.tc .tc-jump', name: 'Saltar' },
     { sel: '.tc-dash', css: '.tc .tc-dash', name: 'Deslizar' },

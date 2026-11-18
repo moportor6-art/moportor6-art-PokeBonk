@@ -4,16 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.28';
+  const SUB = '1.29';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.29',
+      date: Date.UTC(2026, 10, 18, 20, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.29`,
+      summary: '«Editar HUD»: la barra de vida, las vitaminas y los movimientos se editan por separado.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Editar HUD**: ahora se pueden mover, cambiar de tamaño, girar u ocultar por separado la **barra de vida**, la barra de **vitaminas y objetos** y la de **movimientos** (sigue estando también «Ataques y objetos» para mover las dos juntas).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.28',
       date: Date.UTC(2026, 10, 18, 20, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.28`,
@@ -2832,6 +2849,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.29',
+      date: '2026-11-18',
+      title: 'Barras del HUD por separado.',
+      notes: [
+        ['new', 'Editar HUD: barra de vida, vitaminas y objetos, y movimientos editables por separado.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.28',

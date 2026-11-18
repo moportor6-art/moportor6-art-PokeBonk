@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Barras del HUD por separado (Subversión 1.29)
+- `hud-editor.js`: `ITEMS` suma `.hud-bl > .slots` (vitaminas y objetos), `.hud-bl .bl-row > .slots` (movimientos) y `.hpbar` (barra de vida).
+
 ## Bolsa de bayas (Subversión 1.28)
 - `bolsa.js`: `run.__pbBolsa` (cantidades, enfriamientos y efectos temporales); envuelve `interactables.interact` (bayas al usar un arbusto), `recompute` (efectos) y `hurt` (Enigma); barra `.pb-bolsa` (en `hud-editor.js`).
 - `auto-recoger.js`: los arbustos de bayas se recogen siempre.
