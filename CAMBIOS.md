@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Informe compacto (Subversión 1.21)
+- `telemetria.js`: entradas iguales seguidas (< 1,5 s) se agrupan con contador; el informe muestra las 80 últimas líneas.
+
 ## Tope de nivel y evoluciones del Nv. 44 (Subversión 1.20)
 - `equilibrio.js`: `tope()` cuenta `run.johtoBranches('grow')` (evoluciones de crecimiento desbloqueadas, que el juego ofrece en el Nv. 44).
 

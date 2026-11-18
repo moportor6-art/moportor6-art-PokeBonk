@@ -23,8 +23,10 @@
 
   const T = run => run.__pbTel ??= { log: [], hp: null, enGolpe: false, informe: null };
   const anota = (run, txt) => {
-    const d = T(run), t = run.time ?? 0;
-    d.log.push([t, txt]);
+    const d = T(run), t = run.time ?? 0, u = d.log.at(-1);
+    // 1.21: los golpes repetidos seguidos (p. ej. cientos de bloqueados en un segundo) se juntan en una línea ×N.
+    if (u && u[1] === txt && t - u[2] < 1.5) { u[3]++; u[2] = t; return; }
+    d.log.push([t, txt, t, 1]);
     while (d.log.length && d.log[0][0] < t - VENTANA) d.log.shift();
     if (d.log.length > 400) d.log.splice(0, d.log.length - 400);
   };
@@ -51,7 +53,9 @@
       run.endHow === 'error' || ultErr ? `Error: ${ultErr ?? '—'}${run.endHow === 'error' ? ' · LA PARTIDA TERMINÓ POR ERROR' : ''}` : '',
       `— Últimos ${VENTANA} s —`
     ].filter(Boolean);
-    return cab.concat(d.log.map(([t, x]) => `[${reloj(t)}] ${x}`)).join('\n');
+    const ls = d.log.map(([t, x, t2, n]) => `[${reloj(t)}${n > 1 ? `–${reloj(t2)}` : ''}] ${x}${n > 1 ? ` ×${n}` : ''}`);
+    // Sin tope el texto salía tan largo que se cortaba al pegarlo justo antes del final: van las 80 últimas.
+    return cab.concat(ls.length > 80 ? [`(… ${ls.length - 80} líneas anteriores omitidas)`, ...ls.slice(-80)] : ls).join('\n');
   };
   window.PB_TELEMETRIA = () => { const run = window.__pbRun; return run ? informe(run) : ''; };
 
@@ -97,7 +101,7 @@
         try {
           const perdio = antes - this.hp;
           if (perdio > 0 || r) anota(run, `Golpe de ${quien(run, src)}${tipo ? ` · tipo ${tipo}` : ''} · bruto ${r1(dmg)} → −${r1(perdio)} PS (${r1(antes)} → ${r1(this.hp)})${this.dead || this.hp <= 0 ? ' · DEBILITADO' : ''}`);
-          else if (dmg > 0) anota(run, `Golpe esquivado o bloqueado de ${quien(run, src)} (bruto ${r1(dmg)})`);
+          else if (dmg > 0) anota(run, `Bloqueado (invulnerable o esquivado): ${quien(run, src)} · bruto ${r1(dmg)}`);
           d.hp = this.hp;
         } catch {}
         return r;
