@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Error al terminar la Teracristalización (Subversión 1.18)
+- `main-…js`: el tinte del jugador usa `this.__pbTint?.(t) || (…)`; antes, cuando `__pbTint` devolvía `null` (tera terminada o en su arranque), `...f` lanzaba en cada fotograma y el juego cerraba la partida por error.
+- `telemetria.js`: guarda el último error (`console.error` y `error`) en el informe y, si `run.endHow === 'error'`, muestra un aviso fijo `.pb-tel-err` para copiarlo.
+
 ## Minijefes con duración mínima (Subversión 1.17)
 - `equilibrio.js`: `capRate` = PS máx. / segundos para Tótem (4096) e Invocador (8192), 10 s, y Alfa (2), 6 s; +25 % por zona.
 

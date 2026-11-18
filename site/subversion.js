@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.17';
+  const SUB = '1.18';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.18',
+      date: Date.UTC(2026, 10, 18, 4, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.18`,
+      summary: 'PokéBonk Lite: arreglado el error que terminaba la partida al acabar la Teracristalización.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**:`,
+        `- **La «muerte de un golpe» era un error**: al terminar tu Teracristalización (o en su arranque), el dibujo de tu Pokémon fallaba en cada fotograma y el juego cerraba la partida con «Se ha producido un error…», volvía al menú y salía el líder. Arreglado.`,
+        `- **Informe del error**: si una partida termina por un error, sale un aviso fijo con **«📋 Copiar informe del error»** (con el detalle técnico del fallo) aunque vuelvas al menú.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.17',
       date: Date.UTC(2026, 10, 18, 3, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.17`,
@@ -2618,6 +2637,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.18',
+      date: '2026-11-17',
+      title: 'Error al terminar la Teracristalización (Lite).',
+      notes: [
+        ['fix', 'Lite: la partida ya no termina por error al acabar tu Teracristalización (parecía una muerte de un golpe).'],
+        ['new', 'Lite: si una partida termina por error, aviso fijo con «Copiar informe del error».']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.17',

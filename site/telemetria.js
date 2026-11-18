@@ -7,6 +7,14 @@
 (() => {
   if (window.PB_EDICION !== 'lite') return;
   const VENTANA = 30;
+  // 1.17: errores del juego (si un fotograma falla 60 veces seguidas, la partida termina «por error»).
+  let ultErr = null;
+  const ce = console.error.bind(console);
+  console.error = (...a) => {
+    try { const e = a.find(x => x instanceof Error); if (e || /pokebonk/i.test(String(a[0]))) ultErr = `${a.filter(x => !(x instanceof Error)).join(' ')} ${e ? `${e.name}: ${e.message}\n${(e.stack ?? '').split('\n').slice(1, 7).join('\n')}` : ''}`.trim(); } catch {}
+    return ce(...a);
+  };
+  addEventListener('error', e => { try { ultErr = `${e.message}\n${(e.error?.stack ?? '').split('\n').slice(1, 7).join('\n')}`; } catch {} });
   let NOM = {};
   fetch('./data/pokemon.json').then(r => r.json()).then(l => { NOM = Object.fromEntries(l.map(x => [x.id, x.name])); }).catch(() => {});
   const nom = sp => NOM[sp] ?? `#${sp}`;
@@ -40,15 +48,45 @@
       `Partida: ${modo} · mapa ${run.biome?.id ?? '?'} · zona ${run.stage ?? '?'} · ${reloj(run.time ?? 0)} · bajas ${run.stats?.kills ?? 0} · dificultad ${run.tier ?? 0}`,
       `Objetos: ${items}`,
       run.__pbMuerte ? `Aviso: ${run.__pbMuerte}` : '',
+      run.endHow === 'error' || ultErr ? `Error: ${ultErr ?? '—'}${run.endHow === 'error' ? ' · LA PARTIDA TERMINÓ POR ERROR' : ''}` : '',
       `— Últimos ${VENTANA} s —`
     ].filter(Boolean);
     return cab.concat(d.log.map(([t, x]) => `[${reloj(t)}] ${x}`)).join('\n');
   };
   window.PB_TELEMETRIA = () => { const run = window.__pbRun; return run ? informe(run) : ''; };
 
+  const copiar = async (txt, b, donde) => {
+    let ok = false;
+    try { await navigator.clipboard.writeText(txt); ok = true; } catch {}
+    if (!ok) try {
+      const ta = document.createElement('textarea'); ta.value = txt; ta.style.cssText = 'position:fixed;opacity:0';
+      document.body.append(ta); ta.select(); ok = document.execCommand('copy'); ta.remove();
+    } catch {}
+    if (ok) { b.textContent = '✅ Informe copiado: pégalo en el chat'; return; }
+    let ta = donde.querySelector('.pb-tel-txt');
+    if (!ta) { ta = document.createElement('textarea'); ta.className = 'pb-tel-txt'; ta.readOnly = true; ta.style.cssText = 'display:block;width:92%;height:120px;margin:0 auto 6px;font:11px monospace'; b.after(ta); }
+    ta.value = txt; ta.focus(); ta.select();
+    b.textContent = 'Mantén pulsado el texto → Copiar';
+  };
+  // Si la partida terminó por error, un aviso fijo (sobrevive a la vuelta al menú) para copiar el informe.
+  let avisado = null;
+  const avisoError = (run, txt) => {
+    if (avisado === run) return; avisado = run;
+    const w = document.createElement('div');
+    w.className = 'pb-tel-err';
+    w.style.cssText = 'position:fixed;left:50%;top:10px;transform:translateX(-50%);z-index:2147483647;background:#3a0a0a;color:#fff;border:2px solid #ff6a5a;border-radius:12px;padding:8px 12px;font:700 13px system-ui,sans-serif;max-width:92vw;text-align:center;box-shadow:0 4px 18px rgba(0,0,0,.5)';
+    w.innerHTML = '<div>⚠️ La partida terminó por un error del juego</div>';
+    const b = document.createElement('button'); b.className = 'btn'; b.textContent = '📋 Copiar informe del error'; b.style.margin = '6px 4px 0';
+    const x = document.createElement('button'); x.className = 'btn'; x.textContent = 'Cerrar'; x.style.margin = '6px 4px 0';
+    b.onclick = e => { e.stopPropagation(); copiar(txt, b, w); };
+    x.onclick = e => { e.stopPropagation(); w.remove(); };
+    w.append(b, x); document.body.append(w);
+  };
+
   setInterval(() => {
     const run = window.__pbRun, p = run?.player;
     if (!run || !p || run.mode === 'duel') return;
+    if (run.endHow === 'error') avisoError(run, informe(run));
     if (!p.__pbTel && typeof p.hurt === 'function') {
       const h = p.hurt;
       p.hurt = function (dmg, tipo, src, ...a) {
@@ -86,20 +124,7 @@
       b.className = 'btn pb-tel';
       b.textContent = '📋 Copiar informe';
       b.style.cssText = 'margin:0 auto 6px;display:block';
-      b.onclick = async e => {
-        e.stopPropagation();
-        let ok = false;
-        try { await navigator.clipboard.writeText(d.informe); ok = true; } catch {}
-        if (!ok) try {
-          const ta = document.createElement('textarea'); ta.value = d.informe; ta.style.cssText = 'position:fixed;opacity:0';
-          document.body.append(ta); ta.select(); ok = document.execCommand('copy'); ta.remove();
-        } catch {}
-        if (ok) { b.textContent = '✅ Informe copiado: pégalo en el chat'; return; }
-        let ta = m.querySelector('.pb-tel-txt');
-        if (!ta) { ta = document.createElement('textarea'); ta.className = 'pb-tel-txt'; ta.readOnly = true; ta.style.cssText = 'display:block;width:92%;height:120px;margin:0 auto 6px;font:11px monospace'; b.after(ta); }
-        ta.value = d.informe; ta.focus(); ta.select();
-        b.textContent = 'Mantén pulsado el texto → Copiar';
-      };
+      b.onclick = e => { e.stopPropagation(); copiar(d.informe, b, m); };
       const ref = m.querySelector('.pb-muerte');
       if (ref) ref.after(b); else (m.querySelector('.panel') ?? m).prepend(b);
     }
