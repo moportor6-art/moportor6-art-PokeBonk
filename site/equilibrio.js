@@ -65,7 +65,8 @@
       const f = E.flags[j];
       if (!E.alive[j] || (f & 4) || !(f & (4096 | 8192 | 2)) || vistos.get(j) === E.gen[j]) continue;
       vistos.set(j, E.gen[j]);
-      const secs = (f & (4096 | 8192) ? 10 : 6) * z, tope = E.maxHp[j] / secs;
+      const n = (run.tier | 0) === 0; // 1.24: en Normal, 6 s y 4 s
+      const secs = (f & (4096 | 8192) ? (n ? 6 : 10) : (n ? 4 : 6)) * z, tope = E.maxHp[j] / secs;
       if (!(E.capRate[j] > 0) || E.capRate[j] > tope) E.capRate[j] = tope;
     }
   }, 250);

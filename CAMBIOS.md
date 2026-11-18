@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Jefes más cortos en Normal (Subversión 1.24)
+- `fases.js`: con `run.tier === 0`, PS ×1,25 y `capRate` de 15/18/20 s (40 s en el santuario), impuesto aunque el juego diera uno más largo.
+- `equilibrio.js`: minijefes en Normal 6 s y Alfas 4 s.
+
 ## Cristales en el suelo (Subversión 1.23)
 - `tera.js`: `SIN_CORONA = true` (el arte de las coronas se conserva); rastro con `run.vfx.ground.spawn` (formas Shard 29 y Gem 32) cada 0,7 m recorridos mientras dura la tera.
 

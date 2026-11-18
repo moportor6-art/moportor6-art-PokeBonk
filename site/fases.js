@@ -65,9 +65,12 @@
       const lider = !!(run.__gym || run.__pbAlto);
       if (lider && !set.has(k + 'L')) {
         set.add(k + 'L');
-        if (!run.sanctuary) { E.maxHp[j] *= 1.6; E.hp[j] = E.maxHp[j]; }
-        const secs = run.sanctuary ? 60 : [30, 33, 35][Math.min(2, (run.stage ?? 1) - 1)] /* 1.22: antes 40/50/60 */, tasa = E.maxHp[j] / secs;
-        if (E.capRate && (!(E.capRate[j] > 0) || E.capRate[j] > tasa)) { E.capRate[j] = tasa; E.capBank[j] = tasa * 3; E.capT[j] = run.time ?? 0; }
+        // 1.24: en dificultad Normal (tier 0) aguantan bastante menos: +25 % de PS y 15/18/20 s como mínimo, aunque el
+        // juego les diera un tope más largo; en Difícil sigue igual (+60 % y 30/33/35 s).
+        const normal = (run.tier | 0) === 0, z = Math.min(2, (run.stage ?? 1) - 1);
+        if (!run.sanctuary) { E.maxHp[j] *= normal ? 1.25 : 1.6; E.hp[j] = E.maxHp[j]; }
+        const secs = run.sanctuary ? (normal ? 40 : 60) : (normal ? [15, 18, 20] : [30, 33, 35])[z] /* 1.22: antes 40/50/60 */, tasa = E.maxHp[j] / secs;
+        if (E.capRate && (normal || !(E.capRate[j] > 0) || E.capRate[j] > tasa)) { E.capRate[j] = tasa; E.capBank[j] = tasa * 3; E.capT[j] = run.time ?? 0; }
       }
       // Santuario del modo historia (1.04) y líderes (1.10): Mega al 66 % (si la tiene) y Dynamax al 33 %, ambas a la vez.
       if (sant || lider) {

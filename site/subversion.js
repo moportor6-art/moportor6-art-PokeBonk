@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.23';
+  const SUB = '1.24';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.24',
+      date: Date.UTC(2026, 10, 18, 10, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.24`,
+      summary: 'PokéBonk Lite: en dificultad Normal, los jefes aguantan bastante menos.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `Solo en **PokéBonk Lite**, en dificultad **Normal** (en Difícil no cambia nada):`,
+        `- **Pokémon de los líderes**: +25 % de PS (antes +60 %) y un mínimo de 15 / 18 / 20 s por zona (antes 30 / 33 / 35 s, y el propio juego les daba hasta 30 s más). Santuario: 40 s (antes 60).`,
+        `- **Dominantes e Invocadores**: mínimo de 6 s (antes 10); **Alfas**: 4 s (antes 6), +25 % por zona.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.23',
       date: Date.UTC(2026, 10, 18, 9, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.23`,
@@ -2729,6 +2748,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.24',
+      date: '2026-11-18',
+      title: 'Jefes más cortos en Normal (Lite).',
+      notes: [
+        ['balance', 'Lite (Normal): Pokémon de los líderes con +25 % de PS y 15/18/20 s mínimos; santuario 40 s.'],
+        ['balance', 'Lite (Normal): Dominantes e Invocadores 6 s mínimos, Alfas 4 s.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.23',
