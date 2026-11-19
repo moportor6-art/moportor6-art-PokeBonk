@@ -21,6 +21,7 @@
   const eclosionar = h => {
     const m = meta(), p = m.profile, [a, b] = RANGO[h.reg] ?? RANGO.kanto;
     const pool = (POKE ?? []).filter(x => x.id >= a && x.id <= b && !x.evoFrom && !LEG.has(x.id) && (!vale || vale.has(x.id)) && !p.league.includes(x.id));
+    try { window.PB_LOGROS?.cont('huevos'); } catch {} // 1.34: logro «Criador»
     if (!pool.length) { p.stardust = (p.stardust ?? 0) + 300; return 'Ya tienes todos los de esa región: +300 de Polvo Estelar'; }
     const x = pool[Math.floor(Math.random() * pool.length)];
     p.league.push(x.id);

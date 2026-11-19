@@ -1,5 +1,11 @@
 # Cambios respecto al port original
 
+## Automatismos y sistemas nuevos (Subversión 1.34)
+- `extras.js` (Lite): esquiva automática (envuelve `vfx.telegraph`; `profile.pbAuto.esq`), avisos de rarezas (`capture.spawnShiny`, Dominantes, Poké Balls gratis; `pbAuto.avisos`), cartas favoritas (`profile.pbFav`), movimientos Z (`.pb-z` en `.pb-mx`, tecla Z, `combat.hit` fijo), logros (`PB_LOGROS`, `profile.pbLogros`/`pbCont`), récords por Pokémon (`profile.pbStatsPk`, ficha de la Pokédex) y Tienda de Polvo (`profile.pbTienda`, entra en la bolsa con `PB_BOLSA.dar`).
+- `guarderia.js` (Lite): Guardería en el Modo historia; herencia en `localStorage['pb-herencia']`, que lee `compatibilidad.js`.
+- `torre.js` (Lite): Torre de Líderes con los ases de `PB_GYM.LIDERES` (`profile.pbTorre`).
+- `hud-editor.js`: el botón Z se puede mover. `incubadora.js` cuenta huevos para los logros.
+
 ## Bolsa con prioridades (Subversión 1.33)
 - `bolsa.js`: entre lo que toca usar, ordena por `prio()` (estados, curación según lo que falta con `CURA`, apuros, Mepo).
 

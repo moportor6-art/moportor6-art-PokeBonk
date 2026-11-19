@@ -4,16 +4,40 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.33';
+  const SUB = '1.34';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.34',
+      date: Date.UTC(2026, 10, 18, 23, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.34`,
+      summary: 'PokéBonk Lite: esquiva automática, movimientos Z, cartas favoritas, Guardería, Torre de Líderes, logros y Tienda de Polvo.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Esquiva automática**: si estás dentro de la zona marcada de un ataque a punto de caer, te deslizas solo hacia fuera (Pausa → «HUD y guía»).`,
+        `- **Avisos de rarezas**: cartel con variocolores, Dominantes y Poké Balls gratis cercanas.`,
+        `- **Cartas favoritas**: toca la ⭐ de una carta al subir de nivel; cuando vuelva a salir se elegirá sola.`,
+        `- **Movimientos Z**: botón Z junto a TERA (o tecla Z) desde el Nv. 20, una vez por zona: ataque definitivo de tu tipo alrededor (a los jefes les quita un 12 %).`,
+        `- **Guardería** (Modo historia): deja a dos Pokémon; tras 3 partidas nace un huevo con la forma base de la madre y un movimiento heredado del padre (desde el Nv. 5, al volver a abrir el juego).`,
+        `- **Torre de Líderes** (Modo historia): los Pokémon estrella de los 8 líderes de Kanto o Johto, uno tras otro. Premio de 1.500 o 2.500 de Polvo.`,
+        `- **Logros** con premio de Polvo y **Tienda de Polvo** en el Laboratorio (bayas, pociones y huevos para la próxima partida).`,
+        `- **Récords por Pokémon** en su ficha de la Pokédex.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.33',
       date: Date.UTC(2026, 10, 18, 22, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.33`,
@@ -2921,6 +2945,18 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.34',
+      date: '2026-11-18',
+      title: 'Esquiva automática, movimientos Z, Guardería, Torre de Líderes, logros y tienda (Lite).',
+      notes: [
+        ['new', 'Lite: esquiva automática de ataques marcados, avisos de rarezas y cartas favoritas que se eligen solas.'],
+        ['new', 'Lite: movimientos Z desde el Nv. 20, una vez por zona.'],
+        ['new', 'Lite: Guardería con huevos y movimiento heredado, y Torre de Líderes en el Modo historia.'],
+        ['new', 'Lite: logros con Polvo, Tienda de Polvo en el Laboratorio y récords por Pokémon en la Pokédex.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.33',

@@ -38,6 +38,8 @@
         if (m != null && !ya.has(m)) { l.push([m, nv]); ya.add(m); nv += 8; }
       }
     }
+    // 1.34: movimientos heredados de la Guardería (guarderia.js los guarda aquí: { especie: idMovimiento }), desde el Nv. 5.
+    try { const her = JSON.parse(localStorage.getItem('pb-herencia') || '{}'); for (const [sp, m] of Object.entries(her)) { const l = ls[sp]; if (l && !l.some(x => x[0] === m)) l.push([m, 5]); } } catch {}
     return ls;
   };
   window.fetch = async (u, ...a) => {
