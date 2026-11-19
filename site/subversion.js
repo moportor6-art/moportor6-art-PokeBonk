@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.48';
+  const SUB = '1.49';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.49',
+      date: Date.UTC(2026, 10, 19, 22, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.49`,
+      summary: 'PokéBonk Lite: mapa de pruebas con un Pueblo Paleta de bloques (botón 🧪 arriba, junto a Ajustes).',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Mapa de pruebas: Pueblo Paleta** (botón 🧪 en la barra de arriba del menú de inicio): eliges Pokémon y apareces en un pueblo de bloques levantado en un claro llano: las casas de Rojo y de Azul, el Laboratorio del Prof. Oak, el jardín vallado, carteles, el camino y la hierba alta de la Ruta 1, el anillo de árboles y el agua del sur. Las paredes, árboles y vallas chocan.`,
+        `- Es una prueba: no cuenta para récords, logros, Historial ni Guardería. Si gusta, el siguiente paso es convertirlo en un mapa de verdad.`,
+        `- Texturas: Voxel Pack de Kenney (www.kenney.nl), licencia CC0.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.48',
       date: Date.UTC(2026, 10, 19, 20, 30),
       tag: 'correccion',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.48`,
@@ -3214,6 +3233,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.49',
+      date: '2026-11-19',
+      title: 'Mapa de pruebas: Pueblo Paleta de bloques (Lite).',
+      notes: [
+        ['new', 'Lite: mapa de pruebas con un Pueblo Paleta de bloques (texturas CC0 del Voxel Pack de Kenney).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.48',

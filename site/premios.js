@@ -31,7 +31,7 @@
   let visto = null;
   setInterval(() => {
     const run = window.__pbRun, p = P();
-    if (!run || !p || run.state !== 'over' || visto === run || run.mode === 'duel' || run.__pbSala) return;
+    if (!run || !p || run.state !== 'over' || visto === run || run.mode === 'duel' || run.__pbSala || run.__pbPrueba) return;
     visto = run;
     const sp = run.startSpecies, L = (p.pbLogPk ??= {})[sp] ??= { c: {}, n: {} }, nombre = NOM[sp] ?? `#${sp}`;
     for (const [k, nom, de, metas] of METAS) {

@@ -53,7 +53,7 @@
   let visto = null;
   setInterval(() => {
     const run = window.__pbRun, p = P();
-    if (!run || !p || run.state !== 'over' || run.mode === 'duel' || run.__pbSala) return;
+    if (!run || !p || run.state !== 'over' || run.mode === 'duel' || run.__pbSala || run.__pbPrueba) return;
     const Hs = p.pbHistorial ??= [];
     if (visto !== run) {
       visto = run;

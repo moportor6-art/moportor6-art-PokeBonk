@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Mapa de pruebas: Pueblo Paleta (Subversión 1.49)
+- `paleta.js` (Lite): botón `.pb-paleta` junto a `.jay-settings-shortcut`; partida en `encina`, busca un claro llano sin colliders, apaga los colliders del juego dentro, construye bloques de 1 m (caras visibles agrupadas por textura en `BufferGeometry`, `MeshToonMaterial`; clases de Three.js tomadas de la escena) dentro de `terrain.group` y añade colliders circulares. `run.__pbPrueba` lo excluye de `extras.js`, `premios.js`, `registro.js` y `guarderia.js`.
+- `assets/voxel/`: 20 texturas del Voxel Pack de Kenney (CC0) reducidas a 32 px y su licencia.
+
 ## Portal solo con el guardián (Subversión 1.48)
 - `ultra.js` (Lite): envuelve `run.onBossKilled` (lo llama cualquier enemigo con la marca `Boss` al morir): no lo ejecuta para el Ultraente ni para lo apuntado con `PB_SINPORTAL` (`torre.js`, `hoopa.js`; la Liga usa la Torre). `capRate` de 15/25 s para el Ultraente.
 
