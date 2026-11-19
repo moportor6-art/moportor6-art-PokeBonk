@@ -556,16 +556,17 @@
     dialogo(r.reg, lineasDe(ret, nom, lin), () => seguir(i));
   };
 
+  // 1.41: si la pausa se repinta (cambio de pestaña, estadísticas…), el botón se vuelve a poner al momento en vez de
+  // esperar al siguiente ciclo (antes parpadeaba o se quedaba sin él).
+  try { new MutationObserver(() => { try { const r = window.__pbRun; if (r?.__hist != null && document.querySelector('.pz .pz-tabs:not(:has(.pb-hist-pz))')) botonPausa(r); } catch {} }).observe(document.documentElement, { childList: true, subtree: true }); } catch {}
+  // 1.41: cada paso con su propio try: antes, si uno fallaba (p. ej. pendiente()), el botón «Laboratorio» de la pausa
+  // dejaba de ponerse y desaparecía al reabrir la pausa.
   setInterval(() => {
-    try {
-      envolverApp();
-      const run = window.__pbRun;
-      if (run && run.state === 'play') marcar(run);
-      if (run && run.__hist != null && run.state === 'over') resultado(run);
-      pendiente();
-      boton();
-      botonPausa(run);
-    } catch {}
+    const run = window.__pbRun;
+    for (const f of [envolverApp, () => run && run.state === 'play' && marcar(run), () => botonPausa(run),
+      () => run && run.__hist != null && run.state === 'over' && resultado(run), pendiente, boton]) {
+      try { f(); } catch (e) { try { console.warn('[historia]', e); } catch {} }
+    }
   }, 400);
 
   // ---------- Laboratorio de la historia (pantalla del capítulo y pausa) ----------

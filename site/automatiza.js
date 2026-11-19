@@ -100,10 +100,10 @@
     ['inc', 'Incienso inteligente', ['No', 'Sí'], [false, true]],
     ['rend', 'Modo rendimiento', ['Auto', 'Siempre', 'No'], ['auto', 'siempre', 'no']],
     // 1.36: opciones de extras.js y utiles.js en el mismo menú.
-    ['esq', 'Esquiva automática', ['No', 'Sí'], [false, true]],
     ['avisos', 'Avisos de rarezas', ['No', 'Sí'], [false, true]],
     ['vib', 'Vibrar al recibir golpes', ['No', 'Sí'], [false, true]],
-    ['dz', 'Zona muerta del joystick', ['Pequeña', 'Normal', 'Grande'], [0.04, 0.1, 0.22]]
+    ['dz', 'Zona muerta del joystick', ['Pequeña', 'Normal', 'Grande'], [0.04, 0.1, 0.22]],
+    ['esq', 'Esquiva automática (control)', ['No', 'Sí'], [false, true]]
   ];
   setInterval(() => {
     const row = document.querySelector('.pb-he-menu .row'), a = A();

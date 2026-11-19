@@ -1,5 +1,5 @@
 /* Subversión propia (moportor6, 1.34): más automatismos y sistemas, solo en PokéBonk Lite.
-   - Esquiva automática (Pausa → «HUD y guía», Sí por defecto): si estás dentro de la zona marcada de un ataque que está
+   - Esquiva automática (Pausa → «HUD y guía», con los controles; apagada por defecto desde 1.41): si estás dentro de la zona marcada de un ataque que está
      a punto de caer y puedes deslizarte, te deslizas solo hacia fuera.
    - Avisos de rarezas (Sí por defecto): cartel y sonido con variocolores, Dominantes y Poké Balls gratis cerca.
    - Cartas favoritas: al subir de nivel, cada carta lleva una ⭐; las marcadas se eligen solas cuando salen.
@@ -12,7 +12,7 @@
   const meta = () => window.__pbMeta;
   const P = () => meta()?.profile;
   const guardar = () => { try { meta().save(); } catch {} };
-  const A = () => { const p = P(); if (!p) return null; const a = p.pbAuto ??= {}; a.esq ??= true; a.avisos ??= true; return a; };
+  const A = () => { const p = P(); if (!p) return null; const a = p.pbAuto ??= {}; if (!a.esqV2) { a.esq = false; a.esqV2 = true; } a.avisos ??= true; return a; }; // 1.41: esquiva apagada por defecto
   const cont = (k, n = 1) => { const p = P(); if (!p) return; (p.pbCont ??= {})[k] = (p.pbCont[k] ?? 0) + n; };
   let NOM = {}, TIPOS = {};
   fetch('./data/pokemon.json').then(r => r.json()).then(l => { for (const x of l) { NOM[x.id] = x.name; TIPOS[x.id] = x.types; } }).catch(() => {});

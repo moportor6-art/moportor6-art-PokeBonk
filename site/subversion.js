@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.40';
+  const SUB = '1.41';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.41',
+      date: Date.UTC(2026, 10, 19, 16, 30),
+      tag: 'correccion',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.41`,
+      summary: 'PokéBonk Lite: la esquiva automática viene apagada y el Laboratorio de la pausa del Modo historia ya no desaparece.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Esquiva automática**: ahora es solo una opción de control, apagada por defecto (también si la tenías encendida). Se enciende en Pausa → «HUD y guía».`,
+        `- **Laboratorio en la pausa del Modo historia**: si la pausa se repinta, el botón vuelve al momento, y un fallo en otra parte de la historia ya no lo quita.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.40',
       date: Date.UTC(2026, 10, 19, 5, 10),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.40`,
@@ -3067,6 +3085,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.41',
+      date: '2026-11-19',
+      title: 'Esquiva automática apagada y Laboratorio fijo en la pausa de la historia (Lite).',
+      notes: [
+        ['fix', 'Lite: la esquiva automática estorbaba al moverse; ahora es una opción de control apagada por defecto.'],
+        ['fix', 'Lite: el botón «Laboratorio» de la pausa del Modo historia desaparecía a ratos.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.40',

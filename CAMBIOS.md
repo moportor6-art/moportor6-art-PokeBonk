@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Correcciones (Subversión 1.41)
+- `extras.js`: esquiva automática apagada por defecto (migración única `pbAuto.esqV2`); `automatiza.js` la muestra como opción de control.
+- `historia.js`: cada paso del ciclo con su propio `try` (antes un fallo dejaba sin botón «Laboratorio» en la pausa) y `MutationObserver` que lo repone al repintarse la pausa.
+
 ## Sin fin con premio (Subversión 1.40)
 - `premios.js` (Lite): con `run.endless`, al terminar da 250 × n(n+1)/2 de Polvo (n = bloques de 5 min) y guarda `profile.pbSinFin[especie]` y `pbSinFinMax`. `extras.js`: logros `sinfin30/60/90`. `registro.js`: el Historial marca `sf`.
 
