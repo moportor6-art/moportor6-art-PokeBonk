@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.42';
+  const SUB = '1.43';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
-      id: 'moportor6-sub-1.42',
+      id: 'moportor6-sub-1.43',
       date: Date.UTC(2026, 10, 19, 17, 30),
       tag: 'novedad',
       pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.43`,
+      summary: 'PokéBonk Lite: la Esfera elemental usa los 11 estados del juego y potencia la duración y el daño de los estados.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Esfera elemental con 11 elementos**: Fuego (quema), Veneno (envenena y corta la curación), Psíquico (duerme), Eléctrico (paraliza), Hielo (congela), Agua (moja), Planta (enraíza), Fantasma (maldice), Hada (encanta), Siniestro (confunde) y Lucha (aturde). Desde el nivel 5 suma tu propio tipo.`,
+        `- **Estados más fuertes**: cualquier estado que apliques (con la esfera o con tus ataques, como las llamas de Typhlosion) dura un 6 % más por nivel, y la quemadura y el veneno hacen un 10 % más de daño por nivel. Al nivel 8: +48 % de duración y +80 % de daño de los estados, además del +40 % de daño general y +64 % de probabilidad de aplicarlos.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
+      id: 'moportor6-sub-1.42',
+      date: Date.UTC(2026, 10, 19, 17, 30),
+      tag: 'novedad',
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.42`,
@@ -3105,6 +3123,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.43',
+      date: '2026-11-19',
+      title: 'Esfera elemental: 11 estados y estados potenciados (Lite).',
+      notes: [
+        ['new', 'Lite: la Esfera elemental recorre los 11 estados del juego.'],
+        ['new', 'Lite: los estados que aplicas duran más y hacen más daño con cada nivel de la Esfera.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.42',

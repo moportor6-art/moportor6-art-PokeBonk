@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Esfera elemental completa (Subversión 1.43)
+- `esfera.js`: 11 estados (`burn`, `poison`, `sleep`, `paralysis`, `freeze`, `wet`, `root`, `curse`, `charm`, `confusion`, `stun`) y, tras cada `combat.hit` con estado, la parte añadida a sus arrays de `enemies` (duración +6 % n; `burnDps`/`poisonDps` +10 % n).
+
 ## Esfera elemental (Subversión 1.42)
 - `esfera.js` (Lite): mejora `pb-esfera` en `PB_LAB.defs` (8 niv., 500 × 1,6ⁿ). Envuelve `player.recompute` (stats.damage × (1 + 0,05 n)) y `combat.hit` (statusChance × (1 + 0,08 n)); la esfera golpea con `combat.hit` (especial, 2,2 × (1 + 0,12 n), estado 35 % + 5 % n).
 

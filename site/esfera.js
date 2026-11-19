@@ -2,16 +2,21 @@
    solo en PokéBonk Lite. 8 niveles; cada uno:
    - +5 % de daño a todos tus ataques (stats.damage, tras cada recompute del jugador);
    - +8 % de probabilidad de que tus ataques con estado lo apliquen (quemar, envenenar, dormir, paralizar, congelar…),
-     así Typhlosion quema más a menudo con sus llamas;
-   - una esfera gira a tu alrededor y cambia de elemento: Fuego (quema), Veneno (envenena), Psíquico (duerme),
-     Eléctrico (paraliza) y Hielo (congela); con nivel 5 o más añade también tu propio tipo. Su daño usa la fórmula
+     así Typhlosion quema más a menudo con sus llamas; y (1.43) esos estados duran un 6 % más y la quemadura y el
+     veneno hacen un 10 % más de daño por nivel;
+   - una esfera gira a tu alrededor y cambia de elemento en cada golpe: Fuego (quema), Veneno (envenena y corta la
+     curación), Psíquico (duerme), Eléctrico (paraliza), Hielo (congela), Agua (moja), Planta (enraíza), Fantasma
+     (maldice), Hada (encanta), Siniestro (confunde) y Lucha (aturde) (1.43); con nivel 5 o más añade tu propio tipo. Su daño usa la fórmula
      normal de ataques especiales (escala con tu Pokémon) y crece un 12 % por nivel.
    Ganchos: PB_LAB.defs (como lab-extra.js), player.recompute y combat.hit (instancias). */
 (() => {
   if (window.PB_EDICION !== 'lite') return;
   const ID = 'pb-esfera', MAX = 8;
-  const DEF = { id: ID, name: 'Esfera elemental', desc: '+5 % de daño a todo y +8 % de aplicar estados por nivel. Una esfera gira a tu alrededor y quema, envenena, duerme, paraliza y congela.', icon: 'life-orb', max: MAX, cost: n => Math.round(500 * 1.6 ** n) };
-  const EL = [['fire', 'burn', 0xff7a3a], ['poison', 'poison', 0xb05ad8], ['psychic', 'sleep', 0xff5a9a], ['electric', 'paralysis', 0xffd23a], ['ice', 'freeze', 0x8ae8ff]];
+  const DEF = { id: ID, name: 'Esfera elemental', desc: '+5 % de daño a todo y +8 % de aplicar estados por nivel. Una esfera de 11 elementos gira a tu alrededor: quema, envenena, duerme, paraliza, congela, moja, enraíza, maldice, encanta, confunde y aturde.', icon: 'life-orb', max: MAX, cost: n => Math.round(500 * 1.6 ** n) };
+  // 1.43: los 11 estados del juego, cada uno con su elemento (comprobados uno por uno sobre los arrays de enemies).
+  const EL = [['fire', 'burn', 0xff7a3a], ['poison', 'poison', 0xb05ad8], ['psychic', 'sleep', 0xff5a9a], ['electric', 'paralysis', 0xffd23a],
+    ['ice', 'freeze', 0x8ae8ff], ['water', 'wet', 0x4a9aff], ['grass', 'root', 0x6ad84a], ['ghost', 'curse', 0x7a5ab8],
+    ['fairy', 'charm', 0xffa8e8], ['dark', 'confusion', 0x5a4a6a], ['fighting', 'stun', 0xd84a3a]];
   const COL = { normal: 0xe8e8d0, fire: 0xff7a3a, water: 0x4a9aff, grass: 0x6ad84a, electric: 0xffd23a, ice: 0x8ae8ff, fighting: 0xd84a3a, poison: 0xb05ad8, ground: 0xd8b05a, flying: 0xa8a8ff, psychic: 0xff5a9a, bug: 0xa8c83a, rock: 0xb8a04a, ghost: 0x7a5ab8, dragon: 0x7a4aff, dark: 0x5a4a6a, steel: 0xb8b8d0, fairy: 0xffa8e8 };
   let TIPOS = {};
   fetch('./data/pokemon.json').then(r => r.json()).then(l => { for (const x of l) TIPOS[x.id] = x.types; }).catch(() => {});
@@ -34,9 +39,16 @@
     if (C && !C.__pbEsf) {
       C.__pbEsf = true;
       const hit = C.hit.bind(C);
+      // 1.43: además, el estado que aplique cualquier golpe tuyo dura un 6 % más y su daño por segundo (quemadura,
+      // veneno) es un 10 % mayor por nivel. Solo se potencia lo que el golpe acaba de añadir, para no acumularlo.
+      const ARR = { burn: ['burn', 'burnDps'], poison: ['poison', 'poisonDps'], sleep: ['sleep'], paralysis: ['para'], freeze: ['chillT'], wet: ['wet'], root: ['root'], curse: ['curse'], charm: ['charm'], confusion: ['confuse'], stun: ['stun'] };
       C.hit = (j, d, o, ...x) => {
-        if (o?.status && o.statusChance > 0 && !o.__pbEsf) { const k = nivel(run); if (k) o = { ...o, statusChance: Math.min(1, o.statusChance * (1 + 0.08 * k)) }; }
-        return hit(j, d, o, ...x);
+        const k = nivel(run), E = run.enemies, ks = o?.status && ARR[o.status];
+        if (!k || !ks) return hit(j, d, o, ...x);
+        if (o.statusChance > 0 && !o.__pbEsf) o = { ...o, statusChance: Math.min(1, o.statusChance * (1 + 0.08 * k)) };
+        const antes = ks.map(a => E[a]?.[j] ?? 0), r = hit(j, d, o, ...x);
+        try { ks.forEach((a, i) => { const v = E[a]?.[j]; if (v > antes[i]) E[a][j] = antes[i] + (v - antes[i]) * (1 + (a.endsWith('Dps') ? 0.1 : 0.06) * k); }); } catch {}
+        return r;
       };
     }
   }, 500);
