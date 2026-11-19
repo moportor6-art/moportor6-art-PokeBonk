@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Portal solo con el guardián (Subversión 1.48)
+- `ultra.js` (Lite): envuelve `run.onBossKilled` (lo llama cualquier enemigo con la marca `Boss` al morir): no lo ejecuta para el Ultraente ni para lo apuntado con `PB_SINPORTAL` (`torre.js`, `hoopa.js`; la Liga usa la Torre). `capRate` de 15/25 s para el Ultraente.
+
 ## Laboratorio de la historia (Subversión 1.47)
 - `historia.js`: el botón `.pb-hist-pz` va al principio de `.pz .sm-foot`; `envolverApp` acepta como propia una configuración igual a la del capítulo (la copia que usa `onRestart` con `lastCfg`), así «Reiniciar» no pone `activo = null`.
 

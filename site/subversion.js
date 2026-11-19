@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.47';
+  const SUB = '1.48';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.48',
+      date: Date.UTC(2026, 10, 19, 20, 30),
+      tag: 'correccion',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.48`,
+      summary: 'PokéBonk Lite: los Ultraentes ya no abren el portal de la zona y aguantan más; lo mismo para los jefes de la Torre, Hoopa y la Liga.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Portal solo con el guardián**: el juego abría el portal (y daba la zona por superada) al caer cualquier enemigo marcado como jefe. El Ultraente de las ultrafendas lo era: al vencerlo se saltaba al guardián. Ahora no abre el portal; tampoco los jefes de la Torre de Líderes, los Anillos de Hoopa y la Liga Pokémon.`,
+        `- **Ultraentes más resistentes**: al menos 15 s de combate (25 s en Difícil). Se siguen capturando al vencerlos.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.47',
       date: Date.UTC(2026, 10, 19, 20, 0),
       tag: 'correccion',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.47`,
@@ -3196,6 +3214,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.48',
+      date: '2026-11-19',
+      title: 'Los Ultraentes ya no abren el portal y aguantan más (Lite).',
+      notes: [
+        ['fix', 'Lite: vencer a un Ultraente (o a un jefe de la Torre, Hoopa o la Liga) abría el portal de la zona sin vencer al guardián.'],
+        ['fix', 'Lite: los Ultraentes caían en 1-2 segundos; ahora duran al menos 15 s (25 s en Difícil).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.47',

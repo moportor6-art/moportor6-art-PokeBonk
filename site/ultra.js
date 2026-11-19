@@ -10,6 +10,26 @@
   const NOM = { 793: 'Nihilego', 794: 'Buzzwole', 795: 'Pheromosa', 796: 'Xurkitree', 797: 'Celesteela', 798: 'Kartana', 799: 'Guzzlord', 803: 'Poipole', 804: 'Naganadel', 805: 'Stakataka', 806: 'Blacephalon' };
   // 1.13: para que fases.js no los trate como jefes de líder (en los gimnasios se reforzaban y se dinamaxizaban).
   window.PB_ULTRA = { es: (run, j) => { const s = run?.__pbFenda; return s?.j === j && run.enemies.gen[j] === s.g; } };
+  // 1.48: cualquier enemigo con la marca de jefe que cae llama a onBossKilled y abre el portal de la zona. Los
+  // Ultraentes (y los jefes de la Torre, los Anillos de Hoopa y la Liga, que se apuntan en run.__pbSinPortal) no son el
+  // guardián: al caer ya no abren el portal ni cuentan como zona superada.
+  const sinPortal = (run, j) => window.PB_ULTRA.es(run, j) || run.__pbSinPortal?.has(`${j}:${run.enemies.gen[j]}`);
+  window.PB_SINPORTAL = (run, j) => { (run.__pbSinPortal ??= new Set()).add(`${j}:${run.enemies.gen[j]}`); };
+  setInterval(() => {
+    const run = window.__pbRun;
+    if (!run?.onBossKilled || run.__pbOBK) return;
+    run.__pbOBK = true;
+    const obk = run.onBossKilled.bind(run);
+    run.onBossKilled = (j, ...a) => {
+      try {
+        if (sinPortal(run, j)) {
+          if (j === run.boss?.bossIndex) { try { run.boss.kit && (run.boss.kit.dead = true); run.boss.release?.(); } catch {} }
+          return;
+        }
+      } catch {}
+      return obk(j, ...a);
+    };
+  }, 300);
   const activa = run => run && run.mode === 'standard' && !run.tower && !run.endless && !run.expedition && !run.duel && !run.coop;
   const meta = () => window.__pbMeta;
   let vale = null;
@@ -71,6 +91,9 @@
           E.maxHp[j] = E.hp[j] = [4500, 18000, 37000][k] * 1.2 * extra * dif;
           E.dmg[j] = [30, 63, 102][k] * extra * (run.diff?.enemyDamage ?? 1);
           s.j = j; s.g = E.gen[j]; s.sp = sp;
+          // 1.48: al menos 15 s de combate (25 s en Difícil), como tope de daño por segundo: antes caía en 1-2 s.
+          const secs = (run.tier | 0) ? 25 : 15, tasa = E.maxHp[j] / secs;
+          if (E.capRate) { E.capRate[j] = tasa; E.capBank[j] = tasa * 3; E.capT[j] = run.time ?? 0; }
         }
       } catch {}
     });

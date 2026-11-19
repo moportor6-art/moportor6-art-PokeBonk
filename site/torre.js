@@ -38,7 +38,7 @@
       try { run.ui.banner(`${d.icono ?? '🗼 Piso'} ${d.n + 1}/${d.jefes.length}: ${L.nombre}`, L.sub ?? '¡Su Pokémon estrella te desafía!', '#7ab8ff', { species: L.sp }); run.vfx.ring(x, run.terrain.height(x, z) + 0.2, z, 4, 0x7ab8ff, 1.2); } catch {}
       const f = (1 + d.n * 0.2) * d.k;
       d.j = run.boss.spawn(L.sp, x, z, false, { hp: run.director.hpMult() * 2.4 * f, dmg: run.director.dmgMult() * d.k, kit: true });
-      if (d.j >= 0) d.g = run.enemies.gen[d.j];
+      if (d.j >= 0) { d.g = run.enemies.gen[d.j]; try { window.PB_SINPORTAL?.(run, d.j); } catch {} } // 1.48: sin portal
       return;
     }
   };

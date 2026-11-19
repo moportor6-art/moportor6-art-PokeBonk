@@ -57,7 +57,7 @@
       } catch {}
       const f = 1 + d.i * 0.25 + d.n * 0.4;
       d.j = run.boss.spawn(sp, x, z, false, { hp: run.director.hpMult() * 2.6 * f * (sp === HOOPA ? 1.5 : 1), dmg: run.director.dmgMult() * (1 + d.n * 0.2), kit: true });
-      if (d.j >= 0) d.g = run.enemies.gen[d.j];
+      if (d.j >= 0) { d.g = run.enemies.gen[d.j]; try { window.PB_SINPORTAL?.(run, d.j); } catch {} } // 1.48: sin portal
       return;
     }
   };
