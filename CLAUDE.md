@@ -9,6 +9,7 @@ Responde siempre en español.
 - Mantén la compatibilidad con Windows y Android (APK) y los controles táctiles.
 - No toques módulos ajenos a la tarea.
 - Antes de un cambio grande, deja un punto de restauración (commit). Después, prueba que no haya regresiones (Playwright sobre `site/`, como en las subversiones anteriores).
+- Todo lo nuevo que aparezca en pantalla durante la partida (botones, barras, contadores) debe añadirse a `ITEMS` de `hud-editor.js` para poder moverlo y redimensionarlo.
 - Solo entran megas o formas con todas sus animaciones; si no las tienen, se omiten (no se dibujan ni se usa el sprite normal).
 
 ## Ahorro de tokens
