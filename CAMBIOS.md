@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Resumen en la pausa (Subversión 1.44)
+- `resumen.js` (Lite): pestaña `.pb-res-tab` en `.pz-tabs` y sección `.pb-resumen` (copia de `.pz-left` y `.pz-centre`, con las vitaminas primero); `.pz.pb-res-on` oculta las demás secciones.
+
 ## Esfera elemental completa (Subversión 1.43)
 - `esfera.js`: 11 estados (`burn`, `poison`, `sleep`, `paralysis`, `freeze`, `wet`, `root`, `curse`, `charm`, `confusion`, `stun`) y, tras cada `combat.hit` con estado, la parte añadida a sus arrays de `enemies` (duración +6 % n; `burnDps`/`poisonDps` +10 % n).
 

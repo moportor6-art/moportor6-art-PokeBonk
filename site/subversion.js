@@ -4,16 +4,33 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.43';
+  const SUB = '1.44';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.44',
+      date: Date.UTC(2026, 10, 19, 18, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.44`,
+      summary: 'PokéBonk Lite: pestaña «Resumen» en la pausa con tus movimientos y lo que hace cada vitamina.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Resumen** (primera pestaña de la pausa): tu habilidad, los movimientos que llevas con su nivel y, debajo, cada vitamina con su nivel y lo que te da (también las que eligió el modo automático), seguidas de objetos y reliquias. Todo en una sola vista.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.43',
       date: Date.UTC(2026, 10, 19, 17, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.43`,
@@ -3123,6 +3140,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.44',
+      date: '2026-11-19',
+      title: 'Pestaña «Resumen» en la pausa (Lite).',
+      notes: [
+        ['new', 'Lite: pestaña «Resumen» con movimientos y vitaminas (con sus efectos) juntos.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.43',
