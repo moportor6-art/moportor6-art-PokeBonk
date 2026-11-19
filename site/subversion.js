@@ -4,16 +4,38 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.49';
+  const SUB = '1.50';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.50',
+      date: Date.UTC(2026, 10, 19, 23, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.50`,
+      summary: 'PokéBonk Lite: el mapa de pruebas ya tiene 3 zonas (Pueblo Paleta, Ruta 1 y Ciudad Verde), suelo propio y casas que ayudan.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Suelo propio**: cada zona aplana su terreno (el Pokémon pisa la base nueva), lo cubre de pasto y quita los árboles y adornos del mapa que quedaban dentro.`,
+        `- **Zona 1, Pueblo Paleta**: casas de Rojo y de Azul con chimenea y jardineras, Laboratorio del Prof. Oak con tejado inclinado, buzones, faroles, carteles, jardín, cercas al camino de la Ruta 1 y un muelle en el agua.`,
+        `- **Casas que ayudan** (una vez cada una): tu madre te cura, la hermana de Azul te da 3 Bayas Zidra y el Prof. Oak te deja una Poké Ball gratis.`,
+        `- **Zona 2, Ruta 1**: camino serpenteante entre árboles, bordillos con hueco, hierba alta, cercas y carteles.`,
+        `- **Zona 3, Ciudad Verde**: Centro Pokémon (te cura), Tienda (bayas e Hiperpoción), Gimnasio, casas y estanque.`,
+        `- **Pokémon de la Ruta 1**: Pidgey y Rattata (y Caterpie, Weedle, Spearow, Nidoran…); guardianes Pidgeotto y Raticate; la zona 3 conserva el legendario. Cielo de mañana y atardecer.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.49',
       date: Date.UTC(2026, 10, 19, 22, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.49`,
@@ -3233,6 +3255,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.50',
+      date: '2026-11-19',
+      title: 'Mapa de pruebas: 3 zonas, suelo propio y casas que ayudan (Lite).',
+      notes: [
+        ['new', 'Lite: Pueblo Paleta, Ruta 1 y Ciudad Verde de bloques, con suelo aplanado y sin adornos del mapa dentro.'],
+        ['new', 'Lite: madre, hermana de Azul, Prof. Oak, Centro Pokémon y Tienda ayudan al acercarte a sus puertas.'],
+        ['new', 'Lite: salvajes de la Ruta 1 y guardianes Pidgeotto y Raticate en el mapa de pruebas.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.49',

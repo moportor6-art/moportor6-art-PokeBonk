@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Mapa de pruebas completo (Subversión 1.50)
+- `paleta.js`: una construcción por zona (se rehace al cambiar `run.terrain`/`run.stage`); aplana `terrain.heights` (el terreno se lee de ahí) con un borde suave de 6 m y lo cubre de pasto; esconde adornos con mallas toon dentro (no interactuables ni sprites) e instancias; puertas con ayuda (`run.__pbPrueba.hecho`); envuelve `PB_REGIONES.remap` (salvajes) y `PB_GYM.jefe` (guardianes de las zonas 1 y 2).
+- `assets/voxel/`: 11 texturas más del Voxel Pack (CC0).
+
 ## Mapa de pruebas: Pueblo Paleta (Subversión 1.49)
 - `paleta.js` (Lite): botón `.pb-paleta` junto a `.jay-settings-shortcut`; partida en `encina`, busca un claro llano sin colliders, apaga los colliders del juego dentro, construye bloques de 1 m (caras visibles agrupadas por textura en `BufferGeometry`, `MeshToonMaterial`; clases de Three.js tomadas de la escena) dentro de `terrain.group` y añade colliders circulares. `run.__pbPrueba` lo excluye de `extras.js`, `premios.js`, `registro.js` y `guarderia.js`.
 - `assets/voxel/`: 20 texturas del Voxel Pack de Kenney (CC0) reducidas a 32 px y su licencia.
