@@ -40,6 +40,7 @@ Responde siempre en español.
 - `utiles.js`: Sala de entrenamiento, evento de Navidad, Bestiario, vibración y zona muerta del joystick (Lite).
 - `premios.js`: logros por Pokémon, recompensas por recoger al terminar la partida y premios/récords del Sin fin (Lite).
 - `liga.js`: Liga Pokémon (Alto Mando y Campeón) con el motor de `torre.js` (Lite). `registro.js`: dónde aparece, historial, títulos y colores de eficacia (Lite).
+- `esfera.js`: Esfera elemental del Laboratorio (Lite).
 - `pruebas.js`: botón TEMPORAL para desbloquear toda la Liga (pedido para pruebas; se quitará cuando el usuario lo diga).
 - Secretos: el keystore y su contraseña solo viven en los secrets de GitHub; nunca en el repo.
 - Créditos que se conservan: Charcher, JayElDragon, @SrBatai, autores de PMDCollab, JPTER78/JayElDragon (PokéSurvivor, con su aviso PolyForm Noncommercial), pokelike.xyz, PokeAPI/sprites (medallas), Pokémon Showdown (retratos de la historia), Khydra, jab_lao, pedrobarretto y Pokémon Reloaded. Nada comercial.

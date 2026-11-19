@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Esfera elemental (Subversión 1.42)
+- `esfera.js` (Lite): mejora `pb-esfera` en `PB_LAB.defs` (8 niv., 500 × 1,6ⁿ). Envuelve `player.recompute` (stats.damage × (1 + 0,05 n)) y `combat.hit` (statusChance × (1 + 0,08 n)); la esfera golpea con `combat.hit` (especial, 2,2 × (1 + 0,12 n), estado 35 % + 5 % n).
+
 ## Correcciones (Subversión 1.41)
 - `extras.js`: esquiva automática apagada por defecto (migración única `pbAuto.esqV2`); `automatiza.js` la muestra como opción de control.
 - `historia.js`: cada paso del ciclo con su propio `try` (antes un fallo dejaba sin botón «Laboratorio» en la pausa) y `MutationObserver` que lo repone al repintarse la pausa.

@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.41';
+  const SUB = '1.42';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.42',
+      date: Date.UTC(2026, 10, 19, 17, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.42`,
+      summary: 'PokéBonk Lite: Esfera elemental en el Laboratorio: +5 % de daño por nivel, más estados y una esfera que quema, envenena, duerme, paraliza y congela.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Esfera elemental** (Laboratorio, para todos los Pokémon, 8 niveles; de 500 a 13.400 de Polvo por nivel):`,
+        `  - +5 % de daño a todos tus ataques por nivel (+40 % al máximo).`,
+        `  - +8 % por nivel de que tus ataques con estado lo apliquen: Typhlosion quema mucho más con sus llamas.`,
+        `  - Una esfera gira a tu alrededor y cambia de elemento con cada golpe: Fuego (quema), Veneno (envenena), Psíquico (duerme), Eléctrico (paraliza) y Hielo (congela). Desde el nivel 5 suma también tu propio tipo. Su daño escala con tu Pokémon y sube un 12 % por nivel.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.41',
       date: Date.UTC(2026, 10, 19, 16, 30),
       tag: 'correccion',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.41`,
@@ -3085,6 +3105,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.42',
+      date: '2026-11-19',
+      title: 'Esfera elemental en el Laboratorio (Lite).',
+      notes: [
+        ['new', 'Lite: Esfera elemental (8 niveles): +5 % de daño y +8 % de estados por nivel y una esfera de cinco elementos que aplica estados.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.41',
