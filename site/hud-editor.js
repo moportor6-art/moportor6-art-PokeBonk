@@ -30,7 +30,24 @@
     { sel: '.pb-sala', css: '.pb-sala', name: 'Medidor de entrenamiento' },
     { sel: '.pb-titulo', css: '#hud .pb-titulo', name: 'Título' },
     { sel: '.pb-evoreto', css: '.pb-evoreto', name: 'Retos de evolución' },
-    { sel: '.pb-bolsa', css: '.pb-bolsa', name: 'Bolsa de bayas' }
+    { sel: '.pb-bolsa', css: '.pb-bolsa', name: 'Bolsa de bayas' },
+    // 1.52: todo lo que faltaba del HUD.
+    { sel: '#hud .hud-party', css: '#hud .hud-party', name: 'Compañeros Alfa' },
+    { sel: '#hud .tl-medal', css: '#hud .tl-medal', name: 'Retrato' },
+    { sel: '#hud .tl-plate', css: '#hud .tl-plate', name: 'Nombre, tipo y evolución' },
+    { sel: '#hud .ht-l', css: '#hud .ht-l', name: 'Zona' },
+    { sel: '#hud .hud-top .timer', css: '#hud .hud-top .timer', name: 'Cuenta atrás' },
+    { sel: '#hud .hud-top .wallet', css: '#hud .hud-top .wallet', name: 'Dinero y bajas' },
+    { sel: '#hud .runclock', css: '#hud .runclock', name: 'Reloj de partida' },
+    { sel: '#hud .hud-tr .minimap', css: '#hud .hud-tr .minimap', name: 'Mapa' },
+    { sel: '#hud .hud-tr .counters', css: '#hud .hud-tr .counters', name: 'Contador' },
+    { sel: '#hud .kgoal', css: '#hud .kgoal', name: 'Objetivo de bajas' },
+    { sel: '#hud .hud-tr .evpill', css: '#hud .hud-tr .evpill, #hud .hud-tr .milepill, #hud .hud-tr .leftpill', name: 'Avisos de eventos' },
+    { sel: '#hud .streak', css: '#hud .streak', name: 'Racha' },
+    { sel: '#hud .bossbar:not(.mini)', css: '#hud > .bossbar:not(.mini)', name: 'Barra del jefe' },
+    { sel: '#hud .minibars', css: '#hud .minibars', name: 'Barras de minijefes' },
+    { sel: '#hud .toasts', css: '#hud .toasts', name: 'Mensajes' },
+    { sel: '#hud .autorun-pill', css: '#hud .autorun-pill', name: 'Aviso de modo auto' }
   ];
   const load = () => { try { return JSON.parse(localStorage.getItem(key())) || {}; } catch { return {}; } };
   const save = () => { try { localStorage.setItem(key(), JSON.stringify(H.layout)); } catch {} };
@@ -56,6 +73,9 @@ html body #ui .pz > .sm-foot{min-height:0!important;overflow-y:auto!important}
   editCss.textContent = `
 body.pb-hud-editing .modal{visibility:hidden!important}
 body.pb-hud-editing #hud, body.pb-hud-editing .tc{visibility:visible!important;opacity:1!important}
+/* 1.52: en el editor, lo que solo sale a ratos (racha, jefe, compañeros, avisos…) se ve como un hueco para poder moverlo. */
+body.pb-hud-editing #hud .hud-party:empty, body.pb-hud-editing #hud .streak, body.pb-hud-editing #hud > .bossbar:not(.mini), body.pb-hud-editing #hud .minibars, body.pb-hud-editing #hud .kgoal, body.pb-hud-editing #hud .hud-tr .milepill + .evpill, body.pb-hud-editing #hud .toasts:empty, body.pb-hud-editing #hud .autorun-pill{display:block!important;visibility:visible!important;opacity:.85!important;min-width:110px;min-height:28px;outline:2px dashed rgba(255,255,255,.5)}
+body.pb-hud-editing #hud .hud-party:empty{min-width:200px;min-height:70px}
 body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none!important}
 .pb-he{position:fixed;inset:0;z-index:9999;touch-action:none;user-select:none;-webkit-user-select:none}
 .pb-he-f{position:fixed;border:2px dashed rgba(255,255,255,.9);border-radius:10px;background:rgba(138,90,216,.18);box-sizing:border-box;touch-action:none}

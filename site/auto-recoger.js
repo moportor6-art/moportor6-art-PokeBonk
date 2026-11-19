@@ -6,7 +6,8 @@
    - Poké Ball gratis del mapa (1.26): se abre sola.
    - Elecciones con una sola opción (1.26): si una ventana de elegir (subida de nivel, cofre…) solo ofrece una carta, se
      elige sola a los 0,6 s.
-   Lo que cuesta dinero o abre una ventana (cofres, altares, jaulas, tragaperras, setas…) sigue siendo con el botón.
+   - Jaulas (1.52): se abren solas si tienes dinero suficiente.
+   Lo que cuesta dinero o abre una ventana (cofres, altares, tragaperras, setas…) sigue siendo con el botón.
    Gancho: run.interactables.interact (el mismo que usa el botón). */
 (() => {
   if (window.PB_EDICION !== 'lite') return;
@@ -15,8 +16,12 @@
     const run = window.__pbRun, p = run?.player, I = run?.interactables;
     if (!run || !p || !I?.list || run.state !== 'play' || p.dead) return;
     for (const o of I.list) {
-      if (!AUTO[o.kind] || o.used || (o.cost ?? 0) > 0) continue;
+      // 1.52: jaulas (Alfas enjaulados): se abren solas si te alcanza el dinero; si no, siguen con el botón.
+      const jaula = o.kind === 'cage' && !o.used && (run.gold ?? 0) >= (I.cageCost?.() ?? Infinity);
+      if (!jaula && (!AUTO[o.kind] || o.used || (o.cost ?? 0) > 0)) continue;
       if (Math.hypot(o.x - p.pos.x, o.z - p.pos.z) > (o.r ?? 2) + 0.6) continue;
+      if (jaula && (o.__pbT ?? 0) > performance.now()) continue;
+      if (jaula) o.__pbT = performance.now() + 2500;
       // 1.28: las bayas se recogen siempre (con la Bolsa de bayas, cada arbusto deja además bayas guardadas).
       try {
         I.interact(o);

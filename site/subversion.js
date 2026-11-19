@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.51';
+  const SUB = '1.52';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.52',
+      date: Date.UTC(2026, 10, 20, 0, 0),
+      tag: 'mejora',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.52`,
+      summary: 'PokéBonk Lite: las jaulas se abren solas si te alcanza el dinero y todo el HUD se puede mover, agrandar, girar u ocultar.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Jaulas automáticas**: al pasar junto a un Alfa enjaulado, la jaula se abre sola si tienes el dinero; si no, sigue con el botón.`,
+        `- **Editor del HUD completo**: ahora también se editan los compañeros Alfa, el retrato y la placa del nombre por separado, la zona, la cuenta atrás, el dinero y bajas, el reloj, el mapa, el contador, el objetivo de bajas, los avisos de eventos, la racha, la barra del jefe, las barras de minijefes, los mensajes y el aviso del modo auto.`,
+        `- Lo que solo sale a ratos (racha, jefe, compañeros…) se ve como un hueco en el editor para que lo puedas colocar.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.51',
       date: Date.UTC(2026, 10, 20, 0, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.51`,
@@ -3277,6 +3296,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.52',
+      date: '2026-11-19',
+      title: 'Jaulas automáticas y editor del HUD completo (Lite).',
+      notes: [
+        ['new', 'Lite: las jaulas se abren solas si tienes dinero suficiente.'],
+        ['new', 'Lite: 16 piezas más del HUD se pueden mover, redimensionar, girar u ocultar, incluidos los compañeros Alfa y la racha.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.51',

@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Jaulas y HUD completo (Subversión 1.52)
+- `auto-recoger.js`: `cage` se usa sola si `run.gold >= interactables.cageCost()`.
+- `hud-editor.js`: 16 `ITEMS` más (`.hud-party`, `.tl-medal`, `.tl-plate`, `.ht-l`, `.timer`, `.wallet`, `.runclock`, `.minimap`, `.counters`, `.kgoal`, `.evpill`, `.streak`, `.bossbar`, `.minibars`, `.toasts`, `.autorun-pill`) y huecos visibles en el editor para los que salen a ratos.
+
 ## Mapa de pruebas con interiores (Subversión 1.51)
 - `paleta.js`: `interiores()` levanta los cuartos en otro claro del mismo mapa (lejos del pueblo) y las puertas te llevan allí (`run.__pbDentro` pausa `director.update` y detiene a los salvajes); personajes y adornos como cajas (`cubos`) con etiqueta para mostrarlos/ocultarlos (viejo, Azul); puntos de acción con `PB_HISTORIA.dialogo`; regalo de Oak envolviendo `combat.hit`; rival con `enemies.spawn`; música `menu` con `audio.playTrack` si la radio no fija otra. Esconde también mallas toon sueltas dentro de la zona.
 
