@@ -4,7 +4,8 @@
    todos ganas la partida y 1.500 de Polvo (2.500 en Difícil). Datos: profile.pbTorre = ['kanto-1', …]. */
 (() => {
   if (window.PB_EDICION !== 'lite') return;
-  const OPC = [['kanto', 1, 'Kanto · Normal', 1500], ['kanto', 1.5, 'Kanto · Difícil', 2500], ['johto', 1, 'Johto · Normal', 1500], ['johto', 1.5, 'Johto · Difícil', 2500]];
+  const OPC = [['kanto', 1, 'Kanto · Normal', 1500], ['kanto', 1.5, 'Kanto · Difícil', 2500], ['johto', 1, 'Johto · Normal', 1500], ['johto', 1.5, 'Johto · Difícil', 2500],
+    ['hoenn', 1.2, 'Hoenn · Normal', 2000], ['hoenn', 1.8, 'Hoenn · Difícil', 3200], ['sinnoh', 1.4, 'Sinnoh · Normal', 2500], ['sinnoh', 2, 'Sinnoh · Difícil', 4000]]; // 1.36: Hoenn y Sinnoh
   const meta = () => window.__pbMeta, H = () => window.PB_HISTORIA;
   const ases = reg => (window.PB_GYM?.LIDERES?.[reg] ?? []).map(l => ({ sp: l.equipo.at(-1), nombre: l.nombre }));
   let pendiente = null;
@@ -24,7 +25,7 @@
     b.querySelectorAll('[data-sp]').forEach(x => x.onclick = () => {
       const [reg, k] = OPC[i]; pendiente = { i, jefes: ases(reg), n: 0, j: -1, k };
       h.cerrar();
-      Promise.resolve(window.__pbApp?.startRun?.({ species: +x.dataset.sp, biome: reg === 'johto' ? 'encina' : 'forest', tier: k > 1 ? 1 : 0, boosts: [], mode: 'standard' })).catch(() => { pendiente = null; });
+      Promise.resolve(window.__pbApp?.startRun?.({ species: +x.dataset.sp, biome: { johto: 'encina', hoenn: 'petalia', sinnoh: 'eterna' }[reg] ?? 'forest', tier: OPC[i][2].includes('Difícil') ? 1 : 0, boosts: [], mode: 'standard' })).catch(() => { pendiente = null; });
     });
     b.querySelector('.vol').onclick = pantalla;
     c.append(b);

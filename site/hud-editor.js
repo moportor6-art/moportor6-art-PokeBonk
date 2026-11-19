@@ -27,6 +27,7 @@
     { sel: '.pb-mx .dx', css: '.pb-mx .dx', name: 'DMAX' },
     { sel: '.pb-mx .pb-tera', css: '.pb-mx .pb-tera', name: 'TERA' },
     { sel: '.pb-mx .pb-z', css: '.pb-mx .pb-z', name: 'Movimiento Z' },
+    { sel: '.pb-sala', css: '.pb-sala', name: 'Medidor de entrenamiento' },
     { sel: '.pb-evoreto', css: '.pb-evoreto', name: 'Retos de evolución' },
     { sel: '.pb-bolsa', css: '.pb-bolsa', name: 'Bolsa de bayas' }
   ];

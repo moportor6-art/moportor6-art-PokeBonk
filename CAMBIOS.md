@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Utilidades (Subversión 1.36)
+- `utiles.js` (Lite): Sala de entrenamiento (`run.__pbSala`, `director.update` en pausa, muñecos con `enemies.spawn`, medidor `.pb-sala` en el editor del HUD), Navidad (diciembre o `localStorage['pb-navidad']='1'`), Bestiario (`profile.pbBestia`) y vibración / zona muerta (`pbAuto.vib`, `pbAuto.dz` → `window.__pbJoyDZ`, que lee el bundle `main` en vez de `sx`).
+- `automatiza.js`: en la pausa, opciones de Esquiva, Avisos, vibración y zona muerta. `torre.js`: Hoenn y Sinnoh. `extras.js` y `guarderia.js` no cuentan la Sala.
+
 ## Islas de Alola (Subversión 1.35)
 - `alola.js` (Lite): mapas `akala` (base `forest`), `ulaula` y `poniisla` (base `desert`) tras `melemele`. Ojo: la zona 1 toma el cielo de `datos` (+ `morning`) y `zonasDatos[0]`/`[1]` son las zonas 2 y 3 (`zones[n-2]` en el bundle). El suelo sale del `tex` del mapa base.
 

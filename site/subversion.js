@@ -4,16 +4,38 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.35';
+  const SUB = '1.36';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.36',
+      date: Date.UTC(2026, 10, 19, 4, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.36`,
+      summary: 'PokéBonk Lite: Sala de entrenamiento, Bestiario, evento de Navidad, más Torre de Líderes y ajustes del control.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Sala de entrenamiento** (Modo historia → «🎯 Entrenamiento»): sin horda, con tres muñecos. Un medidor (movible en el editor del HUD) marca tu daño por segundo; «+5 Nv.» sube a tu Pokémon. No cuenta para récords ni logros.`,
+        `- **Bestiario** (Modo historia → «📖 Bestiario»): cada jefe que ves queda apuntado con sus tipos, debilidades, veces visto y vencido y tu victoria más rápida.`,
+        `- **Evento de Navidad** (todo diciembre): nieve, Delibird entre los salvajes, un regalo cada 3 minutos y +250 de Polvo por partida.`,
+        `- **Torre de Líderes**: ahora también Hoenn y Sinnoh.`,
+        `- **Control** (Pausa → «HUD y guía»): vibrar al recibir golpes y zona muerta del joystick. Ahí también están ya la Esquiva automática y los Avisos de rarezas.`,
+        `- La copia de seguridad ya existía: menú Remaster → Traspaso (exportar e importar toda tu partida).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.35',
       date: Date.UTC(2026, 10, 19, 3, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.35`,
@@ -2965,6 +2987,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.36',
+      date: '2026-11-18',
+      title: 'Sala de entrenamiento, Bestiario, Navidad, Torre de Hoenn y Sinnoh y control (Lite).',
+      notes: [
+        ['new', 'Lite: Sala de entrenamiento con medidor de daño y Bestiario de jefes con debilidades.'],
+        ['new', 'Lite: evento de Navidad en diciembre y Torre de Líderes de Hoenn y Sinnoh.'],
+        ['new', 'Lite: vibración al recibir golpes y zona muerta del joystick; la Esquiva y los Avisos ya se pueden apagar en la pausa.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.35',

@@ -33,7 +33,7 @@
   let visto = null;
   setInterval(async () => {
     const run = window.__pbRun, p = meta()?.profile, g = p?.pbGuarde;
-    if (!run || !g?.a || !g?.b || run.state !== 'over' || visto === run || run.mode === 'duel') return;
+    if (!run || !g?.a || !g?.b || run.state !== 'over' || visto === run || run.mode === 'duel' || run.__pbSala) return;
     visto = run; g.n = (g.n ?? 0) + 1;
     try { meta().save(); } catch {}
     if (g.n >= PARTIDAS) { const t = await eclosionar(); if (t) setTimeout(() => { try { window.__pbApp?.notice?.(t); run.ui.toast(t, null); } catch {} }, 3000); }

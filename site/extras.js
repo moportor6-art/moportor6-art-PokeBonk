@@ -181,7 +181,7 @@
         try { run.ui.toast('🛒 Tus compras de la Tienda de Polvo están en la bolsa', null); } catch {}
       }
     }
-    if (run.state !== 'over' || finVisto === run || run.mode === 'duel') return;
+    if (run.state !== 'over' || finVisto === run || run.mode === 'duel' || run.__pbSala) return;
     finVisto = run;
     const sp = run.startSpecies, s = (p.pbStatsPk ??= {})[sp] ??= { p: 0, v: 0, t: 0, k: 0, d: 0 };
     s.p++; if (run.victory) { s.v++; cont('victorias'); if ((run.__pbMinHp ?? 0) >= 0.5) cont('intocable'); }
