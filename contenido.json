@@ -1,0 +1,543 @@
+{
+ "formato": 1,
+ "version": 166,
+ "sub": "1.40",
+ "shell": {
+  "android": "9b17d5850ea6cedf",
+  "android-lite": "4fcedf032e4c57c8",
+  "windows": "64bf0e7140a74631",
+  "windows-lite": "410beb131686e56f"
+ },
+ "modulos": {
+  "pokebonk": {
+   "nombre": "PokéBonk (juego principal)",
+   "hash": "b461a9f24ccbb499595fb020292202e8388ff86ec170ee5babffad607bfe1929",
+   "archivos": 8484,
+   "bytes": 229666711
+  },
+  "pokeisaac": {
+   "nombre": "PokéIsaac",
+   "hash": "699d4bdff59c02e662a4760343b146b99e8eab2167ba6c171bbb63f2b965335f",
+   "archivos": 5680,
+   "bytes": 82833717
+  },
+  "pokemonsurvivors": {
+   "nombre": "Pokémon Survivors",
+   "hash": "d9ec2ef1e24fdcafac39978a0ea61ef4d1af8f214b24ed8f0bce010713d32f59",
+   "archivos": 11224,
+   "bytes": 107847827
+  },
+  "pokesurvivor": {
+   "nombre": "PokéSurvivor",
+   "hash": "d5eb83edadaeddfca4d4863752a6371713fb2fa069ffc8431c1d9338377c4238",
+   "archivos": 10,
+   "bytes": 187901432
+  },
+  "pokepath": {
+   "nombre": "PokéBonk TD",
+   "hash": "0d884a5a8ade40b54255358b16d48ff73111f852c0f52f998ded5d7f93deac70",
+   "archivos": 3684,
+   "bytes": 41183181
+  },
+  "pokeplunder": {
+   "nombre": "PokéPlunder",
+   "hash": "0303453dd6fb1e11bc32338bdf721833b84a354e59c478bacc31ba72641e738e",
+   "archivos": 665,
+   "bytes": 29735389
+  },
+  "pokeoverlord": {
+   "nombre": "Pokémon Overlord",
+   "hash": "df0eb363ae033074c26b929c949b44de00c97c40db2984aeb6762f69b23b2666",
+   "archivos": 11,
+   "bytes": 103109162
+  },
+  "pokelike": {
+   "nombre": "Pokelike",
+   "hash": "8341d77d35adc31f6da998dae1d66f84c07780ec185fcd62c4e03cb83b5543d6",
+   "archivos": 1999,
+   "bytes": 134945324
+  }
+ },
+ "tag": "v166",
+ "base": "https://raw.githubusercontent.com/moportor6-art/moportor6-art-PokeBonk/contenido-v166/",
+ "cambios": [
+  {
+   "oficial": "0.9.9",
+   "sub": "1.40",
+   "date": "2026-11-18",
+   "title": "Recompensas, récords y logros del modo Sin fin (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Polvo por cada 5 minutos en Sin fin, récord por Pokémon y logros Resistente, Incansable y Eterno."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.39",
+   "date": "2026-11-18",
+   "title": "Mapas nuevos de Galar y Paldea (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Bosque Oniria y Minas de Galar; Gran Cañón y Costa de Paldea."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.38",
+   "date": "2026-11-18",
+   "title": "Liga Pokémon, dónde aparece, historial, títulos y colores de eficacia (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Liga Pokémon con Alto Mando y Campeón de cada región."
+    ],
+    [
+     "new",
+     "Lite: dónde aparece cada Pokémon (Pokédex), historial de partidas y títulos."
+    ],
+    [
+     "new",
+     "Lite: números de daño en verde (súper eficaz) y gris azulado (poco eficaz)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.37",
+   "date": "2026-11-18",
+   "title": "Logros por Pokémon y recompensas por recoger (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: logros por Pokémon en bronce, plata y oro, con Maestría."
+    ],
+    [
+     "new",
+     "Lite: al terminar la partida, aviso para recoger las recompensas ganadas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.36",
+   "date": "2026-11-18",
+   "title": "Sala de entrenamiento, Bestiario, Navidad, Torre de Hoenn y Sinnoh y control (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Sala de entrenamiento con medidor de daño y Bestiario de jefes con debilidades."
+    ],
+    [
+     "new",
+     "Lite: evento de Navidad en diciembre y Torre de Líderes de Hoenn y Sinnoh."
+    ],
+    [
+     "new",
+     "Lite: vibración al recibir golpes y zona muerta del joystick; la Esquiva y los Avisos ya se pueden apagar en la pausa."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.35",
+   "date": "2026-11-18",
+   "title": "Islas Akala, Ula'ula y Poni (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: tres mapas nuevos de Alola en cadena tras Melemele, con cielo, Pokémon, jefes y santuario propios."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.34",
+   "date": "2026-11-18",
+   "title": "Esquiva automática, movimientos Z, Guardería, Torre de Líderes, logros y tienda (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: esquiva automática de ataques marcados, avisos de rarezas y cartas favoritas que se eligen solas."
+    ],
+    [
+     "new",
+     "Lite: movimientos Z desde el Nv. 20, una vez por zona."
+    ],
+    [
+     "new",
+     "Lite: Guardería con huevos y movimiento heredado, y Torre de Líderes en el Modo historia."
+    ],
+    [
+     "new",
+     "Lite: logros con Polvo, Tienda de Polvo en el Laboratorio y récords por Pokémon en la Pokédex."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.33",
+   "date": "2026-11-18",
+   "title": "Bolsa con prioridades (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: la bolsa prioriza estados, la curación justa (o la mayor en apuros graves) y después los apuros."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.32",
+   "date": "2026-11-18",
+   "title": "Consumibles en el mapa para la bolsa (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Zumo de Baya, Hiperpoción y Restaurar Todo en arbustos del mapa; van a la bolsa y se usan solos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.31",
+   "date": "2026-11-18",
+   "title": "Icono de la Baya Enigma en la bolsa (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: la Baya Enigma de la bolsa lleva su icono de baya (antes parecía un cuerno)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.30",
+   "date": "2026-11-18",
+   "title": "Incienso sin grietas sorpresa y Dominantes más duros (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: el Incienso inteligente viene desactivado; ya no abre grietas sin pedirlo."
+    ],
+    [
+     "balance",
+     "Lite: Dominantes e Invocadores con 12 s (Normal) / 16 s (Difícil) como mínimo."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.29",
+   "date": "2026-11-18",
+   "title": "Barras del HUD por separado.",
+   "notes": [
+    [
+     "new",
+     "Editar HUD: barra de vida, vitaminas y objetos, y movimientos editables por separado."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.28",
+   "date": "2026-11-18",
+   "title": "Bolsa de bayas (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Bolsa de bayas con 10 tipos (hasta 30 de cada una), uso automático y manual, y movible en «Editar HUD»."
+    ],
+    [
+     "new",
+     "Lite: los arbustos dejan bayas variadas en la bolsa y los Alfas y élites pueden soltarlas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.27",
+   "date": "2026-11-18",
+   "title": "Automatismos y modo rendimiento (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Mega/Dynamax/Tera automáticos con los jefes, Incienso inteligente y evoluciones de reto automáticas (opcionales)."
+    ],
+    [
+     "new",
+     "Lite: curación de emergencia con bayas cercanas y Laboratorio automático con 3 prioridades."
+    ],
+    [
+     "new",
+     "Lite: avisos en el menú y modo rendimiento (menos partículas con mucha horda)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.26",
+   "date": "2026-11-18",
+   "title": "Laboratorio ampliado, automatismos, medallas por Pokémon y Desafío diario (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Sintonía Unown, Imán de grietas, Suerte de huevos y Ojo de cazador en el Laboratorio."
+    ],
+    [
+     "new",
+     "Lite: Poké Balls gratis automáticas y elección automática cuando solo hay una carta."
+    ],
+    [
+     "new",
+     "Lite: medallas ganadas con cada Pokémon en su ficha de la Pokédex."
+    ],
+    [
+     "new",
+     "Lite: Desafío diario con regla especial y 500 de Polvo."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.25",
+   "date": "2026-11-18",
+   "title": "Laboratorio de Difícil y recogida automática (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: +3 niveles en cada mejora de estadística del Laboratorio, a triple de precio, que solo cuentan en Difícil."
+    ],
+    [
+     "new",
+     "Lite: las Rocas de oro, los Imanes y las Bayas se usan solos al pasar cerca."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.24",
+   "date": "2026-11-18",
+   "title": "Jefes más cortos en Normal (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite (Normal): Pokémon de los líderes con +25 % de PS y 15/18/20 s mínimos; santuario 40 s."
+    ],
+    [
+     "balance",
+     "Lite (Normal): Dominantes e Invocadores 6 s mínimos, Alfas 4 s."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.23",
+   "date": "2026-11-17",
+   "title": "Cristales en el suelo en vez de corona (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: rastro de cristales del teratipo al caminar teracristalizado."
+    ],
+    [
+     "balance",
+     "Lite: se quita la corona de la Teracristalización (tuya y de los jefes)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.22",
+   "date": "2026-11-17",
+   "title": "Pokémon de los líderes más llevaderos (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: el daño de los jefes de líder con todas sus fases y furia no pasa de ×1,6."
+    ],
+    [
+     "balance",
+     "Lite: duración mínima de los jefes de líder 30/33/35 s (antes 40/50/60)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.21",
+   "date": "2026-11-17",
+   "title": "Informe de la muerte compacto (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: el informe junta los golpes repetidos (×N) y no pasa de 80 líneas, para que no se corte el final."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.20",
+   "date": "2026-11-17",
+   "title": "Tope de nivel y evoluciones del Nv. 44 (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: con una evolución por reto desbloqueada (Blissey…), el tope de nivel sube al menos a 44."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.19",
+   "date": "2026-11-17",
+   "title": "Isla Melemele de prueba (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: mapa de prueba Isla Melemele (Alola), tropical, abierto desde el principio."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.18",
+   "date": "2026-11-17",
+   "title": "Error al terminar la Teracristalización (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: la partida ya no termina por error al acabar tu Teracristalización (parecía una muerte de un golpe)."
+    ],
+    [
+     "new",
+     "Lite: si una partida termina por error, aviso fijo con «Copiar informe del error»."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.17",
+   "date": "2026-11-17",
+   "title": "Minijefes con duración mínima (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: Dominantes e Invocadores duran al menos 10 s y los Alfas 6 s (+25 % por zona)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.16",
+   "date": "2026-11-17",
+   "title": "Informe de la muerte (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: botón «Copiar informe» en los resultados al caer, con los últimos 30 s de golpes, estados y PS."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.15",
+   "date": "2026-11-17",
+   "title": "Resultados al perder sin cerrarse solos (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: la ventana de resultados ignora los toques 1,5 s al perder (se cerraba con los toques que seguías dando)."
+    ],
+    [
+     "fix",
+     "Lite: el aviso de quién te derrotó va dentro de los resultados; el diálogo del líder espera a que los cierres."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.14",
+   "date": "2026-11-17",
+   "title": "Tanques y Vida Esfera (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: identidad de Tanque y Muralla para 143 Pokémon, con sinergia por tipo (veneno, púas, drenadoras o restos)."
+    ],
+    [
+     "balance",
+     "Lite: Vida Esfera sin −10 % de PS máximos; ahora pierdes 0,2 % de PS por segundo por copia mientras golpeas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.13",
+   "date": "2026-11-17",
+   "title": "Ultraentes vencibles (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: los Ultraentes salían con más de un millón de PS; ahora tienen los de un guardián de su zona."
+    ],
+    [
+     "fix",
+     "Lite: en los gimnasios los Ultraentes ya no reciben las fases del Pokémon del líder."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.12",
+   "date": "2026-11-17",
+   "title": "Aguante y aviso de quién te derrotó (Lite).",
+   "notes": [
+    [
+     "balance",
+     "Lite: ningún golpe quita más del 45 % de los PS máximos."
+    ],
+    [
+     "new",
+     "Lite: al caer se muestra quién te derrotó, con el daño y el tipo del último golpe."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.11",
+   "date": "2026-11-17",
+   "title": "Retos de evolución sin tapar la pausa.",
+   "notes": [
+    [
+     "fix",
+     "Lite: la etiqueta de retos de evolución se oculta en la pausa y en las ventanas."
+    ]
+   ]
+  }
+ ],
+ "completo": {
+  "android": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v166/PokeBonk.apk",
+   "bytes": 872277187,
+   "sha256": "a631e0f5d046d380f14a5174474dfdec90172d69323d89c55efdbfb0185536f3"
+  },
+  "windows": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v166/PokeBonk-Windows-Instalador.exe",
+   "bytes": 850463303,
+   "sha256": "96e6d9c5c78a840d2bd429a43d9a65d5bfd730f95b0788ffd2eeabd11d835963"
+  },
+  "android-lite": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v166/PokeBonk-Lite.apk",
+   "bytes": 217863642,
+   "sha256": "749d3e10fc9daf8c5b7d91ca570fe8ff29b933c063bf0eff427c827cd5249988"
+  },
+  "windows-lite": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v166/PokeBonk-Lite-Windows-Instalador.exe",
+   "bytes": 305095804,
+   "sha256": "8029dcd14402fef135f62e3e9681446a4d80476e8f71b05831f6c59320b91b47"
+  }
+ }
+}
