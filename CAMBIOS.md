@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Sin fin con premio (Subversión 1.40)
+- `premios.js` (Lite): con `run.endless`, al terminar da 250 × n(n+1)/2 de Polvo (n = bloques de 5 min) y guarda `profile.pbSinFin[especie]` y `pbSinFinMax`. `extras.js`: logros `sinfin30/60/90`. `registro.js`: el Historial marca `sf`.
+
 ## Mapas de Galar y Paldea (Subversión 1.39)
 - `galar.js` (Lite): `oniria` (base `forest`) y `minasgalar` (base `cave`) tras `torrerose`. `paldea.js` (Lite): `canonpaldea` (base `desert`) y `costapaldea` (base `coast`) tras `zonacero`. Mismo esquema que las islas de Alola.
 

@@ -57,7 +57,7 @@
     const Hs = p.pbHistorial ??= [];
     if (visto !== run) {
       visto = run;
-      Hs.unshift({ sp: run.startSpecies, m: run.biome?.name ?? '', z: run.stage ?? 1, t: Math.round(run.time ?? 0), k: run.stats?.kills ?? 0, v: !!run.victory, x: run.__pbMuerte ?? '', d: Date.now(), polvo: null });
+      Hs.unshift({ sp: run.startSpecies, m: run.biome?.name ?? '', z: run.stage ?? 1, t: Math.round(run.time ?? 0), k: run.stats?.kills ?? 0, v: !!run.victory, sf: !!run.endless, x: run.__pbMuerte ?? '', d: Date.now(), polvo: null });
       Hs.length = Math.min(Hs.length, 20); guardar();
     }
     const e = Hs[0];
@@ -69,7 +69,7 @@
   const historial = () => {
     const h = H(), p = P(), c = h.capa('kanto'), b = document.createElement('div'); b.className = 'hb';
     const L = p.pbHistorial ?? [];
-    b.innerHTML = `<button class="hx" aria-label="Cerrar">✕</button><h2>📜 Historial (${L.length})</h2><div style="max-height:58vh;overflow:auto;display:flex;flex-direction:column;gap:5px;text-align:left">${L.map(e => `<div style="display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.07);border-radius:10px;padding:5px 8px"><img src="./assets/portraits/${e.sp}.png" style="width:40px;height:40px;border-radius:8px"><div style="font-size:12px;line-height:1.45"><b>${e.v ? '🏆 Victoria' : '💀 Derrota'}</b> · ${h.nombrePk(e.sp)} · ${e.m} (zona ${e.z})<br>⏱️ ${mmss(e.t)} · ⚔️ ${f(e.k)} bajas${e.polvo != null ? ` · ✨ +${f(e.polvo)} Polvo` : ''} · ${new Date(e.d).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}${!e.v && e.x ? `<br><small>${e.x}</small>` : ''}</div></div>`).join('') || '<p>Aún no hay partidas terminadas.</p>'}</div><div class="fila"><button class="hbt vol">Volver</button></div>`;
+    b.innerHTML = `<button class="hx" aria-label="Cerrar">✕</button><h2>📜 Historial (${L.length})</h2><div style="max-height:58vh;overflow:auto;display:flex;flex-direction:column;gap:5px;text-align:left">${L.map(e => `<div style="display:flex;gap:8px;align-items:center;background:rgba(255,255,255,.07);border-radius:10px;padding:5px 8px"><img src="./assets/portraits/${e.sp}.png" style="width:40px;height:40px;border-radius:8px"><div style="font-size:12px;line-height:1.45"><b>${e.sf ? '♾️ Sin fin' : e.v ? '🏆 Victoria' : '💀 Derrota'}</b> · ${h.nombrePk(e.sp)} · ${e.m} (zona ${e.z})<br>⏱️ ${mmss(e.t)} · ⚔️ ${f(e.k)} bajas${e.polvo != null ? ` · ✨ +${f(e.polvo)} Polvo` : ''} · ${new Date(e.d).toLocaleDateString('es-MX', { day: 'numeric', month: 'short' })}${!e.v && e.x ? `<br><small>${e.x}</small>` : ''}</div></div>`).join('') || '<p>Aún no hay partidas terminadas.</p>'}</div><div class="fila"><button class="hbt vol">Volver</button></div>`;
     b.querySelector('.vol').onclick = b.querySelector('.hx').onclick = () => h.abrir();
     c.append(b);
   };

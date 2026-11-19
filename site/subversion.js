@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.39';
+  const SUB = '1.40';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.40',
+      date: Date.UTC(2026, 10, 19, 5, 10),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.40`,
+      summary: 'PokéBonk Lite: el modo Sin fin da Polvo cada 5 minutos, guarda récord por Pokémon y tiene logros.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Sin fin con premio**: cada bloque de 5 minutos vale más que el anterior (250, 500, 750…): 30 min = 5.250 de Polvo y 60 min = 19.500. Se recoge al terminar, con el aviso de recompensas.`,
+        `- **Récord por Pokémon**: tu mejor tiempo en Sin fin sale en su ficha de la Pokédex (+300 de Polvo al superarlo); el Historial marca las partidas ♾️.`,
+        `- **Logros (y títulos)**: Resistente (30 min), Incansable (60 min) y Eterno (90 min).`,
+        `- Sigue igual: sin tope de nivel y vitaminas apilables, salvo las de proyectiles y los objetos únicos.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.39',
       date: Date.UTC(2026, 10, 19, 7, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.39`,
@@ -3047,6 +3067,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.40',
+      date: '2026-11-18',
+      title: 'Recompensas, récords y logros del modo Sin fin (Lite).',
+      notes: [
+        ['new', 'Lite: Polvo por cada 5 minutos en Sin fin, récord por Pokémon y logros Resistente, Incansable y Eterno.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.39',

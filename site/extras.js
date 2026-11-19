@@ -148,7 +148,11 @@
     ['huevos3', 'Criador', 'Eclosiona 3 huevos', 500, p => (p.pbCont?.huevos ?? 0) >= 3],
     ['torre', 'Leyenda de la Torre', 'Supera la Torre de Líderes', 1500, p => (p.pbCont?.torre ?? 0) >= 1],
     ['bolsa30', 'Bolsa llena', 'Llega a 30 de un tipo de baya', 300, p => (p.pbCont?.bolsa30 ?? 0) >= 1],
-    ['partidas25', 'Veterano', 'Juega 25 partidas', 700, p => Object.values(p.pbStatsPk ?? {}).reduce((a, s) => a + s.p, 0) >= 25]
+    ['partidas25', 'Veterano', 'Juega 25 partidas', 700, p => Object.values(p.pbStatsPk ?? {}).reduce((a, s) => a + s.p, 0) >= 25],
+    // 1.40: modo Sin fin (premios.js guarda pbSinFinMax en segundos)
+    ['sinfin30', 'Resistente', 'Aguanta 30 minutos en Sin fin', 800, p => (p.pbSinFinMax ?? 0) >= 1800],
+    ['sinfin60', 'Incansable', 'Aguanta 60 minutos en Sin fin', 1500, p => (p.pbSinFinMax ?? 0) >= 3600],
+    ['sinfin90', 'Eterno', 'Aguanta 90 minutos en Sin fin', 3000, p => (p.pbSinFinMax ?? 0) >= 5400]
   ];
   window.PB_LOGROS = { LOGROS, cont };
   const revisar = run => {

@@ -46,6 +46,27 @@
     guardar();
   }, 500);
 
+  // 1.40: modo Sin fin: 250 de Polvo × n por cada bloque de 5 minutos aguantados (300, luego 500…) y récord por Pokémon.
+  let sfVisto = null;
+  setInterval(() => {
+    const run = window.__pbRun, p = P();
+    if (!run?.endless || !p || run.mode === 'duel' || sfVisto === run || run.state !== 'over') return;
+    sfVisto = run;
+    const t = Math.floor(run.time ?? 0), bloques = Math.floor(t / 300), sp = run.startSpecies;
+    const R = p.pbSinFin ??= {}, antes = R[sp] ?? 0;
+    if (t > antes) R[sp] = t;
+    p.pbSinFinMax = Math.max(p.pbSinFinMax ?? 0, t);
+    if (bloques) dar(`♾️ Sin fin con ${NOM[sp] ?? '#' + sp}: ${Math.floor(t / 60)} min aguantados`, 250 * bloques * (bloques + 1) / 2);
+    if (t > antes && antes) dar(`♾️ ¡Nuevo récord de Sin fin con ${NOM[sp] ?? '#' + sp}!`, 300);
+    guardar();
+  }, 500);
+  setInterval(() => {
+    const run = window.__pbRun;
+    if (!run?.endless || run.state !== 'play') return;
+    const b = Math.floor((run.time ?? 0) / 300);
+    if (b > (run.__pbSFb ?? 0)) { run.__pbSFb = b; try { run.ui.toast(`♾️ ${b * 5} min: +${f(250 * b * (b + 1) / 2)} de Polvo en total al terminar`, null); } catch {} }
+  }, 1000);
+
   // Aviso y lista para recoger.
   const css = document.createElement('style');
   css.textContent = `.pb-premios{position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:99990;border:3px solid #fff;border-radius:16px;padding:8px 16px;background:linear-gradient(#ffcf4a,#e8961a);color:#3a2000;font:900 15px system-ui,sans-serif;box-shadow:0 4px 14px rgba(0,0,0,.45);animation:pbPremio 1s ease-in-out infinite alternate;cursor:pointer}
@@ -86,13 +107,15 @@
   setInterval(() => {
     const info = document.querySelector('.dx-info'), on = document.querySelector('.dx-tile.on img');
     if (!info || !on) return;
-    const sp = +((on.getAttribute('src') ?? '').match(/portraits\/(\d+)\.png/)?.[1] ?? 0), L = P()?.pbLogPk?.[sp];
-    let d = info.querySelector('.pb-logpk'); const k = JSON.stringify([sp, L]);
+    const sp = +((on.getAttribute('src') ?? '').match(/portraits\/(\d+)\.png/)?.[1] ?? 0); let L = P()?.pbLogPk?.[sp];
+    let d = info.querySelector('.pb-logpk'); const k = JSON.stringify([sp, L, P()?.pbSinFin?.[sp]]);
     if (d?.dataset.k === k) return;
-    if (!L) { d?.remove(); return; }
+    if (!L && !P()?.pbSinFin?.[sp]) { d?.remove(); return; }
+    L ??= { c: {}, n: {} };
     if (!d) { d = document.createElement('div'); d.className = 'pb-logpk'; d.style.cssText = 'margin:8px 0;padding:6px 8px;border-radius:10px;background:rgba(255,200,60,.14);font:700 12px system-ui,sans-serif;line-height:1.55'; info.append(d); }
     d.dataset.k = k;
-    d.innerHTML = `${L.m ? '⭐ <b>Maestría</b> · ' : ''}🏅 Logros con este Pokémon<br>` + METAS.map(([c, nom, , metas]) => {
+    const sf = P()?.pbSinFin?.[sp];
+    d.innerHTML = `${L.m ? '⭐ <b>Maestría</b> · ' : ''}🏅 Logros con este Pokémon<br>${sf ? `♾️ Récord de Sin fin: <b>${Math.floor(sf / 60)}:${String(sf % 60).padStart(2, '0')}</b><br>` : ''}` + METAS.map(([c, nom, , metas]) => {
       const n = L.n[c] ?? 0, v = L.c[c] ?? 0;
       return `${n ? NIV[n - 1][0] : '▫️'} ${nom}: <b>${f(v)}</b>${n < 3 ? ` / ${f(metas[n])}` : ' ✔'}`;
     }).join('<br>');
