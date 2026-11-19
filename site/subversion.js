@@ -4,16 +4,37 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.37';
+  const SUB = '1.38';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.38',
+      date: Date.UTC(2026, 10, 19, 6, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.38`,
+      summary: 'PokéBonk Lite: Liga Pokémon (Alto Mando y Campeón), dónde aparece cada Pokémon, historial, títulos y colores de eficacia.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Liga Pokémon** (Modo historia → «🏆 Liga Pokémon»): con las 8 medallas de una región, su Alto Mando y su Campeón uno tras otro (Azul, Lance, Máximo, Cintia, Mirto, Dianta, Kukui, Lionel y Ságita). Normal o Difícil. Premio de Polvo y título de Campeón.`,
+        `- **Dónde aparece**: en la ficha de la Pokédex, los mapas en los que cada Pokémon es jefe, guardián, Dominante, invocador, legendario o habitual.`,
+        `- **Historial** (Modo historia → «📜 Historial»): tus últimas 20 partidas con mapa, tiempo, bajas, Polvo y de qué caíste.`,
+        `- **Títulos** (Modo historia → «🎖️ Títulos»): se ganan con logros, Maestrías, medallas, la Liga y la Torre; el elegido sale bajo tu nombre (movible en el editor del HUD).`,
+        `- **Eficacia**: los números de daño súper eficaz salen en verde y los poco eficaces en gris azulado.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.37',
       date: Date.UTC(2026, 10, 19, 5, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.37`,
@@ -3006,6 +3027,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.38',
+      date: '2026-11-18',
+      title: 'Liga Pokémon, dónde aparece, historial, títulos y colores de eficacia (Lite).',
+      notes: [
+        ['new', 'Lite: Liga Pokémon con Alto Mando y Campeón de cada región.'],
+        ['new', 'Lite: dónde aparece cada Pokémon (Pokédex), historial de partidas y títulos.'],
+        ['new', 'Lite: números de daño en verde (súper eficaz) y gris azulado (poco eficaz).']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.37',

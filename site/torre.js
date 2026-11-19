@@ -35,7 +35,7 @@
     for (let t = 0; t < 12; t++) {
       const a = Math.random() * Math.PI * 2, x = pl.x + Math.cos(a) * 12, z = pl.z + Math.sin(a) * 12;
       if (!run.terrain.inBounds(x, z, 6)) continue;
-      try { run.ui.banner(`🗼 Piso ${d.n + 1}/${d.jefes.length}: ${L.nombre}`, '¡Su Pokémon estrella te desafía!', '#7ab8ff', { species: L.sp }); run.vfx.ring(x, run.terrain.height(x, z) + 0.2, z, 4, 0x7ab8ff, 1.2); } catch {}
+      try { run.ui.banner(`${d.icono ?? '🗼 Piso'} ${d.n + 1}/${d.jefes.length}: ${L.nombre}`, L.sub ?? '¡Su Pokémon estrella te desafía!', '#7ab8ff', { species: L.sp }); run.vfx.ring(x, run.terrain.height(x, z) + 0.2, z, 4, 0x7ab8ff, 1.2); } catch {}
       const f = (1 + d.n * 0.2) * d.k;
       d.j = run.boss.spawn(L.sp, x, z, false, { hp: run.director.hpMult() * 2.4 * f, dmg: run.director.dmgMult() * d.k, kit: true });
       if (d.j >= 0) d.g = run.enemies.gen[d.j];
@@ -53,6 +53,7 @@
       d.j = -1; d.n++; d.t = (run.time ?? 0) + 6;
       if (d.n >= d.jefes.length) {
         d.fin = true;
+        if (d.al) { d.al(run, d); return; } // 1.38: otros usos (liga.js)
         const m = meta(), p = m.profile, [reg, k, nom, polvo] = OPC[d.i];
         run.stats.pbDust = (run.stats.pbDust ?? 0) + polvo;
         p.pbTorre ??= []; p.pbTorre.includes(`${reg}-${k}`) || p.pbTorre.push(`${reg}-${k}`);
@@ -64,6 +65,13 @@
     }
     if ((run.time ?? 0) >= d.t) sacar(run, d);
   }, 250);
+  // 1.38: para otros modos con jefes en fila (liga.js): d = { jefes: [{ sp, nombre, sub }], k, icono, al(run, d) }.
+  window.PB_TORRE = {
+    iniciar(sp, biome, tier, d) {
+      pendiente = { n: 0, j: -1, ...d };
+      return Promise.resolve(window.__pbApp?.startRun?.({ species: sp, biome, tier, boosts: [], mode: 'standard' })).catch(() => { pendiente = null; });
+    }
+  };
   setInterval(() => {
     const f = document.querySelector('.pb-h .pb-hoopa');
     if (!f || f.querySelector('.pb-torre')) return;
