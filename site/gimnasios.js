@@ -110,7 +110,11 @@
     // Liga del modo historia (historia.js): en las zonas 1-3, el as de cada miembro del Alto Mando.
     const al = run.__pbAlto;
     if (al?.length && (run.stage ?? 1) <= 3) { const sp = al[(run.stage ?? 1) - 1]?.[3].filter(vale).at(-1); if (sp) return sp; }
-    const l = lider(run) ?? liderLibre(run);
+    // 1.46: el Pokémon del líder libre ya no sustituye al guardián (era débil y su portal saltaba al jefe real):
+    // sale el guardián de siempre y el del líder lo acompaña como élite resistente, sin portal (ver «acompañante»).
+    const libre = !lider(run) && liderLibre(run);
+    if (libre) { const e = libre.equipo.filter(vale), k = run.stage === 2 ? Math.floor((e.length - 1) / 2) : 0; if (e[k]) run.__pbLibre = { sp: e[k], st: run.stage ?? 1, l: libre }; return null; }
+    const l = lider(run);
     if (!l) return null;
     const e = l.equipo.filter(vale), k = run.stage >= 3 ? e.length - 1 : run.stage === 2 ? Math.floor((e.length - 1) / 2) : 0;
     return e[k] ?? null;
@@ -135,6 +139,32 @@
     return true;
   };
   if (!envolver()) { const t = setInterval(() => { if (envolver()) clearInterval(t); }, 300); }
+
+  // 1.46: acompañante del guardián (líder libre): élite con mucha vida y un mínimo de 20 s (Normal) o 30 s (Difícil) de
+  // combate, como tope de daño por segundo. Al caer da dinero y Polvo, pero no abre portal (no es el guardián).
+  setInterval(() => {
+    const run = window.__pbRun, d = run?.__pbLibre, E = run?.enemies;
+    if (!d || !E || run.state !== 'play') return;
+    if (d.j == null) {
+      const b = run.boss?.bossIndex ?? -1;
+      if (!(b >= 0 && E.alive[b] && E.gen[b] === run.boss.bossGen)) return;
+      const p = run.player.pos, a = Math.random() * Math.PI * 2;
+      const x = (b >= 0 ? E.x[b] : p.x) + Math.cos(a) * 5, z = (b >= 0 ? E.z[b] : p.z) + Math.sin(a) * 5;
+      const dir = run.director, vida = dir.hpMult?.() ?? 1, dano = (dir.dmgMult?.() ?? 1) * 1.3;
+      const j = E.spawn(d.sp, x, z, vida, dano, 1, 1);
+      if (j < 0) { run.__pbLibre = null; return; }
+      d.j = j; d.g = E.gen[j];
+      // Vida: el 80 % de la del guardián (+25 % en Difícil), para que sea un rival serio pero sin eternizarse.
+      E.maxHp[j] = E.hp[j] = E.maxHp[b] * 0.8 * (1 + 0.25 * Math.min(2, run.tier | 0));
+      const secs = (run.tier | 0) ? 30 : 20, tasa = E.maxHp[j] / secs;
+      if (E.capRate) { E.capRate[j] = tasa; E.capBank[j] = tasa * 3; E.capT[j] = run.time ?? 0; }
+      try { run.ui.banner(`${d.l.nombre} envía a su ${nombre(d.sp)}`, 'Acompaña al guardián de la zona. ¡Es muy resistente!', '#ffd84a', { species: d.sp }); } catch {}
+      return;
+    }
+    if (E.gen[d.j] === d.g && E.alive[d.j] && !(E.dying?.[d.j] > 0)) return;
+    run.__pbLibre = null;
+    try { run.gold = (run.gold ?? 0) + 150; run.stats.pbDust = (run.stats.pbDust ?? 0) + 100; run.ui.toast(`¡Venciste al ${nombre(d.sp)} de ${d.l.nombre}! +150 ₽ y +100 de Polvo`, null); } catch {}
+  }, 300);
 
   // ---------- partida ----------
   let ultima = null;

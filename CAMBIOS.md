@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Guardián de verdad (Subversión 1.46)
+- `gimnasios.js` (Lite): `liderLibre` ya no cambia el guardián en `PB_GYM.jefe`; deja `run.__pbLibre` y un ciclo aparte saca al Pokémon del líder con `enemies.spawn` (flags 1) junto al guardián (`boss.bossIndex`), con el 80 % de su vida y `capRate` de 20/30 s. No abre portal.
+
 ## Pausa compacta (Subversión 1.45)
 - `resumen.js` (Lite): CSS con `@media (max-height:620px)`: `.sm-foot .actions` en flex (Continuar arriba, 4 + 3 botones), `.pz-items`/`.pz-detail` sin `max-height` y `.pz-centre .sm-cbody` en dos columnas (detalle a la derecha); el Resumen oculta el detalle.
 

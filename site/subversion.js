@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.45';
+  const SUB = '1.46';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.46',
+      date: Date.UTC(2026, 10, 19, 19, 0),
+      tag: 'correccion',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.46`,
+      summary: 'PokéBonk Lite: el Pokémon del líder (Bronzong y compañía) ya no sustituye al guardián ni abre el portal; ahora lo acompaña y aguanta.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- En los mapas de región (sin gimnasio elegido), el guardián de las zonas 1 y 2 era un Pokémon de un líder (por ejemplo Bronzong de Acerón en Sinnoh). Era muy débil y, al caer, abría el portal: un atajo sin vencer al guardián de verdad.`,
+        `- Ahora sale **el guardián de siempre** (el que abre el portal) y el Pokémon del líder **lo acompaña** como élite: 80 % de la vida del guardián (+25 % en Difícil) y al menos 20 s de combate (30 s en Difícil). Al vencerlo: +150 ₽ y +100 de Polvo, sin portal.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.45',
       date: Date.UTC(2026, 10, 19, 18, 30),
       tag: 'mejora',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.45`,
@@ -3160,6 +3178,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.46',
+      date: '2026-11-19',
+      title: 'El Pokémon del líder acompaña al guardián en vez de sustituirlo (Lite).',
+      notes: [
+        ['fix', 'Lite: el Pokémon de líder (p. ej. Bronzong) era el guardián, caía en un segundo y su portal saltaba al jefe real.'],
+        ['new', 'Lite: ahora acompaña al guardián como élite resistente, sin portal.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.45',
