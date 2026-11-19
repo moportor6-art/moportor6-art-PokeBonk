@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.36';
+  const SUB = '1.37';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.37',
+      date: Date.UTC(2026, 10, 19, 5, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.37`,
+      summary: 'PokéBonk Lite: logros por Pokémon (bronce, plata, oro y Maestría) y recompensas por recoger al terminar la partida.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Logros por Pokémon**: cada Pokémon tiene los suyos en 3 niveles (🥉 200, 🥈 600 y 🥇 1.500 de Polvo): bajas (1.000 / 10.000 / 50.000), Alfas (5 / 25 / 100), jefes (3 / 15 / 50), victorias (1 / 5 / 20), variocolores capturados (1 / 3 / 10) y evoluciones (1 / 5 / 15). Se ven en su ficha de la Pokédex.`,
+        `- **Maestría**: con todo en oro, el Pokémon luce ⭐ en su ficha y te da 5.000 de Polvo.`,
+        `- **Recompensas por recoger**: al terminar la partida aparece el aviso «🎁 Recompensas»; tócalo para ver lo que ganaste y recogerlo. Ahí llegan también los logros generales y el regalo de Navidad.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.36',
       date: Date.UTC(2026, 10, 19, 4, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.36`,
@@ -2987,6 +3006,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.37',
+      date: '2026-11-18',
+      title: 'Logros por Pokémon y recompensas por recoger (Lite).',
+      notes: [
+        ['new', 'Lite: logros por Pokémon en bronce, plata y oro, con Maestría.'],
+        ['new', 'Lite: al terminar la partida, aviso para recoger las recompensas ganadas.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.36',

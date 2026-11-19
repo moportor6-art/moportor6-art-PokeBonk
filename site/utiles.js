@@ -113,8 +113,8 @@ body.pb-hud-editing .pb-sala{display:block!important}`;
     }
     if (run.state === 'over' && navFin !== run) {
       navFin = run; const p = P(); if (!p) return;
-      p.stardust = (p.stardust ?? 0) + 250; guardar();
-      setTimeout(() => { try { window.__pbApp?.notice?.('🎄 Regalo de Navidad: +250 de Polvo Estelar'); } catch {} }, 2500);
+      if (window.PB_PREMIOS) window.PB_PREMIOS.dar('🎄 Regalo de Navidad', 250); // 1.37: por recoger
+      else { p.stardust = (p.stardust ?? 0) + 250; guardar(); }
     }
   }, 500);
 

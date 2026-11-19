@@ -158,8 +158,11 @@
       if (hechos.includes(id)) continue;
       let si = false; try { si = ok(p); } catch {}
       if (!si) continue;
-      hechos.push(id); p.stardust = (p.stardust ?? 0) + premio;
-      try { (run?.ui ?? null)?.toast?.(`🏆 Logro: ${nom} (+${premio} de Polvo)`, null); window.__pbApp?.notice?.(`🏆 Logro: ${nom} · +${premio} de Polvo`); } catch {}
+      hechos.push(id);
+      // 1.37: el premio queda pendiente de recoger (premios.js); sin premios.js, se da al momento como antes.
+      if (window.PB_PREMIOS) window.PB_PREMIOS.dar(`🏆 Logro: ${nom}`, premio);
+      else { p.stardust = (p.stardust ?? 0) + premio; try { window.__pbApp?.notice?.(`🏆 Logro: ${nom} · +${premio} de Polvo`); } catch {} }
+      try { run?.ui?.toast?.(`🏆 Logro: ${nom} (+${premio} de Polvo)`, null); } catch {}
     }
     guardar();
   };

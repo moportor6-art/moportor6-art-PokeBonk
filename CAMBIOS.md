@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Logros por Pokémon y recompensas (Subversión 1.37)
+- `premios.js` (Lite): `profile.pbLogPk` (contadores desde `run.stats` de la especie inicial), `profile.pbPremios` pendientes con aviso `.pb-premios` fuera de partida y lista para recoger; `PB_PREMIOS.dar(texto, polvo)`. `extras.js` (logros) y `utiles.js` (Navidad) dan sus premios con `PB_PREMIOS.dar`.
+
 ## Utilidades (Subversión 1.36)
 - `utiles.js` (Lite): Sala de entrenamiento (`run.__pbSala`, `director.update` en pausa, muñecos con `enemies.spawn`, medidor `.pb-sala` en el editor del HUD), Navidad (diciembre o `localStorage['pb-navidad']='1'`), Bestiario (`profile.pbBestia`) y vibración / zona muerta (`pbAuto.vib`, `pbAuto.dz` → `window.__pbJoyDZ`, que lee el bundle `main` en vez de `sx`).
 - `automatiza.js`: en la pausa, opciones de Esquiva, Avisos, vibración y zona muerta. `torre.js`: Hoenn y Sinnoh. `extras.js` y `guarderia.js` no cuentan la Sala.
