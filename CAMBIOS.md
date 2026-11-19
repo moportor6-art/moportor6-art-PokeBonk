@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Mapas de Galar y Paldea (Subversión 1.39)
+- `galar.js` (Lite): `oniria` (base `forest`) y `minasgalar` (base `cave`) tras `torrerose`. `paldea.js` (Lite): `canonpaldea` (base `desert`) y `costapaldea` (base `coast`) tras `zonacero`. Mismo esquema que las islas de Alola.
+
 ## Liga Pokémon y registro (Subversión 1.38)
 - `liga.js` (Lite): Alto Mando y Campeón con `PB_TORRE.iniciar` (nuevo en `torre.js`, con `d.al`, `d.icono` y `sub` por jefe). `profile.pbCampeon`.
 - `registro.js` (Lite): dónde aparece (envuelve `PB_REGIONES.mapas` para guardar la lista de mapas), `profile.pbHistorial`, `profile.pbTitulo` (`.pb-titulo` en `.hud-tl`, en el editor del HUD) y colores de eficacia (`window.__pbEfSE`/`__pbEfNE`, leídos en el bundle `menus`).

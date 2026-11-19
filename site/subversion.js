@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.38';
+  const SUB = '1.39';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.39',
+      date: Date.UTC(2026, 10, 19, 7, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.39`,
+      summary: 'PokéBonk Lite: cuatro mapas nuevos: Bosque Oniria y Minas de Galar, Gran Cañón y Costa de Paldea.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Bosque Oniria** (tras la Torre Rose): setas brillantes en la penumbra. Impidimp, Hatenna, Milcery… Jefes: Grimmsnarl, Hatterene y Alcremie. Santuario con Zarude.`,
+        `- **Minas de Galar**: carbón, brasas y una veta al rojo vivo. Rolycoly, Chewtle, Cufant… Jefes: Coalossal, Copperajah y Centiskorch. Santuario con Regieleki.`,
+        `- **Gran Cañón de Paldea** (tras la Zona Cero): paredes de roca y cielo estrellado al fondo. Nacli, Glimmet, Bombirdier… Jefes: Garganacl, Glimmora y Bombirdier. Santuario con Ting-Lu.`,
+        `- **Costa de Paldea**: playas al atardecer y una tormenta final. Wiglett, Finizen, Wattrel… Jefes: Dondozo, Palafin y Kilowattrel. Santuario con Chien-Pao.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.38',
       date: Date.UTC(2026, 10, 19, 6, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.38`,
@@ -3027,6 +3047,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.39',
+      date: '2026-11-18',
+      title: 'Mapas nuevos de Galar y Paldea (Lite).',
+      notes: [
+        ['new', 'Lite: Bosque Oniria y Minas de Galar; Gran Cañón y Costa de Paldea.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.38',

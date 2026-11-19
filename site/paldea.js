@@ -164,7 +164,46 @@
           props: ['crystal', 'crystal', 'pillar', 'rock', 'crystal'],
           music: { root: 55, scale: [0, 1, 3, 6, 7, 8, 11], bpm: 130, mood: 'mystic' }
         }
-      }
+      },
+      // 1.39 (solo Lite): dos mapas más de Paldea tras la Zona Cero (como las islas de Alola).
+      ...(window.PB_EDICION === 'lite' ? [{
+        id: 'canonpaldea', base: 'desert', color: 0xc8784a, k: .32,
+        name: 'Gran Cañón de Paldea', desc: 'Paredes de roca de cientos de metros y nidos de Bombirdier. Nacli y Glimmet brillan en cada grieta.',
+        unlock: 'Completa la Zona Cero', zonas: ['Paredes del cañón', 'Fondo del cañón al anochecer'],
+        zonasDatos: [
+          { sky: [0xe89a5a, 0xffe0b0], fog: 0xe8b890, fogNear: 60, fogFar: 230, light: 1, sun: 0xffd0a0, hemiGround: 0xa87a5a, sunDir: [.6, .6, .2], sunH: .45, tint: [1.06, .98, .92], clouds: [1, .92, .86], cover: .25, glow: 0, glowK: 0, stars: 0, motes: 'ash' },
+          { sky: [0x2a1a4a, 0x8a4a6a], fog: 0x4a2a4a, fogNear: 45, fogFar: 200, light: .6, sun: 0xff8a6a, hemiGround: 0x4a3040, sunDir: [-.3, .5, .4], sunH: .2, tint: [1, .9, 1.05], clouds: [.8, .6, .8], cover: .2, glow: 0xc8a0ff, glowK: .45, stars: .8, motes: 'crystal' }
+        ],
+        santuario: { de: 'canela', name: 'Santuario de Ting-Lu', heart: 'Corazón de la ruina', legendaries: [1003], color: 0xc89a5a },
+        datos: {
+          types: ['rock', 'ground', 'flying', 'dragon'], late: ['poison', 'fire'], evolved: true, legendaries: [1003],
+          bosses: [934, 970, 962], guardians: [[934, 933], [970, 969], [962, 967]],
+          totems: [[932, 969, 953, 950], [933, 970, 954, 968], [934, 962, 967, 973]], summoners: [[934, 933], [970, 969], [954, 953]],
+          residents: [932, 950, 969, 953, 968, 962, 967, 973], weather: ['clear', 'sun', 'sand'],
+          sky: [0xffb070, 0xfff0d0], fog: 0xf0c8a0, light: 1.08, sun: 0xffe8c0, hemiGround: 0xb88a5a, morning: { motes: 'heat' },
+          props: ['pillar', 'rock', 'cactus', 'rock', 'crystal', 'deadtree'], propDensity: .75,
+          music: { root: 60, scale: [0, 2, 4, 5, 7, 9, 10], bpm: 122, mood: 'bright' }
+        }
+      },
+      {
+        id: 'costapaldea', base: 'coast', color: 0x2a9ad8, k: .34,
+        name: 'Costa de Paldea', desc: 'Playas abiertas y el mar del Oeste. Wiglett asoma de la arena y Dondozo, con su Tatsugiri, manda en el arrecife.',
+        unlock: 'Completa el Gran Cañón de Paldea', zonas: ['Mar abierto', 'Tormenta en la costa'],
+        zonasDatos: [
+          { sky: [0xff9a6a, 0xffe0b0], fog: 0xffc8a8, fogNear: 70, fogFar: 260, light: .95, sun: 0xffb880, hemiGround: 0x7a8a6a, sunDir: [.8, .35, -.1], sunH: .22, tint: [1.05, .97, .94], clouds: [1, .88, .82], cover: .3, glow: 0xff9a5a, glowK: .3, stars: .1, motes: 'spray' },
+          { sky: [0x2a3a4a, 0x6a7a8a], fog: 0x4a5a6a, fogNear: 40, fogFar: 180, light: .7, sun: 0xb0c0d0, hemiGround: 0x3a4a50, sunDir: [.2, .7, -.3], sunH: .4, tint: [.92, .97, 1.05], clouds: [.8, .85, .95], cover: .85, glow: 0, glowK: 0, stars: 0, motes: 'drips' }
+        ],
+        santuario: { de: 'coast', name: 'Santuario de Chien-Pao', heart: 'Corazón de la ruina', legendaries: [1002], color: 0xa8e8ff },
+        datos: {
+          types: ['water', 'electric', 'normal', 'flying'], late: ['dragon', 'fairy'], evolved: true, legendaries: [1002],
+          bosses: [977, 964, 941], guardians: [[977, 978], [964, 963], [941, 940]],
+          totems: [[960, 963, 940, 938], [961, 964, 941, 939], [977, 978, 976, 916]], summoners: [[961, 960], [941, 940], [939, 938]],
+          residents: [960, 963, 940, 938, 915, 931, 976, 955], weather: ['clear', 'rain', 'rain'],
+          sky: [0x4ab8ff, 0xd8f4ff], fog: 0xc0e8ff, light: 1.05, sun: 0xfff4d8, hemiGround: 0x5aa8a0, morning: { motes: 'spray' },
+          props: ['palm', 'rock', 'coral', 'bush', 'palm'], propDensity: .8,
+          music: { root: 64, scale: [0, 2, 4, 7, 9], bpm: 118, mood: 'bright' }
+        }
+      }] : [])
     ]
   });
 })();

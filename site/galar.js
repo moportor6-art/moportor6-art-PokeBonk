@@ -139,7 +139,47 @@
           props: ['pillar', 'crystal', 'pillar', 'rock', 'pillar'],
           music: { root: 55, scale: [0, 1, 3, 5, 7, 8, 10], bpm: 130, mood: 'tense' }
         }
-      }
+      },
+      // 1.39 (solo Lite): dos mapas más de Galar tras la Torre Rose, como las islas de Alola (alola.js): la zona 1 usa el
+      // cielo de «datos» y las zonas 2 y 3, «zonasDatos».
+      ...(window.PB_EDICION === 'lite' ? [{
+        id: 'oniria', base: 'forest', color: 0x8a3ad8, k: .3,
+        name: 'Bosque Oniria', desc: 'Un bosque eterno de setas que brillan en la penumbra. Impidimp hace travesuras y Hatterene castiga a quien hace ruido.',
+        unlock: 'Completa la Torre Rose', zonas: ['Setas brillantes', 'Corazón del bosque'],
+        zonasDatos: [
+          { sky: [0x3a1a6a, 0x8a5ad8], fog: 0x4a2a7a, fogNear: 40, fogFar: 180, light: .7, sun: 0xc8a0ff, hemiGround: 0x3a2a5a, sunDir: [.2, .8, .3], sunH: .5, tint: [.95, .92, 1.1], clouds: [.8, .7, 1], cover: .5, glow: 0xff8aff, glowK: .45, stars: .3, motes: 'fireflies' },
+          { sky: [0x1a0a3a, 0x4a2a8a], fog: 0x2a1a4a, fogNear: 30, fogFar: 160, light: .55, sun: 0xa88aff, hemiGround: 0x2a1a3a, sunDir: [-.2, .7, .4], sunH: .35, tint: [.9, .88, 1.15], clouds: [.6, .5, .9], cover: .4, glow: 0xff5aff, glowK: .6, stars: .8, motes: 'crystal' }
+        ],
+        santuario: { de: 'encina', name: 'Claro de Zarude', heart: 'Corazón de la jungla', legendaries: [893], color: 0x7aff7a },
+        datos: {
+          types: ['fairy', 'dark', 'psychic', 'grass'], late: ['ghost', 'poison'], evolved: true, legendaries: [893],
+          bosses: [861, 858, 869], guardians: [[861, 860], [858, 857], [869, 868]],
+          totems: [[859, 856, 868, 854], [860, 857, 869, 855], [861, 858, 841, 842]], summoners: [[861, 860], [858, 857], [855, 854]],
+          residents: [859, 856, 868, 854, 840, 829, 876], weather: ['fog', 'clear', 'rain'],
+          sky: [0x5a3a9a, 0xb08ae8], fog: 0x6a4a9a, fogNear: 50, fogFar: 200, light: .8, sun: 0xe0c8ff, hemiGround: 0x4a3a6a, morning: { motes: 'pollen' },
+          props: ['mushroom', 'mushroom', 'tree', 'mushroom', 'bush', 'crystal'], propDensity: .95,
+          music: { root: 58, scale: [0, 2, 3, 6, 7, 9, 10], bpm: 100, mood: 'mystic' }
+        }
+      },
+      {
+        id: 'minasgalar', base: 'cave', color: 0xc86a3a, k: .34,
+        name: 'Minas de Galar', desc: 'Túneles de carbón y cintas transportadoras. Rolycoly rueda por los raíles y Coalossal custodia la veta más honda.',
+        unlock: 'Completa el Bosque Oniria', zonas: ['Galería de carbón', 'Veta profunda'],
+        zonasDatos: [
+          { sky: [0x3a2a1a, 0x8a5a3a], fog: 0x4a3020, fogNear: 35, fogFar: 170, light: .75, sun: 0xffa060, hemiGround: 0x4a3020, sunDir: [.3, .8, .2], sunH: .5, tint: [1.08, .95, .88], clouds: [.8, .7, .6], cover: .3, glow: 0xff7a2a, glowK: .4, stars: 0, motes: 'embers' },
+          { sky: [0x2a0a0a, 0x6a2a1a], fog: 0x3a1a10, fogNear: 30, fogFar: 150, light: .65, sun: 0xff6a3a, hemiGround: 0x3a1a10, sunDir: [-.2, .8, .3], sunH: .4, tint: [1.12, .9, .85], clouds: [.7, .5, .5], cover: .2, glow: 0xff4a1a, glowK: .6, stars: 0, motes: 'ash' }
+        ],
+        santuario: { de: 'cave', name: 'Templo de Regieleki', heart: 'Corazón eléctrico', legendaries: [894], color: 0xffe04a },
+        datos: {
+          types: ['rock', 'fire', 'steel', 'ground'], late: ['electric', 'dragon'], evolved: true, legendaries: [894],
+          bosses: [839, 879, 851], guardians: [[839, 838], [879, 878], [851, 850]],
+          totems: [[837, 833, 850, 878], [838, 834, 851, 879], [839, 874, 884, 849]], summoners: [[839, 838], [851, 850], [879, 878]],
+          residents: [837, 833, 850, 878, 874, 848, 884], weather: ['ash', 'clear', 'fog'],
+          morning: { motes: 'drips' },
+          props: ['rock', 'lavarock', 'pillar', 'crystal', 'rock'], propDensity: .8,
+          music: { root: 52, scale: [0, 1, 3, 5, 7, 8, 10], bpm: 126, mood: 'tense' }
+        }
+      }] : [])
     ]
   });
 })();
