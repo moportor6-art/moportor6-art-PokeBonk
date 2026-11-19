@@ -1,0 +1,1 @@
+var e=e=>`/pokemonsurvivors/assets/${e}`,t=e=>new Promise((t,n)=>{let r=new Image,i=setTimeout(()=>{r.removeAttribute(`src`),n(Error(`Timed out loading ${e}`))},45e3);r.addEventListener(`load`,()=>{clearTimeout(i),t(r)}),r.addEventListener(`error`,()=>{clearTimeout(i),n(Error(`Failed to load ${e}`))}),r.src=e});export{t as n,e as t};
