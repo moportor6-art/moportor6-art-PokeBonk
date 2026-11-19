@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.44';
+  const SUB = '1.45';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.45',
+      date: Date.UTC(2026, 10, 19, 18, 30),
+      tag: 'mejora',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.45`,
+      summary: 'PokéBonk Lite: menú de pausa compacto en el teléfono: botones sin desplazamiento y una sola barra por pestaña.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Botones de la pausa**: «Continuar» arriba y el resto en dos filas (Mapa grande · Ajustes · Atascado · Mapa / Reiniciar · Guardar y salir · Abandonar). Ya no hay que desplazarse para verlos.`,
+        `- **Objetos**: los objetos en iconos pequeños, las vitaminas debajo en lista y el detalle del objeto al lado, sin barras de desplazamiento dentro de otras.`,
+        `- **Resumen**: vitaminas en tres columnas y objetos en iconos, para que quepa casi todo de un vistazo.`,
+        `- Pestañas y estadísticas algo más compactas. Todo solo en pantallas bajas (teléfono en horizontal).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.44',
       date: Date.UTC(2026, 10, 19, 18, 0),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.44`,
@@ -3140,6 +3160,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.45',
+      date: '2026-11-19',
+      title: 'Menú de pausa compacto (Lite).',
+      notes: [
+        ['fix', 'Lite: los botones de la pausa se cortaban y había que desplazarse; ahora caben en dos filas.'],
+        ['fix', 'Lite: pestaña de objetos sin barras de desplazamiento anidadas.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.44',

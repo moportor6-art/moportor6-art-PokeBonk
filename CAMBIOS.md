@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Pausa compacta (Subversión 1.45)
+- `resumen.js` (Lite): CSS con `@media (max-height:620px)`: `.sm-foot .actions` en flex (Continuar arriba, 4 + 3 botones), `.pz-items`/`.pz-detail` sin `max-height` y `.pz-centre .sm-cbody` en dos columnas (detalle a la derecha); el Resumen oculta el detalle.
+
 ## Resumen en la pausa (Subversión 1.44)
 - `resumen.js` (Lite): pestaña `.pb-res-tab` en `.pz-tabs` y sección `.pb-resumen` (copia de `.pz-left` y `.pz-centre`, con las vitaminas primero); `.pz.pb-res-on` oculta las demás secciones.
 
