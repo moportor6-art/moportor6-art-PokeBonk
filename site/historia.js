@@ -437,7 +437,13 @@
     if (!a || a.__pbHist) return !!a;
     const orig = a.startRun;
     a.startRun = function (cfg, ...r) {
-      try { if (cfg !== nuestroCfg && H()) H().activo = null; } catch {}
+      // 1.47: «Reiniciar» en un capítulo crea su propia copia de la configuración; si es el mismo capítulo (mismo
+      // Pokémon, mapa, dificultad y modo, desde una partida de la historia) sigue siendo nuestro y no pierde el Laboratorio.
+      try {
+        const n = nuestroCfg, mismo = n && cfg && cfg.species === n.species && cfg.biome === n.biome && (cfg.tier | 0) === (n.tier | 0) && (cfg.mode ?? 'standard') === n.mode && window.__pbRun?.__hist != null;
+        if (mismo) nuestroCfg = cfg;
+        else if (cfg !== nuestroCfg && H()) H().activo = null;
+      } catch {}
       return orig.call(this, cfg, ...r);
     };
     a.__pbHist = true;
@@ -558,7 +564,7 @@
 
   // 1.41: si la pausa se repinta (cambio de pestaña, estadísticas…), el botón se vuelve a poner al momento en vez de
   // esperar al siguiente ciclo (antes parpadeaba o se quedaba sin él).
-  try { new MutationObserver(() => { try { const r = window.__pbRun; if (r?.__hist != null && document.querySelector('.pz .pz-tabs:not(:has(.pb-hist-pz))')) botonPausa(r); } catch {} }).observe(document.documentElement, { childList: true, subtree: true }); } catch {}
+  try { new MutationObserver(() => { try { const r = window.__pbRun; if (r?.__hist != null && document.querySelector('.pz .sm-foot:not(:has(.pb-hist-pz))')) botonPausa(r); } catch {} }).observe(document.documentElement, { childList: true, subtree: true }); } catch {}
   // 1.41: cada paso con su propio try: antes, si uno fallaba (p. ej. pendiente()), el botón «Laboratorio» de la pausa
   // dejaba de ponerse y desaparecía al reabrir la pausa.
   setInterval(() => {
@@ -624,20 +630,17 @@
     if (run?.__hist == null || run.state === 'over') return;
     // En la barra de pestañas (Movimientos · Objetos · Estadísticas): junto a los botones de abajo los estrechaba
     // («Ajuste s», «Guarda r y salir») y en pantallas bajas tapaba las estadísticas.
-    const foot = document.querySelector('.pz .pz-tabs');
+    // 1.47: en la columna del Pokémon, encima de «Continuar» (había un hueco libre); en la barra de pestañas se cortaba.
+    const foot = document.querySelector('.pz .sm-foot');
     if (!foot || foot.querySelector('.pb-hist-pz')) return;
     const b = document.createElement('button');
     b.type = 'button';
-    b.className = 'pz-tab pb-hist-pz';
-    b.textContent = 'Laboratorio';
-    b.style.cssText = 'background:linear-gradient(#9a6af2,#6a3ad8);color:#fff;border-radius:12px;flex:0 1 auto;padding:0 14px';
+    b.className = 'btn pb-hist-pz';
+    b.textContent = '🧪 Laboratorio';
+    b.style.cssText = 'display:block;width:100%;margin:0 0 6px;height:34px;border:0;border-radius:14px;background:linear-gradient(#9a6af2,#6a3ad8);color:#fff;font:900 15px system-ui,sans-serif;box-shadow:0 3px 0 #4a2aa8;cursor:pointer';
     b.title = 'Mejora a tu Pokémon sin salir de la partida';
     b.onclick = () => laboratorio(ORDEN[H()?.slots[run.__hist]?.r ?? 0], run.startSpecies, run, null);
-    foot.append(b);
-    // 1.10: en pantallas estrechas no cabía y quedaba cortado fuera del panel: primero se acorta y, si aún no
-    // cabe, las pestañas pasan a dos filas.
-    if (foot.scrollWidth > foot.clientWidth + 1) { b.textContent = '🧪 Lab'; b.style.padding = '0 10px'; }
-    if (foot.scrollWidth > foot.clientWidth + 1) { foot.style.flexWrap = 'wrap'; foot.style.rowGap = '6px'; }
+    foot.prepend(b);
   };
 
   window.PB_HISTORIA = { abrir: pantallaRanuras, D, PROF, CAMP, capitulo, mapaDe, laboratorio, capa: abrir, cerrar, nombrePk, dialogo };

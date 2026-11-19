@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.46';
+  const SUB = '1.47';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.47',
+      date: Date.UTC(2026, 10, 19, 20, 0),
+      tag: 'correccion',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.47`,
+      summary: 'PokéBonk Lite: el Laboratorio de la pausa del Modo historia pasa a la columna del Pokémon y ya no se pierde al reiniciar.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Botón «🧪 Laboratorio»** en la pausa del Modo historia: ahora va en la columna del Pokémon, encima de «Continuar» (en la barra de pestañas se cortaba).`,
+        `- **Reiniciar** un capítulo ya no lo saca del Modo historia: la nueva partida sigue siendo el mismo capítulo y conserva el Laboratorio.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.46',
       date: Date.UTC(2026, 10, 19, 19, 0),
       tag: 'correccion',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.46`,
@@ -3178,6 +3196,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.47',
+      date: '2026-11-19',
+      title: 'Laboratorio en la columna del Pokémon y reiniciar sin salir de la historia (Lite).',
+      notes: [
+        ['fix', 'Lite: al reiniciar un capítulo del Modo historia se perdía el botón del Laboratorio.'],
+        ['new', 'Lite: el botón del Laboratorio va encima de «Continuar», en la columna del Pokémon.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.46',

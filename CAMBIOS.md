@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Laboratorio de la historia (Subversión 1.47)
+- `historia.js`: el botón `.pb-hist-pz` va al principio de `.pz .sm-foot`; `envolverApp` acepta como propia una configuración igual a la del capítulo (la copia que usa `onRestart` con `lastCfg`), así «Reiniciar» no pone `activo = null`.
+
 ## Guardián de verdad (Subversión 1.46)
 - `gimnasios.js` (Lite): `liderLibre` ya no cambia el guardián en `PB_GYM.jefe`; deja `run.__pbLibre` y un ciclo aparte saca al Pokémon del líder con `enemies.spawn` (flags 1) junto al guardián (`boss.bossIndex`), con el 80 % de su vida y `capRate` de 20/30 s. No abre portal.
 
