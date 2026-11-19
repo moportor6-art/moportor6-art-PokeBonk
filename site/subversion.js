@@ -4,16 +4,38 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.50';
+  const SUB = '1.51';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.51',
+      date: Date.UTC(2026, 10, 20, 0, 30),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.51`,
+      summary: 'PokéBonk Lite: en el mapa de pruebas ya se entra en las casas, hay personajes con diálogos, regalo de Oak, rival Azul y el viejo de Ciudad Verde.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Se entra en las casas**: al pisar la puerta pasas a un cuarto de bloques (sin salvajes; los de fuera se quedan quietos). Se sale por la misma puerta.`,
+        `- **Casa de Rojo**: tele, mesa y tu madre, que te cura. **Casa de Azul**: su hermana te da 3 Bayas Zidra.`,
+        `- **Laboratorio**: el Prof. Oak y la mesa con tres Poké Balls. Elige Bulbasaur, Charmander o Squirtle: +20 % de daño de Planta, Fuego o Agua en la partida.`,
+        `- **Ruta 1**: tu rival Azul te espera al norte con el inicial que te gana y te desafía.`,
+        `- **Ciudad Verde**: Centro Pokémon con mostrador y Chansey (te cura), Tienda con el Paquete de Oak y muestras, Gimnasio cerrado y el viejo tumbado en el camino, que no se levanta hasta que pasas por la Tienda.`,
+        `- Diálogos con los retratos del Modo historia, música tranquila en los pueblos y algo de variedad en cada partida (sitio, flores, hierba alta y camino de la Ruta 1).`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.50',
       date: Date.UTC(2026, 10, 19, 23, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.50`,
@@ -3255,6 +3277,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.51',
+      date: '2026-11-19',
+      title: 'Mapa de pruebas: interiores, personajes, regalo de Oak, rival y el viejo (Lite).',
+      notes: [
+        ['new', 'Lite: cuartos por dentro en las casas, el Laboratorio, el Centro Pokémon y la Tienda.'],
+        ['new', 'Lite: Prof. Oak con las tres Poké Balls, madre, hermana de Azul, Chansey, tendero, rival Azul y el viejo de Ciudad Verde, con diálogos.'],
+        ['new', 'Lite: música tranquila en los pueblos y variedad en cada partida.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.50',

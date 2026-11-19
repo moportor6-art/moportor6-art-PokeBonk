@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Mapa de pruebas con interiores (Subversión 1.51)
+- `paleta.js`: `interiores()` levanta los cuartos en otro claro del mismo mapa (lejos del pueblo) y las puertas te llevan allí (`run.__pbDentro` pausa `director.update` y detiene a los salvajes); personajes y adornos como cajas (`cubos`) con etiqueta para mostrarlos/ocultarlos (viejo, Azul); puntos de acción con `PB_HISTORIA.dialogo`; regalo de Oak envolviendo `combat.hit`; rival con `enemies.spawn`; música `menu` con `audio.playTrack` si la radio no fija otra. Esconde también mallas toon sueltas dentro de la zona.
+
 ## Mapa de pruebas completo (Subversión 1.50)
 - `paleta.js`: una construcción por zona (se rehace al cambiar `run.terrain`/`run.stage`); aplana `terrain.heights` (el terreno se lee de ahí) con un borde suave de 6 m y lo cubre de pasto; esconde adornos con mallas toon dentro (no interactuables ni sprites) e instancias; puertas con ayuda (`run.__pbPrueba.hecho`); envuelve `PB_REGIONES.remap` (salvajes) y `PB_GYM.jefe` (guardianes de las zonas 1 y 2).
 - `assets/voxel/`: 11 texturas más del Voxel Pack (CC0).
