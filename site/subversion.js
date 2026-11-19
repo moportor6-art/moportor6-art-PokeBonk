@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.34';
+  const SUB = '1.35';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.35',
+      date: Date.UTC(2026, 10, 19, 3, 0),
+      tag: 'novedad',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.35`,
+      summary: "PokéBonk Lite: tres islas nuevas de Alola tras Melemele: Akala, Ula'ula y Poni.",
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Isla Akala** (se abre al completar Melemele): ranchos y colinas de día, atardecer y noche con luciérnagas. Mudbray, Fomantis, Stufful, Bounsweet… Jefes: Mudsdale, Lurantis y Bewear. Santuario con Tapu Lele.`,
+        `- **Isla Ula'ula**: el Desierto Haina y la subida nublada y nevada al Monte Lanakila. Sandygast, Crabrawler, Komala, Mimikyu… Jefes: Palossand, Crabominable y Drampa. Santuario con Tapu Bulu.`,
+        `- **Isla Poni**: el Gran Cañón, su ocaso y el Altar del Sol bajo las estrellas. Jangmo-o, Rockruff, Wimpod, Tipo: Cero… Jefes: Kommo-o, Lycanroc y Golisopod. Santuario con Tapu Fini y Cosmog.`,
+        `- Cada isla es más dura que la anterior.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.34',
       date: Date.UTC(2026, 10, 18, 23, 30),
       tag: 'novedad',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.34`,
@@ -2945,6 +2965,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.35',
+      date: '2026-11-18',
+      title: "Islas Akala, Ula'ula y Poni (Lite).",
+      notes: [
+        ['new', "Lite: tres mapas nuevos de Alola en cadena tras Melemele, con cielo, Pokémon, jefes y santuario propios."]
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.34',

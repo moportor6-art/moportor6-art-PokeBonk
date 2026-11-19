@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Islas de Alola (Subversión 1.35)
+- `alola.js` (Lite): mapas `akala` (base `forest`), `ulaula` y `poniisla` (base `desert`) tras `melemele`. Ojo: la zona 1 toma el cielo de `datos` (+ `morning`) y `zonasDatos[0]`/`[1]` son las zonas 2 y 3 (`zones[n-2]` en el bundle). El suelo sale del `tex` del mapa base.
+
 ## Automatismos y sistemas nuevos (Subversión 1.34)
 - `extras.js` (Lite): esquiva automática (envuelve `vfx.telegraph`; `profile.pbAuto.esq`), avisos de rarezas (`capture.spawnShiny`, Dominantes, Poké Balls gratis; `pbAuto.avisos`), cartas favoritas (`profile.pbFav`), movimientos Z (`.pb-z` en `.pb-mx`, tecla Z, `combat.hit` fijo), logros (`PB_LOGROS`, `profile.pbLogros`/`pbCont`), récords por Pokémon (`profile.pbStatsPk`, ficha de la Pokédex) y Tienda de Polvo (`profile.pbTienda`, entra en la bolsa con `PB_BOLSA.dar`).
 - `guarderia.js` (Lite): Guardería en el Modo historia; herencia en `localStorage['pb-herencia']`, que lee `compatibilidad.js`.
