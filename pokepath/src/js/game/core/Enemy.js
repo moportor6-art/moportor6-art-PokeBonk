@@ -1,0 +1,2129 @@
+import { Sprite } from '../../utils/Sprite.js';
+import { playSound } from '../../file/audio.js';
+import { enemyData } from '../data/enemyData.js';
+
+export class Enemy extends Sprite {
+	constructor(x, y, enemy, waypoints, main, ctx) {
+		super(x, y, ctx, enemy.sprite.image, enemy.sprite.frames, 8);
+		this.main = main;
+
+		const wave = this.main.area.waveNumber;
+
+		this.radius = 4;
+		this.waypoints = waypoints;
+		this.waypointIndex = 0;
+
+		this.center = {
+			x: this.position.x + this.width / 2,
+			y: this.position.y + this.height / 2
+		};
+
+		this.enemy = enemy;
+		this.hp = enemy.hp;
+		this.hpMax = enemy.hp;
+		this.armor = enemy.armor || 0;
+		this.armorMax = enemy.armor || 0;
+		this.regeneration = enemy.regeneration || 0; 
+		this.regenTimer = 0; 
+		this.speed = enemy.speed; 
+		this.baseSpeed = this.speed; 
+		this.power = enemy.power;
+		this.gold = enemy.gold + this.main.player.extraGold
+		this.invisible = enemy.invisible;
+		this.cursed = false;
+		this.invulnerable = false;
+		this.healerTimer = 0;
+
+		// passive (general)
+		this.passive = enemy.passive;
+		this.passiveTimer = 0;
+		this.passiveActivated = false;
+		this.passiveCharges = 0;
+		if (this.passive?.id === 'kingsShield') this.passiveCharges = 4;
+		else if (this.passive?.id === 'dauntlessShield') this.passiveCharges = 400;
+		else if (this.passive?.id === 'intrepidSword') this.passiveCharges = -100;
+		// passive (regenerator)
+		this.regeneratorUsed = false;
+		this.isRegeneratorReviving = false;
+		this.regeneratorReviveTimer = 0;
+
+		// passive (time travel)
+		this.timeTravelSpeedTimer = 0;
+		this.timeTravelMin = 150;
+		this.timeTravelMax = 200;
+
+		// animación
+		this.reviveAnimTime = 0;
+		this.reviveScale = 1;
+
+		// revysBook 360 spin
+		this.spinAngle = 0;
+		this.spinRemaining = 0; // ms left in spin
+
+		this.statusEffects = [];
+		this.floatingTexts = [];
+
+		const cursePath = './src/assets/images/icons/curse.png';
+
+		let cached = null;
+		try {
+			if (this.main && this.main.assets && typeof this.main.assets.getImage === 'function') {
+				cached = this.main.assets.getImage(cursePath);
+			}
+			// fallback a main.getImage con helper
+			if (!cached && this.main && typeof this.main.getImage === 'function') {
+				cached = this.main.getImage(cursePath);
+			}
+			// también comprobar imageCache directo por compatibilidad
+			if (!cached && this.main && this.main.imageCache && this.main.imageCache[cursePath]) {
+				cached = this.main.imageCache[cursePath];
+			}
+		} catch (_) { cached = null; }
+
+		this.curseIcon = cached || null;
+
+		if (!this.curseIcon) {
+		    this.curseIcon = new Image();
+		    this.curseIcon.src = './src/assets/images/icons/curse.png';
+		}
+		// Aumentos cada 5 waves 
+		const bonusSteps = Math.floor((wave - 1) / 5);
+		if (bonusSteps > 0) {
+			if (wave != 100) this.hp = Math.floor(this.hp * (1 + 0.02 * bonusSteps));
+			if (wave != 100) this.hpMax = Math.floor(this.hpMax * (1 + 0.02 * bonusSteps));
+			if (wave != 100) this.armor = Math.floor(this.armor * (1 + 0.01 * bonusSteps));
+			if (wave != 100) this.armorMax = Math.floor(this.armorMax * (1 + 0.01 * bonusSteps));
+			this.gold = Math.floor(this.gold * (1 + 0.15 * bonusSteps));
+		}
+
+		if (typeof this.main.area.inChallenge.toughEnemies == 'number') {
+			this.hp += Math.floor(this.hp * (this.main.area.inChallenge.toughEnemies / 100));
+			this.hpMax += Math.floor(this.hpMax * (this.main.area.inChallenge.toughEnemies / 100));
+			this.armor += Math.floor(this.armor * (this.main.area.inChallenge.toughEnemies / 100));
+			this.armorMax += Math.floor(this.armorMax * (this.main.area.inChallenge.toughEnemies / 100));
+		}
+
+		if (this.main.area.inChallenge.draft) {
+			if (wave === 100) {
+				this.hp -= Math.floor(this.hp * (25 / 100));
+				this.hpMax -= Math.floor(this.hpMax * (25 / 100));
+				this.armor -= Math.floor(this.armor * (25 / 100));
+				this.armorMax -= Math.floor(this.armorMax * (25 / 100));
+			} else {
+				this.hp -= Math.floor(this.hp * (10 / 100));
+				this.hpMax -= Math.floor(this.hpMax * (10 / 100));
+				this.armor -= Math.floor(this.armor * (10 / 100));
+				this.armorMax -= Math.floor(this.armorMax * (10 / 100));
+			}
+		}
+
+		if (this.main.area.isCustom) {
+			this.hp += Math.floor(this.hp * (this.main.area.customData.health / 100));
+			this.hpMax += Math.floor(this.hpMax * (this.main.area.customData.health / 100));
+			this.armor += Math.floor(this.armor * (this.main.area.customData.armor / 100));
+			this.armorMax += Math.floor(this.armorMax * (this.main.area.customData.armor / 100));
+		}
+
+		this.dying = false;
+		this.opacity = 1;
+		this.dyingSpeed = 0.03; 
+
+		this.hasEnteredCanvas = false;
+		this.distanceTraveled = 0;
+		this.stunned = false;
+		
+		this.canSlow = enemy.canSlow;
+		this.canStun = enemy.canStun;
+		this.canBurn = enemy.canBurn;
+		this.canPoison = enemy.canPoison;	
+
+		this.burnedBy = null;
+		this.poisonedBy = null;
+		this.nightmaredBy = null;
+
+		this.weatherTimer = 0;
+
+		if (this.passive?.id == 'drought') {
+			this.main.area.imposedWeather = true;
+			this.main.area.weather = 'harshSunlight';
+			this.main.UI.displayWeather();
+		} else if (this.passive?.id == 'drizzle') {
+			this.main.area.imposedWeather = true;
+			this.main.area.weather = 'rain';
+			this.main.UI.displayWeather();
+		}
+
+		// Achievement tracker
+		this.achievementTimer = 0;
+		this.achievementCount = 0;
+	}
+
+	draw() {
+		this.ctx.save();
+
+		if (this.passive?.id === 'flameBody') {
+		    const centerX = this.position.x + this.width / 2;
+		    const centerY = this.position.y + this.height / 2;
+
+		    const numParticles = 500;
+
+		    for (let i = 0; i < numParticles; i++) {
+		        const angle = Math.random() * Math.PI * 2;
+		        const r = 70 + Math.random() * 50;
+		        const px = centerX + Math.cos(angle) * r;
+		        const py = centerY + Math.sin(angle) * r;
+		        const size = 2 + Math.random() * 3;
+
+		        const t = Math.random(); 
+
+		        const rColor = Math.floor(255);
+		        const gColor = Math.floor(100 + 155 * t);
+		        const bColor = 0;
+
+		        this.ctx.globalAlpha = 0.7 + 0.2 * Math.sin(Date.now() / 300);
+		        this.ctx.fillStyle = `rgb(${rColor},${gColor},${bColor})`;
+		        this.ctx.beginPath();
+		        this.ctx.arc(px, py, size, 0, Math.PI * 2);
+		        this.ctx.fill();
+		    }
+
+		    this.ctx.restore();
+		}
+
+		if (this.passive?.id === "snowCloak") {
+			const cx = this.position.x + this.width / 2;
+			const cy = this.position.y + this.height / 2;
+
+			const radius = 150;
+			const pulse = 0.5 + 0.8 * Math.sin(Date.now() / 600);
+
+			// aura circular (siempre visible)
+			const grad = this.ctx.createRadialGradient(cx, cy, radius * 0.2, cx, cy, radius);
+			grad.addColorStop(0, `rgba(180, 220, 255,${0.35 + pulse * 0.15})`);
+			grad.addColorStop(0.7, `rgba(180, 220, 255,${0.15 + pulse * 0.10})`);
+			grad.addColorStop(1, `rgba(180, 220, 255, 0.08)`); 
+
+			this.ctx.fillStyle = grad;
+			this.ctx.beginPath();
+			this.ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+			this.ctx.fill();
+
+			this.ctx.strokeStyle = 'rgba(200, 230, 255, 0.55)';
+			this.ctx.lineWidth = 2;
+			this.ctx.beginPath();
+			this.ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+			this.ctx.stroke();
+
+			for (let i = 0; i < 50; i++) {
+				const angle = Math.random() * Math.PI * 2;
+				const r = Math.random() * radius;
+				const px = cx + Math.cos(angle) * r;
+				const py = cy + Math.sin(angle) * r;
+				const size = 1 + Math.random() * 2;
+
+				this.ctx.fillStyle = 'rgba(210, 240, 255, 0.8)';
+				this.ctx.beginPath();
+				this.ctx.arc(px, py, size, 0, Math.PI * 2);
+				this.ctx.fill();
+			}
+		}
+
+		if (this.passive?.id === "ingrain") {
+		    const cx = this.position.x + this.width / 2;
+		    const cy = this.position.y + this.height / 2;
+
+		    const radius = 140;
+		    const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 700);
+
+		    // Aura
+		    const grad = this.ctx.createRadialGradient(
+		        cx, cy, radius * 0.15,
+		        cx, cy, radius
+		    );
+
+		    grad.addColorStop(0, `rgba(80,255,120,${0.30 + pulse * 0.15})`);
+		    grad.addColorStop(0.65, `rgba(60,220,90,${0.18 + pulse * 0.08})`);
+		    grad.addColorStop(1, "rgba(60,220,90,0.03)");
+
+		    this.ctx.fillStyle = grad;
+		    this.ctx.beginPath();
+		    this.ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+		    this.ctx.fill();
+
+		    // Borde
+		    this.ctx.strokeStyle = `rgba(120,255,160,${0.55 + pulse * 0.2})`;
+		    this.ctx.lineWidth = 2;
+		    this.ctx.beginPath();
+		    this.ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+		    this.ctx.stroke();
+
+		    // Partículas flotando
+		    for (let i = 0; i < 40; i++) {
+		        const seed = i * 987.123;
+		        const t = Date.now() * 0.0015 + seed;
+
+		        const angle = (seed * 17) % (Math.PI * 2);
+		        const r = (seed * 53) % radius;
+
+		        const drift = Math.sin(t) * 6;
+
+		        const px = cx + Math.cos(angle) * r;
+		        const py = cy + Math.sin(angle) * r - drift;
+
+		        const size = 1.5 + ((seed * 13) % 2.5);
+
+		        this.ctx.fillStyle = `rgba(180,255,180,${0.45 + 0.35 * Math.sin(t * 2)})`;
+
+		        this.ctx.beginPath();
+		        this.ctx.arc(px, py, size, 0, Math.PI * 2);
+		        this.ctx.fill();
+		    }
+
+		    // Destellos sobre el borde
+		    for (let i = 0; i < 12; i++) {
+		        const angle = Date.now() / 1800 + i * (Math.PI * 2 / 12);
+
+		        const px = cx + Math.cos(angle) * radius;
+		        const py = cy + Math.sin(angle) * radius;
+
+		        this.ctx.fillStyle = "rgba(220,255,220,0.8)";
+		        this.ctx.beginPath();
+		        this.ctx.arc(px, py, 2.5, 0, Math.PI * 2);
+		        this.ctx.fill();
+		    }
+		}
+
+		if (this.passive?.id === "static") {
+			const cx = this.position.x + this.width / 2;
+			const cy = this.position.y + this.height / 2;
+
+			const radius = 115;
+			const pulse = 0.5 + 0.5 * Math.sin(Date.now() / 200);
+
+			const grad = this.ctx.createRadialGradient(cx, cy, radius * 0.2, cx, cy, radius);
+			grad.addColorStop(0, `rgba(255, 255, 180,${0.55 + pulse * 0.25})`);
+			grad.addColorStop(0.6, `rgba(255, 240, 120,${0.25 + pulse * 0.15})`);
+			grad.addColorStop(1, `rgba(255, 240, 120, 0.08)`); 
+
+			this.ctx.fillStyle = grad;
+			this.ctx.beginPath();
+			this.ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+			this.ctx.fill();
+
+			this.ctx.strokeStyle = 'rgba(255, 240, 120, 0.9)';
+			this.ctx.lineWidth = 2;
+			this.ctx.beginPath();
+			this.ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+			this.ctx.stroke();
+
+			for (let i = 0; i < 22; i++) {
+				const angle = Math.random() * Math.PI * 2;
+				const r = radius * (0.55 + Math.random() * 0.45);
+				const px = cx + Math.cos(angle) * r;
+				const py = cy + Math.sin(angle) * r;
+
+				const length = 14 + Math.random() * 10;
+				const segments = 3 + Math.floor(Math.random() * 3);
+
+				let x = px;
+				let y = py;
+
+				this.ctx.strokeStyle = `rgba(255, 255, 200, ${0.85 + 0.15 * Math.sin(Date.now() / 100)})`;
+				this.ctx.lineWidth = 1.2;
+
+				this.ctx.beginPath();
+				this.ctx.moveTo(x, y);
+
+				for (let s = 0; s < segments; s++) {
+					const nx = x + (Math.random() - 0.5) * length;
+					const ny = y + (Math.random() - 0.5) * length;
+					this.ctx.lineTo(nx, ny);
+					x = nx;
+					y = ny;
+				}
+
+				this.ctx.stroke();
+
+				// punto brillante al inicio
+				this.ctx.fillStyle = 'rgba(255, 240, 120, 0.95)';
+				this.ctx.beginPath();
+				this.ctx.arc(px, py, 1.5, 0, Math.PI * 2);
+				this.ctx.fill();
+			}
+		}
+
+		const cx = this.position.x + this.width / 2;
+		const cy = this.position.y + this.height / 2;
+
+		this.ctx.translate(cx, cy);
+
+		if (this.isRegeneratorReviving) {
+			this.ctx.scale(this.reviveScale, this.reviveScale);
+		}
+
+		if (this.spinRemaining > 0) {
+			this.ctx.rotate(this.spinAngle);
+		}
+
+		this.ctx.translate(-cx, -cy);
+
+		if (this.invisible) this.ctx.globalAlpha = 0.3;
+
+		super.draw();
+		this.ctx.restore();
+
+		const barWidth = 40;
+		const barHeight = 6;
+		const barX = this.position.x + (this.width / 2) - (barWidth / 2);
+		const barY = this.position.y - 14;
+
+		this.ctx.save();
+
+		this.ctx.fillStyle = '#222';
+		this.ctx.beginPath();
+		this.ctx.roundRect(barX, barY, barWidth, barHeight, 3);
+		this.ctx.fill();
+
+		const hpPercent = Math.max(this.hp / this.hpMax, 0);
+		const healthGradient = this.ctx.createLinearGradient(barX, barY, barX + barWidth, barY);
+		if (hpPercent > 0.5) {
+			healthGradient.addColorStop(0, '#00ff73');
+			healthGradient.addColorStop(1, '#00c04b');
+		} else if (hpPercent > 0.25) {
+			healthGradient.addColorStop(0, '#ffe600');
+			healthGradient.addColorStop(1, '#d4b400');
+		} else {
+			healthGradient.addColorStop(0, '#ff4c4c');
+			healthGradient.addColorStop(1, '#b30000');
+		}
+
+		this.ctx.fillStyle = healthGradient;
+		this.ctx.beginPath();
+		this.ctx.roundRect(barX, barY, barWidth * hpPercent, barHeight, 3);
+		this.ctx.fill();
+
+		this.ctx.lineWidth = 1;
+		this.ctx.strokeStyle = 'black';
+		this.ctx.beginPath();
+		this.ctx.roundRect(barX, barY, barWidth, barHeight, 3);
+		this.ctx.stroke();
+
+		if (this.main.displayHealth == 2 || (this.main.displayHealth == 1 && this.main.area.waveNumber == 100)) {
+			this.ctx.save();
+			this.ctx.font = '8px Arial';
+			this.ctx.textAlign = 'center';
+			this.ctx.textBaseline = 'middle';
+
+			const hpText = (['mew', 'calyrex'].includes(this.enemy.id)) ? '???' : `${this.main.utility.numberDot(Math.max(0, Math.floor(this.hp)), this.main.lang)}`;
+			const textX = barX + barWidth / 2;
+			const textY = barY + barHeight / 1.5;
+
+			this.ctx.lineWidth = 2;
+			this.ctx.strokeStyle = 'black';
+			this.ctx.strokeText(hpText, textX, textY);
+
+			this.ctx.fillStyle = 'white';
+			this.ctx.fillText(hpText, textX, textY);
+			this.ctx.restore();
+		}
+		
+		if (this.armorMax > 0) {
+			const armorPercent = Math.max(this.armor / this.armorMax, 0);
+			const armorY = barY - barHeight - 2;
+
+			this.ctx.fillStyle = '#222';
+			this.ctx.beginPath();
+			this.ctx.roundRect(barX, armorY, barWidth, barHeight, 3);
+			this.ctx.fill();
+
+			this.ctx.fillStyle = '#66ccff';
+			this.ctx.beginPath();
+			this.ctx.roundRect(barX, armorY, barWidth * armorPercent, barHeight, 3);
+			this.ctx.fill();
+
+			this.ctx.lineWidth = 1;
+			this.ctx.strokeStyle = 'black';
+			this.ctx.beginPath();
+			this.ctx.roundRect(barX, armorY, barWidth, barHeight, 3);
+			this.ctx.stroke();
+			if (this.main.displayHealth == 2 || (this.main.displayHealth == 1 && this.main.area.waveNumber == 100)) {
+				this.ctx.save();
+				this.ctx.font = '8px Arial';
+				this.ctx.textAlign = 'center';
+				this.ctx.textBaseline = 'middle';
+
+				const armorText = `${this.main.utility.numberDot(Math.max(0, Math.floor(this.armor)), this.main.lang)}`;
+				const armorTextX = barX + barWidth / 2;
+				const armorTextY = armorY + barHeight / 1.5;
+
+				this.ctx.lineWidth = 2;
+				this.ctx.strokeStyle = 'black';
+				this.ctx.strokeText(armorText, armorTextX, armorTextY);
+
+				this.ctx.fillStyle = 'white';
+				this.ctx.fillText(armorText, armorTextX, armorTextY);
+				this.ctx.restore();
+			}
+		}
+
+		if (this.passive?.id === 'ironDefense') {
+		    const idPercent = Math.min(this.passiveCharges, 100);
+
+		    this.ctx.save();
+		    this.ctx.font = 'bold 8px Arial';
+		    this.ctx.textAlign = 'left';
+		    this.ctx.textBaseline = 'middle';
+
+		    const idText = `${idPercent}%`;
+		    const idTextX = barX + barWidth + 4;
+		    const idTextY = barY + barHeight / 2;
+
+		    this.ctx.lineWidth = 2;
+		    this.ctx.strokeStyle = 'black';
+		    this.ctx.strokeText(idText, idTextX, idTextY);
+
+		    this.ctx.fillStyle = '#c0c0c0';
+		    this.ctx.fillText(idText, idTextX, idTextY);
+		    this.ctx.restore();
+		}
+
+		// indicador de curse
+	    if (this.cursed && this.curseIcon) {
+		    const size = 12;
+		    const offsetX = barX - size - 2;
+		    const offsetY = barY - 2.5;
+		    // this.curseIcon puede ser Image, ImageBitmap o Canvas (según preload)
+		    this.ctx.drawImage(this.curseIcon, offsetX, offsetY, size, size);
+		}
+
+		// efectos visuales
+		this.drawStatusEffects();
+		this.ctx.restore();
+		this.ctx.restore(); 
+	}
+
+	update(deltaTime = 1000 / 60, shouldDraw = true) {
+		// deltaTime ya viene escalado por Game (ms)
+		const simDelta = deltaTime;
+		const frameFactor = simDelta / (1000 / 60);
+
+		if (this.dying) {
+	        this.opacity -= this.dyingSpeed * frameFactor;
+	        if (this.opacity <= 0) {
+	            const index = this.main.area.enemies.indexOf(this);
+	            if (index > -1) this.main.area.enemies.splice(index, 1);
+	            return;
+	        }
+	    }
+
+		if (shouldDraw) {
+	        this.ctx.save();
+	        this.ctx.globalAlpha = this.opacity;
+	        this.draw();
+	        this.ctx.restore();
+	    }
+
+	    if (!this.dying) {
+	    	if (this.isRegeneratorReviving) {
+			    this.regeneratorReviveTimer -= simDelta;
+			    this.reviveAnimTime += simDelta;
+			    this.stunned = true;
+
+			    this.opacity = 1 + 0.5 * Math.sin(this.reviveAnimTime / 120);
+			    this.reviveScale = 1 + 0.05 * Math.sin(this.reviveAnimTime / 150);
+
+			    if (this.regeneratorReviveTimer <= 0) {
+			        this.isRegeneratorReviving = false;
+			        this.stunned = false;
+
+			        this.hp = this.hpMax;
+			        this.armor = 0;
+			        this.armorMax = 0;
+			        this.statusEffects.length = 0;
+					this.speed = this.baseSpeed;
+
+			        // reset visual
+			        this.opacity = 1;
+			        this.reviveScale = 1;
+			        this.reviveAnimTime = 0;
+
+			        playSound('regenerator', 'effect');
+			    }
+			}
+
+	    	if (!this.stunned) {
+			    const waypoint = this.waypoints[this.waypointIndex];
+			    const yDistance = waypoint.y - this.center.y;
+			    const xDistance = waypoint.x - this.center.x;
+			    const angle = Math.atan2(yDistance, xDistance);
+
+			    // FIX: mover en substeps para no saltarse waypoints a alta velocidad
+			    let remainingMove = this.speed * frameFactor;
+
+			    while (remainingMove > 0) {
+			        const wp = this.waypoints[this.waypointIndex];
+			        const wdx = wp.x - this.center.x;
+			        const wdy = wp.y - this.center.y;
+			        const distToWp = Math.hypot(wdx, wdy);
+
+			        let windFactor = this.main.area.getWindFactorAt
+			            ? this.main.area.getWindFactorAt(this.center.x, this.center.y, wdx)
+			            : 1;
+
+			        let slowFactor = this.main.area.getSlowFactorAt
+			            ? this.main.area.getSlowFactorAt(this.center.x, this.center.y)
+			            : 1;
+
+			        const spikeSlowFactor = this.main.area.getSpikeZoneSlowFactorAt
+			            ? this.main.area.getSpikeZoneSlowFactorAt(this.center.x, this.center.y)
+			            : 1;
+
+			        if (this.passive?.id == 'gust' && windFactor === 0.6) windFactor = 2;
+			        if (this.passive?.id == 'windRider' && windFactor === 0.6) windFactor = 0.3;
+			        if (this.passive?.id == 'windRider' && windFactor === 2) windFactor = 4;
+			        if (this.passive?.id == 'hustle' && slowFactor === 0.3) slowFactor = 2;
+
+			        const windedMove = remainingMove * windFactor * slowFactor * spikeSlowFactor;
+
+			        if (distToWp <= windedMove && this.waypointIndex < this.waypoints.length - 1) {
+			            // llegar exactamente al waypoint y continuar
+			            this.position.x = wp.x - this.width / 2;
+			            this.position.y = wp.y - this.height / 2;
+			            this.center.x = wp.x;
+			            this.center.y = wp.y;
+			            // Consume remainingMove proportionally to the distance actually covered
+			            remainingMove -= windFactor > 0 ? distToWp / windFactor : distToWp;
+			            this.waypointIndex++;
+			        } else {
+			            // mover lo que queda en dirección al waypoint actual
+			            const wAngle = Math.atan2(wdy, wdx);
+			            const stepX = Math.cos(wAngle) * windedMove;
+			            const stepY = Math.sin(wAngle) * windedMove;
+			            this.position.x += stepX;
+			            this.position.y += stepY;
+			            remainingMove = 0;
+			        }
+			    }
+
+			    if (!this.hasEnteredCanvas) {
+			        if (
+			            this.position.x >= 0 &&
+			            this.position.x <= this.main.game.canvas.width &&
+			            this.position.y >= -12 &&
+			            this.position.y <= this.main.game.canvas.height
+			        ) this.hasEnteredCanvas = true;
+			    }
+
+			    const totalMove = this.speed * frameFactor;
+			    if (this.hasEnteredCanvas) this.distanceTraveled += totalMove;
+
+			    // dirección visual basada en el waypoint actual
+			    const currentWp = this.waypoints[this.waypointIndex];
+			    const vdx = currentWp.x - this.center.x;
+			    const vdy = currentWp.y - this.center.y;
+			    const vAngle = Math.atan2(vdy, vdx);
+
+			    if (Math.round(Math.sin(vAngle)) === 0) {
+			        if (Math.round(Math.cos(vAngle)) === 1) this.frames.direction = 2;
+			        if (Math.round(Math.cos(vAngle)) === -1) this.frames.direction = 6;
+			    } else {
+			        if (Math.round(Math.sin(vAngle)) === 1) this.frames.direction = 0;
+			        if (Math.round(Math.sin(vAngle)) === -1) this.frames.direction = 4;
+			    }
+
+			    this.center = {
+			        x: this.position.x + this.width / 2,
+			        y: this.position.y + this.height / 2
+			    };
+			}
+
+			if (this.passive?.id === 'ingrain') {
+			    this.passiveTimer += simDelta;
+
+			    if (this.passiveTimer >= 250) { // cada 250 ms
+			        this.passiveTimer = 0;
+
+			        const enemyX = this.center.x;
+				    const nearbyTiles = this.main.area.placementTiles.filter(tile => {
+				    if (tile.land !== 2) return false;
+				    if (tile.tower) return false;
+
+				    return Math.hypot(
+				        tile.center.x - this.center.x,
+				        tile.center.y - this.center.y
+				    ) <= 150;
+				});
+			        if (nearbyTiles) this.regeneration = (nearbyTiles.length * 2000);
+			        else this.regeneration = 0;
+			    }
+			}
+
+			if (this.passive?.id === 'steamEngine' && this.passiveTimer > 0) {
+				this.passiveTimer -= simDelta;
+				if (this.passiveTimer <= 0) {
+					this.passiveTimer = 0;
+					this.speed -= 1;
+					this.baseSpeed -= 1;
+				}
+			}
+
+			if (this.regeneration > 0) {
+			    this.regenTimer += simDelta;
+			    while (this.regenTimer >= 1000) { 
+			        this.hp = Math.min(this.hp + this.regeneration, this.hpMax);
+			        this.regenTimer -= 1000;
+			    }
+			}
+
+			if (this.passive?.id == 'swiftSwim') {
+				if (this.main.area.weather === 'rain') {
+					this.speed = this.baseSpeed * 2;
+				} else {
+					this.speed = this.baseSpeed;
+				}
+			}
+
+			if (this.passive?.id === 'luchadoro' && this.armor === 0) {
+				this.baseSpeed = 3.6;
+				this.speed = this.baseSpeed;
+			}
+
+			if (this.passive?.id == 'slowStart') {
+			    this.passiveTimer += simDelta;
+			    while (this.passiveTimer >= 1000) { 
+			        this.passiveTimer -= 1000;
+			        this.baseSpeed += 0.05;
+			        this.speed += 0.05;
+			    }
+			}
+
+			if (['groudon', 'kyogre'].includes(this.enemy.id) && this.passiveTimer > 0) {
+				this.passiveTimer -= simDelta;
+				if (this.passiveTimer <= 0) {
+					this.passiveTimer = 0;
+					this.stunned = false;
+			   		this.invulnerable = false;
+				}
+			}
+
+			// if (this.regeneratorUsed && !this.dying) this.achievementTimer += simDelta;
+			if (this.enemy.id === 'heatran' && this.achievementTimer < 6500) this.achievementTimer += simDelta;
+
+			if (this.passive?.id === 'soulHeart' && !this.dying) {
+				this.passiveTimer += simDelta;
+				this.achievementTimer += simDelta;
+
+				if (this.passiveTimer > 5100) {
+					this.passiveTimer = 0;
+					playSound('hit2', 'effect');
+		            this.main.area.hitsReceived++;
+		            this.main.player.getDamaged(1);
+				}
+			}
+
+			if (
+			    this.passive?.id === 'timeTravel' &&
+			    !this.dying &&
+			    this.waypointIndex > 0
+			) {
+			    this.passiveTimer += simDelta;
+				this.achievementTimer += simDelta;
+
+				if (this.timeTravelSpeedTimer > 0) {
+					this.timeTravelSpeedTimer -= simDelta;
+					if (this.timeTravelSpeedTimer <= 0) {
+						this.speed -= 1;
+					    this.baseSpeed -= 1;
+					    this.timeTravelSpeedTimer = 0;
+					}
+				}
+
+			    if (this.passiveTimer >= 8000) {
+			        this.passiveTimer = 0;
+
+			        const currentWP = this.waypoints[this.waypointIndex];
+			        const prevWP = this.waypoints[this.waypointIndex - 1];
+
+			        // vector del segmento
+			        const vx = currentWP.x - prevWP.x;
+			        const vy = currentWP.y - prevWP.y;
+			        const length = Math.hypot(vx, vy) || 1;
+
+			        // dirección hacia atrás
+			        const nx = -vx / length;
+			        const ny = -vy / length;
+
+			        // distancia aleatoria
+			        const randomBack =
+			            this.timeTravelMin +
+			            Math.random() * (this.timeTravelMax - this.timeTravelMin);
+
+			       let back = randomBack;
+
+					while (back > 0 && this.waypointIndex > 0) {
+					    const currentWP = this.waypoints[this.waypointIndex];
+					    const prevWP = this.waypoints[this.waypointIndex - 1];
+
+					    const vx = currentWP.x - prevWP.x;
+					    const vy = currentWP.y - prevWP.y;
+					    const length = Math.hypot(vx, vy) || 1;
+
+					    const nx = -vx / length;
+					    const ny = -vy / length;
+
+					    const distToPrev = Math.hypot(this.center.x - prevWP.x, this.center.y - prevWP.y);
+
+					    if (back <= distToPrev) {
+					        // cabe dentro del segmento actual
+					        this.position.x += nx * back;
+					        this.position.y += ny * back;
+					        back = 0;
+					    } else {
+					        // nos pasamos del waypoint anterior: ir al prevWP y seguir retrocediendo
+					        this.position.x = prevWP.x - this.width / 2;
+					        this.position.y = prevWP.y - this.height / 2;
+					        back -= distToPrev;
+					        this.waypointIndex--;
+					        this.center.x = this.position.x + this.width / 2;
+					        this.center.y = this.position.y + this.height / 2;
+					    }
+					}
+
+			        const startX = this.position.x;
+			        const startY = this.position.y;
+			        const endX = startX + nx * back;
+			        const endY = startY + ny * back;
+
+			        this.statusEffects = this.statusEffects.filter(e => !['burn', 'poison', 'nightmare'].includes(e.type));
+				    this.burnedBy = null;
+				    this.poisonedBy = null;
+				    this.nightmaredBy = null;
+				    this.hp += 7000;
+				    if (this.hp >=  this.hpMax) this.hp = this.hpMax;
+
+			        this.position.x = endX;
+			        this.position.y = endY;
+
+			        this.center.x = this.position.x + this.width / 2;
+			        this.center.y = this.position.y + this.height / 2;
+
+			        this.distanceTraveled = Math.max(0, this.distanceTraveled - back);
+
+			        this.speed += 1;
+			        this.baseSpeed += 1;
+			        this.timeTravelSpeedTimer = 1000;
+
+			        if (!this.main.mute[1]) playSound('teleport', 'effect');
+			    }
+			}
+
+			if (this.passive?.id === 'shellSmash' && this.passiveTimer > 0) {
+				this.passiveTimer -= simDelta;
+				if (this.passiveTimer <= 0) { 
+					this.passiveTimer = 0;
+					this.baseSpeed -= 0.5;
+	        		this.speed -= 0.5;
+	            }
+			}
+
+			if (this.passive?.id == 'shadowShield' && !this.invisible) {
+				this.passiveTimer += simDelta;
+				if (this.passiveTimer >= 4000) { 
+					this.armor = this.armorMax;
+					this.passiveTimer = 0;
+					this.invisible = true;
+					playSound('invi', 'effect')
+	            }
+			}
+
+			if (this.passive?.id == "naturalCure") {
+			    this.passiveTimer += simDelta;
+
+			    if (this.passiveTimer >= 5000) { 
+				    this.passiveTimer = 0;
+				    this.statusEffects = this.statusEffects.filter(e => e.type === 'nightmare');
+				    this.burnedBy = null;
+				    this.poisonedBy = null;
+				    this.stunned = false;
+				    
+				    const slowEffects = this.statusEffects.filter(e => e.type === 'slow' && e.duration !== 0);
+				    if (slowEffects.length === 0) {
+				        this.speed = this.baseSpeed;
+				    }
+				    
+				    playSound('regenerator', 'effect');
+				}
+			}
+
+			if (this.passive?.id === 'clearBody' && !this.dying && this.hp > 0) {
+			    const aliveEnemies = this.main.area.enemies.filter(enemy =>
+			        enemy !== this &&
+			        !enemy.dying &&
+			        enemy.hp > 0
+			    ).length;
+
+			    const healAmount = 50 * aliveEnemies * (simDelta / 1000);
+
+			    this.hp = Math.min(this.hp + healAmount, this.hpMax);
+			}
+
+			if (['healer'].includes(this.passive?.id) && !this.dying) {
+				let healValue = (typeof this.main?.area?.inChallenge?.lvlCap === 'number' || this.main?.area?.inChallenge?.noItems) ? 200 : 400;
+			    const healAmount = healValue * (simDelta / 1000);
+
+			    const pulse = 1 + Math.sin(performance.now() / 300) * 0.08;
+			    const radius = 100 * pulse;
+
+			    this.main.area.enemies.forEach(enemy => {
+			        if (enemy.dying || enemy.hp <= 0) return;
+
+			        const distance = Math.hypot(
+			            enemy.center.x - this.center.x,
+			            enemy.center.y - this.center.y
+			        );
+
+			        if (distance <= radius) {
+			            enemy.hp = Math.min(enemy.hp + healAmount, enemy.hpMax);
+			        }
+			    });
+
+			    this.ctx.save();
+
+			    // Aura exterior
+			    this.ctx.beginPath();
+			    this.ctx.arc(
+			        this.center.x,
+			        this.center.y,
+			        radius,
+			        0,
+			        Math.PI * 2
+			    );
+
+			    this.ctx.fillStyle = 'rgba(80, 220, 100, 0.08)';
+			    this.ctx.fill();
+
+			    // Borde del aura
+			    this.ctx.strokeStyle = 'rgba(80, 255, 120, 0.35)';
+			    this.ctx.lineWidth = 2;
+			    this.ctx.stroke();
+
+			    // Pequeño brillo interior
+			    const gradient = this.ctx.createRadialGradient(
+			        this.center.x,
+			        this.center.y,
+			        0,
+			        this.center.x,
+			        this.center.y,
+			        radius
+			    );
+
+			    gradient.addColorStop(0, 'rgba(120, 255, 140, 0.12)');
+			    gradient.addColorStop(0.7, 'rgba(80, 255, 120, 0.04)');
+			    gradient.addColorStop(1, 'rgba(80, 255, 120, 0)');
+
+			    this.ctx.beginPath();
+			    this.ctx.arc(
+			        this.center.x,
+			        this.center.y,
+			        radius,
+			        0,
+			        Math.PI * 2
+			    );
+
+			    this.ctx.fillStyle = gradient;
+			    this.ctx.fill();
+
+			    this.ctx.restore();
+			}
+
+			// revysBook spin update
+			if (this.spinRemaining > 0) {
+				const SPIN_DURATION = 400; // ms for one full 360
+				this.spinAngle += (Math.PI * 2) / SPIN_DURATION * simDelta;
+				this.spinRemaining -= simDelta;
+				if (this.spinRemaining <= 0) {
+					this.spinRemaining = 0;
+					this.spinAngle = 0;
+				}
+			}
+
+			this.updateWeatherEffects(simDelta);
+			this.updateStatusEffects(simDelta);
+	    }
+		this.updateFloatingTexts(simDelta);
+	}
+
+	getDamaged(amount, source = 'physical', ability = null, isCritical = false, alreadyCursed = new Set(), pokemon, tower, ignoreStanceChange = false) {
+	    if (this.hp <= 0 || this.invulnerable) return;
+
+		if (!ignoreStanceChange && source === 'physical') {
+		    const absorber = this.main.area.enemies.find(enemy => {
+		        if (
+		            enemy === this ||
+		            enemy.dying ||
+		            enemy.hp <= 0 ||
+		            enemy.passive?.id !== 'stanceChange'
+		        ) return false;
+
+		        if (!enemy.hasEnteredCanvas) return false;
+
+		        return (
+		            enemy.center.x >= 0 &&
+		            enemy.center.x <= this.main.game.canvas.width &&
+		            enemy.center.y >= 0 &&
+		            enemy.center.y <= this.main.game.canvas.height
+		        );
+		    });
+
+		    if (absorber) {
+		        absorber.getDamaged(
+		            amount,
+		            source,
+		            ability,
+		            isCritical,
+		            alreadyCursed,
+		            pokemon,
+		            tower,
+		            true
+		        );
+		        return;
+		    }
+		}
+
+	   	if (this.passive?.id == 'herbogenesis' && (
+	   		['heal', 'bitterBlade', 'takeHeart'].includes(ability?.id) ||
+	   		['leftovers', 'shellBell', 'clefairyDoll'].includes(pokemon?.item?.id)
+	   	)) {
+	   		this.regeneration = Math.max(0, this.regeneration - 1000);
+	   		this.achievementCount++;
+	   	}
+
+	   	if (this.passive?.id == 'electrogenesis' && !this.stunned && (this.hp > (this.hpMax * 0.5))) return;
+	    if (this.passive?.id == 'nebulogenesis' && source == 'physical') {
+	    	this.passiveTimer += 1;
+	    	if (this.passiveTimer > 8) {
+	    		if (this.passiveTimer == 11) this.passiveTimer = 0;
+	    		this.achievementCount++;
+	    		this.floatingTexts.push({
+		            text: `MISS`,
+		            timer: 0,
+		            duration: 1000,
+		            y: this.position.y,     
+		            vy: -60,       
+		            alpha: 1,
+		            color: '#b9c9e0'
+		        });
+		        return;
+	    	}
+	    }
+
+	    if (this.enemy.id == 'shaymin' && pokemon?.item != undefined) this.achievementCount++;
+	    if (this.enemy.id == 'groudon' && tower?.tile?.land === 2) this.achievementCount++;
+	    if (this.enemy.id == 'tapuLele' && pokemon.power > 100) this.achievementCount++;
+
+	    if (this.passive?.id == 'prankster' && ['burn', 'poison',' nightmare'].includes(source)) amount = Math.floor(amount/2);
+	    if (this.passive?.id == 'psychogenesis') amount = (pokemon.item != null) ? Math.floor(amount * 0.65) : Math.floor(amount * 1.15);
+	    if (this.passive?.id == 'abyssalBound' && !(tower?.tile?.land == 3 || pokemon?.item?.id == 'squirtBottle')) return;
+
+	    if (this.enemy.id == 'nihilego' && this.achievementCount <= 0) {
+	    	if (pokemon.tiles[0] == 3 && pokemon.tiles.length == 1) {
+	    	} else this.achievementCount++;	
+	    }
+
+	   	let cursedDamageSpread = amount;
+
+	    if (pokemon?.item?.id == 'strangeIdol' && ['physical', 'link'].includes(source)) {
+	    	let strangeIdolBuff = 50;
+	    	this.main.area.enemies.forEach(e => {
+	            if (e !== this && e.cursed && e.hp > 0) {
+	            	strangeIdolBuff -= 1;
+	        	}
+		    });
+		    if (strangeIdolBuff > 0) amount += Math.ceil(amount * strangeIdolBuff/100);
+		}
+
+		if (pokemon?.ability?.id == 'heatCrash' && ['physical', 'link'].includes(source)) amount = Math.ceil(amount * Math.max(0.1, this.speed));
+		if (pokemon?.ability?.id == 'honeyGather') this.main.area.honeyGather++;
+
+	    if (pokemon?.item?.id == 'spellTag' && this.statusEffects.length > 0) {
+	    	let spellTagBonus = 0
+			this.statusEffects.forEach((effect) => {
+				if (effect.type != 'nightmare') spellTagBonus += 0.15;
+				if (pokemon?.ability?.id == 'simple') spellTagBonus += (0.15 * 0.75);
+			})
+			amount = Math.ceil(amount * Math.min(1.5, (1 + spellTagBonus)));
+		}
+
+		if (pokemon?.item?.id == 'stickyBarb' && this.statusEffects.length > 0) {
+			this.statusEffects.forEach((effect) => {
+				if ((effect.type == 'stun' || effect.type == 'slow') && ['physical', 'link'].includes(source)) amount = (pokemon?.ability?.id == 'simple') ? Math.ceil(amount * 2.1875) : Math.ceil(amount * 1.25);		
+			})
+		}
+
+		if (pokemon?.item?.id == 'electirizer' && this.statusEffects.length > 0) {
+			this.statusEffects.forEach((effect) => {
+				if (effect.type == 'stun' && ['physical', 'link'].includes(source)) amount = Math.ceil(amount * 1.3);		
+			})
+		}
+
+		if (pokemon?.item?.id == 'magmarizer' && this.statusEffects.length > 0) {
+			this.statusEffects.forEach((effect) => {
+				if (effect.type == 'burn' && ['physical', 'link'].includes(source)) amount = Math.ceil(amount * 1.3);		
+			})
+		}
+
+		if (pokemon?.ability?.id == 'flashFire' && this.statusEffects.length > 0) {
+			this.statusEffects.forEach((effect) => {
+				if (effect.type == 'burn' && ['physical', 'link'].includes(source)) amount = Math.ceil(amount * 2);		
+			})
+		}
+
+		if (pokemon?.ability?.id == 'venomDrench' && this.statusEffects.length > 0) {
+			this.statusEffects.forEach((effect) => {
+				if (effect.type == 'poison' && ['physical', 'link'].includes(source)) amount = Math.ceil(amount * 2);		
+			})
+		}
+
+		if (pokemon?.item?.id == 'badgeOfHonor' && ['physical', 'link'].includes(source)) {
+			let maxCap = (pokemon?.ability?.id == 'simple') ? 52.5 : 30;
+			let badgeMult = Math.min(maxCap, (this.main.player.stars / 30));
+			amount += Math.ceil(amount * (badgeMult / 100));	
+		}
+
+		if ((
+			ability?.id === 'armorBreak' || ability?.id === 'rageFist' || 
+			ability?.id === 'armorBreakSplash' ||
+			ability?.id === 'armorBreakDoubleShot' || 
+			pokemon?.item?.id == 'shieldBreakerBullet') && 
+			this.armorMax > 0 && source == 'physical' &&
+			this.passive?.id !== 'rockHead'
+	    ) {
+			amount *= 2;
+			if (this.passive?.id === 'weakArmor') amount = Math.ceil(amount * 1.5);
+		}
+
+		if (ability?.id == 'strongJaw' && this.armorMax > 0) {
+			if (this.armor > 0) {
+				if (!isCritical) {
+					isCritical = true;
+					amount = Math.ceil(amount * 1.5);
+				}
+				if (this.passive?.id === 'weakArmor') amount = Math.ceil(amount * 1.5);
+			} else amount *= 2;
+		}
+
+		if (isCritical && this.main.area.enemies.some(enemy => {
+		    if (
+		        enemy.dying ||
+		        enemy.hp <= 0 ||
+		        enemy.passive?.id !== 'criticalAura'
+		    ) return false;
+
+		    if (!enemy.hasEnteredCanvas) return false;
+
+		    return (
+		        enemy.center.x >= 0 &&
+		        enemy.center.x <= this.main.game.canvas.width &&
+		        enemy.center.y >= 0 &&
+		        enemy.center.y <= this.main.game.canvas.height
+		    );
+		})) {
+		    isCritical = false;
+		}
+
+		if (ability?.id == 'secretSword' && this.regeneration > 0) {
+			this.regeneration = Math.max(0, this.regeneration - 10);
+			if (this.passive?.id == 'herbogenesis') this.achievementCount++;
+		}
+
+		if (
+			ability?.id === 'ancientPower' &&
+			this.armorMax > 0 && source == 'physical' &&
+			this.passive?.id !== 'rockHead'
+	    ) amount += Math.floor(amount * (this.main.player.fossilInTeam * 0.15));
+
+		if (pokemon?.ability?.id === 'corrosion' && this.armor > 0 && source == 'physical') {
+	    	amount += Math.ceil(Math.min(this.armor, this.armorMax * 0.05)) 
+	    }
+
+		if (ability?.id === 'hyperCutter' && (this.hp < (this.hpMax * 0.5)) && source == 'physical') amount += Math.ceil(amount * 0.5);
+
+		if (pokemon?.ability?.id == 'technician' && amount <= 1000 && source == 'physical') amount = Math.ceil(amount * 1.5);
+
+		if (this.passive?.id === 'lightMetal' && amount > 1000) amount = 1000;
+		if (this.passive?.id === 'lightMetal' && amount > 500) this.achievementCount++;
+
+		if (this.passive?.id === 'shellSmash' && isCritical) {
+			this.baseSpeed += 0.5;
+	        this.speed += 0.5;
+			this.passiveTimer = 2000;
+		}
+
+		if (this.passive?.id === 'clangingScales') {
+			if (this.armor > 0) amount = Math.ceil(amount * 0.5);
+			else amount = Math.ceil(amount * 2);
+		}
+
+		if (pokemon?.ability?.id == 'flowerTrick' && isCritical) {
+			tower.attackCooldown = 0;
+		}
+		//if (this.passive?.id === 'sturdy' && source == 'physical' && this.hp < this.hpMax * 0.3) amount = 0;
+		if (this.passive?.id === 'disguise' && source == 'physical' && this.armor > 0) amount = 0;
+		
+		if (this.passive?.id === 'sturdy') amount = Math.max(0, amount - 200);
+		if (this.passive?.id === 'iceBody' && isCritical) {
+			this.achievementCount++;
+			amount = 0;
+		}
+
+		if (this.passive?.id === 'clearBody' && isCritical) {
+			this.achievementCount++;
+		}
+
+		if (this.passive?.id === 'steamEngine' && tower?.tile?.land === 3 && this.passiveTimer == 0) {
+			this.speed += 1;
+			this.baseSpeed += 1;
+			this.passiveTimer = 1000;
+		}
+
+		if (this.enemy.id == 'volcanion' && tower?.tile?.land === 3) this.achievementCount += amount;
+
+		if (this.passive?.id === 'sheerForce' && amount < 1000) amount = 0;
+
+		if (this.passive?.id === 'pheromoneRush' && this.poisonedBy) {
+			this.achievementCount++;
+			this.statusEffects.forEach(effect => { 
+				if (effect.type === 'poison') amount = Math.floor(amount + (amount * 0.03 * effect.stacks))
+			})
+		}
+
+		if (this.passive?.id === 'criticalLearning') amount = (isCritical) ? 1 : 0;
+
+		if (this.passive?.id === 'ironDefense') {
+			amount = Math.floor(amount - (amount * 0.01 * this.passiveCharges))
+			this.passiveCharges = Math.min(100, this.passiveCharges + 1);
+			if (this.passiveCharges > 26) this.achievementCount++;
+		}
+
+		if (this.passive?.id === 'remoaid' && source == 'physical' && Math.random() < 0.2) {
+			const waypointEnemy = (this.main.area.inChallenge.mirror) ?
+				this.main.area.map.waypointsMirror[Math.floor(Math.random() * this.main.area.map.waypointsMirror.length)] :
+				this.main.area.waypoints[Math.floor(Math.random() * this.main.area.waypoints.length)]
+
+			this.main.area.enemies.push(
+				new Enemy(
+					waypointEnemy[0].x,
+					waypointEnemy[0].y,
+					enemyData.remoraid,
+					waypointEnemy,
+					this.main,
+					this.main.game.ctx,
+				)
+			)
+		}
+
+		if (this.passive?.id === 'kingsShield' && ((this.hp / this.hpMax * 100) < (this.passiveCharges * 20))) {
+			this.passiveCharges--;
+			const waypointEnemy = (this.main.area.inChallenge.mirror) ?
+				this.main.area.map.waypointsMirror[Math.floor(Math.random() * this.main.area.map.waypointsMirror.length)] :
+				this.main.area.waypoints[Math.floor(Math.random() * this.main.area.waypoints.length)]
+
+			this.main.area.enemies.push(
+				new Enemy(
+					waypointEnemy[0].x,
+					waypointEnemy[0].y,
+					enemyData.aegislash,
+					waypointEnemy,
+					this.main,
+					this.main.game.ctx,
+				)
+			)
+		}
+
+		if (this.passive?.id === 'dauntlessShield' && source == 'physical') {
+			this.passiveCharges -= 2;
+  			amount = Math.floor(Math.max(0, amount * (1 - this.passiveCharges / 100)));
+
+  			if (this.passiveCharges < 0 && !this.passiveActivated) {
+  				this.passiveActivated = true;
+  				this.sprite.src = this.enemy.sprite.shield;
+  				this.baseSpeed = 0.8;
+	    		this.speed = 0.8;
+  			}
+		}
+
+		if (this.passive?.id === 'intrepidSword' && source == 'physical' && !this.passiveActivated) {
+			this.passiveCharges += 2;
+  			amount = Math.floor(Math.max(0, amount * (1 - this.passiveCharges / 100)));
+
+  			if (this.passiveCharges >= 100 && !this.passiveActivated) {
+  				this.passiveActivated = true;
+  				this.sprite.src = this.enemy.sprite.sword;
+  				this.baseSpeed = 1.2;
+	    		this.speed = 1.2;
+	    		this.passiveCharges = 0;
+  			}
+		}
+
+		
+		if (this.passive?.id === 'asOne') amount = Math.ceil(amount * this.main.area.activePieces * 2);
+
+		if (this.passive?.id === 'slackOff' && source == 'physical') this.hp = Math.min(this.hp + 50, this.hpMax);
+
+		if (this.passive?.id === 'flameBody' && source == 'physical') {
+			const dx = this.center.x - tower.center.x;
+			const dy = this.center.y - tower.center.y;
+			const distance = Math.hypot(dx, dy);
+			if (distance < 120) {
+				amount = Math.floor(amount / 2);
+				this.achievementCount += amount;
+			}
+		}
+		if (this.passive?.id === 'luchadoro' && source == 'physical' && this.armor > 0) amount = Math.floor(amount / 2);
+		// if (amount >= 9999 && source == 'physical') this.main.player.unlockAchievement(18)
+	    if (amount > this.main.player.stats.highestHit && source == 'physical') this.main.player.stats.highestHit = amount;
+
+	    let cursedDamage = amount;
+	    let armorDamage = amount;
+
+	    this.main.area.totalDamageDealt += amount;
+	    pokemon.damageDealt += amount; 
+
+	    this.main.area.totalTrueDamageDealt += Math.min((this.hp + this.armor), amount);
+	    pokemon.trueDamageDealt	+= Math.min((this.hp + this.armor), amount); 
+
+	    let litCoalChance = Math.random();
+	    if (pokemon?.item?.id == 'litCoal' && this.canBurn && (litCoalChance < 0.1 || pokemon?.ability?.id == 'simple' && litCoalChance < 0.175)) {
+			this.applyStatusEffect({ type: 'burn', damagePercent: 0.005, duration: 10 }, pokemon); 
+		}
+
+		// HEALS
+		if (this.passive?.id !== 'healBlock') {
+			if (this.main.player.health[this.main.area.map.id] < 14 || this.main.area.heartScale < 5) {
+				if (pokemon?.item?.id == 'leftovers' && Math.random() < 0.01 && !this.main.area.leftoversWaveUsed) {
+					playSound('hit3', 'effect');
+					this.main.player.getHealed(1);
+					// this.main.player.achievementProgress.heartRestore++;
+					// if (this.main.player.achievementProgress.heartRestore > 10) this.main.player.unlockAchievement(19);
+					this.main.area.leftoversWaveUsed = true;
+					this.main.area.heartScale++;
+				}
+
+				if (pokemon?.item?.id == 'shellBell' && pokemon.trueDamageDealt > 50000 && !this.main.area.shellBellWaveUsed) {
+					playSound('hit3', 'effect');
+					this.main.player.getHealed(1);
+					// this.main.player.achievementProgress.heartRestore++;
+					// if (this.main.player.achievementProgress.heartRestore > 10) this.main.player.unlockAchievement(19);
+					this.main.area.shellBellWaveUsed = true;
+					this.main.area.heartScale++;
+				}
+
+				if (pokemon?.item?.id == 'clefairyDoll' && pokemon.trueDamageDealt > 25000 && !this.main.area.clefairyDollUsed) {
+					playSound('hit3', 'effect');
+					this.main.player.getHealed(1);
+					// this.main.player.achievementProgress.heartRestore++;
+					// if (this.main.player.achievementProgress.heartRestore > 10) this.main.player.unlockAchievement(19);
+					this.main.area.clefairyDollUsed = true;
+					this.main.area.heartScale++;
+				}
+			
+				let baseHealChance = 0.05;
+				if (ability?.id === 'bitterBlade') baseHealChance = 0.01;
+				else if (pokemon?.item?.id == 'auspiciousArmor') baseHealChance = 0.002;
+
+				const uses = this.main.area.healUsed[pokemon.id] ?? 0;
+				const healChance = (ability?.id === 'takeHeart') ? baseHealChance : baseHealChance / Math.pow(2, uses);
+
+			    if (
+				    (ability?.id === 'heal' || ability?.id === 'bitterBlade' || ability?.id === 'takeHeart' || pokemon?.item?.id === 'auspiciousArmor') && 
+				    pokemon?.item?.id != 'lifeOrb' && 
+				    uses < 3 &&
+				    Math.random() < healChance
+				) {
+					const healValue = (pokemon?.item?.id == 'bigRoot') ? 2 : 1;
+					playSound('hit3', 'effect');
+
+					if (pokemon?.item?.id == 'propCase') {
+						if (this.main.player.health[this.main.area.routeNumber] > 1) {
+							this.main.player.getDamaged(1);
+							this.main.area.hitsReceived++;
+						}		
+						this.main.area.pendingHeal++;
+					} else {
+				        this.main.player.getHealed(healValue);
+				        // this.main.player.achievementProgress.heartRestore += healValue;
+				    	// if (this.main.player.achievementProgress.heartRestore > 10) this.main.player.unlockAchievement(19);
+					}
+			       
+			    	if (ability?.id === 'bitterBlade' || pokemon?.item?.id === 'auspiciousArmor') this.main.area.healUsed[pokemon.id] = 3
+			    	else if (ability?.id === 'takeHeart') this.main.area.healUsed[pokemon.id] = uses + 1.5;
+			    	else this.main.area.healUsed[pokemon.id] = uses + 1;
+			    	
+			    	if (this.main.area.roomServiceActive) this.main.area.roomService += 20;
+		   			this.main.area.heartScale += healValue;
+		   			
+			    }
+		    }
+		}	
+
+	    if (pokemon?.item?.id == 'shellBell' && pokemon.trueDamageDealt > 50000) this.main.area.shellBellWaveUsed = true;
+
+	    if (ability?.id === 'greed') {
+	    	let g = Math.ceil(this.gold * 0.1);
+	    	this.main.player.achievementProgress.stolenGold += g;
+	    	// if (this.main.player.achievementProgress.stolenGold >= 100000) this.main.player.unlockAchievement(21);
+	    	this.main.area.goldWave += g;
+	    	this.main.player.changeGold(g);
+	    }
+
+	    let armorHit = 0;
+
+	    if (this.invisible && source == 'physical') {
+	    	this.invisible = false;
+	    	if (this.enemy.id === 'lunala') this.achievementCount++;
+	    }
+
+	    // daño a armadura
+	    if (this.armor && this.armor > 0) {
+	        const remainingArmor = this.armor - armorDamage;
+	        if (remainingArmor >= 0) {
+	            this.armor = remainingArmor;
+	            armorHit = armorDamage;
+	            amount = 0;
+	        } else {
+	            armorHit = this.armor;
+	            amount = -remainingArmor;
+	            this.armor = 0;
+	        }
+	    }
+
+	    if (this.passive?.id === 'anchorShot' && this.armor === 0) this.main.area.anchorShot = true;
+
+	    this.hp -= amount;
+
+	    if (this.hp < this.hpMax * 0.5 && ['groudon', 'kyogre'].includes(this.enemy.id) && !this.passiveActivated) {
+	    	this.passiveActivated = true;
+	    	this.armorMax = 75000;
+	    	this.armor = 75000;
+	    	this.sprite.src = this.enemy.sprite.primal;
+
+	    	if (this.statusEffects['stun']) {
+	    		this.stunned = false;
+	    		this.statusEffects['stun'].duration = 0;
+	    	}
+
+	    	this.passiveTimer = 3000;
+			this.stunned = true;
+			this.invulnerable = true;
+
+			playSound('earthquake', 'effect');
+
+			this.main.game.startShake(28, (3000/this.main.game.speedFactor));
+	    	this.main.area.weather = (this.enemy.id == 'groudon') ? 'extremelyHarshSunlight' : 'heavyRain';
+			this.main.UI.displayWeather();
+	    }
+
+	    if (this.passive?.id === 'magmaStorm' && this.hp <= 0 && this.burnedBy === null) this.hp = 1;
+
+	    if (this.hp <= 0 && !this.dying) {
+	    	if (this.passive?.id === 'regenerator' && !this.regeneratorUsed) {
+			    this.regeneratorUsed = true;
+			    this.hp = 1;
+			    this.armorMax = 50000;
+	    		this.armor = 50000;
+			    // preparar resurrección
+			    this.isRegeneratorReviving = true;
+			    this.regeneratorReviveTimer = 5000 / this.main.game.speedFactor;
+
+			    this.statusEffects.length = 0;
+			    this.burnedBy = null;
+				this.poisonedBy = null;
+				this.nightmaredBy = null;
+				this.cursed = false;
+			    this.stunned = true;
+			    //this.invulnerable = true;
+
+			    playSound('hit3', 'effect');
+			    return;
+			}
+
+			if (this.passive?.id == 'schooling' && !this.passiveActivated) {
+		    	this.passiveActivated = true;
+		    	const waypointEnemy = this.waypoints.slice(this.waypointIndex);
+
+		    	for (let i = 0; i < 100; i++) {
+		    		this.main.area.enemies.push(
+						new Enemy(
+							this.center.x + (Math.random()*30)-20,
+							this.center.y + (Math.random()*30)-20,
+							enemyData.wishiwashiSolo,
+							waypointEnemy,
+							this.main,
+							this.main.game.ctx,
+						)
+					)
+		    	}
+		    }
+
+		    if (this.passive?.id == 'healer' && !this.passiveActivated) {
+		    	this.passiveActivated = true;
+		    	playSound('hit3', 'effect');
+				this.main.player.getHealed(1);
+				this.main.area.heartScale++;
+		    }
+
+	    	if (ability?.id === 'moxie') {	    		
+	    	 	//tower.moxieBuff++;
+	    	 	if (this.main.area.moxieUsers[pokemon.id] == undefined) this.main.area.moxieUsers[pokemon.id] = 1;
+	    	 	else this.main.area.moxieUsers[pokemon.id] += 1;
+	    	}
+
+	    	this.main.player.stats.defeatedEnemies++;
+	    	this.main.player.stats.defeatedSpecies.add(this.enemy.id);
+	    	// if (this.enemy.id == 'delibird') {
+	    	// 	this.main.player.achievementProgress.delibirdCount++;
+			// 	if (this.main.player.achievementProgress.delibirdCount >= 225) this.main.player.unlockAchievement(10);
+	    	// }
+	    	// if (this.main.player.stats.defeatedEnemies == 100000) this.main.player.unlockAchievement(8);
+	    	// if (this.main.player.stats.defeatedSpecies.size === 100) this.main.player.unlockAchievement(9);
+	    	this.main.area.goldWave += this.gold;
+	        this.main.player.changeGold(this.gold);
+
+	        if (typeof this.main.area.triggerStall === 'function') {
+			    this.main.area.triggerStall(this);
+			}
+
+	        this.dying = true;
+	        this.hp = 0;
+	        if (this.enemy.id == 'kyogre' && tower?.tile?.land === 1) this.achievementCount++;
+	        if (this.enemy.id == 'thundurus' && this.stunned) this.achievementCount++;
+	        this.tryAchievementUnlock();
+	    }
+
+	    const minSpacing = 12; 
+	    const startYOffset = 12; 
+
+	    if (amount > 0) {
+	        const color = isCritical
+	            ? '#ffeb3b'
+	            : source === 'burn'
+	            ? '#c96937'
+	            : source === 'poison'
+	            ? '#70ac4c'
+	            : '#e06666';
+
+	        let startY = this.position.y - 10 + startYOffset;
+
+	        for (const ft of this.floatingTexts) {
+	            if (Math.abs(startY - ft.y) < minSpacing) {
+	                startY = Math.min(startY, ft.y - minSpacing);
+	            }
+	        }
+
+	        this.floatingTexts.push({
+	            text: `-${amount}${isCritical ? '!' : ''}`,
+	            timer: 0,
+	            duration: 1000,
+	            y: startY,     
+	            vy: -60,       
+	            alpha: 1,
+	            color
+	        });
+	    }
+
+	    if (armorHit > 0) {
+	        let startY = this.position.y - 10 + startYOffset;
+	        for (const ft of this.floatingTexts) {
+	            if (Math.abs(startY - ft.y) < minSpacing) {
+	                startY = Math.min(startY, ft.y - minSpacing);
+	            }
+	        }
+
+	        this.floatingTexts.push({
+	            text: `-${armorHit}${isCritical ? '!' : ''}`,
+	            timer: 0,
+	            duration: 1000,
+	            y: startY,
+	            vy: -60,
+	            alpha: 1,
+	            color: isCritical ? '#ffeb3b' : '#66ccff'
+	        });
+	    }
+
+	    if ((ability?.id === 'curse' || ability?.id === 'curseSplash' || ability?.id === 'magicBounce' || ability?.id === 'willOWisp' || ability?.id === 'curseDoubleShot') && this.cursed && cursedDamage > 0 && !alreadyCursed.has(this)) {
+	        alreadyCursed.add(this);
+	        this.main.area.enemies.forEach(e => {
+	            if (e !== this && e.cursed && e.hp > 0 && !alreadyCursed.has(e)) {
+	                e.getDamaged(cursedDamageSpread, source, ability, false, alreadyCursed, pokemon);
+	                if (pokemon?.item?.id === 'amuletCoin') {
+			            let cursedGold = Math.ceil(cursedDamageSpread * 0.001 * (Math.min(1200, this.main.player.stars)));
+			            this.main.area.goldWave += cursedGold;
+			            this.main.player.changeGold(cursedGold);
+			        }
+	            }
+	            if (ability?.id === 'willOWisp' && e.canBurn && e.cursed) {
+	            	if (pokemon?.item?.id == 'falmeOrb') e.applyStatusEffect({ type: 'burn', damagePercent: 0.0075, duration: 10 }, pokemon);
+                    else e.applyStatusEffect({ type: 'burn', damagePercent: 0.005, duration: 10 }, pokemon);
+	            }
+	        });
+	    }
+	}
+
+	updateStatusEffects(deltaTime) {
+	    if (this.statusEffects.length === 0) return;
+
+	    this.statusEffects.forEach(effect => {
+	        effect.timer += deltaTime;
+	        const interval = 1000;
+
+	        if (effect.type === 'burn') {
+	            while (effect.timer >= interval && effect.duration > 0) {
+	            	if (this.passive?.id == 'flashFire') {
+	            		this.hp = Math.min(this.hp + (this.hpMax * 0.01), this.hpMax);
+	            	} else {
+	            		this.getDamaged(Math.ceil(this.hpMax * effect.damagePercent), 'burn', null, false, new Set(), this.burnedBy);
+	            	}
+
+	                effect.timer -= interval;
+	                if (typeof effect.duration === 'number') effect.duration -= 1;
+	            }
+	        }
+
+	        if (effect.type === 'poison' && this.passive?.id != 'pheromoneRush') {
+	            while (effect.timer >= interval) {
+	                const stacks = effect.stacks || 1;
+	                const poisonDamage = Math.ceil(this.hpMax * effect.damagePercent * stacks);
+	                this.getDamaged(poisonDamage, 'poison', null, false, new Set(), this.poisonedBy);
+	                effect.timer -= interval;
+	            }
+	        }
+
+	        if (effect.type === 'nightmare') {
+	            while (effect.timer >= interval) {
+	                const stacks = effect.stacks || 1;
+	                const nightmareDamage = Math.ceil(this.nightmaredBy.power * 0.2 * stacks);
+	                this.getDamaged(nightmareDamage, 'nightmare', null, false, new Set(), this.nightmaredBy);
+	                effect.timer -= interval;
+	            }
+	        }
+
+	        if (effect.type === 'slow') {
+	            if (!effect.applied) {
+	                effect.applied = true;
+	            }
+	            if (effect.duration !== undefined && effect.timer >= effect.duration * 1000) {
+	                effect.duration = 0;
+	            }
+	        }
+
+	        if (effect.type === 'stun') {
+	            this.stunned = true;
+	            if (effect.duration !== undefined && effect.timer >= effect.duration * 1000) {
+	                this.stunned = false;
+	                effect.duration = 0;
+	            }
+	        }
+	    });
+
+	    // Filtrar efectos terminados
+	    this.statusEffects = this.statusEffects.filter(e => e.duration === undefined || e.duration > 0);
+
+	    // RECOMPUTAR velocidad según slows activos 
+	    const slowEffects = this.statusEffects.filter(e => e.type === 'slow' && e.duration !== 0);
+	    if (slowEffects.length === 0) {
+	        this.speed = this.baseSpeed;
+	    } else {
+	        // multiplicar factores de slow 
+	        let factor = 1;
+	        slowEffects.forEach(e => factor *= (e.slowPercent ?? 1));
+	        this.speed = this.baseSpeed * factor;
+	    }
+	}
+
+	updateWeatherEffects(deltaTime) {
+		if (
+			this.position.x > this.main.game.canvas.width ||
+			this.position.x < -30 ||
+			this.position.y - 20 > this.main.game.canvas.height ||
+			this.position.y < -20
+		) return;
+
+		if (this.main.area.weather == 'sandstorm' && this.armor <= 0) {
+	    	this.weatherTimer += deltaTime;
+	        const interval = 1000;
+
+	        if (this.weatherTimer >= interval) {
+	        	this.weatherTimer = 0;
+	        	let damage = Math.ceil(this.hpMax * 0.005);
+	        	if (this.passive?.id === 'asOne') damage = Math.floor(damage/4);
+	        	this.getDamaged(damage, 'sandstorm', null, false, new Set(), this.main.area.weatherBy);
+	        }
+	    }
+	}
+
+	drawFloatingTexts() {
+	    this.floatingTexts.forEach((ft) => {
+	        const x = this.position.x + this.width / 2;
+	        const y = ft.y;
+
+	        this.ctx.save();
+	        this.ctx.globalAlpha = ft.alpha ?? 1;
+
+	        this.ctx.font = '900 14px Arial';
+	        this.ctx.lineWidth = 1.5;
+	        this.ctx.textAlign = 'center';
+	        this.ctx.textBaseline = 'middle';
+
+	        this.ctx.strokeStyle = 'black';
+	        this.ctx.strokeText(ft.text, x, y);
+
+	        this.ctx.fillStyle = ft.color || '#c96937';
+	        this.ctx.fillText(ft.text, x, y);
+
+	        this.ctx.restore();
+	    });
+	}
+
+	updateFloatingTexts(deltaTime) {
+	    for (let i = this.floatingTexts.length - 1; i >= 0; i--) {
+	        const ft = this.floatingTexts[i];
+	        ft.timer += deltaTime;
+
+	        ft.y += ft.vy * (deltaTime / 1000);
+
+	        const minAlpha = 0.5;
+	        ft.alpha = Math.max(minAlpha, 1 - 0.4 * (ft.timer / ft.duration));
+
+	        if (ft.timer >= ft.duration) {
+	            this.floatingTexts.splice(i, 1);
+	        }
+	    }
+	}
+
+	applyStatusEffect(effect, pokemon) {
+		if (this.passive?.id === 'waterVeil' && this.main.area.weather === 'rain') return;
+
+	    const existing = this.statusEffects.find(e => e.type === effect.type);
+	    if (existing) {
+	        if (effect.type === 'poison') {
+	        	this.poisonedBy = pokemon;
+	        	this.main.player.stats.appliedPoisons++;
+	        	//if (this.main.player.stats.appliedPoisons >= 10000) this.main.player.unlockAchievement(16);
+	            existing.stacks = (existing.stacks || 1) + 1;
+	            if (this.enemy.id === 'regirock') this.achievementCount++;
+	        } else if (effect.type === 'nightmare') {
+	        	this.nightmaredBy = pokemon;
+	            existing.stacks = (existing.stacks || 1) + 1;
+	            if (this.enemy.id === 'regirock') this.achievementCount++;
+	        } 
+	        // else if (effect.type === 'slow' && this.main.slowRefreshFix == 1) {
+	        // 	const currentStrength = existing.slowPercent ?? 1;
+	        // 	const incomingStrength = effect.slowPercent ?? 1;
+	        // 	const sameStrength = Math.abs(currentStrength - incomingStrength) < 0.0001;
+	        // 	const incomingIsStronger = incomingStrength < currentStrength;
+
+	        // 	if (sameStrength || incomingIsStronger) {
+	        // 		Object.assign(existing, {
+	        // 			...effect,
+	        // 			timer: 0,
+	        // 			stacks: undefined
+	        // 		});
+	        // 		this.main.player.stats.appliedSlows++;
+	        // 		if (this.main.player.stats.appliedSlows >= 10000) this.main.player.unlockAchievement(14);
+	        // 	} else {
+	        // 		return;
+	        // 	}
+	        // } 
+	    } else {
+	    	if (effect.type === 'stun' && this.passive?.id == 'electrogenesis') {
+	    		effect.duration *= 2;
+	    		this.achievementCount++;
+	    	}
+	    	if ((effect.type === 'stun' || effect.type === 'slow') && this.passive?.id == 'vCrate') {
+	    		this.baseSpeed -= 0.4;
+	    		return this.speed -= 0.4;
+	    	}
+
+	        this.statusEffects.push({
+	            ...effect,
+	            timer: 0,
+	            stacks: effect.type === 'poison' ? 1 : undefined
+	        });
+	        if (effect.type === 'stun') {
+	        	//this.lightningRodSearch();
+	        	this.main.player.stats.appliedStuns++;
+	        	// if (this.main.player.stats.appliedStuns >= 10000) this.main.player.unlockAchievement(13);
+	        	if (this.passive?.id === 'spectralThief') this.invisible = true;
+	        	if (this.enemy.id == 'tornadus') this.achievementCount++;
+	        }
+	        if (effect.type === 'slow') {
+	        	this.main.player.stats.appliedSlows++;
+	        	// if (this.main.player.stats.appliedSlows >= 10000) this.main.player.unlockAchievement(14);
+	        	if (this.passive?.id === 'spectralThief') this.invisible = true;
+	        	if (this.enemy.id == 'tornadus') this.achievementCount++;
+	        }
+	        if (effect.type === 'poison') {
+	        	this.poisonedBy = pokemon;
+	        	this.main.player.stats.appliedPoisons++;
+	        	// if (this.main.player.stats.appliedPoisons >= 10000) this.main.player.unlockAchievement(16);
+	        	if (this.enemy.id === 'regirock') this.achievementCount++;
+	        }
+	        if (effect.type === 'nightmare') {
+	        	this.nightmaredBy = pokemon;
+	        	if (this.enemy.id === 'regirock') this.achievementCount++;
+	        }
+	        if (effect.type === 'burn') {
+	        	this.burnedBy = pokemon;
+	        	this.main.player.stats.appliedBurns++;
+	        	// if (this.main.player.stats.appliedBurns >= 10000) this.main.player.unlockAchievement(15);
+	        	if (this.passive?.id === 'spectralThief') this.invisible = true;
+	        	if (this.passive?.id === 'magmaStorm') {
+	        		if (this.achievementTimer < 6000) this.achievementCount++;
+	        		this.hpMax += this.armor;
+	        		this.hp += this.armor;
+	        	}
+	        	if (this.enemy.id === 'regirock') this.achievementCount++;
+	        }
+	        if (effect.type === 'curse') {
+	        	this.main.player.stats.appliedCurses++;
+	        	// if (this.main.player.stats.appliedCurses >= 10000) this.main.player.unlockAchievement(17);
+	            this.cursed = true;
+	        }
+	    }
+
+	    if (this.passive?.id === 'justified' && !['curse', 'nightmare'].includes(effect.type)) {
+	        this.armorMax += 5000;
+	    	this.armor += 5000;
+	    	this.passiveActivated = true;
+	    }
+	}
+
+	drawStatusEffects() {
+	    if (this.statusEffects.length === 0) return;
+
+	    const now = Date.now();
+	    const centerX = this.position.x + this.width / 2;
+	    const centerY = this.position.y + this.height / 2;
+
+	    if (this.main.durationCC) {
+	    	this.drawSlowIndicator(centerX);
+	    	this.drawStunIndicator(centerX);	
+	    }
+	   
+	    this.statusEffects.forEach((effect, index) => {
+	        let r, g, b;
+	        const numParticles = 6;
+	        
+	        const effectOffset = (index - (this.statusEffects.length - 1) / 2) * (this.width * 0.15);
+
+	        if (effect.type === 'burn') [r, g, b] = [255, 80, 0];
+	        else if (effect.type === 'poison') [r, g, b] = [180, 50, 255]; 
+	        else if (effect.type === 'nightmare') [r, g, b] = [80, 20, 120];
+	        else return;
+
+	        for (let i = 0; i < numParticles; i++) {
+	            const seed = i * 400;
+	            const progress = ((now + seed) % 1500) / 1500; 
+	            
+	            const py = (centerY + this.height * 0.2) - (progress * this.height * 1.6);
+	            
+	            const drift = Math.sin(now / 400 + i) * (this.width * 0.12);
+	            const px = centerX + effectOffset + drift;
+
+	            const size = (1 - progress) * 3.5;
+	            const alpha = (1 - progress) * 0.9;
+
+	            this.ctx.save();
+	            this.ctx.beginPath();
+	            this.ctx.fillStyle = `rgba(${r},${g},${b},${alpha})`;
+	            
+	            this.ctx.shadowBlur = 5;
+	            this.ctx.shadowColor = `rgba(${r},${g},${b},${alpha})`;
+
+	            this.ctx.arc(px, py, size, 0, Math.PI * 2);
+	            this.ctx.fill();
+	            this.ctx.restore();
+	        }
+	    });
+	}
+
+	drawSlowIndicator(centerX) {
+	    const slowEffects = this.statusEffects.filter(effect => {
+	        return effect.type === 'slow' && typeof effect.duration === 'number' && effect.duration > 0;
+	    });
+	    if (slowEffects.length === 0) return;
+
+	    const remainingSeconds = Math.max(...slowEffects.map(effect => {
+	        return Math.max(0, effect.duration - ((effect.timer || 0) / 1000));
+	    }));
+	    if (remainingSeconds <= 0) return;
+
+	    const longestDuration = Math.max(...slowEffects.map(effect => effect.duration || remainingSeconds));
+	    const fillPercent = Math.max(0, Math.min(1, remainingSeconds / Math.max(0.1, longestDuration)));
+	    const barWidth = 28;
+	    const barHeight = 8;
+	    const x = centerX - barWidth / 2;
+	    const y = this.position.y + this.height - 3;
+	    const label = `${remainingSeconds.toFixed(1)}s`;
+
+	    this.ctx.save();
+	    // Fondo y borde de la barra
+	    this.ctx.fillStyle = 'rgba(4, 14, 18, 0.78)';
+	    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.65)';
+	    this.ctx.lineWidth = 1;
+	    this.ctx.fillRect(x - 1, y - 1, barWidth + 2, barHeight + 2);
+	    this.ctx.strokeRect(x - 1, y - 1, barWidth + 2, barHeight + 2);
+
+	    // Progreso de la barra
+	    this.ctx.fillStyle = 'rgba(16, 47, 57, 0.92)';
+	    this.ctx.fillRect(x, y, barWidth, barHeight);
+	    this.ctx.fillStyle = 'rgba(86, 226, 255, 0.95)';
+	    this.ctx.fillRect(x, y, barWidth * fillPercent, barHeight);
+
+	    // Configuración del texto
+	    this.ctx.font = '10px monospace';
+	    this.ctx.textAlign = 'center';
+	    this.ctx.textBaseline = 'middle';
+	    this.ctx.lineWidth = 2;
+	    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+	    
+	    // Dibujado del texto (ajustado +1px hacia abajo)
+	    const textY = y + barHeight / 2 + 1; 
+	    this.ctx.strokeText(label, centerX, textY);
+	    this.ctx.fillStyle = '#d6fbff';
+	    this.ctx.fillText(label, centerX, textY);
+	    
+	    this.ctx.restore();
+	}
+
+	drawStunIndicator(centerX) {
+	    const stunEffects = this.statusEffects.filter(effect => {
+	        return effect.type === 'stun' && typeof effect.duration === 'number' && effect.duration > 0;
+	    });
+	    if (stunEffects.length === 0) return;
+
+	    const remainingSeconds = Math.max(...stunEffects.map(effect => {
+	        return Math.max(0, effect.duration - ((effect.timer || 0) / 1000));
+	    }));
+	    if (remainingSeconds <= 0) return;
+
+	    const longestDuration = Math.max(...stunEffects.map(effect => effect.duration || remainingSeconds));
+	    const fillPercent = Math.max(0, Math.min(1, remainingSeconds / Math.max(0.1, longestDuration)));
+	    const barWidth = 28;
+	    const barHeight = 8;
+	    const x = centerX - barWidth / 2;
+	    const y = this.position.y + this.height - 3;
+	    const label = `${remainingSeconds.toFixed(1)}s`;
+
+	    this.ctx.save();
+	    // Fondo y borde de la barra (Oscuro neutro)
+	    this.ctx.fillStyle = 'rgba(18, 16, 4, 0.78)';
+	    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.65)';
+	    this.ctx.lineWidth = 1;
+	    this.ctx.fillRect(x - 1, y - 1, barWidth + 2, barHeight + 2);
+	    this.ctx.strokeRect(x - 1, y - 1, barWidth + 2, barHeight + 2);
+
+	    // Progreso de la barra (Amarillos/Dorados)
+	    this.ctx.fillStyle = 'rgba(57, 48, 16, 0.92)'; // Fondo de la barra (Amarillo muy oscuro)
+	    this.ctx.fillRect(x, y, barWidth, barHeight);
+	    this.ctx.fillStyle = 'rgba(255, 230, 86, 0.95)'; // Barra de carga (Amarillo brillante)
+	    this.ctx.fillRect(x, y, barWidth * fillPercent, barHeight);
+
+	    // Configuración del texto
+	    this.ctx.font = '10px monospace';
+	    this.ctx.textAlign = 'center';
+	    this.ctx.textBaseline = 'middle';
+	    this.ctx.lineWidth = 2;
+	    this.ctx.strokeStyle = 'rgba(0, 0, 0, 0.85)';
+	    
+	    // Dibujado del texto (ajustado +1px hacia abajo)
+	    const textY = y + barHeight / 2 + 1; 
+	    this.ctx.strokeText(label, centerX, textY);
+	    this.ctx.fillStyle = '#fff9d6'; // Texto (Blanco amarillento)
+	    this.ctx.fillText(label, centerX, textY);
+	    
+	    this.ctx.restore();
+	}
+
+	lightningRodSearch() {
+	    const towers = this.main.area.towers;
+	    for (const tower of towers) {
+	        if (tower?.ability?.id !== 'lightningRod') continue;
+
+	        const radius = tower.range;
+	        const dx = tower.center.x - this.center.x;
+	        const dy = tower.center.y - this.center.y;
+	        const distance = Math.hypot(dx, dy);
+
+	        if (distance <= radius && tower.lightningRodChargeCD === 0 && tower.lightningRodCharge < 10) {
+	        	tower.lightningRodCharge++;
+				tower.lightningRodChargeCD = 1000;
+	            break;
+	        }
+	    }
+	}
+
+	tryAchievementUnlock() {
+		if (this.main.area.isCustom) return;
+		switch (this.enemy?.id) {
+			case 'shaymin':
+				if (this.achievementCount === 0) {
+		        	this.main.player.unlockAchievement(0);
+		        }	
+			break;
+			case 'celebi':
+				if (this.achievementTimer <= 7500) {
+		        	this.main.player.unlockAchievement(1);
+		        }
+			break;
+			case 'lunala':
+				if (this.achievementCount <= 5) {
+		        	this.main.player.unlockAchievement(2);
+		        }	
+			break;
+			case 'zapdos':
+				if (this.achievementCount <= 3) {
+		        	this.main.player.unlockAchievement(3);
+		        }	
+			break;
+			case 'moltres':
+				if (this.achievementCount >= (this.hpMax * 0.88)) {
+		        	this.main.player.unlockAchievement(4);
+		        }
+			break;
+			case 'regirock':
+				if (this.achievementCount === 0) {
+		        	this.main.player.unlockAchievement(5);
+		        }
+			break;
+			case 'groudon':
+				if (this.achievementCount === 0) {
+		        	this.main.player.unlockAchievement(6);
+		        }
+			break;
+			case 'hooh':
+				if (this.isRegeneratorReviving) {
+		        	this.main.player.unlockAchievement(7);
+		        }
+			break;
+			case 'registeel':
+				if (this.achievementCount === 0) {
+		        	this.main.player.unlockAchievement(8);
+		        }
+			break;
+			case 'regice':
+				if (this.achievementCount >= 50) {
+					this.main.player.unlockAchievement(9);
+				}
+			break;
+			case 'regigigas':
+				if (this.main.area?.inChallenge?.toughEnemies == 50) {
+					this.main.player.unlockAchievement(10);
+				}
+			break;
+			case 'articuno':
+				if (this.main.area.weather == 'hail') {
+					this.main.player.unlockAchievement(11);
+				}
+			break;
+			case 'kyogre':
+				if (this.achievementCount === 1) {
+					this.main.player.unlockAchievement(12);
+				}
+			break;
+			case 'thundurus':
+				if (this.achievementCount === 1) {
+					this.main.player.unlockAchievement(13);
+				}
+			break;
+			case 'tapuFini':
+				if (this.achievementCount < 11) {
+					this.main.player.unlockAchievement(14);
+				}
+			break;
+			case 'nihilego':
+				if (this.achievementCount === 0) {
+					this.main.player.unlockAchievement(15);
+				}
+			break;
+			case 'tapuKoko':
+				if (this.achievementCount < 4) {
+					this.main.player.unlockAchievement(16);
+				}
+			break;
+			case 'tapuBulu':
+				if (this.achievementCount === 0) {
+					this.main.player.unlockAchievement(17);
+				}
+			break;
+			case 'tapuLele':
+				if (this.achievementCount === 0) {
+					this.main.player.unlockAchievement(18);
+				}
+			break;
+			case 'keldeo':
+				if (!this.passiveActivated) {
+		        	this.main.player.unlockAchievement(19);
+		        	if (!this.main.player.secrets.keldeo) {
+		        		this.main.player.secrets.keldeo = true;
+		        		this.main.UI.getSecret('keldeo'); 
+		        	}
+		        }
+			break;
+			case 'heatran':
+				if (this.achievementCount > 0) {
+					this.main.player.unlockAchievement(20);
+				}
+			break;
+			case 'volcanion':
+				if (this.achievementCount >= (this.hpMax * 0.74)) {
+		        	this.main.player.unlockAchievement(21);
+		        }
+			break;
+			case 'pheromosa':
+				if (this.achievementCount == 0) {
+					this.main.player.unlockAchievement(22);
+				}
+			break;
+			case 'cobalion':
+				if (!this.passiveActivated) {
+		        	this.main.player.unlockAchievement(23);
+		        	if (!this.main.player.secrets.cobalion) {
+		        		this.main.player.secrets.cobalion = true;
+		        		this.main.UI.getSecret('cobalion'); 
+		        	}
+		        }
+			break;
+			case 'tornadus':
+				if (this.achievementCount === 0) {
+					this.main.player.unlockAchievement(24);
+				}
+			break;
+			case 'stakataka':
+				if (this.achievementCount === 0) {
+					this.main.player.unlockAchievement(25);
+				}
+			break;
+			case 'terrakion':
+				if (!this.passiveActivated) {
+		        	this.main.player.unlockAchievement(26);
+		        	if (!this.main.player.secrets.terrakion) {
+		        		this.main.player.secrets.terrakion = true;
+		        		this.main.UI.getSecret('terrakion'); 
+		        	}
+		        }
+			break;
+			case 'magearna':
+				if (this.achievementTimer > 59500) {
+					this.main.player.unlockAchievement(27);
+				}
+			break;
+			case 'diancie':
+				if (this.achievementCount === 0) {
+					this.main.player.unlockAchievement(28);
+				}
+			break;
+		}
+			
+	}
+}
