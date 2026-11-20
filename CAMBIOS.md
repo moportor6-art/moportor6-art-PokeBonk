@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Editor del HUD (Subversión 1.55)
+- `hud-editor.js`: `ITEMS` `.hud-party > .ally:nth-child(1-4)`; `H.huecos()` marca con `.pb-he-ph` (hueco transparente, hijos ocultos) solo las piezas con `display:none` o sin tamaño al abrir el editor y lo quita al cerrar.
+
 ## Editor del HUD (Subversión 1.54)
 - `hud-editor.js`: panel compacto arrastrable por el título (posición en `localStorage['pb-he-panel']`) y plegable; `z-index` de los recuadros según su área (pequeños encima); el arrastre divide por la escala acumulada de los padres (`H.escala`) y `clamp` solo al soltar.
 

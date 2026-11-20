@@ -33,6 +33,11 @@
     { sel: '.pb-bolsa', css: '.pb-bolsa', name: 'Bolsa de bayas' },
     // 1.52: todo lo que faltaba del HUD.
     { sel: '#hud .hud-party', css: '#hud .hud-party', name: 'Compañeros Alfa' },
+    // 1.55: cada compañero por separado (dentro del grupo de compañeros).
+    { sel: '#hud .hud-party > .ally:nth-child(1)', css: '#hud .hud-party > .ally:nth-child(1)', name: 'Compañero 1' },
+    { sel: '#hud .hud-party > .ally:nth-child(2)', css: '#hud .hud-party > .ally:nth-child(2)', name: 'Compañero 2' },
+    { sel: '#hud .hud-party > .ally:nth-child(3)', css: '#hud .hud-party > .ally:nth-child(3)', name: 'Compañero 3' },
+    { sel: '#hud .hud-party > .ally:nth-child(4)', css: '#hud .hud-party > .ally:nth-child(4)', name: 'Compañero 4' },
     { sel: '#hud .tl-medal', css: '#hud .tl-medal', name: 'Retrato' },
     { sel: '#hud .tl-plate', css: '#hud .tl-plate', name: 'Nombre, tipo y evolución' },
     { sel: '#hud .ht-l', css: '#hud .ht-l', name: 'Zona' },
@@ -73,9 +78,10 @@ html body #ui .pz > .sm-foot{min-height:0!important;overflow-y:auto!important}
   editCss.textContent = `
 body.pb-hud-editing .modal{visibility:hidden!important}
 body.pb-hud-editing #hud, body.pb-hud-editing .tc{visibility:visible!important;opacity:1!important}
-/* 1.52: en el editor, lo que solo sale a ratos (racha, jefe, compañeros, avisos…) se ve como un hueco para poder moverlo. */
-body.pb-hud-editing #hud .hud-party:empty, body.pb-hud-editing #hud .streak, body.pb-hud-editing #hud > .bossbar:not(.mini), body.pb-hud-editing #hud .minibars, body.pb-hud-editing #hud .kgoal, body.pb-hud-editing #hud .hud-tr .milepill + .evpill, body.pb-hud-editing #hud .toasts:empty, body.pb-hud-editing #hud .autorun-pill{display:block!important;visibility:visible!important;opacity:.85!important;min-width:110px;min-height:28px;outline:2px dashed rgba(255,255,255,.5)}
-body.pb-hud-editing #hud .hud-party:empty{min-width:200px;min-height:70px}
+/* 1.52-1.55: en el editor, lo que ahora no se ve (racha, jefe, avisos…) sale como un hueco transparente con su nombre,
+   sin fondo ni contenido, para poder colocarlo; lo que sí se ve se muestra tal cual. */
+body.pb-hud-editing .pb-he-ph{display:block!important;visibility:visible!important;opacity:1!important;min-width:110px;min-height:26px;background:rgba(255,210,58,.10)!important;box-shadow:none!important;border:0!important}
+body.pb-hud-editing .pb-he-ph>*{visibility:hidden!important}
 body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none!important}
 .pb-he{position:fixed;inset:0;z-index:9999;touch-action:none;user-select:none;-webkit-user-select:none}
 .pb-he-f{position:fixed;border:2px dashed rgba(255,255,255,.9);border-radius:10px;background:rgba(138,90,216,.18);box-sizing:border-box;touch-action:none}
@@ -157,16 +163,31 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
       root.append(panel);
       document.body.append(root);
       H.root = root; H.panel = panel; H.sel = null; H.frames = [];
-      requestAnimationFrame(() => { H.build(); H.renderPanel(); H.loop(); });
+      requestAnimationFrame(() => { H.huecos(true); H.build(); H.renderPanel(); H.loop(); });
     },
 
     close() {
       H.editing = false;
       document.body.classList.remove('pb-hud-editing');
+      H.huecos(false);
       if (window.PB_MEGA) PB_MEGA.forceShow = false;
       try { PB_MEGA?.paint(); } catch {}
       H.root?.remove(); H.root = null;
       save();
+    },
+
+    // Piezas que ahora no se ven: se marcan como hueco mientras se edita.
+    huecos(on) {
+      for (const e of document.querySelectorAll('.pb-he-ph')) e.classList.remove('pb-he-ph');
+      if (!on) return;
+      for (const it of ITEMS) {
+        const el = document.querySelector(it.sel); if (!el || el.closest('.pb-he')) continue;
+        const r = el.getBoundingClientRect();
+        if (getComputedStyle(el).display === 'none' || r.width < 4 || r.height < 4) {
+          // Solo si su contenedor sí se ve (si no, no tendría dónde colocarse).
+          const pa = el.parentElement; if (pa && getComputedStyle(pa).display !== 'none') el.classList.add('pb-he-ph');
+        }
+      }
     },
 
     present() {

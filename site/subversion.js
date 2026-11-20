@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.54';
+  const SUB = '1.55';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.55',
+      date: Date.UTC(2026, 10, 20, 2, 30),
+      tag: 'correccion',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.55`,
+      summary: 'Editor del HUD: cada compañero Alfa por separado y huecos transparentes en vez de barras vacías.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Compañeros Alfa por separado**: además del grupo, cada tarjeta (Compañero 1, 2, 3 y 4) se mueve, agranda, gira u oculta sola.`,
+        `- **Sin barras fantasma**: lo que en ese momento no se ve (racha, barra del jefe, avisos, objetivo de bajas…) ya no aparece como una barra oscura vacía, sino como un hueco transparente con su nombre. Lo que sí está en pantalla se muestra tal cual.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.54',
       date: Date.UTC(2026, 10, 20, 1, 0),
       tag: 'correccion',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.54`,
@@ -3333,6 +3351,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.55',
+      date: '2026-11-19',
+      title: 'Editor del HUD: compañeros por separado y huecos transparentes.',
+      notes: [
+        ['new', 'Cada compañero Alfa se edita por separado.'],
+        ['fix', 'Las piezas que no se ven aparecían como barras oscuras vacías en el editor.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.54',
