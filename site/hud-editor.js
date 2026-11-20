@@ -357,7 +357,7 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
   fijo.textContent = `.pb-mx .mg{order:1}.pb-mx .dx{order:2}.pb-mx .pb-tera{order:3}.pb-mx .pb-z{order:4}
 body.pb-menu-abierto:not(.pb-hud-editing) .pb-mx,body.pb-menu-abierto:not(.pb-hud-editing) .pb-bolsa,body.pb-menu-abierto:not(.pb-hud-editing) .pb-evoreto{visibility:hidden!important}`;
   document.head.append(fijo);
-  setInterval(() => { const r = window.__pbRun; document.body.classList.toggle('pb-menu-abierto', !!(r?.player && r.state !== 'play' && r.ui?.modalEl?.isConnected)); }, 150);
+  setInterval(() => { const r = window.__pbRun; document.body?.classList.toggle('pb-menu-abierto', !!(r?.player && r.state !== 'play' && r.ui?.modalEl?.isConnected)); }, 150);
   // 1.56-1.57: minimapa interactivo. Tocarlo cambia el alcance (cerca 60 m · medio 120 m · zona entera, con su borde
   // y todos los objetivos descubiertos); mantenerlo pulsado medio segundo abre el mapa grande (marcas y seguir).
   const abreMapa = run => {

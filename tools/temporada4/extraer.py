@@ -49,3 +49,9 @@ def importados(src):
             if not p: continue
             s.add(p.split(' as ')[-1])
     return s
+def clase_que_contiene(s,i):
+    """Nombre y código de la clase (X=class{...} o class X{...}) que encierra la posición i."""
+    for m in reversed(list(re.finditer(r'(?:[,;\s}(]|^)([\w$]+)=class\b|class ([\w$]+)\b',s[:i]))):
+        k=s.find('{',m.end()-1); e=blk_end(s,k)
+        if e>i: return (m.group(1) or m.group(2)), s[m.start()+ (1 if s[m.start()] in ',; }(' else 0):e+1]
+    return None,None

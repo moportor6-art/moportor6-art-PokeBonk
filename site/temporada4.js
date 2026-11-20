@@ -1,3 +1,10 @@
+/* Interruptor de la zona de pruebas: el contenido nuevo de la Temporada 4 que afecta a sistemas comunes (objetos, Reliquias,
+   Confite Trébol, Grieta fusionada, mutaciones…) solo está activo en los mapas de la región «Temporada 4 (pruebas)» hasta que
+   el usuario lo dé por bueno: entonces basta con poner PB_T4_OFICIAL = true. */
+window.PB_T4_OFICIAL = false;
+window.PB_T4_MAPAS = new Set(['furia', 'plateado']);
+window.PB_T4_ON = () => !!window.PB_T4_OFICIAL || window.PB_T4_MAPAS.has(window.__pbRun?.biome?.id);
+
 /* Subversión 1.63: Temporada 4 (pruebas). Zona aparte para probar el contenido de la Temporada 4 de PokéBonk (0.10.13,
    de Charcher, replicado con su permiso) antes de pasarlo al juego normal o al modo historia.
    - Lago de la Furia: forma `lake` portada al motor (menus-…js: pbLkGen, generateLake, placeLakeEnv y el sombreado LAKE),
@@ -231,6 +238,8 @@
     update(run, dt) {
       if (!window.__pbT4lib) return;
       const id = run.biome?.id;
+      // Aviso de la Grieta fusionada al juntar 3 Inciensos (una vez por partida).
+      if (window.PB_T4_ON() && run.incense >= 3 && run.rifts?.canFuse && !run.__t4Fusion) { run.__t4Fusion = 1; run.ui?.toast?.('Tienes 3 Inciensos: pulsa X (o mantén el botón de Incienso) para fundirlos en una Grieta fusionada', null); }
       if (id === 'furia') { let f = inst.get(run); if (!f) inst.set(run, f = new Furia(run)); try { f.update(dt); } catch (err) { if (!f.err) { f.err = 1; console.warn('[T4 Furia]', err); } } }
       // Monte Plateado: la clase original de la 0.10.13 (portada dentro del main como pbPlateado), sin cambios.
       if (id === 'plateado') { let p = plat.get(run); if (!p) plat.set(run, p = new (window.__pbT4lib.Plateado())(run)); try { p.update(dt); } catch (err) { if (!p.err) { p.err = 1; console.warn('[T4 Plateado]', err); } } }
