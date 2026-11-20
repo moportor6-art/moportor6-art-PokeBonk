@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Lago de la Furia: antenas y pesca (Subversión 1.64)
+- `temporada4.js`: clase `Furia` portada de la 0.10.13 (`PB_T4.update/limpiar`); luces de antena con partículas.
+- `main-…js`: `window.__pbT4lib={R,N,F,c}` (Pokédex, formas de partícula, azar y banderas) y llamadas a `PB_T4` junto a las del Valle Iris.
+
 ## Temporada 4 (pruebas): Lago de la Furia (Subversión 1.63)
 - `temporada4.js`: región especial `t4` con el mapa `furia` (datos originales de la 0.10.13), desbloqueado para pruebas; santuario provisional sobre la arena `coast`.
 - `menus-…js`: forma `lake` portada de la 0.10.13 (`pbLkGen` y ayudantes `pbLk*`, `generateLake`, `placeLakeEnv`, texturas `Ed`, `groveAt`, relieve y sombreado `LAKE`) y catálogo `yd.furia`.

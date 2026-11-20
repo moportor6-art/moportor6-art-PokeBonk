@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.63';
+  const SUB = '1.64';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.64',
+      date: Date.UTC(2026, 10, 20, 17, 0),
+      tag: 'nuevo',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.64`,
+      summary: 'Temporada 4 (pruebas): las antenas Rocket y la Gran Pesca de Magikarp del Lago de la Furia.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Antenas Rocket**: los Pokémon que rondan una antena se **enfurecen** (más rápidos, más fuertes, el doble de experiencia) y, si se quedan mucho, **evolucionan**. Ponte al lado y **mantén pulsado E** (o el botón de acción en el móvil) 2,5 s para **sintonizarla** durante 45 s: los salvajes de su zona quedan confusos y se golpean entre ellos, pero el Rocket contraataca con élites.`,
+        `- **¡Apagón!**: con las tres antenas sintonizadas a la vez se corta la señal y caen orbes de experiencia.`,
+        `- **La Gran Pesca de Magikarp**: a veces los Magikarp saltan a la orilla durante 30 s; golpéalos para sacarles monedas y busca el **Magikarp dorado** (orbe, monedas y un regalo). Los que vuelven al agua junto a una antena sin sintonizar salen como **Gyarados enfurecido**.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.63',
       date: Date.UTC(2026, 10, 20, 15, 0),
       tag: 'nuevo',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.63`,
@@ -3501,6 +3520,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.64',
+      date: '2026-11-20',
+      title: 'Lago de la Furia: antenas Rocket y Gran Pesca de Magikarp.',
+      notes: [
+        ['new', 'Antenas Rocket que enfurecen y hacen evolucionar a los salvajes; se sintonizan manteniendo E.'],
+        ['new', 'Apagón al sintonizar las tres antenas.'],
+        ['new', 'La Gran Pesca de Magikarp con Magikarp dorado y Gyarados enfurecido.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.63',
