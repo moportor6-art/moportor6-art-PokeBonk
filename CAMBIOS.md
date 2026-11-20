@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Editor del HUD (Subversión 1.54)
+- `hud-editor.js`: panel compacto arrastrable por el título (posición en `localStorage['pb-he-panel']`) y plegable; `z-index` de los recuadros según su área (pequeños encima); el arrastre divide por la escala acumulada de los padres (`H.escala`) y `clamp` solo al soltar.
+
 ## Pokédex (Subversión 1.53)
 - `dex-gen.js` (ambas ediciones): fila `.pb-dxgen` tras `.dx-types` que oculta casillas por su número (`.pb-gen-off`, reaplicado con `MutationObserver`), y CSS `@media (max-height:620px)` para `.dx-show`/`.dx-info`/`.dx-stats`.
 

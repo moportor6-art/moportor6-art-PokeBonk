@@ -83,6 +83,15 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
 .pb-he-f b{position:absolute;left:4px;top:-18px;font:800 11px system-ui,sans-serif;color:#fff;text-shadow:0 1px 2px #000;white-space:nowrap;pointer-events:none}
 .pb-he-p{position:fixed;left:50%;top:50%;transform:translate(-50%,-50%);width:min(340px,86vw);padding:12px 14px;border-radius:16px;background:rgba(255,255,255,.96);color:#2a2340;font:700 14px system-ui,sans-serif;box-shadow:0 6px 0 rgba(0,0,0,.2);touch-action:auto}
 .pb-he-p h3{margin:0 0 4px;font-size:16px}
+/* 1.54: panel compacto, se arrastra por el título y se puede plegar para editar lo que queda debajo. */
+.pb-he .pb-he-p{width:min(300px,62vw);padding:8px 10px;font-size:12px;z-index:200000;max-height:92vh;overflow:auto}
+.pb-he .pb-he-p h3{font-size:14px;cursor:grab;touch-action:none;padding-right:30px;margin:0 0 2px}
+.pb-he .pb-he-p small{font-size:11px;margin-bottom:4px}
+.pb-he .pb-he-p .row{margin-top:6px;gap:6px}.pb-he .pb-he-p button{padding:6px 6px;font-size:12px;min-width:70px}
+.pb-he .pb-he-p input[type=range]{margin:0}
+.pb-he .pb-he-min{position:absolute;right:6px;top:5px;width:26px;height:26px;min-width:0!important;padding:0!important;border-radius:50%!important;font:900 15px system-ui!important;flex:none!important}
+.pb-he .pb-he-p.plegado{width:auto;padding:5px 8px}.pb-he .pb-he-p.plegado>*:not(h3):not(.pb-he-min){display:none!important}
+.pb-he .pb-he-p.plegado h3{margin:0;padding-right:32px}
 .pb-he-p small{display:block;opacity:.7;margin-bottom:8px;font-weight:600}
 .pb-he-p input[type=range]{width:100%}
 .pb-he-p .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
@@ -186,17 +195,25 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
           box.setPointerCapture?.(e.pointerId);
           H.sel = it.sel; H.renderPanel();
           const v = H.layout[it.sel] ??= { x: 0, y: 0, s: 1 };
-          const sx = e.clientX, sy = e.clientY, ox = v.x, oy = v.y;
+          const sx = e.clientX, sy = e.clientY, ox = v.x, oy = v.y, k = H.escala(f.el);
+          // 1.54: dentro de una pieza ya agrandada/achicada, el movimiento se corrige por su escala (antes se iba de más
+          // o de menos y parecía desordenarse solo). Ya no se recoloca a la fuerza mientras se arrastra.
           const mv = ev => {
-            v.x = ox + (ev.clientX - sx) / innerWidth * 100;
-            v.y = oy + (ev.clientY - sy) / innerHeight * 100;
+            v.x = ox + (ev.clientX - sx) / innerWidth * 100 / k;
+            v.y = oy + (ev.clientY - sy) / innerHeight * 100 / k;
             H.apply();
-            H.clamp(f.el, v);
           };
-          const up = () => { box.removeEventListener('pointermove', mv); box.removeEventListener('pointerup', up); box.removeEventListener('pointercancel', up); save(); };
+          const up = () => { box.removeEventListener('pointermove', mv); box.removeEventListener('pointerup', up); box.removeEventListener('pointercancel', up); H.clamp(f.el, v); save(); };
           box.addEventListener('pointermove', mv); box.addEventListener('pointerup', up); box.addEventListener('pointercancel', up);
         });
       }
+    },
+
+    // Escala acumulada de las piezas que contienen a esta (1 si ninguna está agrandada).
+    escala(el) {
+      let k = 1;
+      for (let q = el.parentElement; q && q !== document.body; q = q.parentElement) { const sc = parseFloat(getComputedStyle(q).scale); if (sc > 0) k *= sc; }
+      return k || 1;
     },
 
     // Que nada se salga de la pantalla.
@@ -205,14 +222,14 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
       let dx = 0, dy = 0;
       if (r.left < 0) dx = -r.left; else if (r.right > innerWidth) dx = innerWidth - r.right;
       if (r.top < 0) dy = -r.top; else if (r.bottom > innerHeight) dy = innerHeight - r.bottom;
-      if (dx || dy) { v.x += dx / innerWidth * 100; v.y += dy / innerHeight * 100; H.apply(); }
+      if (dx || dy) { const k = H.escala(el); v.x += dx / innerWidth * 100 / k; v.y += dy / innerHeight * 100 / k; H.apply(); }
     },
 
     loop() {
       if (!H.editing) return;
       for (const f of H.frames) {
         const r = f.el.getBoundingClientRect();
-        Object.assign(f.box.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px' });
+        Object.assign(f.box.style, { left: r.left + 'px', top: r.top + 'px', width: r.width + 'px', height: r.height + 'px', zIndex: String(Math.max(1, 100000 - Math.round(r.width * r.height / 20))) }); // 1.54: las pequeñas encima
         f.box.classList.toggle('on', f.it.sel === H.sel);
       }
       requestAnimationFrame(H.loop);
@@ -221,7 +238,19 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
     renderPanel() {
       const p = H.panel; p.textContent = '';
       const it = ITEMS.find(i => i.sel === H.sel);
-      const h = document.createElement('h3'); h.textContent = it ? it.name : 'Editar HUD';
+      const h = document.createElement('h3'); h.textContent = (it ? it.name : 'Editar HUD') + ' ✥';
+      // 1.54: arrastrar el panel por el título; botón para plegarlo.
+      h.addEventListener('pointerdown', e => {
+        e.preventDefault(); e.stopPropagation(); h.setPointerCapture?.(e.pointerId);
+        const r = p.getBoundingClientRect(), sx = e.clientX - r.left, sy = e.clientY - r.top;
+        const mv = ev => { const x = Math.max(0, Math.min(innerWidth - r.width, ev.clientX - sx)), y = Math.max(0, Math.min(innerHeight - 30, ev.clientY - sy)); Object.assign(p.style, { left: x + 'px', top: y + 'px', transform: 'none' }); H.panelPos = { x, y }; };
+        const up = () => { h.removeEventListener('pointermove', mv); h.removeEventListener('pointerup', up); h.removeEventListener('pointercancel', up); try { localStorage.setItem('pb-he-panel', JSON.stringify(H.panelPos)); } catch {} };
+        h.addEventListener('pointermove', mv); h.addEventListener('pointerup', up); h.addEventListener('pointercancel', up);
+      });
+      const mn = document.createElement('button'); mn.className = 'pb-he-min'; mn.textContent = p.classList.contains('plegado') ? '+' : '–';
+      mn.addEventListener('click', e => { e.stopPropagation(); p.classList.toggle('plegado'); mn.textContent = p.classList.contains('plegado') ? '+' : '–'; });
+      p.append(mn);
+      try { const q = H.panelPos ?? JSON.parse(localStorage.getItem('pb-he-panel') || 'null'); if (q) { H.panelPos = q; Object.assign(p.style, { left: Math.min(q.x, innerWidth - 120) + 'px', top: Math.min(q.y, innerHeight - 30) + 'px', transform: 'none' }); } } catch {}
       const sm = document.createElement('small');
       sm.textContent = it ? 'Arrástralo para moverlo. Abajo puedes cambiar su tamaño, girarlo u ocultarlo.' : 'Toca y arrastra cualquier elemento para moverlo. Toca uno para cambiar su tamaño, girarlo u ocultarlo.';
       p.append(h, sm);

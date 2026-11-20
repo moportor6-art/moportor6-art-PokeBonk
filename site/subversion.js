@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.53';
+  const SUB = '1.54';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.54',
+      date: Date.UTC(2026, 10, 20, 1, 0),
+      tag: 'correccion',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.54`,
+      summary: 'Editor del HUD: panel pequeño que se arrastra y se pliega, piezas pequeñas encima y movimientos que ya no se desordenan.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Panel del editor** más pequeño: arrástralo por su título (✥) a donde no estorbe, o plégalo con «–» para editar lo que hay debajo (con «+» se vuelve a abrir). Recuerda dónde lo dejaste.`,
+        `- **Recuadros**: los pequeños quedan siempre encima de los grandes, así puedes agarrar cada pieza aunque esté dentro de otra (por ejemplo el retrato dentro de «Retrato y nivel»).`,
+        `- **Sin desordenarse**: dentro de una pieza agrandada o achicada, lo que mueves ahora sigue al dedo exactamente, y solo se recoloca dentro de la pantalla al soltarlo.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.53',
       date: Date.UTC(2026, 10, 20, 0, 30),
       tag: 'mejora',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.53`,
@@ -3314,6 +3333,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.54',
+      date: '2026-11-19',
+      title: 'Editor del HUD más cómodo.',
+      notes: [
+        ['fix', 'El panel del editor tapaba el centro: ahora es pequeño, se arrastra y se pliega.'],
+        ['fix', 'Los recuadros grandes tapaban a los pequeños y lo movido dentro de piezas escaladas se descolocaba.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.53',
