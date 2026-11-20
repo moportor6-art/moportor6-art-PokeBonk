@@ -24,6 +24,7 @@
         `- **El Ojo del Lago**: el santuario original del Lago de la Furia, con islotes unidos por pasarelas, agua propia y tres **repetidores** del Rocket.`,
         `- **Suicune**, con su combate original en tres fases: **Viento del norte**, **Paz Mental** (cada señal lo enfurece más) y **El lago se desborda** (las olas cruzan la arena, los bancos se inundan y el agua va cerrando el círculo).`,
         `- Suicune corre oculto en la niebla y solo sale para atacar. **Mantén pulsado E** junto a cada repetidor para apagarlo: con los tres apagados se le pasa la furia, se arrodilla y recibe mucho más daño.`,
+        `- Las **antenas Rocket** del lago ya salen en el minimapa: triángulo rojo con señal, azul sintonizada y gris en el Apagón.`,
         ``,
         PIE
       ].join('\n')
@@ -3546,7 +3547,8 @@
       title: 'Suicune y El Ojo del Lago.',
       notes: [
         ['new', 'Santuario El Ojo del Lago con repetidores que se apagan manteniendo E.'],
-        ['new', 'Combate de Suicune en tres fases con el lago desbordándose.']
+        ['new', 'Combate de Suicune en tres fases con el lago desbordándose.'],
+        ['new', 'Las antenas Rocket aparecen en el minimapa.']
       ]
     },
     {

@@ -224,6 +224,8 @@
   window.PB_T4 = {
     update(run, dt) { if (run.biome?.id !== 'furia' || !window.__pbT4lib) return; let f = inst.get(run); if (!f) inst.set(run, f = new Furia(run)); try { f.update(dt); } catch (err) { if (!f.err) { f.err = 1; console.warn('[T4 Furia]', err); } } },
     limpiar(run) { const f = inst.get(run); if (f) { try { f.clear(); } catch {} f.terrainRef = null; f.ballGiven = false; } },
-    furia: run => inst.get(run)
+    furia: run => inst.get(run),
+    // Marcas de las antenas en el minimapa (triángulos: rojo con la señal, azul sintonizada, gris en el Apagón).
+    marcas(run) { const f = inst.get(run); if (!f || run.biome?.id !== 'furia' || !f.ants.length) return null; return f.ants.map(a => ({ x: a.x, z: a.z, css: f.blackT > 0 ? '#a8a8b8' : a.state === 'tuned' ? '#4ab8ff' : '#ff3a4a' })); }
   };
 })();

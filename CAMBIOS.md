@@ -5,6 +5,7 @@
 - `menus-…js`: kit de Suicune (`pbSuicune()`, en `BP` para `rage`/245), `generateArena` de la 0.10.13 (admite `sink` y `bowl`) y catálogo `yd.ragelake`.
 - `regiones.js`: `santuario.datos` copia los datos propios del santuario sin teñir. `temporada4.js` da los originales de El Ojo del Lago.
 - `assets/env/ragelake/`, `assets/models/rage_*.glb`: originales.
+- `main-…js` (minimapa) dibuja `PB_T4.marcas(run)`: las antenas como triángulos de color según su estado.
 - `tools/temporada4/`: `libres.js` (identificadores libres), `renombrar.js` (renombra solo los libres) y `alinear.py` (equivalencias de nombres minificados entre versiones), para portar más contenido.
 
 ## Lago de la Furia: antenas y pesca (Subversión 1.64)
