@@ -66,3 +66,44 @@
     }
   }, 400);
 })();
+
+/* 1.59: aspectos en la ficha de la Pokédex. Lista los aspectos que tienes de ese Pokémon (variocolor, espectral,
+   los de Tesoros, medallas, legendarios…) para equiparlos con un toque (meta.setSkin, lo mismo que el Vestidor) y un
+   botón que abre el Vestidor del juego (Jugar → Vestidor) con ese Pokémon para verlos en movimiento. Los aspectos solo
+   se usan con Pokémon de tu Liga. */
+(() => {
+  const NOMBRES = { shiny: '✨ Variocolor', classic: '✨ Variocolor clásico', spectral: '👻 Espectral', t1: '🎁 Aspecto de Tesoros', t2: '🏆 Gran premio de Tesoros', m1: '🏅 Aspecto de medalla I', m2: '🏅 Aspecto de medalla II', l1: '⭐ Aspecto legendario I', l2: '⭐ Aspecto legendario II', l3: '⭐ Aspecto legendario III' };
+  const vestidor = sp => {
+    document.querySelector('.screen.dx .back-btn')?.click();
+    let n = 0;
+    const paso = setInterval(() => {
+      if (++n > 40) return clearInterval(paso);
+      const tab = [...document.querySelectorAll('.ls-seg .pill')].find(b => /Vestidor/.test(b.textContent));
+      if (!tab) { if (n === 3 || n === 12) [...document.querySelectorAll('.mm-play, .mm-item, button')].find(b => /^\s*Jugar/.test(b.innerText ?? ''))?.click(); return; }
+      if (!tab.classList.contains('on')) { tab.click(); return; }
+      const m = document.querySelector(`.wd-mon[data-id="${sp}"]`); if (m) { m.click(); clearInterval(paso); }
+    }, 250);
+  };
+  setInterval(() => {
+    const M = window.__pbMeta, info = document.querySelector('.dx-info'), on = document.querySelector('.dx-tile.on img, .dx-tile.on canvas');
+    if (!M?.lookAvailable || !info) return;
+    const sel = document.querySelector('.dx-tile.on small'), sp = +(sel?.textContent ?? 0); if (!sp) return;
+    // El juego solo da por disponibles los aspectos de Pokémon de tu Liga: para enseñar también los ganados de otros, se
+    // comprueba un momento como si estuviera en ella.
+    const L = M.profile.league ?? [], liga = L.includes(sp);
+    if (!liga) L.push(sp);
+    let tiene = [];
+    try { tiene = Object.keys(NOMBRES).filter(l => { try { return M.lookAvailable(sp, l); } catch { return false; } }); } finally { if (!liga) L.splice(L.lastIndexOf(sp), 1); }
+    const actual = liga ? (M.skinFor?.(sp) ?? null) : null;
+    const k = JSON.stringify([sp, tiene, actual, liga]);
+    let d = info.querySelector('.pb-aspectos');
+    if (d?.dataset.k === k) return;
+    if (!tiene.length) { d?.remove(); return; }
+    if (!d) { d = document.createElement('div'); d.className = 'pb-aspectos'; d.style.cssText = 'margin:10px 0;padding:8px 10px;border-radius:12px;background:rgba(255,120,200,.13);font:700 12px system-ui,sans-serif;line-height:1.5'; info.prepend(d); }
+    d.dataset.k = k;
+    const bt = (l, txt) => `<button type="button" data-l="${l ?? ''}" style="margin:3px 4px 0 0;border:0;border-radius:99px;padding:4px 10px;font:800 12px system-ui;cursor:pointer;${(actual ?? null) === l ? 'background:#3ec26a;color:#fff' : 'background:rgba(255,255,255,.85);color:#2a2340'}">${(actual ?? null) === l ? '✔ ' : ''}${txt}</button>`;
+    d.innerHTML = `🎨 <b>Aspectos</b> (${tiene.length})${liga ? ' · toca uno para equiparlo' : ' · <span style="color:#ff8a8a">se usan cuando lo tengas en tu Liga</span>'}<br>${bt(null, 'Normal')}${tiene.map(l => bt(l, NOMBRES[l])).join('')}<br><button type="button" class="pb-asp-ver" style="margin-top:6px;border:0;border-radius:10px;padding:5px 12px;font:800 12px system-ui;background:#7a3fd0;color:#fff;cursor:pointer">👁️ Verlos en el Vestidor</button>`;
+    d.querySelectorAll('[data-l]').forEach(b => b.onclick = e => { e.stopPropagation(); if (!liga) return; M.setSkin(sp, b.dataset.l || null); d.dataset.k = ''; });
+    d.querySelector('.pb-asp-ver').onclick = e => { e.stopPropagation(); vestidor(sp); };
+  }, 600);
+})();

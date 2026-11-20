@@ -1,5 +1,11 @@
 # Cambios respecto al port original
 
+## Actualizador, aspectos y Laboratorio (Subversión 1.59)
+- `actualizaciones.js`: botón `.pb-act-btn` (🔄) en `.mm-top` solo en la app; busca a mano y marca `.hay` cuando la búsqueda automática encuentra versión.
+- `dex-gen.js`: bloque `.pb-aspectos` en la ficha con los aspectos de `lookAvailable` (comprobados como si estuviera en la Liga), equipa con `setSkin` y abre el Vestidor.
+- `lab-extra.js`: las cajas `.pb-lab-oro` van dentro de `<details class="pb-lab-extras">`.
+- `historia.js`: el botón del Laboratorio de la pausa sale en todas las partidas de la Lite.
+
 ## Actualizador (Subversión 1.58)
 - `updater.js`: `pbUpdateFound` (aviso de `MainActivity.checkForUpdate`, que compara con el `versionCode` del APK y enlaza al primer `.apk`) se ignora si existe `PB_ACT.disponible`.
 - `actualizaciones.js`: búsqueda automática cada 10 min en el menú; la manual borra `pb-act-omitida` y muestra la etiqueta publicada.

@@ -564,7 +564,7 @@
 
   // 1.41: si la pausa se repinta (cambio de pestaña, estadísticas…), el botón se vuelve a poner al momento en vez de
   // esperar al siguiente ciclo (antes parpadeaba o se quedaba sin él).
-  try { new MutationObserver(() => { try { const r = window.__pbRun; if (r?.__hist != null && document.querySelector('.pz .sm-foot:not(:has(.pb-hist-pz))')) botonPausa(r); } catch {} }).observe(document.documentElement, { childList: true, subtree: true }); } catch {}
+  try { new MutationObserver(() => { try { const r = window.__pbRun; if (document.querySelector('.pz .sm-foot:not(:has(.pb-hist-pz))')) botonPausa(r); } catch {} }).observe(document.documentElement, { childList: true, subtree: true }); } catch {}
   // 1.41: cada paso con su propio try: antes, si uno fallaba (p. ej. pendiente()), el botón «Laboratorio» de la pausa
   // dejaba de ponerse y desaparecía al reabrir la pausa.
   setInterval(() => {
@@ -627,7 +627,9 @@
     tasks.after(b);
   };
   const botonPausa = run => {
-    if (run?.__hist == null || run.state === 'over') return;
+    // 1.59: en todas las partidas de la Lite (antes solo en capítulos de la historia, y al salir de ellos —«Otra vez»,
+    // partidas normales— el botón desaparecía).
+    if (!run?.player || run.state === 'over' || run.mode === 'duel') return;
     // En la barra de pestañas (Movimientos · Objetos · Estadísticas): junto a los botones de abajo los estrechaba
     // («Ajuste s», «Guarda r y salir») y en pantallas bajas tapaba las estadísticas.
     // 1.47: en la columna del Pokémon, encima de «Continuar» (había un hueco libre); en la barra de pestañas se cortaba.
@@ -639,7 +641,7 @@
     b.textContent = '🧪 Laboratorio';
     b.style.cssText = 'display:block;width:100%;margin:0 0 6px;height:34px;border:0;border-radius:14px;background:linear-gradient(#9a6af2,#6a3ad8);color:#fff;font:900 15px system-ui,sans-serif;box-shadow:0 3px 0 #4a2aa8;cursor:pointer';
     b.title = 'Mejora a tu Pokémon sin salir de la partida';
-    b.onclick = () => laboratorio(ORDEN[H()?.slots[run.__hist]?.r ?? 0], run.startSpecies, run, null);
+    b.onclick = () => laboratorio(ORDEN[(run.__hist != null ? H()?.slots[run.__hist]?.r : 0) ?? 0], run.startSpecies, run, null);
     foot.prepend(b);
   };
 

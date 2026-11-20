@@ -38,4 +38,29 @@
       R.__pbX = true;
     }
   }, 400);
+  // 1.59: las cajas de opciones del Laboratorio (Tienda, Naturaleza, Maldición, Teratipo, Incubadora, Automático…) se
+  // juntan en un desplegable cerrado, para que la lista de mejoras se vea (antes la empujaban fuera de la pantalla).
+  const cssX = document.createElement('style');
+  cssX.textContent = `.pb-lab-extras{margin:4px 0 6px;border-radius:14px;background:rgba(30,24,60,.82);color:#fff;flex:0 0 auto}
+.pb-lab-extras>summary{cursor:pointer;list-style:none;padding:8px 14px;font:800 14px system-ui,sans-serif;display:flex;gap:8px;align-items:center}
+.pb-lab-extras>summary::-webkit-details-marker{display:none}
+.pb-lab-extras>summary small{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1}
+.pb-lab-extras>summary b{margin-left:auto;flex:none;background:#ffd84a;color:#3a2a00;border-radius:99px;padding:2px 10px;font-size:12px}
+.pb-lab-extras[open]>summary b{background:#ece8f6}
+.pb-lab-extras .pb-lab-in{max-height:52vh;overflow:auto;padding:0 8px 8px;display:flex;flex-direction:column;gap:6px}
+.pb-lab-extras .pb-lab-oro{margin:0!important}`;
+  document.head.append(cssX);
+  setInterval(() => {
+    const lab = document.querySelector('.screen.lab'); if (!lab) return;
+    let d = lab.querySelector('.pb-lab-extras');
+    if (!d) {
+      const ref = lab.querySelector('.lab-wrap') ?? lab.querySelector('.it-tools'); if (!ref) return;
+      d = document.createElement('details'); d.className = 'pb-lab-extras';
+      d.innerHTML = '<summary>⚙️ Más opciones del Laboratorio <small style="opacity:.7;font-weight:600">Tienda, naturaleza, maldición, teratipo, incubadora, automático…</small><b>Abrir</b></summary><div class="pb-lab-in"></div>';
+      d.addEventListener('toggle', () => { d.querySelector('summary b').textContent = d.open ? 'Cerrar' : 'Abrir'; });
+      ref.before(d);
+    }
+    const dentro = d.querySelector('.pb-lab-in');
+    for (const c of lab.querySelectorAll('.pb-lab-oro')) if (!dentro.contains(c)) dentro.append(c);
+  }, 300);
 })();

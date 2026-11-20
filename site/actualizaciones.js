@@ -164,7 +164,7 @@
       if (!document.querySelector('.jay-sidebar') || (window.__pbApp?.run && window.__pbApp.run.state !== 'over')) return;
       if (document.querySelector('.pb-tour:not([hidden])')) return;
       ultima = Date.now();
-      buscar(false).catch(() => {});
+      buscar(false).then(avisoBoton, () => {});
     }, 4000);
   }
 
@@ -196,6 +196,37 @@
       try { await llamar('restaurar'); await llamar('reiniciar'); } catch (err) { res.textContent = err.message; }
     };
   };
+
+  // 1.59: botón 🔄 en la barra de arriba del menú (solo en la app). Un toque busca y, si hay versión nueva, abre el aviso;
+  // si no, dice cuál es la última publicada. Se pone verde con un punto cuando la búsqueda automática encontró algo.
+  let nueva = null;
+  const avisoBoton = (p) => { nueva = p?.hay ? p : null; const b = document.querySelector('.pb-act-btn'); if (b) b.classList.toggle('hay', !!nueva); };
+  if (disponible) {
+    const css = document.createElement('style');
+    css.textContent = '.pb-act-btn{position:relative}.pb-act-btn.hay{background:#3ec26a!important}.pb-act-btn.hay::after{content:"";position:absolute;top:2px;right:2px;width:9px;height:9px;border-radius:50%;background:#ff4757;border:2px solid #fff}.pb-act-btn.gira span{display:inline-block;animation:pbActGira 1s linear infinite}@keyframes pbActGira{to{transform:rotate(360deg)}}.pb-act-tip{position:fixed;z-index:99999;right:12px;top:62px;max-width:300px;padding:9px 12px;border-radius:12px;background:#2a2340;color:#fff;font:700 12px/1.45 system-ui,sans-serif;box-shadow:0 6px 18px rgba(0,0,0,.35)}';
+    document.head.appendChild(css);
+    setInterval(() => {
+      const aj = document.querySelector('.mm-top .jay-settings-shortcut:not(.pb-paleta):not(.pb-act-btn)');
+      if (!aj || aj.parentElement.querySelector('.pb-act-btn')) return;
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'jay-settings-shortcut pb-act-btn'; b.title = 'Buscar actualizaciones';
+      b.innerHTML = '<span style="font-size:18px;line-height:1">🔄</span>';
+      b.classList.toggle('hay', !!nueva);
+      b.onclick = async () => {
+        if (nueva) return mostrarPlan(nueva);
+        b.classList.add('gira');
+        let txt;
+        try { localStorage.removeItem(OMITIDA); const p = await buscar(true); avisoBoton(p); txt = p.hay ? '' : `Ya tienes la última versión (${p.tag || ''}). Una versión recién creada tarda unos 15 minutos en publicarse: vuelve a tocar luego.`; }
+        catch { txt = 'No se pudo buscar (¿sin internet?). Se juega igual; prueba más tarde.'; }
+        b.classList.remove('gira');
+        if (!txt) return;
+        document.querySelector('.pb-act-tip')?.remove();
+        const t = document.createElement('div'); t.className = 'pb-act-tip'; t.textContent = txt; t.onclick = () => t.remove();
+        document.body.appendChild(t); setTimeout(() => t.remove(), 6000);
+      };
+      aj.before(b);
+    }, 1000);
+  }
 
   window.PB_ACT = { disponible, buscar, pintar, llamar };
 })();

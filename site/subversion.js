@@ -4,16 +4,36 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.58';
+  const SUB = '1.59';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.59',
+      date: Date.UTC(2026, 10, 20, 5, 0),
+      tag: 'mejora',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.59`,
+      summary: 'Botón 🔄 para actualizar, aspectos en la Pokédex, Laboratorio más claro y siempre en la pausa.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Actualizar con un toque**: nuevo botón 🔄 arriba a la derecha del menú (en la app). Lo tocas y busca; si hay versión nueva abre el aviso, si no te dice cuál es la última. Se pone verde con un punto rojo cuando encuentra algo solo.`,
+        `- **Aspectos en la Pokédex**: la ficha de cada Pokémon enseña los aspectos que ganaste (Tesoros, variocolor, espectral, medallas…) y los equipas con un toque. «Verlos en el Vestidor» te lleva a verlos en movimiento. Se usan con Pokémon de tu Liga.`,
+        `- **Laboratorio más claro**: las mejoras extra (Esfera elemental, Sintonía Unown…) van en un desplegable «Más opciones del Laboratorio» y la lista normal vuelve a verse entera.`,
+        `- **Laboratorio en la pausa siempre**: el botón 🧪 sale en todas las partidas, no solo en el modo historia, y no se pierde al reiniciar.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.58',
       date: Date.UTC(2026, 10, 20, 4, 30),
       tag: 'correccion',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.58`,
@@ -3408,6 +3428,18 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.59',
+      date: '2026-11-19',
+      title: 'Botón de actualizar, aspectos en la Pokédex y Laboratorio más claro.',
+      notes: [
+        ['new', 'Botón 🔄 en el menú para buscar actualizaciones con un toque.'],
+        ['new', 'La Pokédex enseña y equipa los aspectos ganados, con acceso al Vestidor.'],
+        ['better', 'Las mejoras extra del Laboratorio van en un desplegable.'],
+        ['fix', 'El Laboratorio sale en la pausa de todas las partidas y no se pierde al reiniciar.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.58',
