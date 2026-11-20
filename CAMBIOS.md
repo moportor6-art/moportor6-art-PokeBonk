@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Hiperrayo (Subversión 1.61)
+- `menus-…js`: el efecto `"hyper-beam".beam` se rehace con `vfx.beams`: 14 tramos que se ensanchan desde la boca con pulsos, núcleo blanco, bola en la boca y estallido al final, dos espirales (omitidas con `vfx.calm`) dibujadas al final para que, si se llega al tope de 512 rayos, solo se recorten ellas; conserva los anillos, el destello y las chispas.
+
 ## Gráficos por cargar (Subversión 1.60)
 - `site/assets/env/{canela,cave,encina}/tiles/`: las 18 texturas que pedía `Ed()` (formas `island`, `cave`, `ancient`) y no existían; generadas con `tools/tiles_mapas.py` recoloreando texturas del propio mapa y del Valle Iris.
 - `regionales.js`: `tick()` ya no llama a `run.sprites.get(undefined)` (pedía `front/undefined.png`).

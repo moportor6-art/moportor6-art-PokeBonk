@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.60';
+  const SUB = '1.61';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.61',
+      date: Date.UTC(2026, 10, 20, 8, 30),
+      tag: 'mejora',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.61`,
+      summary: 'Hiperrayo rediseñado: ya no es una línea plana.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Hiperrayo nuevo**: sale estrecho de la boca y se abre como un cañón, con pulsos de energía que avanzan por el rayo, un núcleo blanco que vibra, dos espirales que giran a su alrededor, un destello en la boca y un estallido palpitante con chispas donde acaba.`,
+        `- Con «efectos tranquilos» las espirales se omiten y los brillos son más suaves.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.60',
       date: Date.UTC(2026, 10, 20, 6, 30),
       tag: 'correccion',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.60`,
@@ -3446,6 +3464,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.61',
+      date: '2026-11-20',
+      title: 'Hiperrayo con forma y animación.',
+      notes: [
+        ['better', 'El Hiperrayo se abre desde la boca, lleva pulsos, espirales de energía y un estallido al final.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.60',
