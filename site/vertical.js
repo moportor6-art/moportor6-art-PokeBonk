@@ -10,6 +10,12 @@
   const read = () => { try { const v = localStorage.getItem(KEY); return CHOICES.some(c => c[0] === v) ? v : 'landscape'; } catch { return 'landscape'; } };
   const native = v => { try { window.AndroidMenu?.setOrientation?.(v); } catch {} };
   native(read());
+  // 1.57: el modo vertical se retira a petición (no era jugable): siempre horizontal, sin la fila de Ajustes ni el
+  // reordenado vertical. El resto del archivo se conserva por si se recupera.
+  try { localStorage.setItem(KEY, 'landscape'); } catch {}
+  native('landscape');
+  document.documentElement.classList.remove('pb-portrait');
+  if (true) return;
 
   const root = document.documentElement;
   const isPortrait = () => innerHeight > innerWidth * 1.05;

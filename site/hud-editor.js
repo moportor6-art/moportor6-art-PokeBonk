@@ -358,8 +358,8 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
 body.pb-menu-abierto:not(.pb-hud-editing) .pb-mx,body.pb-menu-abierto:not(.pb-hud-editing) .pb-bolsa,body.pb-menu-abierto:not(.pb-hud-editing) .pb-evoreto{visibility:hidden!important}`;
   document.head.append(fijo);
   setInterval(() => { const r = window.__pbRun; document.body.classList.toggle('pb-menu-abierto', !!(r?.player && r.state !== 'play' && r.ui?.modalEl?.isConnected)); }, 150);
-  // 1.56: tocar el minimapa abre el mapa grande (ahí ves dónde estás en toda la zona y puedes poner hasta 3 marcas o
-  // seguir un objetivo).
+  // 1.56-1.57: minimapa interactivo. Tocarlo cambia el alcance (cerca 60 m · medio 120 m · zona entera, con su borde
+  // y todos los objetivos descubiertos); mantenerlo pulsado medio segundo abre el mapa grande (marcas y seguir).
   const abreMapa = run => {
     for (const k of Object.getOwnPropertyNames(Object.getPrototypeOf(run))) {
       try { if (typeof run[k] === 'function' && /showMap\(this\)/.test(String(run[k])) && /paused/.test(String(run[k]))) { run[k](); return true; } } catch {}
@@ -367,14 +367,31 @@ body.pb-menu-abierto:not(.pb-hud-editing) .pb-mx,body.pb-menu-abierto:not(.pb-hu
     if (run.state === 'play' && run.ui?.showMap) { run.state = 'paused'; run.ui.showMap(run); return true; }
     return false;
   };
-  addEventListener('pointerdown', e => {
-    const run = window.__pbRun; if (!run?.player || run.state !== 'play' || H.editing) return;
-    const mm = document.querySelector('#hud .hud-tr .minimap'); if (!mm) return;
+  const ALC = [[60, 'Cerca'], [120, 'Medio'], [0, 'Zona entera']];
+  let alc = +(localStorage.getItem('pb-mm-alc') || 0) % ALC.length;
+  const ponAlc = () => { const run = window.__pbRun, w = run?.terrain?.world ?? 360; window.__pbMMR = ALC[alc][0] || w * 0.62; };
+  setInterval(ponAlc, 1000); ponAlc();
+  const enMM = e => {
+    const run = window.__pbRun; if (!run?.player || run.state !== 'play' || H.editing) return null;
+    const mm = document.querySelector('#hud .hud-tr .minimap'); if (!mm) return null;
     const r = mm.getBoundingClientRect();
-    if (r.width < 10 || e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) return;
-    if (getComputedStyle(mm).opacity === '0') return;
-    if (abreMapa(run)) { e.stopPropagation(); e.preventDefault(); }
+    if (r.width < 10 || e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom || getComputedStyle(mm).opacity === '0') return null;
+    return { run, mm, r };
+  };
+  let pulsa = null;
+  addEventListener('pointerdown', e => {
+    const m = enMM(e); if (!m) return;
+    e.stopPropagation(); e.preventDefault();
+    pulsa = { t: performance.now(), id: e.pointerId, largo: setTimeout(() => { pulsa = null; abreMapa(m.run); }, 500) };
   }, true);
+  addEventListener('pointerup', e => {
+    if (!pulsa || pulsa.id !== e.pointerId) return;
+    clearTimeout(pulsa.largo); pulsa = null; e.stopPropagation();
+    alc = (alc + 1) % ALC.length; localStorage.setItem('pb-mm-alc', alc); ponAlc();
+    try { window.__pbRun?.ui?.toast?.(`🗺️ Minimapa: ${ALC[alc][1]} · mantén pulsado para el mapa grande`, null); } catch {}
+  }, true);
+  addEventListener('pointercancel', () => { if (pulsa) { clearTimeout(pulsa.largo); pulsa = null; } }, true);
+  addEventListener('click', e => { if (enMM(e)) { e.stopPropagation(); e.preventDefault(); } }, true);
 
   H.apply();
   addEventListener('pb-orientation', () => { if (!H.editing) { H.layout = load(); H.apply(); } });

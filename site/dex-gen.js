@@ -12,6 +12,12 @@
 .pb-dxgen button{flex:1 0 auto;border:0;border-radius:99px;padding:4px 6px;font:800 11.5px system-ui,sans-serif;background:rgba(255,255,255,.08);color:#cfc8e8;cursor:pointer}
 .pb-dxgen button.on{background:#ffd84a;color:#3a2a00}
 .dx-grid .dx-tile.pb-gen-off{display:none!important}
+/* 1.57: arreglos de la auditoría de menús. */
+.mm-item.pb-hist.pb-punto::after{top:-5px!important;right:-5px!important}
+.mm-item.pb-hist b{white-space:nowrap;font-size:clamp(13px,1.8vw,18px)!important;line-height:1.2!important;overflow:visible!important}
+.pz .pz-hero .sm-kpi span{white-space:nowrap!important;overflow:hidden;text-overflow:ellipsis;max-width:100%;display:block}
+.ev-go{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-size:clamp(15px,2.4vw,22px)!important}
+.screen .seg{scrollbar-width:none}
 @media (max-height:620px){
 .dx .dx-left{gap:5px!important}
 .dx .dx-stats{gap:5px!important}.dx .dx-stats .dx-chipstat{padding:1px 9px!important;min-height:0!important}

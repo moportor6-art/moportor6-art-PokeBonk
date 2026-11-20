@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Minimapa, menús y horizontal (Subversión 1.57)
+- Bundle `main`: `drawMinimap` usa `200/(window.__pbMMR||60)`; `hud-editor.js` cambia `__pbMMR` al tocar (60 / 120 / 62 % del mundo, `localStorage['pb-mm-alc']`) y abre el mapa grande con pulsación larga.
+- `vertical.js`: fuerza horizontal y sale antes de crear la fila de Ajustes (el código se conserva).
+- `dex-gen.js`: CSS de la auditoría (botón «Modo historia», KPIs de la pausa, `.ev-go`).
+
 ## Minimapa y botones (Subversión 1.56)
 - `hud-editor.js`: `order` fijo en `.pb-mx`; clase `body.pb-menu-abierto` (partida con `ui.modalEl`) que oculta `.pb-mx`, `.pb-bolsa` y `.pb-evoreto`; `pointerdown` en captura sobre `.minimap` que llama al método de la partida que hace `showMap(this)`.
 

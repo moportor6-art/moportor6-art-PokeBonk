@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.56';
+  const SUB = '1.57';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.57',
+      date: Date.UTC(2026, 10, 20, 4, 0),
+      tag: 'mejora',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.57`,
+      summary: 'Minimapa con 3 alcances (cerca, medio y zona entera), menús revisados y adiós al modo vertical.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Minimapa interactivo**: tócalo para cambiar el alcance sin salir de la partida: Cerca (60 m) · Medio (120 m) · Zona entera (todo el mapa con su borde y lo descubierto). Se recuerda. Mantenlo pulsado medio segundo para abrir el mapa grande (marcas y seguir objetivos).`,
+        `- **Menús revisados**: «Modo historia» ya no se corta ni lo tapa el punto rojo, los textos pequeños de la pausa no se salen y el botón «Entrar en la Torre» cabe.`,
+        `- **Modo vertical retirado**: el juego queda siempre en horizontal.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.56',
       date: Date.UTC(2026, 10, 20, 3, 0),
       tag: 'correccion',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.56`,
@@ -3370,6 +3389,17 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.57',
+      date: '2026-11-19',
+      title: 'Minimapa con alcances, menús revisados y sin modo vertical.',
+      notes: [
+        ['new', 'El minimapa cambia de alcance al tocarlo (cerca, medio, zona entera); pulsación larga abre el mapa grande.'],
+        ['fix', 'Textos cortados o desbordados en el menú principal, la pausa y la Torre Lavanda.'],
+        ['fix', 'Se retira el modo vertical: siempre horizontal.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.56',
