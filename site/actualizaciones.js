@@ -155,14 +155,15 @@
     return p;
   };
 
-  // Búsqueda automática, una vez, con el menú a la vista y sin partida.
+  // Búsqueda automática con el menú a la vista y sin partida: al abrir y luego cada 10 minutos que estés en el menú
+  // (1.58: antes solo una vez al abrir; si la versión nueva aún se estaba publicando no volvía a mirar).
   if (disponible) {
-    let hecho = false;
-    const t = setInterval(() => {
-      if (hecho) return clearInterval(t);
+    let ultima = 0;
+    setInterval(() => {
+      if (Date.now() - ultima < 10 * 60e3 || trabajando || (modal && !modal.hidden)) return;
       if (!document.querySelector('.jay-sidebar') || (window.__pbApp?.run && window.__pbApp.run.state !== 'over')) return;
       if (document.querySelector('.pb-tour:not([hidden])')) return;
-      hecho = true; clearInterval(t);
+      ultima = Date.now();
       buscar(false).catch(() => {});
     }, 4000);
   }
@@ -186,7 +187,7 @@
     const res = cuerpo.querySelector('.rm-res');
     cuerpo.querySelector('.rm-buscar').onclick = async () => {
       res.textContent = 'Buscando...';
-      try { const p = await buscar(true); res.textContent = p.hay ? '' : 'Ya tienes la última versión.'; }
+      try { localStorage.removeItem(OMITIDA); const p = await buscar(true); res.textContent = p.hay ? '' : `Ya tienes la última versión publicada (${p.tag || ''}). Si acabas de crear una versión, tarda unos 15 minutos en compilarse y publicarse: vuelve a buscar luego.`; }
       catch (err) { res.textContent = err.message.includes('404') || err.message.includes('fetch') ? 'No se pudo comprobar (sin internet o la versión nueva aún se está publicando).' : err.message; }
     };
     const r = cuerpo.querySelector('.rm-rest');

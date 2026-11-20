@@ -1,5 +1,9 @@
 # Cambios respecto al port original
 
+## Actualizador (Subversión 1.58)
+- `updater.js`: `pbUpdateFound` (aviso de `MainActivity.checkForUpdate`, que compara con el `versionCode` del APK y enlaza al primer `.apk`) se ignora si existe `PB_ACT.disponible`.
+- `actualizaciones.js`: búsqueda automática cada 10 min en el menú; la manual borra `pb-act-omitida` y muestra la etiqueta publicada.
+
 ## Minimapa, menús y horizontal (Subversión 1.57)
 - Bundle `main`: `drawMinimap` usa `200/(window.__pbMMR||60)`; `hud-editor.js` cambia `__pbMMR` al tocar (60 / 120 / 62 % del mundo, `localStorage['pb-mm-alc']`) y abre el mapa grande con pulsación larga.
 - `vertical.js`: fuerza horizontal y sale antes de crear la fila de Ajustes (el código se conserva).

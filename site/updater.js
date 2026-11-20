@@ -52,7 +52,10 @@
     requestAnimationFrame(() => go.focus({ preventScroll: true }));
   };
 
-  window.pbUpdateFound = data => { if (data && data.tag && data.url) { info = data; show(); } };
+  // 1.58: si la app trae el actualizador propio (actualizaciones.js), este aviso antiguo no sale: comparaba con la
+  // versión del APK instalado (que no cambia con las actualizaciones por partes) y ofrecía bajar el APK completo
+  // (además, el de la edición completa, no el de la Lite).
+  window.pbUpdateFound = data => { if (window.PB_ACT?.disponible) return; if (data && data.tag && data.url) { info = data; show(); } };
   try { const pending = window.AndroidMenu?.updateInfo?.(); if (pending) info = JSON.parse(pending); } catch {}
   // Espera a que el menú principal esté a la vista (no interrumpe partidas ni otras ventanas).
   setInterval(show, 1500);

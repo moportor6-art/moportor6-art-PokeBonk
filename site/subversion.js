@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.57';
+  const SUB = '1.58';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.58',
+      date: Date.UTC(2026, 10, 20, 4, 30),
+      tag: 'correccion',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.58`,
+      summary: 'Actualizador: ya no te manda a bajar el APK completo y vuelve a buscar solo cada 10 minutos.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Adiós al aviso viejo**: había dos avisos de actualización. El antiguo comparaba con el APK que instalaste (que no cambia al actualizar por partes), así que siempre decía que había versión nueva y te mandaba a bajar el juego completo (y encima el de la edición completa, no la Lite). Ya no sale: solo queda el actualizador por partes.`,
+        `- **Busca solo**: al estar en el menú vuelve a comprobar cada 10 minutos (antes solo al abrir el juego, y si la versión nueva aún se estaba publicando no volvía a mirar).`,
+        `- **Buscar a mano** (Remaster → Actualizaciones) olvida las versiones omitidas y te dice cuál es la última publicada. Una versión nueva tarda unos 15 minutos en aparecer desde que se crea.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.57',
       date: Date.UTC(2026, 10, 20, 4, 0),
       tag: 'mejora',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.57`,
@@ -3389,6 +3408,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.58',
+      date: '2026-11-19',
+      title: 'Actualizador más fácil: sin aviso de APK completo y búsqueda periódica.',
+      notes: [
+        ['fix', 'El aviso antiguo pedía bajar el APK completo aunque ya estuvieras actualizado.'],
+        ['better', 'El actualizador vuelve a buscar cada 10 minutos en el menú y la búsqueda manual olvida las versiones omitidas.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.57',
