@@ -1,0 +1,571 @@
+{
+ "formato": 1,
+ "version": 178,
+ "sub": "1.62",
+ "shell": {
+  "android": "9b17d5850ea6cedf",
+  "android-lite": "4fcedf032e4c57c8",
+  "windows": "64bf0e7140a74631",
+  "windows-lite": "410beb131686e56f"
+ },
+ "modulos": {
+  "pokebonk": {
+   "nombre": "PokéBonk (juego principal)",
+   "hash": "f4aaaf21630054cc81031a6909108617399212d0ef7a310c9c439000024036ec",
+   "archivos": 8545,
+   "bytes": 233933775
+  },
+  "pokeisaac": {
+   "nombre": "PokéIsaac",
+   "hash": "699d4bdff59c02e662a4760343b146b99e8eab2167ba6c171bbb63f2b965335f",
+   "archivos": 5680,
+   "bytes": 82833717
+  },
+  "pokemonsurvivors": {
+   "nombre": "Pokémon Survivors",
+   "hash": "d5f55f5fb902ac066ca27fcee42d3939c059d614e81840d95eef6c7aa80fa834",
+   "archivos": 11226,
+   "bytes": 107976879
+  },
+  "pokesurvivor": {
+   "nombre": "PokéSurvivor",
+   "hash": "d5eb83edadaeddfca4d4863752a6371713fb2fa069ffc8431c1d9338377c4238",
+   "archivos": 10,
+   "bytes": 187901432
+  },
+  "pokepath": {
+   "nombre": "PokéBonk TD",
+   "hash": "0d884a5a8ade40b54255358b16d48ff73111f852c0f52f998ded5d7f93deac70",
+   "archivos": 3684,
+   "bytes": 41183181
+  },
+  "pokeplunder": {
+   "nombre": "PokéPlunder",
+   "hash": "0303453dd6fb1e11bc32338bdf721833b84a354e59c478bacc31ba72641e738e",
+   "archivos": 665,
+   "bytes": 29735389
+  },
+  "pokeoverlord": {
+   "nombre": "Pokémon Overlord",
+   "hash": "df0eb363ae033074c26b929c949b44de00c97c40db2984aeb6762f69b23b2666",
+   "archivos": 11,
+   "bytes": 103109162
+  },
+  "pokelike": {
+   "nombre": "Pokelike",
+   "hash": "8341d77d35adc31f6da998dae1d66f84c07780ec185fcd62c4e03cb83b5543d6",
+   "archivos": 1999,
+   "bytes": 134945324
+  }
+ },
+ "tag": "v178",
+ "base": "https://raw.githubusercontent.com/moportor6-art/moportor6-art-PokeBonk/contenido-v178/",
+ "cambios": [
+  {
+   "oficial": "0.9.9",
+   "sub": "1.62",
+   "date": "2026-11-20",
+   "title": "Suelos y horizontes originales de Isla Canela, Cueva Celeste y Bosque Encina.",
+   "notes": [
+    [
+     "better",
+     "Las texturas de suelo recreadas se cambian por las originales del juego."
+    ],
+    [
+     "fix",
+     "Los tres mapas vuelven a tener su fondo de horizonte."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.61",
+   "date": "2026-11-20",
+   "title": "Hiperrayo con forma y animación.",
+   "notes": [
+    [
+     "better",
+     "El Hiperrayo se abre desde la boca, lleva pulsos, espirales de energía y un estallido al final."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.60",
+   "date": "2026-11-20",
+   "title": "Texturas de suelo que faltaban y aviso de gráficos por cargar.",
+   "notes": [
+    [
+     "fix",
+     "Isla Canela, Cueva Celeste y Bosque Encina tienen sus 18 texturas de suelo (antes faltaban y salía el aviso)."
+    ],
+    [
+     "fix",
+     "Ya no se pide un dibujo inexistente cuando tu Pokémon no tiene forma regional."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.59",
+   "date": "2026-11-19",
+   "title": "Botón de actualizar, aspectos en la Pokédex y Laboratorio más claro.",
+   "notes": [
+    [
+     "new",
+     "Botón 🔄 en el menú para buscar actualizaciones con un toque."
+    ],
+    [
+     "new",
+     "La Pokédex enseña y equipa los aspectos ganados, con acceso al Vestidor."
+    ],
+    [
+     "better",
+     "Las mejoras extra del Laboratorio van en un desplegable."
+    ],
+    [
+     "fix",
+     "El Laboratorio sale en la pausa de todas las partidas y no se pierde al reiniciar."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.58",
+   "date": "2026-11-19",
+   "title": "Actualizador más fácil: sin aviso de APK completo y búsqueda periódica.",
+   "notes": [
+    [
+     "fix",
+     "El aviso antiguo pedía bajar el APK completo aunque ya estuvieras actualizado."
+    ],
+    [
+     "better",
+     "El actualizador vuelve a buscar cada 10 minutos en el menú y la búsqueda manual olvida las versiones omitidas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.57",
+   "date": "2026-11-19",
+   "title": "Minimapa con alcances, menús revisados y sin modo vertical.",
+   "notes": [
+    [
+     "new",
+     "El minimapa cambia de alcance al tocarlo (cerca, medio, zona entera); pulsación larga abre el mapa grande."
+    ],
+    [
+     "fix",
+     "Textos cortados o desbordados en el menú principal, la pausa y la Torre Lavanda."
+    ],
+    [
+     "fix",
+     "Se retira el modo vertical: siempre horizontal."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.56",
+   "date": "2026-11-19",
+   "title": "Minimapa táctil y botones en su sitio.",
+   "notes": [
+    [
+     "new",
+     "Tocar el minimapa abre el mapa grande con marcas y objetivos."
+    ],
+    [
+     "fix",
+     "TERA y Z se cambiaban de sitio y los botones se pintaban encima de los menús."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.55",
+   "date": "2026-11-19",
+   "title": "Editor del HUD: compañeros por separado y huecos transparentes.",
+   "notes": [
+    [
+     "new",
+     "Cada compañero Alfa se edita por separado."
+    ],
+    [
+     "fix",
+     "Las piezas que no se ven aparecían como barras oscuras vacías en el editor."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.54",
+   "date": "2026-11-19",
+   "title": "Editor del HUD más cómodo.",
+   "notes": [
+    [
+     "fix",
+     "El panel del editor tapaba el centro: ahora es pequeño, se arrastra y se pliega."
+    ],
+    [
+     "fix",
+     "Los recuadros grandes tapaban a los pequeños y lo movido dentro de piezas escaladas se descolocaba."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.53",
+   "date": "2026-11-19",
+   "title": "Pokédex: filtro por generación y ficha con más aire.",
+   "notes": [
+    [
+     "new",
+     "Filtro por generación en la Pokédex."
+    ],
+    [
+     "fix",
+     "La ficha del Pokémon quedaba muy apretada en el teléfono."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.52",
+   "date": "2026-11-19",
+   "title": "Jaulas automáticas y editor del HUD completo (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: las jaulas se abren solas si tienes dinero suficiente."
+    ],
+    [
+     "new",
+     "Lite: 16 piezas más del HUD se pueden mover, redimensionar, girar u ocultar, incluidos los compañeros Alfa y la racha."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.51",
+   "date": "2026-11-19",
+   "title": "Mapa de pruebas: interiores, personajes, regalo de Oak, rival y el viejo (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: cuartos por dentro en las casas, el Laboratorio, el Centro Pokémon y la Tienda."
+    ],
+    [
+     "new",
+     "Lite: Prof. Oak con las tres Poké Balls, madre, hermana de Azul, Chansey, tendero, rival Azul y el viejo de Ciudad Verde, con diálogos."
+    ],
+    [
+     "new",
+     "Lite: música tranquila en los pueblos y variedad en cada partida."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.50",
+   "date": "2026-11-19",
+   "title": "Mapa de pruebas: 3 zonas, suelo propio y casas que ayudan (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Pueblo Paleta, Ruta 1 y Ciudad Verde de bloques, con suelo aplanado y sin adornos del mapa dentro."
+    ],
+    [
+     "new",
+     "Lite: madre, hermana de Azul, Prof. Oak, Centro Pokémon y Tienda ayudan al acercarte a sus puertas."
+    ],
+    [
+     "new",
+     "Lite: salvajes de la Ruta 1 y guardianes Pidgeotto y Raticate en el mapa de pruebas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.49",
+   "date": "2026-11-19",
+   "title": "Mapa de pruebas: Pueblo Paleta de bloques (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: mapa de pruebas con un Pueblo Paleta de bloques (texturas CC0 del Voxel Pack de Kenney)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.48",
+   "date": "2026-11-19",
+   "title": "Los Ultraentes ya no abren el portal y aguantan más (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: vencer a un Ultraente (o a un jefe de la Torre, Hoopa o la Liga) abría el portal de la zona sin vencer al guardián."
+    ],
+    [
+     "fix",
+     "Lite: los Ultraentes caían en 1-2 segundos; ahora duran al menos 15 s (25 s en Difícil)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.47",
+   "date": "2026-11-19",
+   "title": "Laboratorio en la columna del Pokémon y reiniciar sin salir de la historia (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: al reiniciar un capítulo del Modo historia se perdía el botón del Laboratorio."
+    ],
+    [
+     "new",
+     "Lite: el botón del Laboratorio va encima de «Continuar», en la columna del Pokémon."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.46",
+   "date": "2026-11-19",
+   "title": "El Pokémon del líder acompaña al guardián en vez de sustituirlo (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: el Pokémon de líder (p. ej. Bronzong) era el guardián, caía en un segundo y su portal saltaba al jefe real."
+    ],
+    [
+     "new",
+     "Lite: ahora acompaña al guardián como élite resistente, sin portal."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.45",
+   "date": "2026-11-19",
+   "title": "Menú de pausa compacto (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: los botones de la pausa se cortaban y había que desplazarse; ahora caben en dos filas."
+    ],
+    [
+     "fix",
+     "Lite: pestaña de objetos sin barras de desplazamiento anidadas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.44",
+   "date": "2026-11-19",
+   "title": "Pestaña «Resumen» en la pausa (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: pestaña «Resumen» con movimientos y vitaminas (con sus efectos) juntos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.43",
+   "date": "2026-11-19",
+   "title": "Esfera elemental: 11 estados y estados potenciados (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: la Esfera elemental recorre los 11 estados del juego."
+    ],
+    [
+     "new",
+     "Lite: los estados que aplicas duran más y hacen más daño con cada nivel de la Esfera."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.42",
+   "date": "2026-11-19",
+   "title": "Esfera elemental en el Laboratorio (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Esfera elemental (8 niveles): +5 % de daño y +8 % de estados por nivel y una esfera de cinco elementos que aplica estados."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.41",
+   "date": "2026-11-19",
+   "title": "Esquiva automática apagada y Laboratorio fijo en la pausa de la historia (Lite).",
+   "notes": [
+    [
+     "fix",
+     "Lite: la esquiva automática estorbaba al moverse; ahora es una opción de control apagada por defecto."
+    ],
+    [
+     "fix",
+     "Lite: el botón «Laboratorio» de la pausa del Modo historia desaparecía a ratos."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.40",
+   "date": "2026-11-18",
+   "title": "Recompensas, récords y logros del modo Sin fin (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Polvo por cada 5 minutos en Sin fin, récord por Pokémon y logros Resistente, Incansable y Eterno."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.39",
+   "date": "2026-11-18",
+   "title": "Mapas nuevos de Galar y Paldea (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Bosque Oniria y Minas de Galar; Gran Cañón y Costa de Paldea."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.38",
+   "date": "2026-11-18",
+   "title": "Liga Pokémon, dónde aparece, historial, títulos y colores de eficacia (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Liga Pokémon con Alto Mando y Campeón de cada región."
+    ],
+    [
+     "new",
+     "Lite: dónde aparece cada Pokémon (Pokédex), historial de partidas y títulos."
+    ],
+    [
+     "new",
+     "Lite: números de daño en verde (súper eficaz) y gris azulado (poco eficaz)."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.37",
+   "date": "2026-11-18",
+   "title": "Logros por Pokémon y recompensas por recoger (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: logros por Pokémon en bronce, plata y oro, con Maestría."
+    ],
+    [
+     "new",
+     "Lite: al terminar la partida, aviso para recoger las recompensas ganadas."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.36",
+   "date": "2026-11-18",
+   "title": "Sala de entrenamiento, Bestiario, Navidad, Torre de Hoenn y Sinnoh y control (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: Sala de entrenamiento con medidor de daño y Bestiario de jefes con debilidades."
+    ],
+    [
+     "new",
+     "Lite: evento de Navidad en diciembre y Torre de Líderes de Hoenn y Sinnoh."
+    ],
+    [
+     "new",
+     "Lite: vibración al recibir golpes y zona muerta del joystick; la Esquiva y los Avisos ya se pueden apagar en la pausa."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.35",
+   "date": "2026-11-18",
+   "title": "Islas Akala, Ula'ula y Poni (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: tres mapas nuevos de Alola en cadena tras Melemele, con cielo, Pokémon, jefes y santuario propios."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.34",
+   "date": "2026-11-18",
+   "title": "Esquiva automática, movimientos Z, Guardería, Torre de Líderes, logros y tienda (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: esquiva automática de ataques marcados, avisos de rarezas y cartas favoritas que se eligen solas."
+    ],
+    [
+     "new",
+     "Lite: movimientos Z desde el Nv. 20, una vez por zona."
+    ],
+    [
+     "new",
+     "Lite: Guardería con huevos y movimiento heredado, y Torre de Líderes en el Modo historia."
+    ],
+    [
+     "new",
+     "Lite: logros con Polvo, Tienda de Polvo en el Laboratorio y récords por Pokémon en la Pokédex."
+    ]
+   ]
+  },
+  {
+   "oficial": "0.9.9",
+   "sub": "1.33",
+   "date": "2026-11-18",
+   "title": "Bolsa con prioridades (Lite).",
+   "notes": [
+    [
+     "new",
+     "Lite: la bolsa prioriza estados, la curación justa (o la mayor en apuros graves) y después los apuros."
+    ]
+   ]
+  }
+ ],
+ "completo": {
+  "android": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v178/PokeBonk.apk",
+   "bytes": 876542414,
+   "sha256": "b1d1a54a819a7c908d03532ba4f9666ffdba6eb2fc14337df6f4244d589d1667"
+  },
+  "windows": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v178/PokeBonk-Windows-Instalador.exe",
+   "bytes": 854688165,
+   "sha256": "495b9d56e451aa6e5d65cbbee221dc4a1633d852e8d6ad80048b5dc7c9a1fc82"
+  },
+  "android-lite": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v178/PokeBonk-Lite.apk",
+   "bytes": 222063141,
+   "sha256": "5098e4579daf476a33cf600574ec188c46e8e1097783c134179dfeafb621a73a"
+  },
+  "windows-lite": {
+   "url": "https://github.com/moportor6-art/moportor6-art-PokeBonk/releases/download/v178/PokeBonk-Lite-Windows-Instalador.exe",
+   "bytes": 309277052,
+   "sha256": "1af17bbd886128b187d5fbff55d62045c62f30b6080e0d432ccafac5a0b82fb6"
+  }
+ }
+}
