@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Pokédex (Subversión 1.53)
+- `dex-gen.js` (ambas ediciones): fila `.pb-dxgen` tras `.dx-types` que oculta casillas por su número (`.pb-gen-off`, reaplicado con `MutationObserver`), y CSS `@media (max-height:620px)` para `.dx-show`/`.dx-info`/`.dx-stats`.
+
 ## Jaulas y HUD completo (Subversión 1.52)
 - `auto-recoger.js`: `cage` se usa sola si `run.gold >= interactables.cageCost()`.
 - `hud-editor.js`: 16 `ITEMS` más (`.hud-party`, `.tl-medal`, `.tl-plate`, `.ht-l`, `.timer`, `.wallet`, `.runclock`, `.minimap`, `.counters`, `.kgoal`, `.evpill`, `.streak`, `.bossbar`, `.minibars`, `.toasts`, `.autorun-pill`) y huecos visibles en el editor para los que salen a ratos.
