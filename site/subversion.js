@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.61';
+  const SUB = '1.62';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.62',
+      date: Date.UTC(2026, 10, 20, 9, 0),
+      tag: 'mejora',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.62`,
+      summary: 'Isla Canela, Cueva Celeste y Bosque Encina con sus suelos y horizontes originales.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Gráficos originales**: los suelos que la 1.60 tuvo que recrear se cambian por los del juego original de Charcher (pokebonk.com), y los tres mapas recuperan su **fondo de horizonte**, que también faltaba.`,
+        `- Primer paso de la **Temporada 4**: su contenido se irá probando en una zona aparte antes de pasar al juego normal.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.61',
       date: Date.UTC(2026, 10, 20, 8, 30),
       tag: 'mejora',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.61`,
@@ -3464,6 +3482,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.62',
+      date: '2026-11-20',
+      title: 'Suelos y horizontes originales de Isla Canela, Cueva Celeste y Bosque Encina.',
+      notes: [
+        ['better', 'Las texturas de suelo recreadas se cambian por las originales del juego.'],
+        ['fix', 'Los tres mapas vuelven a tener su fondo de horizonte.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.61',

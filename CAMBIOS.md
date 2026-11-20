@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Gráficos originales (Subversión 1.62)
+- `site/assets/env/{canela,cave,encina}/tiles/*.png` y `pano_far/near.png`: los originales de pokebonk.com (0.10.13, que ya los trae). Se retira `tools/tiles_mapas.py`, que generaba sustitutos.
+
 ## Hiperrayo (Subversión 1.61)
 - `menus-…js`: el efecto `"hyper-beam".beam` se rehace con `vfx.beams`: 14 tramos que se ensanchan desde la boca con pulsos, núcleo blanco, bola en la boca y estallido al final, dos espirales (omitidas con `vfx.calm`) dibujadas al final para que, si se llega al tope de 512 rayos, solo se recorten ellas; conserva los anillos, el destello y las chispas.
 

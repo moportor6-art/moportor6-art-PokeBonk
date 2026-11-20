@@ -32,7 +32,6 @@ Responde siempre en español.
 - Datos del juego: `site/data/pokemon.json` y `learnsets.json` traen los 1025 Pokémon; el límite visible es `maxDex`.
 - Sprites: hojas PMD en `site/assets/pmd/<sid>.png` y `pmd-shiny/`, metadatos en `site/data/sprites.json`.
   - `tools/megas_hoenn.py` (acción «Megas», PMDCollab) y `tools/regionales.py` (acción «Regionales», PMDCollab; sids 10000-13999). Los ids >= 20000 son variocolor;
-  - `tools/tiles_mapas.py`: texturas de suelo de Isla Canela, Cueva Celeste y Bosque Encina (`assets/env/<mapa>/tiles/`).
   - `tools/megas_reloaded.py` y `tools/especies_reloaded.py` (Pokémon Reloaded, uso privado con permiso; numeración en `tools/reloaded_numeros.json`).
 - `liga-scroll.js`: desplazamiento natural de la lista de la Liga.
 - `lan.js` + `android/.../LanRed.java` (puente `PBLanNative`): cooperativo en la misma Wi-Fi; `legibilidad.js`: contraste y choques visuales. `curanderos.js`: curanderos en todos los mapas y Alfas curanderos. `zona.js`: zonas de 15 minutos. `clima.js`: el clima avisa y afecta a los salvajes. `gimnasios.js`: gimnasios y medallas; `rival.js`: el rival Azul.
