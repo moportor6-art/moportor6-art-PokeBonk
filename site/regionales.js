@@ -366,7 +366,9 @@
       if (f) { if (!p.__regK) p.__regBase = p.types; p.types = f.types.slice(); }
       else if (p.__regBase) { p.types = p.__regBase; p.__regBase = null; }
       p.__regK = k;
-      try { run.sprites.get(X.psid(p, run)); } catch {}
+      // 1.60: sin forma regional psid es undefined y pedía «front/undefined.png» (contaba como gráfico por cargar).
+      const sid = X.psid(p, run);
+      if (sid != null) try { run.sprites.get(sid); } catch {}
     }
   };
   setInterval(() => { try { X.tick(); } catch {} }, 200);

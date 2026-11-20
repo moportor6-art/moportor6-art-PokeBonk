@@ -4,16 +4,34 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.59';
+  const SUB = '1.60';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.60',
+      date: Date.UTC(2026, 10, 20, 6, 30),
+      tag: 'correccion',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.60`,
+      summary: 'Adiós a «Faltan gráficos por cargar»: Isla Canela, Cueva Celeste y Bosque Encina ya tienen su suelo.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Suelos que faltaban**: Isla Canela, Cueva Celeste y Bosque Encina pedían 6 texturas de suelo cada una que el juego nunca trajo. Se veían como una pradera genérica y salía «Faltan 7 gráficos por cargar». Ahora tienen arena negra, toba y ceniza (Canela), cristal, grava y barro (Cueva) y raíces, hojarasca y musgo (Encina).`,
+        `- **Gráfico fantasma**: con un Pokémon sin forma regional el juego pedía un dibujo «undefined» que nunca existía y también sumaba al aviso.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.59',
       date: Date.UTC(2026, 10, 20, 5, 0),
       tag: 'mejora',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.59`,
@@ -3428,6 +3446,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.60',
+      date: '2026-11-20',
+      title: 'Texturas de suelo que faltaban y aviso de gráficos por cargar.',
+      notes: [
+        ['fix', 'Isla Canela, Cueva Celeste y Bosque Encina tienen sus 18 texturas de suelo (antes faltaban y salía el aviso).'],
+        ['fix', 'Ya no se pide un dibujo inexistente cuando tu Pokémon no tiene forma regional.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.59',

@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Gráficos por cargar (Subversión 1.60)
+- `site/assets/env/{canela,cave,encina}/tiles/`: las 18 texturas que pedía `Ed()` (formas `island`, `cave`, `ancient`) y no existían; generadas con `tools/tiles_mapas.py` recoloreando texturas del propio mapa y del Valle Iris.
+- `regionales.js`: `tick()` ya no llama a `run.sprites.get(undefined)` (pedía `front/undefined.png`).
+- Los `pano_far/near.png` de esos tres mapas tampoco existen, pero el motor los salta sin reintentar ni contar en el aviso.
+
 ## Actualizador, aspectos y Laboratorio (Subversión 1.59)
 - `actualizaciones.js`: botón `.pb-act-btn` (🔄) en `.mm-top` solo en la app; busca a mano y marca `.hay` cuando la búsqueda automática encuentra versión.
 - `dex-gen.js`: bloque `.pb-aspectos` en la ficha con los aspectos de `lookAvailable` (comprobados como si estuviera en la Liga), equipa con `setSkin` y abre el Vestidor.
