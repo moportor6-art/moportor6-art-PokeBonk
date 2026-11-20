@@ -44,6 +44,7 @@ Responde siempre en español.
 - `resumen.js`: pestaña «Resumen» de la pausa con movimientos y vitaminas, y pausa compacta en pantallas bajas (Lite).
 - `paleta.js`: mapa de pruebas de bloques con 3 zonas (Pueblo Paleta, Ruta 1, Ciudad Verde), interiores y personajes (Lite; texturas CC0 de Kenney en `assets/voxel/`).
 - `dex-gen.js`: filtro por generación y ficha más espaciada en la Pokédex.
+- `temporada4.js`: región «Temporada 4 (pruebas)» con el contenido portado de la 0.10.13 (Lago de la Furia; forma `lake` en menus-…js).
 - `pruebas.js`: botón TEMPORAL para desbloquear toda la Liga (pedido para pruebas; se quitará cuando el usuario lo diga).
 - Secretos: el keystore y su contraseña solo viven en los secrets de GitHub; nunca en el repo.
 - Créditos que se conservan: Charcher, JayElDragon, @SrBatai, autores de PMDCollab, JPTER78/JayElDragon (PokéSurvivor, con su aviso PolyForm Noncommercial), pokelike.xyz, PokeAPI/sprites (medallas), Pokémon Showdown (retratos de la historia), Khydra, jab_lao, pedrobarretto, Pokémon Reloaded y Kenney (Voxel Pack, CC0). Nada comercial.

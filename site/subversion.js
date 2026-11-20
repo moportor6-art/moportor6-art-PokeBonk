@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.62';
+  const SUB = '1.63';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.63',
+      date: Date.UTC(2026, 10, 20, 15, 0),
+      tag: 'nuevo',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.63`,
+      summary: 'Temporada 4 (pruebas): primer mapa, el Lago de la Furia.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Temporada 4 (pruebas)**: nueva región aparte en la selección de mapas para probar el contenido de la Temporada 4 de PokéBonk (de Charcher, replicado con su permiso) antes de pasarlo al juego normal.`,
+        `- **Lago de la Furia**: el mapa original de Johto, con su lago enorme, islotes, juncos, la cabaña, el muelle, la barca y las **antenas del Equipo Rocket**. Pokémon de agua, dragón y veneno; Suicune espera en el santuario.`,
+        `- En pruebas: las antenas aún no se pueden sintonizar, y el santuario usa una arena provisional.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.62',
       date: Date.UTC(2026, 10, 20, 9, 0),
       tag: 'mejora',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.62`,
@@ -3482,6 +3501,15 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.63',
+      date: '2026-11-20',
+      title: 'Temporada 4 (pruebas): Lago de la Furia.',
+      notes: [
+        ['new', 'Región «Temporada 4 (pruebas)» con el Lago de la Furia original de la Temporada 4.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.62',

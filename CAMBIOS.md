@@ -1,5 +1,10 @@
 # Cambios respecto al port original
 
+## Temporada 4 (pruebas): Lago de la Furia (Subversión 1.63)
+- `temporada4.js`: región especial `t4` con el mapa `furia` (datos originales de la 0.10.13), desbloqueado para pruebas; santuario provisional sobre la arena `coast`.
+- `menus-…js`: forma `lake` portada de la 0.10.13 (`pbLkGen` y ayudantes `pbLk*`, `generateLake`, `placeLakeEnv`, texturas `Ed`, `groveAt`, relieve y sombreado `LAKE`) y catálogo `yd.furia`.
+- `assets/env/furia/` y `assets/models/furia_{hut,pier,boat,antenna}.glb`: originales de pokebonk.com.
+
 ## Gráficos originales (Subversión 1.62)
 - `site/assets/env/{canela,cave,encina}/tiles/*.png` y `pano_far/near.png`: los originales de pokebonk.com (0.10.13, que ya los trae). Se retira `tools/tiles_mapas.py`, que generaba sustitutos.
 
