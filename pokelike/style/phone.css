@@ -1,0 +1,1272 @@
+/* Phone layout. Loaded after main.css; desktop is untouched.
+
+   The rule on a phone: a screen fits the visible display, with no page scroll. The top bar is the
+   only navigation, the main action sits at the bottom where the thumb is, and a screen scrolls by
+   itself only when its content really cannot fit (a long list, a very small phone).
+
+   scripts/phone-layout-test.mjs measures all of this: npm run test:phone. */
+
+:root { --app-h: 100vh; }
+@supports (height: 100dvh) { :root { --app-h: 100dvh; } }
+.nav-phone { display: none; }
+.trait-preview-short { display: none; }
+
+.chal-square-desc, .chal-cta-short { display: none; }
+.chal-permanent { display: contents; }
+.chal-records-btn { display: block; }
+
+/* The menu: one layout on every screen size. */
+  .app-menu-modal-list { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; padding: 10px; }
+  #app-menu-modal .menu-tile {
+    grid-column: span 3;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-height: 92px;
+    width: 100%;
+    margin: 0;
+    padding: 10px 6px;
+    box-sizing: border-box;
+    font-size: var(--text-base);
+    line-height: 1.3;
+    white-space: normal;
+    text-align: center;
+  }
+  #app-menu-modal .menu-tile :is(img, svg) { display: block; flex: none; width: 34px; height: 34px; object-fit: contain; image-rendering: pixelated; }
+  #app-menu-modal .menu-tile span { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; }
+  #app-menu-modal .menu-minor {
+    grid-column: span 3;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 100%;
+    min-height: 36px;
+    margin: 0;
+    padding: 6px 4px;
+    box-sizing: border-box;
+    font-size: var(--text-sm);
+    line-height: 1.25;
+    white-space: normal;
+    text-align: center;
+  }
+  .app-menu-modal-legal { padding: 0 10px 8px; margin: 0; font-size: var(--text-xs); line-height: 1.35; }
+
+#title-screen .title-mode-card-title { white-space: nowrap; }
+
+/* The Challenge screen and its menus: one layout on every screen size. */
+  /* ---- Challenge screen: every mode the same row, sharing out the height ----
+     Every picture runs down the left edge like a Battle Tower card, square and full height:
+     each row is a size container, so the picture's width can simply be 100cqh. */
+  #challenge-select .history-select-panel.chal-panel {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-height: calc(var(--shell-h) - var(--top-h) - 14px);
+    box-sizing: border-box;
+  }
+  #challenge-select .chal-panel > * { flex: none; }
+  #challenge-select .chal-panel > .chal-records { display: none; }
+  #challenge-select #chal-intro { order: 1; }
+  #challenge-select #chal-endless2 { order: 2; }
+  #challenge-select #chal-weekly { order: 3; }
+  #challenge-select #chal-daily { order: 4; }
+  #challenge-select #chal-spiremon { order: 5; }
+  .chal-records-btn { order: 6; width: 100%; min-height: 34px; margin: 0; }
+  #challenge-select :is(#chal-intro, #chal-endless2, #chal-weekly, #chal-daily, #chal-spiremon) {
+    flex: 1 1 0;
+    min-height: 60px;
+    width: 100%;
+    container-type: size;
+    position: relative;
+    display: flex;
+    align-items: stretch;
+    gap: 0;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-align: left;
+  }
+  /* The words: name, then the sentence. */
+  :is(#chal-intro, #chal-endless2) .chal-intro-body { flex: 1 1 0; display: flex; flex-direction: column; justify-content: center; gap: 1px; min-width: 0; padding: 3px 6px 3px 8px; overflow: hidden; }
+  :is(#chal-intro, #chal-endless2) .chal-intro-title { margin: 0; font-size: var(--text-base); line-height: 1.25; }
+  :is(#chal-intro, #chal-endless2) .chal-intro-desc { display: none; }
+  #challenge-select :is(#chal-intro, #chal-endless2) .chal-square-desc { display: block; margin: 0; padding: 0; -webkit-line-clamp: none; font-size: var(--text-sm); line-height: 1.3; text-align: left; }
+  /* The way in: the same button on the right of every row. */
+  :is(#chal-intro, #chal-endless2) .chal-intro-cta {
+    flex: none; align-self: center; display: flex; align-items: center; justify-content: center; width: 58px; min-height: 30px; margin: 0 8px 0 0; padding: 3px; box-sizing: border-box;
+    border: 2px solid var(--outline); box-shadow: 2px 2px 0 0 var(--outline); background: var(--chal-accent); color: #fff; font-size: 7px; line-height: 1.2; text-align: center; white-space: normal;
+  }
+  /* The picture, on all of them. */
+  :is(#chal-intro, #chal-endless2) .chal-intro-sprite,
+  :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-portrait {
+    flex: none;
+    width: 100cqh;
+    height: 100cqh;
+    max-height: none;
+    min-height: 0;
+    padding: 4px;
+    box-sizing: border-box;
+    object-fit: contain;
+    border-right: 2px solid var(--outline);
+    background: #8a8a92 center / cover no-repeat;
+    box-shadow: inset 0 0 0 999px var(--chal-tint, transparent);
+    image-rendering: pixelated;
+  }
+  /* The permanent ones have their own scene, tinted in the mode's colour. */
+  #chal-intro .chal-intro-sprite { background-image: url('../img/chalbg/elite4drake.png'); --chal-tint: rgba(196, 58, 46, 0.42); }
+  #chal-endless2 .chal-intro-sprite { background-image: url('../img/chalbg/distortion.png'); --chal-tint: rgba(138, 92, 200, 0.3); }
+  #chal-spiremon .chal-weekly-portrait { background-image: url('../img/chalbg/forest.png'); --chal-tint: rgba(47, 143, 106, 0.42); }
+  /* The Weekly's and Daily's come from the colour of the sprite (applyChalScene); this is until it has loaded. */
+  :is(#chal-weekly, #chal-daily) .chal-weekly-portrait { background-image: url('../img/chalbg/city.png'); }
+  #challenge-select .chal-weekly-portrait img { filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.65)); }
+  :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-portrait { display: flex; align-items: center; justify-content: center; }
+  :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-portrait img { width: 100%; height: 100%; max-width: none; max-height: none; object-fit: contain; }
+  /* The rows: picture, what kind of thing it is, its name and sentence, a button on the right. */
+  :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-main { flex: 1 1 0; min-width: 0; display: flex; align-items: stretch; gap: 0; height: 100cqh; padding: 0; }
+  :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-body {
+    flex: 1 1 0; min-width: 0; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-content: center; column-gap: 6px; row-gap: 1px; padding: 13px 8px 3px 8px; overflow: hidden;
+  }
+  :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-body > * { grid-column: 1; margin: 0; min-width: 0; }
+  :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-title { font-size: var(--text-base); line-height: 1.25; text-align: left; }
+  #chal-weekly .chal-square-desc, #chal-daily .chal-square-desc { display: block; -webkit-line-clamp: none; font-size: var(--text-sm); line-height: 1.3; }
+  :is(#chal-weekly, #chal-daily, #chal-spiremon) :is(.chal-weekly-progress, .chal-weekly-streak, .chal-weekly-cta) { display: none; }
+  #chal-weekly .chal-temp-unlock { display: none; }
+  #chal-spiremon :is(.spiremon-leaving, .chal-temp-unlock) { font-size: var(--text-xs); line-height: 1.3; }
+  :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-body > .chal-cta-short {
+    grid-column: 2; grid-row: 1 / span 6; align-self: center; display: flex; align-items: center; justify-content: center; width: 58px; min-height: 30px; padding: 3px; box-sizing: border-box;
+    border: 2px solid var(--outline); box-shadow: 2px 2px 0 0 var(--outline); font-size: 7px; line-height: 1.2; text-align: center; white-space: normal;
+  }
+  :is(#chal-weekly, #chal-spiremon) .chal-cta-short { background: var(--chal-accent); color: #fff; }
+  /* What kind of thing it is: a small line along the top of the words. */
+  #challenge-select :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-banner {
+    position: absolute; top: max(3px, calc(50cqh - 28px)); left: calc(100cqh + 8px); right: 6px; z-index: 1;
+    display: flex; flex-wrap: nowrap; justify-content: flex-start; align-items: center; gap: 8px; min-height: 0; padding: 0; margin: 0; line-height: 1.5; overflow-x: clip; overflow-y: visible;
+    background: none; border: 0; color: var(--chal-accent);
+  }
+  #challenge-select :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-banner :is(.chal-weekly-tag, .chal-weekly-count) { font-size: 7px; color: var(--chal-accent); white-space: nowrap; }
+  /* The Daily says three things on that line, so it runs a size smaller; on the narrowest row the timer gives way. */
+  #challenge-select #chal-daily .chal-weekly-banner :is(.chal-weekly-tag, .chal-weekly-count) { font-size: 6px; }
+  #chal-daily-timer { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; margin: 0; font-size: 6px; color: var(--chal-ink-soft); white-space: nowrap; }
+  #chal-daily .chal-weekly-banner :is(.chal-weekly-tag, .chal-weekly-count) { flex: none; }
+  @container (max-width: 320px) { #chal-daily-timer { display: none; } }
+  /* Short phones: the intro sentence gives its height to the rows. */
+  @media (max-width: 768px) and (max-height: 640px) { #challenge-select .history-header-intro { display: none; } #challenge-select .history-header { padding: 4px 10px; } #challenge-select .history-header-title { margin: 0; } }
+  /* The same picture on the rows inside Endless and the Weekly. */
+  :is(#endless-mode-select, #weekly-select) .weekly-sub { padding: 0 8px 0 0 !important; align-items: stretch; }
+  :is(#endless-mode-select, #weekly-select) .weekly-sub-portrait { flex: 0 0 76px; width: 76px; height: auto; min-height: 76px; padding: 3px; border: 0; border-right: 2px solid var(--outline); background: #8a8a92 center / cover no-repeat; box-shadow: inset 0 0 0 999px var(--chal-tint, transparent); image-rendering: pixelated; }
+  :is(#endless-mode-select, #weekly-select) .weekly-sub-portrait img { filter: drop-shadow(1px 1px 0 rgba(0, 0, 0, 0.65)); }
+  :is(#endless-mode-select, #weekly-select) .weekly-sub .chal-intro-body { align-self: center; padding-block: 4px; }
+  #chal-records-modal .chal-records { width: 100%; margin: 0; border: 0; box-shadow: none; }
+  #chal-records-modal .chal-records-title { display: none; }
+
+/* Big screens: the same rows at a fixed height (there is room to scroll), with larger words. */
+@media (min-width: 769px) and (min-height: 501px) {
+  #weekly-select .weekly-grid > .weekly-sub:only-child { grid-column: 1 / -1; }
+  #challenge-select .history-select-panel.chal-panel { max-width: 680px; min-height: 0; gap: 8px; }
+  #challenge-select :is(#chal-intro, #chal-endless2, #chal-weekly, #chal-daily, #chal-spiremon) { flex: none; height: 112px; min-height: 0; }
+  :is(#chal-intro, #chal-endless2) .chal-intro-body { padding: 6px 10px 6px 14px; gap: 4px; }
+  :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-body { padding: 16px 12px 4px 14px; row-gap: 3px; column-gap: 10px; }
+  :is(#chal-intro, #chal-endless2) .chal-intro-title, :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-title { font-size: var(--text-lg); }
+  #challenge-select :is(#chal-intro, #chal-endless2) .chal-square-desc, #chal-weekly .chal-square-desc, #chal-daily .chal-square-desc { font-size: var(--text-base); line-height: 1.35; }
+  #chal-spiremon :is(.spiremon-leaving, .chal-temp-unlock) { font-size: var(--text-sm); }
+  :is(#chal-intro, #chal-endless2) .chal-intro-cta, :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-body > .chal-cta-short { width: 84px; min-height: 40px; font-size: var(--text-sm); }
+  :is(#chal-intro, #chal-endless2) .chal-intro-cta { margin-right: 12px; }
+  #challenge-select :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-banner { top: calc(50cqh - 30px); left: calc(100cqh + 14px); right: 10px; }
+  #challenge-select :is(#chal-weekly, #chal-daily, #chal-spiremon) .chal-weekly-banner :is(.chal-weekly-tag, .chal-weekly-count) { font-size: var(--text-xs); }
+  #challenge-select #chal-daily .chal-weekly-banner :is(.chal-weekly-tag, .chal-weekly-count) { font-size: var(--text-xs); }
+  #chal-daily-timer { font-size: var(--text-xs); }
+  .chal-records-btn { min-height: 40px; }
+}
+
+/* The bottom ad's own strip, under the ad itself, only while an ad is showing. --ad-foot is set in
+   index.html. An open Fuse bar with no ad in it gets .pkl-ad-empty: see-through and tap-through, but
+   still laid out, because Fuse only refreshes a slot it can see. */
+.pkl-ad-empty { opacity: 0 !important; pointer-events: none !important; }
+#ad-foot-strip {
+  position: fixed;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: var(--ad-foot, 0px);
+  background: #111;
+  pointer-events: none;
+  z-index: 1;
+}
+/* What floats at the bottom of the screen floats above that strip. */
+.achievement-toast, .item-found-toast { bottom: calc(18px + var(--safe-bottom) + var(--ad-foot, 0px)); }
+#new-build-toast { bottom: calc(14px + var(--safe-bottom) + var(--ad-foot, 0px)); }
+
+
+/* ===== Shell: the top bar and the screen area (phones and tablets) ===== */
+@media (max-width: 1023px) {
+  :root {
+    --bar-h: 44px;
+    --top-h: calc(var(--bar-h) + var(--safe-top));
+    --gutter: 8px;
+    --run-menu-height: 0px;
+  }
+  /* On body, not :root: --ad-reserve is set on body, and a variable resolves where it is declared. */
+  body { --shell-h: calc(var(--app-h) - var(--ad-reserve, 0px) - var(--ad-foot, 0px)); }
+  body.run-menu-active { --run-menu-offset: 0px; }
+  body.in-battle { --top-h: var(--safe-top); }
+  html.ad-bar .screen.active { padding-bottom: 4px !important; }
+
+  /* Nothing scrolls but the screen itself. The old min-height: 100lvh made every iPhone page
+     slightly taller than the display whenever Safari's toolbar was up. */
+  html { height: var(--app-h); overflow: hidden; }
+  body { box-sizing: border-box; height: var(--app-h); min-height: 0; overflow: hidden; }
+  /* overflow: hidden still lets code and the iOS keyboard scroll the page, and iOS then restores
+     that position on reload: the whole game sat shifted up until the tab was closed. See pinPageToTop. */
+  @supports (overflow: clip) { body { overflow: clip; } }
+
+  .screen { min-height: 0 !important; width: 100%; box-sizing: border-box; }
+  .screen.active {
+    height: var(--shell-h);
+    overflow: hidden auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    padding:
+      calc(var(--top-h) + 6px)
+      calc(var(--gutter) + var(--safe-right))
+      calc(4px + min(var(--safe-bottom), 8px))
+      calc(var(--gutter) + var(--safe-left)) !important;
+  }
+
+  /* One bar. Replaces the black Menu / Login strip and the floating column of icons.
+     Not with Settings → classic menu bar (body.nav-classic, phones only). */
+  body:not(.nav-classic) #run-menu-bar, body:not(.nav-classic) #run-menu-toggle { display: none !important; }
+  body:not(.nav-classic) .nav-phone { display: inline-flex; }
+  body:not(.nav-classic) .map-menu-icons .nav-more { display: none !important; }
+  body:not(.nav-classic) .map-menu-icons {
+    top: var(--ad-reserve, 0px) !important;
+    left: 0 !important;
+    right: 0 !important;
+    height: var(--top-h);
+    box-sizing: border-box;
+    flex-direction: row;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 4px;
+    padding: var(--safe-top) calc(6px + var(--safe-right)) 0 calc(6px + var(--safe-left));
+    background: #2a2820;
+    border-bottom: 2px solid #111;
+    border-radius: 0;
+  }
+  body.menu-icons-left:not(.nav-classic) .map-menu-icons { flex-direction: row-reverse; }
+  body:not(.nav-classic) .map-menu-icons .btn-icon-sm {
+    flex: 0 1 40px;
+    min-width: 34px;
+    width: auto;
+    height: 34px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+  }
+  /* The display above outranks main.css's run / out-of-run hiding: restate it (Map, Reset,
+     Home only in a run; the Mart only outside one). */
+  body:not(.nav-classic):not(.run-menu-in-run) .map-menu-icons .nav-in-run,
+  body:not(.nav-classic).run-menu-in-run .map-menu-icons .nav-out-of-run { display: none; }
+  body:not(.nav-classic) .map-menu-icons .nav-phone svg { width: 22px; height: 22px; display: block; color: #f3f3f7; }
+  body:not(.nav-classic) .nav-phone-label { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  body:not(.nav-classic) .map-menu-icons .run-menu-btn--warn svg { color: #ffd86b; }
+  body:not(.nav-classic) .map-menu-icons .cloud-loading svg { opacity: 0.5; }
+  body:not(.nav-classic) /* Its button stays in the page for the Menu's Account tile: cloud save keeps it wired up. */
+  .map-menu-icons .nav-phone-account { display: none !important; }
+  body:not(.nav-classic) .map-menu-icons [onclick^="confirmResetRun"] { order: 1; }
+  body:not(.nav-classic) .map-menu-icons [onclick^="openPokedexModal"] { order: 2; }
+  body:not(.nav-classic) .map-menu-icons [onclick^="openPcModal"] { order: 3; }
+  body:not(.nav-classic) .map-menu-icons [onclick^="showLeagueModal"] { order: 4; }
+  body:not(.nav-classic) .map-menu-icons #btn-fullscreen { order: 5; }
+  body:not(.nav-classic) .map-menu-icons [onclick^="openSettingsModal"] { order: 6; }
+  body:not(.nav-classic) .map-menu-icons #btn-mart-nav { order: 7; }
+  body:not(.nav-classic) .map-menu-icons :is(#btn-soullink-nav, #btn-deck-nav) { order: 8; }
+  body:not(.nav-classic) .map-menu-icons .nav-phone-menu { order: 9; }
+
+  body:not(.nav-classic) .pdollar-hud,
+  body.menu-icons-left:not(.nav-classic) .pdollar-hud {
+    position: static;
+    margin: 0 auto 0 0;
+    padding: 4px 7px;
+    font-size: 11px;
+    transform-origin: left center;
+  }
+  body.menu-icons-left:not(.nav-classic) .pdollar-hud { margin: 0 0 0 auto; }
+
+  /* Dialogs stop above the bottom ad and clear the notch. */
+  .game-modal, .item-equip-overlay {
+    box-sizing: border-box;
+    padding:
+      calc(6px + var(--safe-top))
+      calc(6px + var(--safe-right))
+      calc(6px + var(--safe-bottom) + var(--ad-foot, 0px))
+      calc(6px + var(--safe-left));
+  }
+}
+
+
+/* ===== Content: phones in either direction ===== */
+@media (max-width: 768px), (max-height: 500px) and (pointer: coarse) {
+
+  /* ---- Headings ---- */
+  .screen-intro { margin: 0 !important; max-width: none; flex: none; }
+  .screen-intro h2 { font-size: var(--text-2xl); line-height: 1.35; }
+  .screen-desc { margin: 2px 0 0; font-size: var(--text-base); line-height: 1.45; }
+  .screen.active { gap: 6px; }
+
+  /* A screen's way out: a full-width button at the very bottom. */
+  :is(#catch-screen, #item-screen, #swap-screen) > div:not([id]) {
+    order: 10;
+    margin-top: 0 !important;
+    flex: none;
+    width: 100%;
+  }
+  :is(#btn-skip-catch, #btn-skip-item, #btn-skip-passive, #btn-skip-shiny, #btn-trade-continue, #btn-skip-statbuff, #btn-cancel-swap, #btn-skip-trade, #btn-next-map) {
+    width: 100%;
+    max-width: none;
+    min-height: 40px;
+    margin: 0;
+  }
+  /* On a phone too small to fit it all, the buttons still stay in reach. */
+  :is(#gameover-actions, #endless-stage-complete > div:last-child, #swap-screen > div:not([id]), .trade-footer) {
+    position: sticky;
+    bottom: 0;
+    z-index: 5;
+  }
+
+  /* ---- Your team: a dark dock at the bottom, so its text reads on any background ---- */
+  .screen-team-bar {
+    display: flex;
+    flex-wrap: nowrap;
+    justify-content: center;
+    gap: 3px;
+    width: 100%;
+    margin: auto 0 0;
+    padding: 0;
+    flex: none;
+    box-sizing: border-box;
+    background: none;
+    border: 0;
+    order: 9;
+  }
+  /* What is above the team sits in the middle of the free space. */
+  :is(#item-screen, #passive-screen) .screen-intro { margin-top: auto !important; }
+  .screen-team-bar .team-slot {
+    position: relative;
+    flex: 0 0 calc((100% - 15px) / 6);
+    width: auto;
+    min-width: 0;
+    padding: 0;
+    gap: 1px;
+    align-items: center;
+  }
+  .screen-team-bar .team-sprite { width: 36px; height: 36px; margin-inline: auto; }
+  .screen-team-bar .team-slot-name { display: none; }
+  .screen-team-bar .team-slot > div[style*="flex-wrap"] { display: none !important; }
+  .screen-team-bar .team-slot-lv { font-size: var(--text-sm); text-align: center; }
+  /* No panel behind it any more, so the level has to read on sky and on grass. */
+  .screen-team-bar .team-slot-lv { color: #fff; -webkit-text-stroke: 2px #000; paint-order: stroke fill; }
+  /* A bar draws its outline and shadow outside its box, which ate the whole gap: a thinner
+     outline and a pixel in from each side leave a clear 2-3px between neighbours. */
+  :is(.screen-team-bar, #map-screen #team-bar) .hp-bar-bg { width: calc(100% - 2px); margin-inline: 1px; outline-width: 1px; box-shadow: none; }
+  .screen-team-bar .team-slot-item { position: absolute; top: 0; right: 0; width: auto; height: auto; margin: 0; padding: 0; }
+
+  /* ---- Catch and starter: three cards side by side, in the middle of the free space ---- */
+  #catch-screen.active { gap: 5px; justify-content: flex-start; align-items: stretch; }
+  #starter-screen { justify-content: flex-start; align-items: stretch; }
+  #catch-screen .screen-intro { order: 0; margin-top: auto !important; }
+  #catch-screen #catch-choices { order: 1; margin: 0 !important; }
+  /* Item choices and passive choices: three across, the team and the way out at the bottom.
+     Passive's Skip sits inside its choices, so the screen lays them all out on one grid. */
+  #item-screen.active { justify-content: flex-start; }
+  #passive-screen.active:has(#passive-choices:not(.is-replace-grid)) {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    grid-template-rows: minmax(0, 1fr) auto auto auto auto auto minmax(0, 1fr) auto auto;
+    column-gap: 5px;
+    row-gap: 0;
+  }
+  #passive-choices:not(.is-replace-grid) { display: contents; }
+  #passive-screen:has(#passive-choices:not(.is-replace-grid)) .screen-intro { grid-column: 1 / -1; grid-row: 2; margin: 0 0 6px !important; }
+  #passive-choices:not(.is-replace-grid) .item-card { width: auto; max-width: none; min-width: 0; margin: 0 0 5px; box-sizing: border-box; align-self: stretch; }
+  #passive-choices:not(.is-replace-grid) .item-card:nth-child(-n+3) { grid-row: 3; }
+  #passive-choices:not(.is-replace-grid) .item-card:nth-child(n+4):nth-child(-n+6) { grid-row: 4; }
+  #passive-choices:not(.is-replace-grid) .item-card:nth-child(n+7):nth-child(-n+9) { grid-row: 5; }
+  #passive-choices:not(.is-replace-grid) .item-card:nth-child(n+10) { grid-row: 6; }
+  #passive-screen:has(#passive-choices:not(.is-replace-grid)) #passive-team-bar { grid-column: 1 / -1; grid-row: 8; margin: 0 0 5px; }
+  #passive-choices:not(.is-replace-grid) .choice-skip-row { grid-column: 1 / -1; grid-row: 9; width: 100%; margin: 0; }
+  #passive-choices:not(.is-replace-grid) .starting-unlock-row { grid-column: 1 / -1; grid-row: 6; margin: 0 0 5px; }
+  /* The unlockable's full card: centred on the screen rather than over its button. */
+  #passive-choices .starting-unlock-pop.item-card { position: fixed !important; left: 50%; top: 22%; bottom: auto; }
+  /* The shiny stop and the trade reveal: the same layout as the replace screen. */
+  #shiny-screen.active { justify-content: flex-start; gap: 0; }
+  #shiny-content { flex: 1 1 auto; width: 100%; display: flex; flex-direction: column; align-items: center; justify-content: space-between; gap: 8px; }
+  #shiny-content .shiny-title { margin: 0; font-size: var(--text-2xl); line-height: 1.35; text-align: center; }
+  #shiny-content .poke-choice-wrap { display: flex; flex-direction: column; align-items: center; flex: none; width: 100%; height: auto; margin: 0; }
+  #shiny-content .poke-card { flex: none; height: auto; }
+  #shiny-content .poke-trait-preview { display: none; }
+  #shiny-traits { flex: none; width: 100%; padding: 2px; box-sizing: border-box; }
+  /* The power-up's Skip: under everything. */
+  #stat-buff-choices { flex: 1 1 auto; margin-block: 0 !important; grid-template-rows: auto auto auto minmax(0, 1fr); }
+  #btn-skip-statbuff { grid-column: 1 / -1; grid-row: 4; align-self: end; margin: 0; }
+  #catch-team-bar .team-sprite { width: 30px; height: 30px; }
+  #starter-screen:not(:has(.pc-box)) .screen-intro { margin-top: auto !important; }
+  #starter-screen:not(:has(.pc-box)) #starter-layout { margin: 0 0 auto; width: 100%; }
+
+  #catch-screen #catch-choices:not(:has(.poke-trait-preview)),
+  #starter-screen #starter-choices:not(:has(.pc-box)),
+  #starter-screen .starter-card-row {
+    display: flex;
+    flex-direction: row;
+    flex: 0 0 auto;
+    flex-wrap: nowrap;
+    align-items: stretch;
+    gap: 5px;
+    width: 100%;
+    max-width: none;
+  }
+  #catch-screen #catch-choices:not(:has(.poke-trait-preview)) > *,
+  #starter-screen #starter-choices:not(:has(.pc-box)) > *,
+  #starter-screen .starter-card-row > * { flex: 1 1 0; min-width: 0; max-width: none; width: auto; }
+
+  /* Challenge runs: card | trait boxes | Reroll, each row the same on all three. */
+  #catch-screen #catch-choices:has(.poke-trait-preview) {
+    flex: 0 0 auto;
+    width: 100%;
+    max-width: none;
+    gap: 4px 5px;
+    grid-template-rows: auto auto auto;
+    align-items: stretch;
+  }
+  #catch-screen #catch-choices:has(.poke-trait-preview) .poke-choice-wrap { row-gap: 4px; min-height: 0; }
+
+  /* The card: every row the same height on all three, whatever the text says. */
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start;
+    gap: 4px;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    min-width: 0;
+    min-height: 0;
+    padding: 7px 5px 7px;
+    box-sizing: border-box;
+    overflow: hidden;
+    text-align: center;
+  }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-sprite-wrap {
+    position: relative;
+    flex: 0 0 68px;
+    width: 100%;
+    height: 68px;
+    margin: 0;
+  }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-sprite {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-name { flex: none; margin: 0; font-size: var(--text-sm); line-height: 1.3; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: center; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-level { flex: none; margin: 0; line-height: 1.2; text-align: center; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-types { flex: 0 0 15px; height: 15px; margin: 0; flex-wrap: nowrap; justify-content: center; gap: 2px; overflow: hidden; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-types .type-badge { font-size: 7px; padding: 1px 3px; line-height: 1.6; flex: none; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-card-col-stats { flex: none; display: flex; flex-direction: column-reverse; gap: 6px; width: 100%; padding: 3px 0; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-hp .hp-text { display: none; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-stats-bars { gap: 4px; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-move {
+    flex: none;
+    width: 100%;
+    max-width: none;
+    min-width: 0;
+    min-height: 0;
+    margin: 2px 0 0;
+    padding: 5px 3px;
+    gap: 4px;
+  }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .move-name { margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; text-align: center; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .move-meta { display: flex; flex-wrap: nowrap; align-items: center; justify-content: center; gap: 2px; margin: 0; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .move-meta > * { flex: none; height: 12px; line-height: 12px; margin: 0; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .move-meta .move-cat-icon { width: 13px; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .move-meta .move-type-badge { font-size: 7px; padding: 0 2px; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .move-meta .move-power-badge { font-size: 7px; padding: 0 2px; background: none; }
+
+  /* Ability: name plus as much of the text as fits; a tap shows all of it and does not catch. */
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-ability {
+    position: relative;
+    flex: 0 0 54px;
+    height: 54px;
+    width: 100%;
+    display: block;
+    margin: 1px 0 0;
+    padding: 2px 3px;
+    box-sizing: border-box;
+    overflow: hidden;
+    cursor: help;
+  }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-ability .ability-src { display: none; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-ability .ability-name {
+    margin: 0;
+    font-size: var(--text-sm);
+    line-height: 11px;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    text-align: center;
+  }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-ability .ability-desc {
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow: hidden;
+    margin: 1px 0 0;
+    font-size: var(--text-xs);
+    line-height: 9px;
+    text-align: center;
+    color: #2a2820;
+    white-space: normal;
+  }
+  body.dark-mode :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-ability .ability-desc { color: #c8c4b8; }
+
+  /* Trait boxes: one size, always two slots. A single-type Pokémon just leaves the second empty. */
+  #catch-screen #catch-choices .poke-trait-preview:has(.trait-preview-row) {
+    --tbox: 42px;
+    align-self: stretch;
+    height: calc(var(--tbox) * 2 + 3px);
+    min-height: 0 !important;
+    padding: 0;
+    gap: 3px;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
+  #catch-screen #catch-choices .trait-preview-row {
+    position: relative;
+    flex: 0 0 var(--tbox);
+    height: var(--tbox);
+    display: block;
+    padding: 2px 3px;
+    box-sizing: border-box;
+    overflow: hidden;
+    background: #e8e4d8;
+    color: var(--ink);
+    border: 2px solid var(--outline);
+    border-radius: 0;
+    box-shadow: none;
+    cursor: help;
+  }
+  body.dark-mode #catch-screen #catch-choices .trait-preview-row { background: #2a2820; color: var(--text); }
+  #catch-screen #catch-choices .trait-preview-row-up { border-color: #d4a017; background: #fff3c4; }
+  body.dark-mode #catch-screen #catch-choices .trait-preview-row-up { background: #3a3010; }
+  #catch-screen #catch-choices .trait-preview-row-header {
+    display: flex;
+    flex-direction: row-reverse;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 2px;
+    height: 12px;
+    overflow: hidden;
+  }
+  #catch-screen #catch-choices .trait-preview-row-header .type-badge { flex: 0 1 auto; min-width: 0; overflow: hidden; white-space: nowrap; padding: 1px 3px !important; font-size: 6px !important; line-height: 1.4; }
+  #catch-screen #catch-choices .trait-preview-count { flex: none; font-size: 6px; color: inherit; }
+  #catch-screen #catch-choices .trait-preview-new-tag { display: none; }
+  #catch-screen #catch-choices .trait-preview-desc { display: none; }
+  #catch-screen #catch-choices .trait-preview-short { display: block; margin: 2px 8px 0 0; font-size: 7px; line-height: 9px; max-height: 18px; overflow: hidden; color: inherit; text-align: left; }
+  #catch-screen #catch-choices .trait-preview-short b { color: #9a6a00; font-weight: normal; }
+  body.dark-mode #catch-screen #catch-choices .trait-preview-short b { color: #ffd700; }
+
+  /* The small "i" says it can be tapped. */
+  #catch-screen #catch-choices .trait-preview-row::after,
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming:not(.swap-event), #swap-choices) .poke-card .poke-ability::after {
+    content: 'i';
+    position: absolute;
+    right: 1px;
+    bottom: 1px;
+    width: 8px;
+    height: 8px;
+    font-size: 5px;
+    line-height: 8px;
+    text-align: center;
+    color: #fff;
+    background: #5a5448;
+  }
+  #catch-screen #catch-choices .poke-choice-wrap > :is(.btn-secondary, .reroll-placeholder) {
+    width: 100%;
+    height: 30px;
+    min-height: 30px;
+    margin: 0;
+    padding: 0 2px;
+    box-sizing: border-box;
+  }
+  #trait-tooltip { width: 196px; max-width: 196px; white-space: pre-line; line-height: 1.5; z-index: 400; }
+
+  /* ---- Compact Pokémon cards: Swap, Power-up, Win, Game over, Stage complete ---- */
+  #swap-choices, #stat-buff-choices {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-content: start;
+    gap: 5px;
+    width: 100%;
+  }
+  #stat-buff-choices { margin-block: auto; }
+  #stat-buff-choices > :has(> button), #stat-buff-choices > button { grid-column: 1 / -1; }
+  #stat-buff-screen.active { justify-content: flex-start; }
+  #stat-buff-screen button { width: 100%; min-height: 40px; }
+  .stat-buff-poke-wrap { min-width: 0; width: auto; }
+  .stat-buff-poke-wrap > div:not(.poke-card) { margin: 0 !important; font-size: var(--text-xs); color: #1b1b1b; text-align: center; }
+
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .poke-card {
+    display: grid;
+    grid-template-columns: 46px minmax(0, 1fr) auto;
+    grid-template-areas:
+      "name name level"
+      "types types types"
+      "sprite stats stats"
+      "move move move";
+    align-items: center;
+    align-content: start;
+    gap: 1px 5px;
+    width: 100%;
+    height: auto;
+    max-width: none;
+    min-height: 0;
+    padding: 4px 5px;
+    box-sizing: border-box;
+    text-align: left;
+  }
+  /* Variants on compact cards: the glyph alone, the colour says the rest. */
+  /* Traits above the choices, like above the team on the map. They take the instruction line's place. */
+  #swap-screen:has(#swap-traits:not([style*="none"])) #swap-prompt { display: none; }
+  /* Traits, newcomer, team, way out: spread over the screen, with room between them. */
+  #swap-screen.active, #swap-screen:has(#swap-traits:not([style*="none"])).active { justify-content: space-between; gap: 8px; }
+  @media (max-height: 640px) {
+    #swap-screen.active, #swap-screen:has(#swap-traits:not([style*="none"])).active, html.ad-bar #swap-screen.active { gap: 4px; }
+  }
+  @media (max-height: 759px) {
+    #swap-screen:has(#swap-traits:not([style*="none"])) :is(#swap-incoming:not(.swap-event), #swap-choices) .stat-row { height: 7px; min-height: 0; line-height: 7px; }
+    #swap-screen:has(#swap-traits:not([style*="none"])) :is(#swap-incoming:not(.swap-event), #swap-choices) .poke-stats-bars { gap: 1px; }
+  }
+  #swap-traits { flex: none; width: 100%; padding: 2px; box-sizing: border-box; }
+  /* The newcomer is one card like the rest, not a banner. */
+  #swap-incoming > div { display: flex !important; justify-content: center; }
+  #swap-incoming:not(.swap-event) .poke-card { width: calc(50% - 2.5px); }
+  :is(#swap-incoming.swap-event, #shiny-content) .poke-card { width: min(46vw, 180px); }
+  /* The newcomer is what you are deciding on: with a full team, the team shrinks to fit under it. */
+  #swap-screen:has(#swap-incoming.swap-event) #swap-choices .poke-card {
+    grid-template-columns: 40px minmax(0, 1fr) auto;
+    grid-template-areas: "sprite name level" "sprite types types";
+    align-items: center;
+  }
+  #swap-screen:has(#swap-incoming.swap-event) #swap-choices :is(.poke-card-col-stats, .poke-move, .poke-ability) { display: none; }
+  #swap-screen:has(#swap-incoming.swap-event) #swap-choices :is(.poke-sprite-wrap, .poke-sprite) { width: 40px; height: 40px; }
+  #swap-screen:has(#swap-incoming.swap-event):has(#swap-choices > *) #swap-incoming > div > div:not(.poke-card) { display: none; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .poke-sprite-wrap { width: 46px; height: 46px; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .poke-sprite { width: 46px; height: 46px; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .poke-sprite-wrap { grid-area: sprite; margin: 0; position: relative; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .variant-tags .variant-tag { width: 14px; height: 14px; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .poke-name { grid-area: name; margin: 0; text-align: left; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; max-width: 100%; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .poke-level { grid-area: level; margin: 0; white-space: nowrap; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .poke-types { grid-area: types; margin: 0 0 2px; justify-content: flex-start; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .poke-card-col-stats { grid-area: stats; display: block; min-width: 0; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .poke-stats-bars { margin: 0; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .poke-hp .hp-text { display: none; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .poke-move {
+    grid-area: move;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: 4px;
+    min-height: 0;
+    margin: 1px 0 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+  }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .poke-move .move-name { margin: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .move-meta { margin: 0; gap: 3px; flex: none; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) :is(.move-type-badge, .move-cat-icon) { display: none; }
+  :is(#stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) .poke-ability { display: none; }
+
+  /* Swap: the ability as one line; a tap shows all of it and does not release anyone. */
+  :is(#swap-incoming:not(.swap-event), #swap-choices) .poke-ability {
+    position: relative;
+    display: block;
+    grid-column: 1 / -1;
+    min-height: 0;
+    margin: 1px 0 0;
+    padding: 0 9px 0 0;
+    border: 0;
+    background: none;
+    box-shadow: none;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    font-size: 7px;
+    cursor: help;
+  }
+  /* On the small cards the name alone reads better than a cut-off sentence; a tap opens the rest. */
+  :is(#swap-incoming:not(.swap-event), #swap-choices) .poke-ability > * { display: inline; margin: 0; font-size: var(--text-xs); }
+  :is(#swap-incoming:not(.swap-event), #swap-choices) .poke-ability .ability-desc { display: none; }
+  :is(#swap-incoming:not(.swap-event), #swap-choices) .ability-src { display: none; }
+  #swap-screen:has(.poke-ability) #swap-prompt { display: none; }
+
+  /* ---- Trade ---- */
+  #trade-screen { justify-content: flex-start; }
+  #trade-team-list { flex: 1 1 auto; min-height: 0; max-height: none; width: 100%; gap: 4px; margin: 0; }
+  .trade-member-row { padding: 4px 8px; gap: 8px; }
+  .trade-member-sprite { width: 40px; height: 40px; }
+  .trade-footer { order: 9; width: 100%; margin: 0; flex: none; }
+
+  /* ---- Badge earned ---- */
+  #badge-screen.active { justify-content: flex-start; align-items: stretch; }
+  .badge-earn-body { margin-block: auto; }
+  .badge-earn-footer { width: 100%; margin: 0; flex: none; padding: 0; }
+
+  /* ---- End of a run: recap, your team with its stats, the buttons in reach ---- */
+  :is(#win-team, #gameover-team) {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+    width: 100%;
+    margin: 0;
+    flex: none;
+  }
+  #stage-complete-team {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px !important;
+    width: 100%;
+    margin: 0 !important;
+    flex: none;
+  }
+  :is(#win-team, #gameover-team, #stage-complete-team) { max-width: none; }
+  :is(#win-team, #gameover-team, #stage-complete-team) > * { min-width: 0; width: auto; max-width: none; }
+  @media (min-width: 600px) { :is(#win-team, #gameover-team) { grid-template-columns: repeat(3, minmax(0, 1fr)); } #stage-complete-team { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; } }
+
+  #gameover-screen.active { display: flex; flex-direction: column; justify-content: flex-start; align-items: stretch; text-align: center; gap: 4px; }
+  .gameover-title { margin: 0; flex: none; font-size: var(--text-4xl); line-height: 1.2; }
+  #gameover-stats, #stage-complete-stats { flex: none; width: 100%; }
+  #gameover-actions { order: 99; margin-top: auto !important; width: 100%; flex: none; }
+  #gameover-actions > button { flex: 1 1 0; min-width: 0; }
+  #gameover-screen .discord-link { display: none; }
+
+  /* Win: the buttons as a 2x2 grid. */
+  #win-screen.active {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto 1fr auto auto auto;
+    align-content: stretch;
+    text-align: center;
+    gap: 5px;
+  }
+  #win-screen > div:not([id]):not(.win-title) { display: contents !important; }
+  #win-screen.active > :is(.win-title, p, #win-run-count, #win-reward, #win-team, .discord-link) { grid-column: 1 / -1; }
+  #win-screen.active > #win-team { align-self: start; }
+  #win-screen button { min-width: 0; min-height: 36px; width: 100%; margin: 0; white-space: normal; line-height: 1.25; }
+  #win-screen p { margin: 0; font-size: var(--text-sm); }
+  #win-run-count { margin: 0 !important; font-size: 10px !important; }
+  #win-reward { margin: 0; }
+  .win-title { margin: 0; flex: none; font-size: var(--text-3xl); line-height: 1.25; }
+  #win-screen .discord-link { flex: none; margin: 0 auto; padding-block: 2px; }
+
+  #endless-stage-complete.active { justify-content: flex-start; align-items: stretch; gap: 4px; }
+  #stage-complete-msg { font-size: var(--text-xl) !important; flex: none; margin: 0; }
+  #stage-complete-unlock { margin: 0 !important; flex: none; }
+  #stage-complete-unlock:empty, #stage-complete-reward:empty { display: none; }
+  #endless-stage-complete > div:last-child { margin-top: auto; flex: none; }
+  #endless-stage-complete > div:last-child > button { flex: 1 1 0; min-width: 0; min-height: 38px; height: auto; padding-left: 4px; padding-right: 4px; line-height: 1.3; white-space: normal; overflow-wrap: anywhere; }
+
+  /* Run recap: four columns, icon and number side by side. */
+  .run-stats-summary { width: 100%; margin: 0; padding: 4px 6px; border-width: 1px; }
+  .run-stats-summary > *:not(.run-score, .run-mvp, .run-stat-grid) { margin-top: 3px; }
+  .run-stats-head { display: none; }
+  .run-score { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 2px 10px; padding: 3px 6px; margin-bottom: 4px; }
+  .run-score-value { font-size: 14px; }
+  .run-score-breakdown { flex-basis: 100%; margin: 0; }
+  .run-mvp { flex-direction: row; flex-wrap: wrap; justify-content: center; gap: 2px 8px; padding: 2px 6px; margin-bottom: 4px; }
+  .run-mvp-sprite { width: 32px; height: 32px; }
+  .run-stat-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 3px; }
+  .run-stat-cell {
+    display: grid;
+    grid-template-columns: 18px minmax(0, 1fr);
+    align-items: center;
+    justify-items: center;
+    column-gap: 2px;
+    row-gap: 1px;
+    min-width: 0;
+    padding: 2px 1px;
+    border-radius: 4px;
+  }
+  .run-stat-icon { display: flex; align-items: center; justify-content: center; width: 18px; height: 18px; font-size: 12px; }
+  .run-stat-icon > * { width: 16px !important; height: 16px !important; }
+  .run-stat-value { font-size: 9px; }
+  .run-stat-label { font-size: 6px; line-height: 1.2; }
+  .run-stat-label, .run-stat-sub, .run-stat-record { grid-column: 1 / -1; }
+  .run-stat-record { position: static; font-size: 5px; padding: 0 2px; }
+  :is(#gameover-passives, #win-passives, #stage-complete-passives) { flex: none; width: 100%; }
+  #win-screen.active > #win-passives { grid-column: 1 / -1; }
+  .run-passives { width: 100%; margin: 0; padding: 4px 6px; }
+  .run-passives-head { margin: 0 0 3px; }
+  .run-passives-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 2px 6px; max-height: 84px; overflow-y: auto; scrollbar-width: none; }
+  /* Up to six show whole; past that the box scrolls by itself. On normal phones the team's move lines make the room. */
+  .run-passives-list { max-height: 58px; }
+  @media (max-height: 759px) { :is(#gameover-screen, #win-screen, #endless-stage-complete):has(.run-passives) :is(#gameover-team, #win-team, #stage-complete-team) .poke-move { display: none; } }
+  .run-passive { min-width: 0; padding: 0; }
+  .run-passive-name { min-width: 0; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font-size: var(--text-sm); }
+  @media (max-height: 759px) {
+    #passive-screen:has(#passive-choices .item-card:nth-child(4)) .screen-desc { display: none; }
+    #passive-choices:has(.item-card:nth-child(4)) .item-icon { display: flex; justify-content: center; height: 20px; margin: 0; }
+    #passive-choices:has(.item-card:nth-child(4)) .item-icon :is(img, .item-sprite-icon) { width: 20px !important; height: 20px !important; }
+  }
+  /* The box needs its room from somewhere: the team's stat rows, on all but the tallest phones. */
+  @media (max-height: 759px) {
+    :is(#gameover-screen, #win-screen, #endless-stage-complete):has(.run-passives) :is(#gameover-team, #win-team, #stage-complete-team) .stat-row { height: 7px; min-height: 0; line-height: 7px; }
+    :is(#gameover-screen, #win-screen, #endless-stage-complete):has(.run-passives) :is(#gameover-team, #win-team, #stage-complete-team) .poke-stats-bars { gap: 1px; }
+  }
+
+  /* ---- Fight preparation and the fight: the normal layout, the main button floats low ---- */
+  #elite-prep-sub, .elite-prep-order-banner { display: none; }
+  #elite-prep-screen.active { padding-bottom: 70px !important; }
+  /* The bag stays on one line, however much is in it. */
+  .elite-prep-stage { flex-wrap: wrap; }
+  .elite-prep-bag { order: -1; flex: 0 0 100%; width: 100%; max-width: none; box-sizing: border-box; }
+  .elite-prep-field { flex: 1 1 100%; max-width: 640px; margin-inline: auto; }
+  #elite-prep-items { display: flex; flex-wrap: nowrap; gap: 3px; overflow-x: auto; scrollbar-width: none; }
+  #elite-prep-items::-webkit-scrollbar { display: none; }
+  #elite-prep-items .item-badge { flex: none; }
+  .elite-prep-fight-btn {
+    position: fixed;
+    left: 16px;
+    right: 16px;
+    bottom: calc(10px + min(var(--safe-bottom), 8px) + var(--ad-foot, 0px));
+    width: min(360px, calc(100vw - 32px));
+    max-width: none;
+    margin: 0 auto;
+    z-index: 60;
+    box-sizing: border-box;
+  }
+  /* Skip and Continue float in that same spot, at their usual size. */
+  body:not(.deck-battle, .sp-battle) #battle-screen.active { padding-bottom: 60px !important; }
+  body:not(.deck-battle, .sp-battle) .battle-controls {
+    position: fixed;
+    left: 0;
+    right: 0;
+    bottom: calc(16px + min(var(--safe-bottom), 8px) + var(--ad-foot, 0px));
+    padding: 0;
+    z-index: 60;
+    pointer-events: none;
+  }
+  body:not(.deck-battle, .sp-battle) .battle-controls > button { pointer-events: auto; }
+  body:not(.deck-battle, .sp-battle) #btn-continue-battle.battle-continue-loss { position: static; width: auto; margin: 0; }
+
+  /* ---- Map: team and bag as two thin rows, the map gets the rest ---- */
+  #map-screen.active {
+    gap: 4px;
+    padding-top: calc(var(--top-h) + 4px) !important;
+    padding-inline: calc(4px + var(--safe-left)) calc(4px + var(--safe-right)) !important;
+  }
+  .map-panels { width: 100%; gap: 3px; }
+  .map-panels .hud-box { padding: 2px 4px; }
+  .map-panels .hud-label { display: none; }
+  #map-screen #team-bar { display: flex !important; flex-wrap: nowrap; justify-content: center; gap: 2px; }
+  #map-screen #team-bar .team-slot { position: relative; flex: 0 0 calc((100% - 10px) / 6); min-width: 0; width: auto; padding: 0; gap: 0; align-items: center; }
+  #map-screen #team-bar .team-sprite { width: 34px; height: 34px; }
+  #map-screen #team-bar .team-slot-name { display: none; }
+  #map-screen #team-bar .team-slot-lv { font-size: var(--text-sm); line-height: 1.1; }
+  #map-screen #team-bar .hp-bar-bg { margin-block: 1px 0; }
+  #map-screen #team-bar .team-slot-item { position: absolute; top: 0; right: 0; width: auto; height: auto; margin: 0; padding: 0; }
+  .map-panel-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-height: 28px;
+    overflow-x: auto;
+    scrollbar-width: none;
+    white-space: nowrap;
+  }
+  .map-panel-right::-webkit-scrollbar { display: none; }
+  .map-panel-right > * { flex: none; margin: 0 !important; }
+  #item-bar, #passive-badges, #badge-count-panel { display: flex; flex-wrap: nowrap; align-items: center; gap: 3px; min-height: 0; }
+
+  /* ---- Title: the square cards, as big as fit on the screen ---- */
+  #title-screen.active {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-evenly;
+    align-items: center;
+    gap: 4px;
+    padding-bottom: calc(4px + min(var(--safe-bottom), 8px)) !important;
+  }
+  .title-hero { margin: 0; padding: 0; flex: none; }
+  .game-logo { margin: 0; }
+  .game-logo img { height: clamp(30px, 8dvh, 72px); width: auto; display: block; margin: 0 auto; }
+  .game-subtitle { margin: 3px 0 0; }
+  .title-install-app { flex: none; margin: 0 auto; }
+  #title-screen .title-mode-cards {
+    /* Two rows of squares: what is left after the logo, Pokésort, the footer and each row's title. */
+    --square: min(calc((100vw - 34px) / 2), calc((var(--shell-h) - var(--top-h) - 262px) / 2));
+    /* Always two by two: small squares must not start fitting three across. */
+    display: grid;
+    grid-template-columns: repeat(2, var(--square));
+    flex: none;
+    margin: 0;
+    padding: 0;
+    gap: 8px 10px;
+    width: 100%;
+    justify-content: center;
+  }
+  #title-screen .title-mode-cards:has(.title-mode-resume:not([style*="none"])) {
+    --square: min(calc((100vw - 34px) / 2), calc((var(--shell-h) - var(--top-h) - 322px) / 2));
+  }
+  #title-screen .title-mode-col { flex: 0 0 var(--square); width: var(--square); gap: 3px; }
+  #title-screen .title-mode-card { gap: 3px; }
+  /* The words follow the square, so a small one never spills into its neighbour. */
+  #title-screen .title-mode-card-title { min-height: 0; line-height: 1.5; padding-inline: 0; font-size: min(var(--text-2xl), calc(var(--square) / 12.5)); }
+  #title-screen .title-mode-card-action { padding-inline: 2px; font-size: min(var(--text-sm), calc(var(--square) / 14)); }
+  #title-screen .title-mode-resume { padding-block: 4px; margin: 0; }
+  .title-pokechain-wrap { flex: none; width: 100%; margin: 0; padding: 0; }
+  .title-pokechain-card {
+    width: 100%;
+    max-width: none;
+    height: auto;
+    min-height: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+    padding: 6px 10px;
+    box-sizing: border-box;
+    text-align: left;
+  }
+  .title-pokechain-icon { flex: none; width: 40px; height: 40px; }
+  .title-pokechain-icon img { width: 40px; height: 40px; }
+  .title-pokechain-text { flex: 1 1 auto; min-width: 0; align-items: flex-start; }
+  .title-pokechain-sub { display: none; }
+  /* One thing per line: the puzzle's name on the left; what to do, then what it pays, on the right. */
+  .title-pokechain-meta { flex: none; margin: 0; flex-flow: row wrap; align-items: center; justify-content: flex-end; gap: 2px 6px; max-width: 58%; text-align: right; }
+  .title-pokechain-status { order: -1; flex: 0 0 100%; text-align: right; }
+  .title-legal-footer { position: static; flex: none; margin: 0; padding: 0; background: none; border: 0; }
+  .title-legal-footer-inner { padding: 0; }
+  .title-footer-legal { font-size: var(--text-xs); line-height: 1.35; margin: 1px 0 0; }
+
+  /* ---- Lists you pick from before a run ---- */
+  .chal-panel { gap: 5px; }
+  .chal-panel > * { flex: none; }
+  .chal-intro, .chal-weekly-card { width: 100%; margin: 0; box-sizing: border-box; }
+  .chal-intro { padding: 6px 8px; gap: 8px; }
+  .chal-intro--launch { margin: 0; }
+  .chal-intro-sprite { width: 52px; height: 52px; }
+  .chal-intro-title { margin-bottom: 3px; }
+  .chal-intro-desc {
+    font-size: 7px;
+    line-height: 1.45;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+    overflow: hidden;
+  }
+  .chal-endless-launch { flex-wrap: nowrap; }
+  .chal-endless-launch .chal-intro-cta { flex: none; }
+  .weekly-sub { width: 100%; }
+  .weekly-status { margin: 0; }
+  .chal-weekly-card { padding: 0; }
+  .chal-weekly-banner { padding-block: 2px; }
+  .chal-weekly-main { gap: 8px; padding: 5px 8px; }
+  .chal-weekly-portrait { width: 44px; height: 44px; flex: none; }
+  .chal-weekly-portrait img { width: 44px; height: 44px; }
+  .chal-weekly-title { margin-bottom: 2px; }
+  .chal-weekly-progress { font-size: 7px; line-height: 1.4; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
+  .chal-weekly-cta { display: none; }
+  .chal-weekly-streak { transform: scale(.8); }
+  .mono-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 4px; width: 100%; padding: 0; margin: 0; flex: 1 1 auto; min-height: 0; }
+  .mono-tile { min-height: 0; padding: 6px 2px; gap: 4px; }
+  .mono-tile-status { font-size: var(--text-xs); }
+  .chal-header { margin: 0; }
+  .chal-sub { margin: 0; font-size: var(--text-sm); }
+  #monotype-back { width: 100%; min-height: 40px; }
+  #monotype-select > div:not([class]) { width: 100%; flex: none; }
+
+
+  /* ---- Starter from the PC: filters in two sideways rows, the bosses in one, the Pokémon get the rest ---- */
+  #starter-screen:has(.pc-box).active { padding-top: calc(var(--top-h) + 3px) !important; }
+  #starter-layout:has(.pc-box) { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; margin: 0; gap: 3px; width: 100%; max-width: none; }
+  #starter-choices:has(.pc-box) { flex: 1 1 0; min-height: 0; display: flex; flex-direction: column; gap: 3px; width: 100%; max-width: none; margin: 0; }
+  #starter-choices:has(.pc-box) .pc-box { flex: 1 1 0; min-height: 0; height: auto; max-height: none; width: 100%; max-width: none; display: flex; flex-direction: column; margin: 0; }
+  .pc-box > .game-modal-header { min-height: 0; padding: 3px 6px 3px 10px; }
+  .pc-box .game-modal-desc { display: none; }
+  .pc-box-toolbar { padding: 4px 6px; gap: 4px; }
+  .pc-toolbar-sep { display: none; }
+  .pc-toolbar-top, .pc-gen-filter-bar { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; gap: 4px; padding-bottom: 3px; }
+  :is(.pc-toolbar-top, .pc-gen-filter-bar)::-webkit-scrollbar { display: none; }
+  .pc-toolbar-top input[type="search"] { flex: 0 0 120px; min-width: 120px; height: 28px; min-height: 28px; }
+  .pc-toolbar-top .hof-sort-btns { display: flex; flex-wrap: nowrap; flex: none; gap: 4px; }
+  :is(.pc-toolbar-top, .pc-gen-filter-bar, .hof-sort-btns) > button { flex: none; margin: 0; padding: 5px 7px; min-height: 0; line-height: 1.2; }
+  #starter-choices:has(.pc-box) .pc-box-body { flex: 1 1 0; min-height: 0; overflow: hidden auto; }
+  #starter-choices:has(.pc-box) .pc-box .dex-grid { max-height: none; height: auto; overflow: visible; padding: 5px 6px; gap: 4px; }
+  #starter-region-panel { flex: none; width: 100%; max-width: none; margin: 0; padding: 3px 6px; box-sizing: border-box; }
+  #starter-layout:has(.pc-box) #starter-region-panel { align-self: stretch; }
+  .starter-region-grid { grid-template-columns: minmax(0, 1.05fr) repeat(3, minmax(0, 1fr)); gap: 3px; align-items: center; }
+  .starter-region-title { font-size: 6px; line-height: 1.35; padding: 0; min-height: 0; }
+  .starter-region-col { padding: 0; gap: 1px; min-height: 0; }
+  .starter-region-col .region-stage-name, .starter-region-col .region-stage-level { font-size: 6px; line-height: 1.2; }
+  .starter-region-col .type-badge { font-size: 5px; padding: 0 2px; line-height: 1.5; }
+
+  /* ---- Dialogs: lists take nearly the whole display, with a small gap on every side
+     so the screen behind still shows (owner, Nov 13 2026). Pokésort uses the same frame. ---- */
+  :is(#pokedex-modal, #pc-modal, #item-guide-modal, #achievements-modal, #hof-modal, #settings-modal,
+      #patch-notes-modal, #shop-modal, #mega-stones-modal, #dex-detail-modal, #league-modal, #chal-records-modal,
+      #pokechain-modal) {
+    padding:
+      calc(var(--dlg-gap, 10px) + var(--safe-top))
+      calc(var(--dlg-gap, 10px) + var(--safe-right))
+      calc(var(--dlg-gap, 10px) + var(--safe-bottom) + var(--ad-foot, 0px))
+      calc(var(--dlg-gap, 10px) + var(--safe-left));
+  }
+  /* Very short screens (320x480): a thinner frame, so the Pokédex still shows half a screen of Pokémon. */
+  @media (max-height: 520px) { :root { --dlg-gap: 6px; } }
+  /* Gym Challenge badge on the game-over / win recap: just its sprite, in the score box's empty left
+     corner, so it takes no row and those screens still fit above the ad bar. */
+  :has(> .run-badge-recap) { position: relative; }
+  .run-badge-recap { position: absolute; top: 9px; left: 10px; margin: 0; z-index: 1; }
+  .run-badge-recap img { width: 22px; height: 22px; }
+  .run-badge-recap span { display: none; }   /* the name stays in the sprite's title */
+  :is(#pokedex-modal, #pc-modal, #item-guide-modal, #achievements-modal, #hof-modal, #settings-modal,
+      #patch-notes-modal, #shop-modal, #mega-stones-modal, #dex-detail-modal, #league-modal, #chal-records-modal,
+      #pokechain-modal) .game-modal-box {
+    width: 100%;
+    max-width: none;
+    height: 100%;
+    max-height: none;
+  }
+  .game-modal-header { padding: 5px 8px 5px 12px; min-height: 40px; box-sizing: border-box; }
+  .game-modal-heading { gap: 2px; }
+  .game-modal-desc { font-size: var(--text-xs); }
+
+  /* The menu: six big tiles, the rest small below them, all of it on one screen. */
+  .game-modal-box--menu { max-width: none; width: 100%; max-height: 100%; }
+
+  /* Settings: rows close enough that most of it shows at once. */
+  .settings-section-title { padding: 5px 12px; }
+  .settings-row { padding: 6px 12px; min-height: 36px; box-sizing: border-box; }
+
+  /* The item guide: more per screen. */
+  .item-guide-row { padding: 5px 8px; gap: 8px; }
+  .item-guide-list { padding: 4px 8px 8px; gap: 4px; }
+}
+
+/* Very small phones: two lines of ability text and slightly smaller trait boxes, so the buttons still fit. */
+@media (max-width: 768px) and (max-height: 600px) {
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-ability { flex-basis: 39px; height: 39px; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-ability .ability-desc { -webkit-line-clamp: 2; }
+  #catch-screen #catch-choices .poke-trait-preview:has(.trait-preview-row) { --tbox: 39px; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card { padding: 3px 4px 4px; gap: 2px; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-card-col-stats { gap: 3px; padding: 0; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-stats-bars { gap: 1px; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-move { padding: 2px 3px; gap: 2px; margin-top: 1px; }
+}
+
+/* ===== With the ad's strip taken out, what is left of a normal phone (about 600px) ===== */
+@media (max-width: 768px) and (max-height: 680px) {
+  html.ad-bar #swap-prompt { display: none; }
+  html.ad-bar .game-logo img { height: clamp(30px, 6dvh, 56px); }
+  html.ad-bar #title-screen .title-mode-cards { --square: min(calc((100vw - 34px) / 2), calc((var(--shell-h) - var(--top-h) - 236px) / 2)); gap: 3px 10px; }
+  html.ad-bar #title-screen .title-mode-cards:has(.title-mode-resume:not([style*="none"])) { --square: min(calc((100vw - 34px) / 2), calc((var(--shell-h) - var(--top-h) - 290px) / 2)); }
+  html.ad-bar #title-screen .title-pokechain-icon, html.ad-bar #title-screen .title-pokechain-icon img { width: 30px; height: 30px; }
+  html.ad-bar #title-screen .title-pokechain-card { padding-block: 3px; }
+  /* A legendary, shiny or Aurora arriving with an ad on screen. */
+  html.ad-bar #swap-screen:has(#swap-incoming.swap-event):has(#swap-choices > *) .screen-intro { display: none; }
+  html.ad-bar :is(#swap-incoming.swap-event, #shiny-content) .poke-card .poke-sprite-wrap { flex-basis: 48px; height: 48px; }
+  html.ad-bar :is(#swap-incoming.swap-event, #shiny-content) .stat-row { height: 7px; min-height: 0; line-height: 7px; }
+  html.ad-bar :is(#swap-incoming.swap-event, #shiny-content) .poke-stats-bars { gap: 1px; }
+  html.ad-bar #swap-screen:has(#swap-traits:not([style*="none"])).active { gap: 3px; }
+  html.ad-bar #swap-screen.active { gap: 3px; padding-top: calc(var(--top-h) + 3px) !important; padding-bottom: calc(3px + var(--safe-bottom)) !important; }
+  html.ad-bar :is(#swap-incoming:not(.swap-event), #swap-choices, #win-team, #gameover-team, #stage-complete-team) .stat-row { height: 7px; min-height: 0; line-height: 7px; }
+  html.ad-bar :is(#swap-incoming:not(.swap-event), #swap-choices, #win-team, #gameover-team, #stage-complete-team) .poke-stats-bars { gap: 1px; }
+  /* The end screens keep the stats; the move names are what goes. */
+  html.ad-bar :is(#win-team, #gameover-team, #stage-complete-team) .poke-move { display: none; }
+}
+
+/* ===== And of the smallest iPhones (about 490px) ===== */
+@media (max-width: 768px) and (max-height: 600px) {
+  html.ad-bar :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-sprite-wrap { flex-basis: 48px; height: 48px; }
+  html.ad-bar :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-ability { flex-basis: 30px; height: 30px; }
+  html.ad-bar :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-ability .ability-desc { -webkit-line-clamp: 1; }
+  html.ad-bar :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .stat-row { height: 7px; min-height: 0; line-height: 7px; }
+  html.ad-bar #catch-screen.active { gap: 3px; padding-top: calc(var(--top-h) + 3px) !important; padding-bottom: calc(3px + var(--safe-bottom)) !important; }
+  html.ad-bar #catch-team-bar .team-sprite { width: 24px; height: 24px; }
+  html.ad-bar #catch-team-bar .team-slot-lv { display: none; }
+  html.ad-bar #catch-screen #catch-choices .poke-choice-wrap > :is(.btn-secondary, .reroll-placeholder) { height: 24px; min-height: 24px; }
+  html.ad-bar #btn-skip-catch { min-height: 34px; height: 34px; }
+  html.ad-bar #title-screen .title-mode-cards { --square: min(calc((100vw - 34px) / 2), calc((var(--shell-h) - var(--top-h) - 214px) / 2)); }
+  html.ad-bar #title-screen .title-mode-cards:has(.title-mode-resume:not([style*="none"])) { --square: min(calc((100vw - 34px) / 2), calc((var(--shell-h) - var(--top-h) - 268px) / 2)); }
+  html.ad-bar .trade-member-row { padding-block: 1px; }
+  html.ad-bar .trade-member-sprite { width: 32px; height: 32px; }
+}
+
+/* Short phones: Home gives the subtitle's line to the cards. */
+@media (max-width: 768px) and (max-height: 600px) {
+  /* After a run the team's stats matter least: small cards, so the recap, the passives and the buttons all fit. */
+  :is(#win-screen, #gameover-screen, #endless-stage-complete) :is(#win-team, #gameover-team, #stage-complete-team) .poke-card {
+    grid-template-columns: 34px minmax(0, 1fr) auto;
+    grid-template-areas: "sprite name level" "sprite types types";
+    align-items: center;
+  }
+  :is(#win-screen, #gameover-screen, #endless-stage-complete) :is(#win-team, #gameover-team, #stage-complete-team) :is(.poke-card-col-stats, .poke-move, .poke-ability) { display: none; }
+  :is(#win-screen, #gameover-screen, #endless-stage-complete) :is(#win-team, #gameover-team, #stage-complete-team) :is(.poke-sprite-wrap, .poke-sprite) { width: 34px; height: 34px; }
+  #win-team > div > div:not(.poke-card) { display: none; }
+  .run-passives-list { max-height: 40px; }
+  /* Replacing someone: the stats you are choosing by stay, the move lines go. */
+  :is(#swap-incoming:not(.swap-event), #swap-screen:not(:has(#swap-incoming.swap-event)) #swap-choices) .poke-move { display: none; }
+  :is(#swap-incoming:not(.swap-event), #swap-screen:not(:has(#swap-incoming.swap-event)) #swap-choices) .stat-row { height: 7px; min-height: 0; line-height: 7px; }
+  :is(#swap-incoming:not(.swap-event), #swap-screen:not(:has(#swap-incoming.swap-event)) #swap-choices) .poke-stats-bars { gap: 1px; }
+  html.ad-bar #swap-screen:not(:has(#swap-incoming.swap-event)) .screen-intro { display: none; }
+  html.ad-bar #swap-screen:not(:has(#swap-incoming.swap-event)) #swap-traits { display: none !important; }
+  html.ad-bar #swap-screen.active { gap: 2px; }
+  /* A full Mart: selling needs the items, not the team or the instruction line. */
+  #passive-screen:has(#passive-choices .item-card:nth-child(4)) #passive-team-bar { display: none; }
+  /* Powering up: the stats are what you choose by, the move lines give way to the ad. */
+  html.ad-bar #stat-buff-choices .poke-move { display: none; }
+  /* A legendary or shiny arriving with an ability, with an ad: smaller team sprites. */
+  html.ad-bar #swap-screen:has(#swap-incoming.swap-event) #swap-choices .poke-card { grid-template-columns: 28px minmax(0, 1fr) auto; }
+  html.ad-bar #swap-screen:has(#swap-incoming.swap-event) #swap-choices :is(.poke-sprite-wrap, .poke-sprite) { width: 28px; height: 28px; }
+  /* The Challenge rows give up a little height each. */
+  html.ad-bar #challenge-select :is(#chal-intro, #chal-endless2, #chal-weekly, #chal-daily, #chal-spiremon) { min-height: 54px; }
+  .game-subtitle { display: none; }
+  #title-screen .title-mode-cards { --square: min(calc((100vw - 34px) / 2), calc((var(--shell-h) - var(--top-h) - 240px) / 2)); }
+  #title-screen .title-mode-cards:has(.title-mode-resume:not([style*="none"])) { --square: min(calc((100vw - 34px) / 2), calc((var(--shell-h) - var(--top-h) - 300px) / 2)); }
+  html.ad-bar #title-screen .title-mode-cards { --square: min(calc((100vw - 34px) / 2), calc((var(--shell-h) - var(--top-h) - 214px) / 2)); }
+  html.ad-bar #title-screen .title-mode-cards:has(.title-mode-resume:not([style*="none"])) { --square: min(calc((100vw - 34px) / 2), calc((var(--shell-h) - var(--top-h) - 268px) / 2)); }
+}
+
+/* ===== Phones held sideways: the same screens, spread across instead of down ===== */
+@media (max-height: 500px) and (pointer: coarse) {
+  .screen.active { padding-top: calc(var(--top-h) + 3px) !important; padding-bottom: calc(3px + var(--safe-bottom)) !important; gap: 3px; }
+
+  /* Title */
+  .title-hero { display: flex; align-items: center; justify-content: center; gap: 12px; }
+  .game-logo img { height: 26px; }
+  .game-subtitle { margin: 0; }
+  #title-screen .title-mode-cards { --square: min(calc((100vw - 64px) / 4), calc(var(--shell-h) - var(--top-h) - 178px)) !important; display: flex; flex-wrap: nowrap; }
+  #title-screen .title-mode-cards:has(.title-mode-resume:not([style*="none"])) { --square: min(calc((100vw - 64px) / 4), calc(var(--shell-h) - var(--top-h) - 204px)) !important; }
+  .title-footer-legal { display: none; }
+
+  /* Map: panels on the left, the map gets the height */
+  #map-screen.active { flex-direction: row; align-items: stretch; gap: 6px; }
+  .map-panels { order: 1; flex: 0 0 40%; width: 40%; max-width: 40%; flex-direction: column; flex-wrap: nowrap; justify-content: center; overflow: hidden auto; }
+  .map-panels .hud-box { flex: none; order: 0; width: 100%; height: auto; max-height: none; box-sizing: border-box; }
+  .map-panel-traits { display: flex; flex-direction: row; overflow-x: auto; max-width: none; min-width: 0; padding: 2px; scrollbar-width: none; }
+  .map-panel-traits .trait-row { flex-shrink: 0; margin: 0 8px 0 0; padding: 0 8px 0 0; border-bottom: none; border-right: 1px solid var(--border); }
+  .map-panel-traits .trait-row:last-child { border-right: none; padding-right: 0; margin-right: 0; }
+  .map-panel-traits .trait-desc { display: none; }
+  #map-container { order: 2; flex: 1 1 0; min-width: 0; height: auto; min-height: 0; align-self: stretch; }
+
+  /* Catch: heading, the choices, then team and Skip side by side */
+  #catch-screen.active { flex-flow: row wrap; align-content: center; align-items: stretch; }
+  #catch-screen .screen-intro { flex: 0 0 100%; margin: 0 !important; }
+  #catch-screen .screen-desc { display: none; }
+  #catch-screen #catch-choices { flex: 0 0 100%; margin: 0 !important; }
+  #catch-team-bar { flex: 2 1 0; width: auto; margin: 0; }
+  #catch-screen > div:not([id]) { flex: 1 1 0; width: auto; }
+
+  /* Items and passives the same: team and the way out share the last row. */
+  #item-screen.active { flex-flow: row wrap; align-content: center; align-items: stretch; }
+  #item-screen .screen-intro { flex: 0 0 100%; margin: 0 !important; }
+  #item-screen .screen-desc { display: none; }
+  #item-screen #item-choices { flex: 0 0 100%; margin: 0 !important; }
+  #item-team-bar { order: 9; flex: 2 1 0; width: auto; margin: 0; }
+  #item-screen > div:not([id]) { flex: 1 1 0; width: auto; }
+  #passive-screen:has(#passive-choices:not(.is-replace-grid)) .screen-desc { display: none; }
+  #passive-screen:has(#passive-choices:not(.is-replace-grid)) #passive-team-bar { grid-column: 1 / span 2; grid-row: 8; margin: 0; }
+  #passive-choices:not(.is-replace-grid) .choice-skip-row { grid-column: 3; grid-row: 8; }
+  #passive-choices:not(.is-replace-grid) .starting-unlock-row { grid-column: 1 / -1; grid-row: 6; margin: 0 0 5px; }
+
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card {
+    display: grid;
+    grid-template-columns: 58px minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto;
+    align-items: start;
+    column-gap: 4px;
+    text-align: left;
+  }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-sprite-wrap { grid-column: 1; grid-row: 1 / span 4; height: 58px; align-self: center; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-name { grid-column: 2; grid-row: 1; text-align: left; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-level { grid-column: 2; grid-row: 2; text-align: left; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-types { grid-column: 2; grid-row: 3; justify-content: flex-start; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-move { grid-column: 2; grid-row: 4; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-card-col-stats { grid-column: 3; grid-row: 1 / span 4; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-ability { grid-column: 1 / -1; flex: none; height: 30px; }
+  :is(#catch-choices, #starter-choices:not(:has(.pc-box)), .starter-card-row, #swap-incoming.swap-event, #shiny-content) .poke-card .poke-ability .ability-desc { -webkit-line-clamp: 2; }
+  #catch-screen #catch-choices .poke-trait-preview:has(.trait-preview-row) { --tbox: 39px; flex-direction: row; height: var(--tbox); }
+  #catch-screen #catch-choices .trait-preview-row { flex: 1 1 0; min-width: 0; }
+  #catch-screen #catch-choices .poke-choice-wrap > :is(.btn-secondary, .reroll-placeholder) { height: 24px; min-height: 24px; }
+
+  /* Compact cards three across; Swap keeps the newcomer and the way out on the left */
+  #swap-screen.active {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 3fr);
+    grid-template-rows: auto 1fr auto;
+    gap: 3px 6px;
+  }
+  #swap-screen .screen-intro { grid-column: 1; grid-row: 1; }
+  #swap-incoming { grid-column: 1; grid-row: 2; }
+  #swap-choices { grid-column: 2; grid-row: 1 / -1; margin: 0; }
+  #swap-screen > div:not([id]) { grid-column: 1; grid-row: 3; }
+  :is(#swap-choices, #stat-buff-choices, #win-team, #gameover-team, #stage-complete-team) { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
+  .run-stat-grid { grid-template-columns: repeat(8, minmax(0, 1fr)); }
+  #app-menu-modal .menu-tile { grid-column: span 2; min-height: 66px; gap: 4px; padding: 5px; }
+  #app-menu-modal .menu-tile :is(img, svg) { width: 24px; height: 24px; }
+  #app-menu-modal .menu-minor { grid-column: span 2; min-height: 30px; }
+  /* Sideways: fixed rows, the list scrolls. */
+  #challenge-select .history-select-panel.chal-panel { min-height: 0; }
+  #challenge-select :is(#chal-intro, #chal-endless2, #chal-weekly, #chal-daily, #chal-spiremon) { flex: none; height: 72px; }
+}
+
+/* A mark in the corner of an ability only added noise; the sentence itself says there is more. */
+@media (max-width: 768px), (max-height: 500px) and (pointer: coarse) {
+  .poke-card .poke-ability::after { content: none !important; }
+}
+
+/* Passive Items 2.0 on phones: a locked starting item shows its name and lock only, so six
+   cards fit; the type badges are smaller. */
+@media (max-width: 768px), (max-height: 500px) and (pointer: coarse) {
+  #passive-choices .item-card.locked :is(.item-desc, .passive-types) { display: none; }
+  #passive-choices .item-card.locked .starting-item-lock img { height: 28px; }
+  #passive-choices .passive-types { gap: 2px; padding-top: 4px; }
+  #passive-choices .passive-types .type-badge { font-size: 6px; padding: 1px 3px; }
+}
+@media (max-width: 768px) and (max-height: 759px) {
+  #passive-screen:has(#passive-choices.is-replace-grid .item-card:nth-child(5)) #passive-team-bar { display: none; }
+}
+
+/* Landscape phones are wider than 768px: keep the desktop trait line and its i hidden
+   on the catch screen (it showed twice). */
+@media (max-height: 500px) and (pointer: coarse) {
+  #catch-screen #catch-choices :is(.trait-preview-line, .trait-i) { display: none; }
+}
+
+/* Classic menu bar (owner, Nov 11 2026): Settings can bring back the old phone navigation —
+   the Menu / Reset / Account strip outside a run and the floating icon column — instead of
+   the one top bar. body.nav-classic is only set on phones (applyMenuSideClass). */
+@media (max-width: 768px) {
+  body.nav-classic { --run-menu-height: 64px; --top-h: var(--safe-top); }
+  body.nav-classic.run-menu-active:not(.run-menu-in-run):not(.in-battle) { --top-h: calc(var(--run-menu-height) + var(--safe-top)); }
+}
+
+/* The passive replace screen on short phones (player report, Nov 12 2026): the screen was
+   centred, so when the cards ran taller than the display the top half was pushed above
+   the scroll start and could not be reached. Start at the top; the intro's auto margin
+   still centres it when everything fits. */
+@media (max-width: 768px), (max-height: 500px) and (pointer: coarse) {
+  #passive-screen.active { justify-content: flex-start; }
+}
