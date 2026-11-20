@@ -75,6 +75,8 @@
             const s2 = tinte(clon(sa), m.santuario.color ?? m.color, m.santuario.k ?? .3);
             Object.assign(s2, { name: m.santuario.name, heart: m.santuario.heart, legendaries: m.santuario.legendaries ?? o.legendaries });
             if (m.santuario.music) s2.music = m.santuario.music;
+            // Datos propios del santuario (arena, modelos, cielo…) tal cual, sin tinte: los usa la Temporada 4.
+            if (m.santuario.datos) Object.assign(s2, m.santuario.datos);
             o.sanctuary = s2;
           }
           out.push(o);

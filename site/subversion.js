@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.64';
+  const SUB = '1.65';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.65',
+      date: Date.UTC(2026, 10, 20, 20, 0),
+      tag: 'nuevo',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.65`,
+      summary: 'Temporada 4 (pruebas): Suicune en El Ojo del Lago, con su arena y sus tres fases originales.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **El Ojo del Lago**: el santuario original del Lago de la Furia, con islotes unidos por pasarelas, agua propia y tres **repetidores** del Rocket.`,
+        `- **Suicune**, con su combate original en tres fases: **Viento del norte**, **Paz Mental** (cada señal lo enfurece más) y **El lago se desborda** (las olas cruzan la arena, los bancos se inundan y el agua va cerrando el círculo).`,
+        `- Suicune corre oculto en la niebla y solo sale para atacar. **Mantén pulsado E** junto a cada repetidor para apagarlo: con los tres apagados se le pasa la furia, se arrodilla y recibe mucho más daño.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.64',
       date: Date.UTC(2026, 10, 20, 17, 0),
       tag: 'nuevo',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.64`,
@@ -3520,6 +3539,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.65',
+      date: '2026-11-20',
+      title: 'Suicune y El Ojo del Lago.',
+      notes: [
+        ['new', 'Santuario El Ojo del Lago con repetidores que se apagan manteniendo E.'],
+        ['new', 'Combate de Suicune en tres fases con el lago desbordándose.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.64',

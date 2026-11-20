@@ -1,5 +1,12 @@
 # Cambios respecto al port original
 
+## Suicune y El Ojo del Lago (Subversión 1.65)
+- `main-…js`: arena `rage` portada de la 0.10.13 (`pbRage()`: clase y disposición, perezosa para extender `dm`); importa `MeshBasicMaterial` y `DataTexture` de Three.
+- `menus-…js`: kit de Suicune (`pbSuicune()`, en `BP` para `rage`/245), `generateArena` de la 0.10.13 (admite `sink` y `bowl`) y catálogo `yd.ragelake`.
+- `regiones.js`: `santuario.datos` copia los datos propios del santuario sin teñir. `temporada4.js` da los originales de El Ojo del Lago.
+- `assets/env/ragelake/`, `assets/models/rage_*.glb`: originales.
+- `tools/temporada4/`: `libres.js` (identificadores libres), `renombrar.js` (renombra solo los libres) y `alinear.py` (equivalencias de nombres minificados entre versiones), para portar más contenido.
+
 ## Lago de la Furia: antenas y pesca (Subversión 1.64)
 - `temporada4.js`: clase `Furia` portada de la 0.10.13 (`PB_T4.update/limpiar`); luces de antena con partículas.
 - `main-…js`: `window.__pbT4lib={R,N,F,c}` (Pokédex, formas de partícula, azar y banderas) y llamadas a `PB_T4` junto a las del Valle Iris.
