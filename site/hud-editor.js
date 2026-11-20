@@ -351,6 +351,31 @@ body.pb-hud-editing.pb-hud-touch .tc{display:block!important;pointer-events:none
     }
   };
 
+  // 1.56: orden fijo de los botones MEGA · DMAX · TERA · Z (antes TERA y Z se cambiaban de sitio según qué script
+  // los ponía primero) y, con un menú abierto (mapa, pausa, cartas…), esos botones y la bolsa no se pintan encima.
+  const fijo = document.createElement('style');
+  fijo.textContent = `.pb-mx .mg{order:1}.pb-mx .dx{order:2}.pb-mx .pb-tera{order:3}.pb-mx .pb-z{order:4}
+body.pb-menu-abierto:not(.pb-hud-editing) .pb-mx,body.pb-menu-abierto:not(.pb-hud-editing) .pb-bolsa,body.pb-menu-abierto:not(.pb-hud-editing) .pb-evoreto{visibility:hidden!important}`;
+  document.head.append(fijo);
+  setInterval(() => { const r = window.__pbRun; document.body.classList.toggle('pb-menu-abierto', !!(r?.player && r.state !== 'play' && r.ui?.modalEl?.isConnected)); }, 150);
+  // 1.56: tocar el minimapa abre el mapa grande (ahí ves dónde estás en toda la zona y puedes poner hasta 3 marcas o
+  // seguir un objetivo).
+  const abreMapa = run => {
+    for (const k of Object.getOwnPropertyNames(Object.getPrototypeOf(run))) {
+      try { if (typeof run[k] === 'function' && /showMap\(this\)/.test(String(run[k])) && /paused/.test(String(run[k]))) { run[k](); return true; } } catch {}
+    }
+    if (run.state === 'play' && run.ui?.showMap) { run.state = 'paused'; run.ui.showMap(run); return true; }
+    return false;
+  };
+  addEventListener('pointerdown', e => {
+    const run = window.__pbRun; if (!run?.player || run.state !== 'play' || H.editing) return;
+    const mm = document.querySelector('#hud .hud-tr .minimap'); if (!mm) return;
+    const r = mm.getBoundingClientRect();
+    if (r.width < 10 || e.clientX < r.left || e.clientX > r.right || e.clientY < r.top || e.clientY > r.bottom) return;
+    if (getComputedStyle(mm).opacity === '0') return;
+    if (abreMapa(run)) { e.stopPropagation(); e.preventDefault(); }
+  }, true);
+
   H.apply();
   addEventListener('pb-orientation', () => { if (!H.editing) { H.layout = load(); H.apply(); } });
   // Fila «Editor del HUD» en Ajustes > Gráficos (debajo de Orientación). Solo abre el editor durante una partida.

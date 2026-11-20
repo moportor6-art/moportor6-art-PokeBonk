@@ -4,16 +4,35 @@
    Para una nueva subversión: cambia SUB y añade una entrada al principio de "items" y de "changelog". */
 (() => {
   const OFICIAL = '0.9.9';
-  const SUB = '1.55';
+  const SUB = '1.56';
   const AUTOR = 'Actualización hecha por moportor6 (no oficial)';
   const PIE = '> Juego original de Charcher. Port Android de JayElDragon.';
 
   const items = [
     {
+      id: 'moportor6-sub-1.56',
+      date: Date.UTC(2026, 10, 20, 3, 0),
+      tag: 'correccion',
+      pinned: true,
+      sub: true,
+      author: AUTOR,
+      title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.56`,
+      summary: 'Minimapa táctil que abre el mapa grande, botones MEGA/DMAX/TERA/Z en orden fijo y sin pintarse encima de los menús.',
+      body: [
+        `Subversión **no oficial** hecha por moportor6 sobre la versión **${OFICIAL}** oficial. La versión oficial no cambia.`,
+        ``,
+        `- **Minimapa táctil**: tócalo y se abre el mapa grande: ves en qué parte de toda la zona estás, lo descubierto, y puedes poner hasta 3 marcas o tocar un icono para seguirlo (la flecha de la pantalla te guía).`,
+        `- **Botones que se cambiaban de sitio**: TERA y Z se intercambiaban según la partida; ahora el orden es siempre MEGA · DMAX · TERA · Z.`,
+        `- **Encima de los menús**: los botones MEGA/DMAX/TERA/Z, la bolsa de bayas y los retos de evolución se pintaban encima del mapa, la pausa o las cartas; ahora se esconden mientras hay un menú abierto.`,
+        ``,
+        PIE
+      ].join('\n')
+    },
+    {
       id: 'moportor6-sub-1.55',
       date: Date.UTC(2026, 10, 20, 2, 30),
       tag: 'correccion',
-      pinned: true,
+      pinned: false,
       sub: true,
       author: AUTOR,
       title: `PokéBonk Remaster: versión ${OFICIAL} oficial - Subversión 1.55`,
@@ -3351,6 +3370,16 @@
   // Entradas propias para la ventana Novedades (botón de la versión junto al logo).
   // Categorías iguales a las oficiales: new, better, balance, fix, event, coop.
   const changelog = [
+    {
+      oficial: OFICIAL,
+      sub: '1.56',
+      date: '2026-11-19',
+      title: 'Minimapa táctil y botones en su sitio.',
+      notes: [
+        ['new', 'Tocar el minimapa abre el mapa grande con marcas y objetivos.'],
+        ['fix', 'TERA y Z se cambiaban de sitio y los botones se pintaban encima de los menús.']
+      ]
+    },
     {
       oficial: OFICIAL,
       sub: '1.55',

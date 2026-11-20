@@ -1,5 +1,8 @@
 # Cambios respecto al port original
 
+## Minimapa y botones (Subversión 1.56)
+- `hud-editor.js`: `order` fijo en `.pb-mx`; clase `body.pb-menu-abierto` (partida con `ui.modalEl`) que oculta `.pb-mx`, `.pb-bolsa` y `.pb-evoreto`; `pointerdown` en captura sobre `.minimap` que llama al método de la partida que hace `showMap(this)`.
+
 ## Editor del HUD (Subversión 1.55)
 - `hud-editor.js`: `ITEMS` `.hud-party > .ally:nth-child(1-4)`; `H.huecos()` marca con `.pb-he-ph` (hueco transparente, hijos ocultos) solo las piezas con `display:none` o sin tamaño al abrir el editor y lo quita al cerrar.
 
