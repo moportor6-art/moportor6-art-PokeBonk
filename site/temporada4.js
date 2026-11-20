@@ -19,12 +19,18 @@
       unlock: 'Zona de pruebas de la Temporada 4', zonas: ["Tarde de tormenta", "Noche de la Furia"], zonasDatos: ZONAS,
       santuario: { de: 'coast', name: "El Ojo del Lago", heart: "Corazón de la tormenta", legendaries: [245], color: 16726602, k: 0, music: {"root": 50, "scale": [0, 2, 3, 5, 7, 8, 10], "bpm": 132, "mood": "tense"}, datos: {"arena": "rage", "pack": "ragelake", "shrine": "rage_altar", "portal": "rage_portal", "sky": [1053738, 4856362], "fog": 2365998, "fogNear": 36, "fogFar": 140, "light": 0.86, "sun": 16761024, "hemiGround": 1710634} },
       datos: FURIA
+    }, {
+      id: 'plateado', base: 'glacier', color: 0, k: 0,
+      name: "Monte Plateado", desc: "La montaña más alta de Johto. Solo los más fuertes llegan a la cumbre, y las rocas sueltas no perdonan a nadie.",
+      unlock: 'Zona de pruebas de la Temporada 4', zonas: ["Ventisca en la ladera", "Crepúsculo en la cumbre"], zonasDatos: [{"sky": [6978200, 13160672], "fog": 11582672, "fogNear": 44, "fogFar": 180, "light": 0.92, "sun": 15266047, "hemiGround": 5921384, "sunDir": [0.6, 0.76, 0.2], "sunH": 0.4, "tint": [0.97, 0.99, 1.05], "clouds": [0.9, 0.92, 1], "cover": 0.3, "glow": 13162751, "glowK": 0.2, "stars": 0, "motes": "snow"}, {"sky": [2763354, 15769784], "fog": 10127528, "fogNear": 48, "fogFar": 190, "light": 0.86, "sun": 16758944, "hemiGround": 3813448, "sunDir": [0.74, 0.68, -0.12], "sunH": 0.12, "tint": [1, 0.93, 1.02], "clouds": [1, 0.82, 0.92], "cover": 0.05, "glow": 16747168, "glowK": 0.55, "stars": 0.5, "motes": "snow"}],
+      santuario: { de: 'glacier', name: "Cumbre del Monte Plateado", heart: "Corazón de la montaña", legendaries: [244], color: 16742970, k: 0, music: {"root": 47, "scale": [0, 2, 3, 5, 7, 8, 11], "bpm": 126, "mood": "tense"}, datos: {"arena": "summit", "pack": "silversummit", "shrine": "summit_altar", "portal": "summit_portal", "sky": [3820154, 13154520], "fog": 10133688, "fogNear": 34, "fogFar": 135, "light": 0.95, "sun": 16773344, "hemiGround": 4868698} },
+      datos: {"size": 400, "shape": "summit", "types": ["rock", "dark", "steel"], "late": ["ice", "fighting"], "residents": [246, 215, 231, 216, 200, 74, 95, 66, 41, 220, 225, 227, 81, 77, 84, 228, 198, 236], "sky": [5933776, 14215416], "fog": 13162728, "fogNear": 56, "fogFar": 220, "light": 1, "sun": 16774888, "hemiGround": 6974066, "ground": [8030810, 9081960, 10133664, 15265524], "path": 11049608, "cliff": [8026754, 6184552, 10132132], "water": null, "waterColor": 5939408, "props": ["rock", "snowpine", "rock", "pine"], "propDensity": 1, "weather": ["clear", "hail", "sand"], "morning": {"motes": "snow"}, "bosses": [215, 227, 212], "legendaries": [244], "guardians": [[215, 221], [227, 208], [248, 212, 247]], "totems": [[217, 232, 221, 76], [229, 82, 68, 185], [208, 227, 237, 247]], "summoners": [[217, 221], [232, 42], [247, 229]], "music": {"root": 50, "scale": [0, 2, 3, 5, 7, 9, 10], "bpm": 96, "mood": "calm"}, "tex": {"top": [8030810, 9081960, 6978126], "detail": "snow", "side": [8026754, 10132132, 4868692], "lip": 15265524, "path": [11049608, 6970960], "leaf": 3037764, "bark": 4864560, "rock": 8026754, "accent": 10149738, "deco": [0, 1, 2, 3, 7]}}
     }]
   });
   // Zona de pruebas: el mapa se puede jugar sin completar nada antes.
   const abrir = setInterval(() => {
     const P = window.__pbMeta?.profile; if (!P?.biomes) return;
-    if ((P.biomes.furia ?? -1) < 0) P.biomes.furia = 0;
+    for (const id of ['furia', 'plateado']) if ((P.biomes[id] ?? -1) < 0) P.biomes[id] = 0;
     clearInterval(abrir);
   }, 500);
 })();
@@ -220,10 +226,20 @@
       this.enr.fill(0); this.ants = [];
     }
   }
-  const inst = new WeakMap();
+  const inst = new WeakMap(), plat = new WeakMap();
   window.PB_T4 = {
-    update(run, dt) { if (run.biome?.id !== 'furia' || !window.__pbT4lib) return; let f = inst.get(run); if (!f) inst.set(run, f = new Furia(run)); try { f.update(dt); } catch (err) { if (!f.err) { f.err = 1; console.warn('[T4 Furia]', err); } } },
-    limpiar(run) { const f = inst.get(run); if (f) { try { f.clear(); } catch {} f.terrainRef = null; f.ballGiven = false; } },
+    update(run, dt) {
+      if (!window.__pbT4lib) return;
+      const id = run.biome?.id;
+      if (id === 'furia') { let f = inst.get(run); if (!f) inst.set(run, f = new Furia(run)); try { f.update(dt); } catch (err) { if (!f.err) { f.err = 1; console.warn('[T4 Furia]', err); } } }
+      // Monte Plateado: la clase original de la 0.10.13 (portada dentro del main como pbPlateado), sin cambios.
+      if (id === 'plateado') { let p = plat.get(run); if (!p) plat.set(run, p = new (window.__pbT4lib.Plateado())(run)); try { p.update(dt); } catch (err) { if (!p.err) { p.err = 1; console.warn('[T4 Plateado]', err); } } }
+    },
+    limpiar(run) {
+      const f = inst.get(run); if (f) { try { f.clear(); } catch {} f.terrainRef = null; f.ballGiven = false; }
+      const p = plat.get(run); if (p) { try { p.clear(); p.dispose(); } catch {} plat.delete(run); }
+    },
+    plateado: run => plat.get(run),
     furia: run => inst.get(run),
     // Marcas de las antenas en el minimapa (triángulos: rojo con la señal, azul sintonizada, gris en el Apagón).
     marcas(run) { const f = inst.get(run); if (!f || run.biome?.id !== 'furia' || !f.ants.length) return null; return f.ants.map(a => ({ x: a.x, z: a.z, css: f.blackT > 0 ? '#a8a8b8' : a.state === 'tuned' ? '#4ab8ff' : '#ff3a4a' })); }
